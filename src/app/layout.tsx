@@ -40,25 +40,18 @@ export const metadata: Metadata = {
     },
   },
   openGraph: {
-    title: 'See Every Place - Track Your Travels & Create Beautiful Maps',
-    description: 'Map countries, states, national parks, UNESCO sites and more. Track your adventures and share beautiful travel graphics with friends.',
+    title: 'See Every Place - Track Your World Travels & Bucket List',
+    description: 'Map countries, states, national parks, stadiums, and museums. Track where you have been and see every place you want to go.',
     type: 'website',
     locale: 'en_US',
     siteName: 'See Every Place',
-    images: [
-      {
-        url: '/opengraph-image.webp',
-        width: 1200,
-        height: 630,
-        alt: 'See Every Place - Track Your Travels',
-      },
-    ],
+    // Next.js automatically adds the image from opengraph-image.tsx
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'See Every Place - Track Your Travels & Create Beautiful Maps',
-    description: 'Map countries, states, national parks, UNESCO sites and more. Track your adventures and share beautiful travel graphics.',
-    images: ['/opengraph-image.webp'],
+    title: 'See Every Place - Track Your World Travels & Bucket List',
+    description: 'Map countries, states, national parks, stadiums, and museums. Track where you have been and see every place you want to go.',
+    // Next.js automatically adds the image from opengraph-image.tsx
   },
   category: 'travel',
   classification: 'Travel Tracking Application',
