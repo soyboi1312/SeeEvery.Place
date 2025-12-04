@@ -18,11 +18,8 @@ export type StadiumSubcategory = "All" | "Football" | "American Football" | "Bas
 export type ParkSubcategory = "All" | "National Park" | "State Park";
 export type MountainSubcategory = "All" | "5000m+" | "US 14ers";
 
-// Map of categories to their subcategories
-export const categorySubcategories: Partial<Record<Category, readonly string[]>> = {
-  stadiums: ["All", "Football", "American Football", "Baseball", "Basketball", "Hockey", "Cricket", "Rugby", "Tennis", "Motorsport"] as const,
-  mountains: ["All", "5000m+", "US 14ers"] as const,
-};
+// Map of categories to their subcategories (empty - subcategories are now handled in CategoryTabs)
+export const categorySubcategories: Partial<Record<Category, readonly string[]>> = {};
 
 // Check if a category has subcategories
 export const hasSubcategories = (category: Category): boolean => {

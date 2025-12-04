@@ -18,7 +18,7 @@ const MapVisualization = dynamic(() => import('@/components/MapVisualization'), 
   ),
   ssr: false,
 });
-import { Category, UserSelections, emptySelections, Status, categorySubcategories, hasSubcategories } from '@/lib/types';
+import { Category, UserSelections, emptySelections, Status } from '@/lib/types';
 import {
   loadSelections,
   saveSelections,
@@ -302,26 +302,10 @@ export default function Home() {
           activeCategory={activeCategory}
           onCategoryChange={handleCategoryChange}
           stats={allStats}
+          activeSubcategory={activeSubcategory}
+          onSubcategoryChange={setActiveSubcategory}
+          selections={selections}
         />
-
-        {/* Subcategory Filter */}
-        {hasSubcategories(activeCategory) && categorySubcategories[activeCategory] && (
-          <div className="flex flex-wrap gap-2 justify-center">
-            {categorySubcategories[activeCategory]!.map((subcategory) => (
-              <button
-                key={subcategory}
-                onClick={() => setActiveSubcategory(subcategory)}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                  activeSubcategory === subcategory
-                    ? 'bg-blue-600 text-white shadow-md'
-                    : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 border border-gray-200 dark:border-gray-600'
-                }`}
-              >
-                {subcategory}
-              </button>
-            ))}
-          </div>
-        )}
 
         {/* Selection List */}
         <SelectionList
