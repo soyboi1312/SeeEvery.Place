@@ -1,0 +1,92 @@
+export interface Airport {
+  id: string;
+  code: string;
+  name: string;
+  city: string;
+  country: string;
+  region: string;
+  lat: number;
+  lng: number;
+}
+
+// World's major airports by region
+export const airports: Airport[] = [
+  // North America
+  { id: "jfk", code: "JFK", name: "John F. Kennedy International", city: "New York", country: "USA", region: "North America", lat: 40.6413, lng: -73.7781 },
+  { id: "lax", code: "LAX", name: "Los Angeles International", city: "Los Angeles", country: "USA", region: "North America", lat: 33.9425, lng: -118.4081 },
+  { id: "ord", code: "ORD", name: "O'Hare International", city: "Chicago", country: "USA", region: "North America", lat: 41.9742, lng: -87.9073 },
+  { id: "dfw", code: "DFW", name: "Dallas/Fort Worth International", city: "Dallas", country: "USA", region: "North America", lat: 32.8998, lng: -97.0403 },
+  { id: "den", code: "DEN", name: "Denver International", city: "Denver", country: "USA", region: "North America", lat: 39.8561, lng: -104.6737 },
+  { id: "atl", code: "ATL", name: "Hartsfield-Jackson Atlanta", city: "Atlanta", country: "USA", region: "North America", lat: 33.6407, lng: -84.4277 },
+  { id: "sfo", code: "SFO", name: "San Francisco International", city: "San Francisco", country: "USA", region: "North America", lat: 37.6213, lng: -122.3790 },
+  { id: "mia", code: "MIA", name: "Miami International", city: "Miami", country: "USA", region: "North America", lat: 25.7959, lng: -80.2870 },
+  { id: "sea", code: "SEA", name: "Seattle-Tacoma International", city: "Seattle", country: "USA", region: "North America", lat: 47.4502, lng: -122.3088 },
+  { id: "bos", code: "BOS", name: "Logan International", city: "Boston", country: "USA", region: "North America", lat: 42.3656, lng: -71.0096 },
+  { id: "yyz", code: "YYZ", name: "Toronto Pearson International", city: "Toronto", country: "Canada", region: "North America", lat: 43.6777, lng: -79.6248 },
+  { id: "yvr", code: "YVR", name: "Vancouver International", city: "Vancouver", country: "Canada", region: "North America", lat: 49.1947, lng: -123.1792 },
+  { id: "mex", code: "MEX", name: "Mexico City International", city: "Mexico City", country: "Mexico", region: "North America", lat: 19.4361, lng: -99.0719 },
+
+  // Europe
+  { id: "lhr", code: "LHR", name: "London Heathrow", city: "London", country: "UK", region: "Europe", lat: 51.4700, lng: -0.4543 },
+  { id: "cdg", code: "CDG", name: "Paris Charles de Gaulle", city: "Paris", country: "France", region: "Europe", lat: 49.0097, lng: 2.5479 },
+  { id: "ams", code: "AMS", name: "Amsterdam Schiphol", city: "Amsterdam", country: "Netherlands", region: "Europe", lat: 52.3105, lng: 4.7683 },
+  { id: "fra", code: "FRA", name: "Frankfurt Airport", city: "Frankfurt", country: "Germany", region: "Europe", lat: 50.0379, lng: 8.5622 },
+  { id: "mad", code: "MAD", name: "Madrid-Barajas", city: "Madrid", country: "Spain", region: "Europe", lat: 40.4983, lng: -3.5676 },
+  { id: "bcn", code: "BCN", name: "Barcelona-El Prat", city: "Barcelona", country: "Spain", region: "Europe", lat: 41.2974, lng: 2.0833 },
+  { id: "fco", code: "FCO", name: "Rome Fiumicino", city: "Rome", country: "Italy", region: "Europe", lat: 41.8003, lng: 12.2389 },
+  { id: "muc", code: "MUC", name: "Munich Airport", city: "Munich", country: "Germany", region: "Europe", lat: 48.3537, lng: 11.7750 },
+  { id: "zrh", code: "ZRH", name: "Zurich Airport", city: "Zurich", country: "Switzerland", region: "Europe", lat: 47.4647, lng: 8.5492 },
+  { id: "ist", code: "IST", name: "Istanbul Airport", city: "Istanbul", country: "Turkey", region: "Europe", lat: 41.2608, lng: 28.7418 },
+  { id: "dub", code: "DUB", name: "Dublin Airport", city: "Dublin", country: "Ireland", region: "Europe", lat: 53.4264, lng: -6.2499 },
+  { id: "cph", code: "CPH", name: "Copenhagen Airport", city: "Copenhagen", country: "Denmark", region: "Europe", lat: 55.6180, lng: 12.6508 },
+  { id: "vie", code: "VIE", name: "Vienna International", city: "Vienna", country: "Austria", region: "Europe", lat: 48.1103, lng: 16.5697 },
+  { id: "lgw", code: "LGW", name: "London Gatwick", city: "London", country: "UK", region: "Europe", lat: 51.1537, lng: -0.1821 },
+
+  // Asia
+  { id: "sin", code: "SIN", name: "Singapore Changi", city: "Singapore", country: "Singapore", region: "Asia", lat: 1.3644, lng: 103.9915 },
+  { id: "hkg", code: "HKG", name: "Hong Kong International", city: "Hong Kong", country: "Hong Kong", region: "Asia", lat: 22.3080, lng: 113.9185 },
+  { id: "nrt", code: "NRT", name: "Narita International", city: "Tokyo", country: "Japan", region: "Asia", lat: 35.7720, lng: 140.3929 },
+  { id: "hnd", code: "HND", name: "Tokyo Haneda", city: "Tokyo", country: "Japan", region: "Asia", lat: 35.5494, lng: 139.7798 },
+  { id: "icn", code: "ICN", name: "Incheon International", city: "Seoul", country: "South Korea", region: "Asia", lat: 37.4602, lng: 126.4407 },
+  { id: "bkk", code: "BKK", name: "Suvarnabhumi Airport", city: "Bangkok", country: "Thailand", region: "Asia", lat: 13.6900, lng: 100.7501 },
+  { id: "pek", code: "PEK", name: "Beijing Capital", city: "Beijing", country: "China", region: "Asia", lat: 40.0799, lng: 116.6031 },
+  { id: "pvg", code: "PVG", name: "Shanghai Pudong", city: "Shanghai", country: "China", region: "Asia", lat: 31.1443, lng: 121.8083 },
+  { id: "del", code: "DEL", name: "Indira Gandhi International", city: "Delhi", country: "India", region: "Asia", lat: 28.5562, lng: 77.1000 },
+  { id: "bom", code: "BOM", name: "Chhatrapati Shivaji", city: "Mumbai", country: "India", region: "Asia", lat: 19.0896, lng: 72.8656 },
+  { id: "kul", code: "KUL", name: "Kuala Lumpur International", city: "Kuala Lumpur", country: "Malaysia", region: "Asia", lat: 2.7456, lng: 101.7072 },
+  { id: "tpe", code: "TPE", name: "Taiwan Taoyuan", city: "Taipei", country: "Taiwan", region: "Asia", lat: 25.0797, lng: 121.2342 },
+
+  // Middle East
+  { id: "dxb", code: "DXB", name: "Dubai International", city: "Dubai", country: "UAE", region: "Middle East", lat: 25.2532, lng: 55.3657 },
+  { id: "doh", code: "DOH", name: "Hamad International", city: "Doha", country: "Qatar", region: "Middle East", lat: 25.2731, lng: 51.6081 },
+  { id: "auh", code: "AUH", name: "Abu Dhabi International", city: "Abu Dhabi", country: "UAE", region: "Middle East", lat: 24.4330, lng: 54.6511 },
+  { id: "tlv", code: "TLV", name: "Ben Gurion Airport", city: "Tel Aviv", country: "Israel", region: "Middle East", lat: 32.0055, lng: 34.8854 },
+
+  // Oceania
+  { id: "syd", code: "SYD", name: "Sydney Kingsford Smith", city: "Sydney", country: "Australia", region: "Oceania", lat: -33.9399, lng: 151.1753 },
+  { id: "mel", code: "MEL", name: "Melbourne Airport", city: "Melbourne", country: "Australia", region: "Oceania", lat: -37.6690, lng: 144.8410 },
+  { id: "akl", code: "AKL", name: "Auckland Airport", city: "Auckland", country: "New Zealand", region: "Oceania", lat: -37.0082, lng: 174.7850 },
+  { id: "bne", code: "BNE", name: "Brisbane Airport", city: "Brisbane", country: "Australia", region: "Oceania", lat: -27.3942, lng: 153.1218 },
+
+  // South America
+  { id: "gru", code: "GRU", name: "São Paulo-Guarulhos", city: "São Paulo", country: "Brazil", region: "South America", lat: -23.4356, lng: -46.4731 },
+  { id: "gig", code: "GIG", name: "Rio de Janeiro-Galeão", city: "Rio de Janeiro", country: "Brazil", region: "South America", lat: -22.8090, lng: -43.2506 },
+  { id: "eze", code: "EZE", name: "Buenos Aires Ezeiza", city: "Buenos Aires", country: "Argentina", region: "South America", lat: -34.8222, lng: -58.5358 },
+  { id: "scl", code: "SCL", name: "Santiago International", city: "Santiago", country: "Chile", region: "South America", lat: -33.3930, lng: -70.7858 },
+  { id: "bog", code: "BOG", name: "El Dorado International", city: "Bogotá", country: "Colombia", region: "South America", lat: 4.7016, lng: -74.1469 },
+  { id: "lim", code: "LIM", name: "Jorge Chávez International", city: "Lima", country: "Peru", region: "South America", lat: -12.0219, lng: -77.1143 },
+
+  // Africa
+  { id: "jnb", code: "JNB", name: "O.R. Tambo International", city: "Johannesburg", country: "South Africa", region: "Africa", lat: -26.1367, lng: 28.2411 },
+  { id: "cpt", code: "CPT", name: "Cape Town International", city: "Cape Town", country: "South Africa", region: "Africa", lat: -33.9715, lng: 18.6021 },
+  { id: "cai", code: "CAI", name: "Cairo International", city: "Cairo", country: "Egypt", region: "Africa", lat: 30.1219, lng: 31.4056 },
+  { id: "nbo", code: "NBO", name: "Jomo Kenyatta International", city: "Nairobi", country: "Kenya", region: "Africa", lat: -1.3192, lng: 36.9278 },
+  { id: "cmn", code: "CMN", name: "Mohammed V International", city: "Casablanca", country: "Morocco", region: "Africa", lat: 33.3675, lng: -7.5898 },
+];
+
+export const airportRegions = ["North America", "Europe", "Asia", "Middle East", "Oceania", "South America", "Africa"];
+
+export const getAirportsByRegion = (region: string) =>
+  airports.filter(a => a.region === region);
+
+export const getTotalAirports = () => airports.length;
