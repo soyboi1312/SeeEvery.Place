@@ -212,7 +212,8 @@ export default function Home() {
     }
 
     // Filter by subcategory if one is selected (not "All")
-    if (activeSubcategory !== 'All' && hasSubcategories(activeCategory)) {
+    // Only mountains and stadiums have subcategory filtering
+    if (activeSubcategory !== 'All' && (activeCategory === 'mountains' || activeCategory === 'stadiums')) {
       items = items.filter(item => item.subcategory === activeSubcategory);
     }
 
