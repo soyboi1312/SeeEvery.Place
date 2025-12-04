@@ -1,125 +1,74 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
-import { Category, categoryLabels, categoryIcons, usParksSubcategories, subcategoryLabels } from '@/lib/types';
+import { Category, categoryLabels, categoryIcons, UserSelections } from '@/lib/types';
+import { get5000mPeaks, getUS14ers } from '@/data/mountains';
+import { stadiums } from '@/data/stadiums';
 
 interface CategoryTabsProps {
   activeCategory: Category;
   onCategoryChange: (category: Category) => void;
   stats: Record<Category, { visited: number; total: number }>;
+  activeSubcategory: string;
+  onSubcategoryChange: (subcategory: string) => void;
+  selections: UserSelections;
 }
 
-// Top-level categories (without stateParks, using usParks as parent for park categories)
-const topLevelCategories: (Category | 'usParks')[] = ['countries', 'states', 'usParks', 'unesco', 'mountains', 'museums', 'stadiums', 'marathons'];
+// Top-level categories for the main tab bar
+const topLevelCategories: Category[] = ['countries', 'states', 'nationalParks', 'stateParks', 'unesco', 'mountains', 'museums', 'stadiums', 'marathons'];
 
-export default function CategoryTabs({ activeCategory, onCategoryChange, stats }: CategoryTabsProps) {
-  const [showUsParksDropdown, setShowUsParksDropdown] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
+// Subcategories for peaks
+const peakSubcategories = [
+  { id: '5000m+', label: '5000m+', icon: '🏔️' },
+  { id: 'US 14ers', label: 'US 14ers', icon: '🇺🇸' },
+];
 
-  // Check if active category is a US Parks subcategory
-  const isUsParksActive = usParksSubcategories.includes(activeCategory);
+// Subcategories for stadiums
+const stadiumSubcategories = [
+  { id: 'Baseball', label: 'Baseball', icon: '⚾' },
+  { id: 'American Football', label: 'Football', icon: '🏈' },
+  { id: 'Basketball', label: 'Basketball', icon: '🏀' },
+  { id: 'Hockey', label: 'Hockey', icon: '🏒' },
+  { id: 'Football', label: 'Soccer', icon: '⚽' },
+];
 
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setShowUsParksDropdown(false);
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+export default function CategoryTabs({ activeCategory, onCategoryChange, stats, activeSubcategory, onSubcategoryChange, selections }: CategoryTabsProps) {
+  // Calculate peak subcategory stats
+  const peaks5000m = get5000mPeaks();
+  const us14ers = getUS14ers();
+  const peaks5000mVisited = selections.mountains.filter(
+    sel => sel.status === 'visited' && peaks5000m.some(m => m.id === sel.id)
+  ).length;
+  const us14ersVisited = selections.mountains.filter(
+    sel => sel.status === 'visited' && us14ers.some(m => m.id === sel.id)
+  ).length;
 
-  // Calculate combined US Parks stats
-  const usParksStats = {
-    visited: stats.nationalParks.visited + stats.stateParks.visited,
-    total: stats.nationalParks.total + stats.stateParks.total,
+  const peakStats: Record<string, { visited: number; total: number }> = {
+    '5000m+': { visited: peaks5000mVisited, total: peaks5000m.length },
+    'US 14ers': { visited: us14ersVisited, total: us14ers.length },
+  };
+
+  // Calculate stadium subcategory stats
+  const getStadiumStats = (sport: string) => {
+    const sportStadiums = stadiums.filter(s => s.sport === sport);
+    const visited = selections.stadiums.filter(
+      sel => sel.status === 'visited' && sportStadiums.some(s => s.id === sel.id)
+    ).length;
+    return { visited, total: sportStadiums.length };
+  };
+
+  const stadiumStats: Record<string, { visited: number; total: number }> = {
+    'Baseball': getStadiumStats('Baseball'),
+    'American Football': getStadiumStats('American Football'),
+    'Basketball': getStadiumStats('Basketball'),
+    'Hockey': getStadiumStats('Hockey'),
+    'Football': getStadiumStats('Football'),
   };
 
   return (
     <div className="space-y-3">
-      {/* Main category tabs */}
       <div className="w-full overflow-x-auto pb-2">
         <div className="flex gap-2 min-w-max px-1">
           {topLevelCategories.map((category) => {
-            // Special handling for US Parks parent category
-            if (category === 'usParks') {
-              const isActive = isUsParksActive;
-
-              return (
-                <div key="usParks" className="relative" ref={dropdownRef}>
-                  <button
-                    onClick={() => setShowUsParksDropdown(!showUsParksDropdown)}
-                    className={`
-                      flex items-center gap-2 px-4 py-3 rounded-xl font-medium transition-all duration-200
-                      ${isActive
-                        ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg scale-105'
-                        : 'bg-white/80 dark:bg-gray-700/80 text-gray-700 dark:text-gray-200 hover:bg-white dark:hover:bg-gray-600 hover:shadow-md border border-gray-200 dark:border-gray-600'
-                      }
-                    `}
-                  >
-                    <span className="text-lg flex items-center justify-center">🏞️</span>
-                    <span className="hidden sm:inline">US Parks</span>
-                    {usParksStats.visited > 0 && (
-                      <span className={`
-                        px-2 py-0.5 rounded-full text-xs font-bold
-                        ${isActive ? 'bg-white/20' : 'bg-green-100 text-green-700'}
-                      `}>
-                        {usParksStats.visited}
-                      </span>
-                    )}
-                    <svg
-                      className={`w-4 h-4 transition-transform ${showUsParksDropdown ? 'rotate-180' : ''}`}
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </button>
-
-                  {/* Dropdown for subcategories */}
-                  {showUsParksDropdown && (
-                    <div className="absolute bottom-full left-0 mb-2 sm:bottom-auto sm:top-full sm:mb-0 sm:mt-2 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden z-50 min-w-[180px]">
-                      {usParksSubcategories.map((subcat) => {
-                        const subStat = stats[subcat];
-                        const isSubActive = activeCategory === subcat;
-
-                        return (
-                          <button
-                            key={subcat}
-                            onClick={() => {
-                              onCategoryChange(subcat);
-                              setShowUsParksDropdown(false);
-                            }}
-                            className={`
-                              w-full flex items-center gap-3 px-4 py-3 text-left transition-colors
-                              ${isSubActive
-                                ? 'bg-blue-50 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300'
-                                : 'hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200'
-                              }
-                            `}
-                          >
-                            <span className="text-lg">{categoryIcons[subcat]}</span>
-                            <span className="flex-1">{subcategoryLabels[subcat]}</span>
-                            {subStat.visited > 0 && (
-                              <span className={`
-                                px-2 py-0.5 rounded-full text-xs font-bold
-                                ${isSubActive ? 'bg-blue-200 dark:bg-blue-800 text-blue-800 dark:text-blue-200' : 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300'}
-                              `}>
-                                {subStat.visited}
-                              </span>
-                            )}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
-              );
-            }
-
-            // Regular category handling
             const isActive = category === activeCategory;
             const stat = stats[category];
 
@@ -151,32 +100,65 @@ export default function CategoryTabs({ activeCategory, onCategoryChange, stats }
         </div>
       </div>
 
-      {/* Subcategory tabs - shown when US Parks is active */}
-      {isUsParksActive && (
-        <div className="flex gap-2 px-1">
-          {usParksSubcategories.map((subcat) => {
-            const isSubActive = activeCategory === subcat;
-            const subStat = stats[subcat];
+      {/* Peak subcategory tabs */}
+      {activeCategory === 'mountains' && (
+        <div className="flex gap-2 px-1 flex-wrap">
+          {peakSubcategories.map((sub) => {
+            const isSubActive = activeSubcategory === sub.id;
+            const subStat = peakStats[sub.id];
 
             return (
               <button
-                key={subcat}
-                onClick={() => onCategoryChange(subcat)}
+                key={sub.id}
+                onClick={() => onSubcategoryChange(sub.id)}
                 className={`
                   flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all duration-200
                   ${isSubActive
                     ? 'bg-blue-600 text-white shadow-md'
-                    : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
+                    : 'bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 border border-gray-200 dark:border-gray-600'
                   }
                 `}
               >
-                <span>{categoryIcons[subcat]}</span>
-                <span>{subcategoryLabels[subcat]}</span>
+                <span>{sub.icon}</span>
+                <span>{sub.label}</span>
                 <span className={`
                   px-2 py-0.5 rounded-full text-xs font-bold
-                  ${isSubActive ? 'bg-white/20' : 'bg-gray-100 text-gray-600'}
+                  ${isSubActive ? 'bg-white/20' : 'bg-gray-100 dark:bg-gray-600 text-gray-600 dark:text-gray-300'}
                 `}>
-                  {subStat.total}
+                  {subStat.visited}/{subStat.total}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Stadium subcategory tabs */}
+      {activeCategory === 'stadiums' && (
+        <div className="flex gap-2 px-1 flex-wrap">
+          {stadiumSubcategories.map((sub) => {
+            const isSubActive = activeSubcategory === sub.id;
+            const subStat = stadiumStats[sub.id];
+
+            return (
+              <button
+                key={sub.id}
+                onClick={() => onSubcategoryChange(sub.id)}
+                className={`
+                  flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all duration-200
+                  ${isSubActive
+                    ? 'bg-blue-600 text-white shadow-md'
+                    : 'bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 border border-gray-200 dark:border-gray-600'
+                  }
+                `}
+              >
+                <span>{sub.icon}</span>
+                <span>{sub.label}</span>
+                <span className={`
+                  px-2 py-0.5 rounded-full text-xs font-bold
+                  ${isSubActive ? 'bg-white/20' : 'bg-gray-100 dark:bg-gray-600 text-gray-600 dark:text-gray-300'}
+                `}>
+                  {subStat.visited}/{subStat.total}
                 </span>
               </button>
             );
