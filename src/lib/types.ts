@@ -21,7 +21,6 @@ export type MountainSubcategory = "All" | "5000m+" | "US 14ers";
 // Map of categories to their subcategories
 export const categorySubcategories: Partial<Record<Category, readonly string[]>> = {
   stadiums: ["All", "Football", "American Football", "Baseball", "Basketball", "Hockey", "Cricket", "Rugby", "Tennis", "Motorsport"] as const,
-  nationalParks: ["All", "National Park", "State Park"] as const,
   mountains: ["All", "5000m+", "US 14ers"] as const,
 };
 
