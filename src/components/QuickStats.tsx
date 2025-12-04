@@ -1,5 +1,6 @@
 'use client';
 
+import { ReactNode } from 'react';
 import { Category, categoryLabels, categoryIcons, UserSelections } from '@/lib/types';
 import { getStats } from '@/lib/storage';
 import { countries } from '@/data/countries';
@@ -55,7 +56,7 @@ export default function QuickStats({ selections, onCategoryClick }: QuickStatsPr
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {displayCategories.map((displayCategory) => {
           let stats: { visited: number; total: number; bucketList: number; percentage: number };
-          let icon: string;
+          let icon: ReactNode;
           let label: string;
           let clickCategory: Category;
 
