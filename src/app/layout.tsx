@@ -8,6 +8,20 @@ export const metadata: Metadata = {
   },
   title: 'See Every Place - Track Your World Travels & Bucket List',
   description: 'Map countries, states, national parks, stadiums, and museums. Track where you have been and see every place you want to go. Free travel tracking app.',
+  icons: {
+    icon: [
+      { url: '/files/fav/favicon.ico', sizes: 'any' },
+      { url: '/files/fav/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
+      { url: '/files/fav/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/files/fav/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
+    ],
+    other: [
+      { rel: 'android-chrome-192x192', url: '/files/fav/android-chrome-192x192.png' },
+      { rel: 'android-chrome-512x512', url: '/files/fav/android-chrome-512x512.png' },
+    ],
+  },
   keywords: [
     'travel tracker',
     'countries visited map',
