@@ -3,6 +3,7 @@
  */
 'use client';
 
+import { useState, useCallback } from 'react';
 import { ComposableMap, Geographies, Geography, ZoomableGroup, Sphere, Graticule, Marker } from 'react-simple-maps';
 import { Category, UserSelections, Status } from '@/lib/types';
 import { getSelectionStatus } from '@/lib/storage';
@@ -14,6 +15,18 @@ import {
   getCategoryMarkers,
   MarkerData,
 } from '@/lib/mapUtils';
+import { nationalParks } from '@/data/nationalParks';
+import { stateParks } from '@/data/stateParks';
+import { unescoSites } from '@/data/unescoSites';
+import { get5000mPeaks, getUS14ers } from '@/data/mountains';
+import { museums } from '@/data/museums';
+import { getMlbStadiums, getNflStadiums, getNbaStadiums, getNhlStadiums, getSoccerStadiums } from '@/data/stadiums';
+import { f1Tracks } from '@/data/f1Tracks';
+import { marathons } from '@/data/marathons';
+import { airports } from '@/data/airports';
+import { skiResorts } from '@/data/skiResorts';
+import { themeParks } from '@/data/themeParks';
+import { surfingReserves } from '@/data/surfingReserves';
 
 interface MapVisualizationProps {
   category: Category;
@@ -22,7 +35,61 @@ interface MapVisualizationProps {
   subcategory?: string;
 }
 
-function WorldMap({ selections, onToggle }: { selections: UserSelections; onToggle?: (id: string, currentStatus: Status) => void }) {
+interface TooltipState {
+  content: string;
+  x: number;
+  y: number;
+}
+
+interface TooltipHandlers {
+  onMouseEnter: (content: string, e: React.MouseEvent) => void;
+  onMouseLeave: () => void;
+  onMouseMove: (e: React.MouseEvent) => void;
+}
+
+// Get item name by category and ID
+function getItemName(category: Category, id: string): string {
+  switch (category) {
+    case 'nationalParks':
+      return nationalParks.find(p => p.id === id)?.name || id;
+    case 'stateParks':
+      return stateParks.find(p => p.id === id)?.name || id;
+    case 'unesco':
+      return unescoSites.find(s => s.id === id)?.name || id;
+    case 'fiveKPeaks':
+      return get5000mPeaks().find(m => m.id === id)?.name || id;
+    case 'fourteeners':
+      return getUS14ers().find(m => m.id === id)?.name || id;
+    case 'museums':
+      return museums.find(m => m.id === id)?.name || id;
+    case 'mlbStadiums':
+      return getMlbStadiums().find(s => s.id === id)?.name || id;
+    case 'nflStadiums':
+      return getNflStadiums().find(s => s.id === id)?.name || id;
+    case 'nbaStadiums':
+      return getNbaStadiums().find(s => s.id === id)?.name || id;
+    case 'nhlStadiums':
+      return getNhlStadiums().find(s => s.id === id)?.name || id;
+    case 'soccerStadiums':
+      return getSoccerStadiums().find(s => s.id === id)?.name || id;
+    case 'f1Tracks':
+      return f1Tracks.find(t => t.id === id)?.name || id;
+    case 'marathons':
+      return marathons.find(m => m.id === id)?.name || id;
+    case 'airports':
+      return airports.find(a => a.id === id)?.name || id;
+    case 'skiResorts':
+      return skiResorts.find(r => r.id === id)?.name || id;
+    case 'themeParks':
+      return themeParks.find(p => p.id === id)?.name || id;
+    case 'surfingReserves':
+      return surfingReserves.find(s => s.id === id)?.name || id;
+    default:
+      return id;
+  }
+}
+
+function WorldMap({ selections, onToggle, tooltip }: { selections: UserSelections; onToggle?: (id: string, currentStatus: Status) => void; tooltip: TooltipHandlers }) {
   return (
     <ComposableMap
       projection="geoEqualEarth"
@@ -65,6 +132,9 @@ function WorldMap({ selections, onToggle }: { selections: UserSelections; onTogg
                       onToggle(id, status);
                     }
                   }}
+                  onMouseEnter={(e) => tooltip.onMouseEnter(countryName, e)}
+                  onMouseLeave={tooltip.onMouseLeave}
+                  onMouseMove={tooltip.onMouseMove}
                 />
               );
             })
@@ -75,7 +145,7 @@ function WorldMap({ selections, onToggle }: { selections: UserSelections; onTogg
   );
 }
 
-function USMap({ selections, onToggle }: { selections: UserSelections; onToggle?: (id: string, currentStatus: Status) => void }) {
+function USMap({ selections, onToggle, tooltip }: { selections: UserSelections; onToggle?: (id: string, currentStatus: Status) => void; tooltip: TooltipHandlers }) {
   return (
     <ComposableMap
       projection="geoAlbersUsa"
@@ -117,6 +187,9 @@ function USMap({ selections, onToggle }: { selections: UserSelections; onToggle?
                       onToggle(id, status);
                     }
                   }}
+                  onMouseEnter={(e) => tooltip.onMouseEnter(name, e)}
+                  onMouseLeave={tooltip.onMouseLeave}
+                  onMouseMove={tooltip.onMouseMove}
                 />
               );
             })
@@ -135,12 +208,14 @@ function USMarkerMap({
   category,
   selections,
   onToggle,
-  subcategory
+  subcategory,
+  tooltip
 }: {
   category: Category;
   selections: UserSelections;
   onToggle?: (id: string, currentStatus: Status) => void;
   subcategory?: string;
+  tooltip: TooltipHandlers;
 }) {
   // Filter out parks in territories that can't be displayed on Albers USA projection
   const markers = getCategoryMarkers(category, selections, subcategory).filter(
@@ -196,21 +271,27 @@ function USMarkerMap({
             ))
           }
         </Geographies>
-        {markers.map((marker) => (
-          <Marker
-            key={marker.id}
-            coordinates={marker.coordinates}
-            onClick={() => {
-              if (onToggle) {
-                onToggle(marker.id, marker.status);
-              }
-            }}
-          >
-            <g className="cursor-pointer">
-              {getUSMarkerIcon(marker)}
-            </g>
-          </Marker>
-        ))}
+        {markers.map((marker) => {
+          const markerName = getItemName(category, marker.id);
+          return (
+            <Marker
+              key={marker.id}
+              coordinates={marker.coordinates}
+              onClick={() => {
+                if (onToggle) {
+                  onToggle(marker.id, marker.status);
+                }
+              }}
+              onMouseEnter={(e) => tooltip.onMouseEnter(markerName, e)}
+              onMouseLeave={tooltip.onMouseLeave}
+              onMouseMove={tooltip.onMouseMove}
+            >
+              <g className="cursor-pointer">
+                {getUSMarkerIcon(marker)}
+              </g>
+            </Marker>
+          );
+        })}
       </ZoomableGroup>
     </ComposableMap>
   );
@@ -476,12 +557,14 @@ function WorldMarkerMap({
   category,
   selections,
   onToggle,
-  subcategory
+  subcategory,
+  tooltip
 }: {
   category: Category;
   selections: UserSelections;
   onToggle?: (id: string, currentStatus: Status) => void;
   subcategory?: string;
+  tooltip: TooltipHandlers;
 }) {
   const markers = getCategoryMarkers(category, selections, subcategory);
   const isMarathons = category === 'marathons';
@@ -549,21 +632,27 @@ function WorldMarkerMap({
             ))
           }
         </Geographies>
-        {markers.map((marker) => (
-          <Marker
-            key={marker.id}
-            coordinates={marker.coordinates}
-            onClick={() => {
-              if (onToggle) {
-                onToggle(marker.id, marker.status);
-              }
-            }}
-          >
-            <g className="cursor-pointer">
-              {getMarkerIcon(marker)}
-            </g>
-          </Marker>
-        ))}
+        {markers.map((marker) => {
+          const markerName = getItemName(category, marker.id);
+          return (
+            <Marker
+              key={marker.id}
+              coordinates={marker.coordinates}
+              onClick={() => {
+                if (onToggle) {
+                  onToggle(marker.id, marker.status);
+                }
+              }}
+              onMouseEnter={(e) => tooltip.onMouseEnter(markerName, e)}
+              onMouseLeave={tooltip.onMouseLeave}
+              onMouseMove={tooltip.onMouseMove}
+            >
+              <g className="cursor-pointer">
+                {getMarkerIcon(marker)}
+              </g>
+            </Marker>
+          );
+        })}
       </ZoomableGroup>
     </ComposableMap>
   );
@@ -579,32 +668,65 @@ function getMapComponent(
   category: Category,
   selections: UserSelections,
   onToggle?: (id: string, currentStatus: Status) => void,
-  subcategory?: string
+  subcategory?: string,
+  tooltip?: TooltipHandlers
 ) {
+  const handlers = tooltip || {
+    onMouseEnter: () => {},
+    onMouseLeave: () => {},
+    onMouseMove: () => {},
+  };
+
   switch (category) {
     case 'countries':
-      return <WorldMap key="world" selections={selections} onToggle={onToggle} />;
+      return <WorldMap key="world" selections={selections} onToggle={onToggle} tooltip={handlers} />;
     case 'states':
-      return <USMap key="us" selections={selections} onToggle={onToggle} />;
+      return <USMap key="us" selections={selections} onToggle={onToggle} tooltip={handlers} />;
     case 'nationalParks':
-      return <USMarkerMap key="us-parks" category={category} selections={selections} onToggle={onToggle} />;
+      return <USMarkerMap key="us-parks" category={category} selections={selections} onToggle={onToggle} tooltip={handlers} />;
     case 'stateParks':
-      return <USMarkerMap key="us-state-parks" category={category} selections={selections} onToggle={onToggle} />;
+      return <USMarkerMap key="us-state-parks" category={category} selections={selections} onToggle={onToggle} tooltip={handlers} />;
     case 'fourteeners':
-      return <USMarkerMap key="us-14ers" category={category} selections={selections} onToggle={onToggle} />;
+      return <USMarkerMap key="us-14ers" category={category} selections={selections} onToggle={onToggle} tooltip={handlers} />;
     default:
-      return <WorldMarkerMap key="world-markers" category={category} selections={selections} onToggle={onToggle} subcategory={subcategory} />;
+      return <WorldMarkerMap key="world-markers" category={category} selections={selections} onToggle={onToggle} subcategory={subcategory} tooltip={handlers} />;
   }
 }
 
 export default function MapVisualization({ category, selections, onToggle, subcategory }: MapVisualizationProps) {
   const isRegionMap = usesRegionMap(category);
+  const [tooltip, setTooltip] = useState<TooltipState | null>(null);
+
+  const tooltipHandlers: TooltipHandlers = {
+    onMouseEnter: useCallback((content: string, e: React.MouseEvent) => {
+      setTooltip({ content, x: e.clientX, y: e.clientY });
+    }, []),
+    onMouseLeave: useCallback(() => {
+      setTooltip(null);
+    }, []),
+    onMouseMove: useCallback((e: React.MouseEvent) => {
+      setTooltip(prev => prev ? { ...prev, x: e.clientX, y: e.clientY } : null);
+    }, []),
+  };
 
   return (
-    <div className="w-full bg-blue-50/50 dark:bg-slate-800/50 rounded-2xl overflow-hidden border border-blue-100 dark:border-slate-700 shadow-inner mb-6">
+    <div className="w-full bg-blue-50/50 dark:bg-slate-800/50 rounded-2xl overflow-hidden border border-blue-100 dark:border-slate-700 shadow-inner mb-6 relative">
       <div className="aspect-[4/3] sm:aspect-[16/9] w-full max-h-[500px]">
-        {getMapComponent(category, selections, onToggle, subcategory)}
+        {getMapComponent(category, selections, onToggle, subcategory, tooltipHandlers)}
       </div>
+
+      {/* Tooltip */}
+      {tooltip && (
+        <div
+          className="fixed z-50 px-2 py-1 text-sm font-medium text-white bg-gray-900 rounded shadow-lg pointer-events-none whitespace-nowrap"
+          style={{
+            left: tooltip.x + 10,
+            top: tooltip.y + 10,
+          }}
+        >
+          {tooltip.content}
+        </div>
+      )}
 
       {/* Legend */}
       <div className="flex justify-center gap-6 pb-4 text-sm text-gray-600 dark:text-gray-300">
