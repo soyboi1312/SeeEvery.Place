@@ -11,7 +11,7 @@ import { stateParks } from '@/data/stateParks';
 import { unescoSites } from '@/data/unescoSites';
 import { get5000mPeaks, getUS14ers } from '@/data/mountains';
 import { museums } from '@/data/museums';
-import { getMlbStadiums, getNflStadiums, getNbaStadiums, getNhlStadiums, getSoccerStadiums } from '@/data/stadiums';
+import { getMlbStadiums, getNflStadiums, getNbaStadiums, getNhlStadiums, getSoccerStadiums, type Stadium } from '@/data/stadiums';
 import { f1Tracks } from '@/data/f1Tracks';
 import { marathons } from '@/data/marathons';
 import { airports } from '@/data/airports';
@@ -405,15 +405,15 @@ export default function ShareCard({ selections, category, subcategory, onClose }
         case 'museums':
           return museums.find(m => m.id === s.id)?.name;
         case 'mlbStadiums':
-          return getMlbStadiums().find(st => st.id === s.id)?.name;
+          return getMlbStadiums().find((st: Stadium) => st.id === s.id)?.name;
         case 'nflStadiums':
-          return getNflStadiums().find(st => st.id === s.id)?.name;
+          return getNflStadiums().find((st: Stadium) => st.id === s.id)?.name;
         case 'nbaStadiums':
-          return getNbaStadiums().find(st => st.id === s.id)?.name;
+          return getNbaStadiums().find((st: Stadium) => st.id === s.id)?.name;
         case 'nhlStadiums':
-          return getNhlStadiums().find(st => st.id === s.id)?.name;
+          return getNhlStadiums().find((st: Stadium) => st.id === s.id)?.name;
         case 'soccerStadiums':
-          return getSoccerStadiums().find(st => st.id === s.id)?.name;
+          return getSoccerStadiums().find((st: Stadium) => st.id === s.id)?.name;
         case 'f1Tracks':
           return f1Tracks.find(t => t.id === s.id)?.name;
         case 'marathons':
