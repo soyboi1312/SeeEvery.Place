@@ -1,6 +1,57 @@
 import { UserSelections, emptySelections, Selection, Status, Category } from './types';
+import { stadiums } from '@/data/stadiums';
 
 const STORAGE_KEY = 'travelmap_selections';
+
+// Map sport names from stadium data to category keys
+const sportToCategoryMap: Record<string, keyof UserSelections> = {
+  'Baseball': 'mlbStadiums',
+  'American Football': 'nflStadiums',
+  'Basketball': 'nbaStadiums',
+  'Hockey': 'nhlStadiums',
+  'Football': 'soccerStadiums',
+  'Cricket': 'soccerStadiums',  // Group cricket, rugby, tennis, motorsport with soccer for simplicity
+  'Rugby': 'soccerStadiums',
+  'Tennis': 'soccerStadiums',
+  'Motorsport': 'soccerStadiums',
+};
+
+// Migrate old "stadiums" selections to new sport-specific categories
+function migrateStadiumSelections(parsed: Record<string, Selection[]>): Record<string, Selection[]> {
+  if (!parsed.stadiums || parsed.stadiums.length === 0) {
+    return parsed;
+  }
+
+  const result = { ...parsed };
+  const oldStadiumSelections = parsed.stadiums;
+
+  // Create a map of stadium IDs to their sports
+  const stadiumSportMap = new Map<string, string>();
+  stadiums.forEach(s => stadiumSportMap.set(s.id, s.sport));
+
+  // Distribute old stadium selections to new categories
+  oldStadiumSelections.forEach((selection: Selection) => {
+    const sport = stadiumSportMap.get(selection.id);
+    if (sport) {
+      const categoryKey = sportToCategoryMap[sport];
+      if (categoryKey) {
+        if (!result[categoryKey]) {
+          result[categoryKey] = [];
+        }
+        // Check if already exists
+        const exists = result[categoryKey].some((s: Selection) => s.id === selection.id);
+        if (!exists) {
+          result[categoryKey].push(selection);
+        }
+      }
+    }
+  });
+
+  // Remove old stadiums key
+  delete result.stadiums;
+
+  return result;
+}
 
 export function loadSelections(): UserSelections {
   if (typeof window === 'undefined') return emptySelections;
@@ -8,7 +59,15 @@ export function loadSelections(): UserSelections {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
-      const parsed = JSON.parse(saved);
+      let parsed = JSON.parse(saved);
+
+      // Migrate old stadium selections to new sport-specific categories
+      if (parsed.stadiums) {
+        parsed = migrateStadiumSelections(parsed);
+        // Save migrated data back to localStorage
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
+      }
+
       // Merge with emptySelections to ensure all categories exist
       return {
         ...emptySelections,

@@ -8,7 +8,11 @@ const categories = [
   'unesco',
   'mountains',
   'museums',
-  'stadiums',
+  'mlbStadiums',
+  'nflStadiums',
+  'nbaStadiums',
+  'nhlStadiums',
+  'soccerStadiums',
   'marathons',
 ]
 

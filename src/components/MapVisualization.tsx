@@ -11,7 +11,7 @@ import { stateParks } from '@/data/stateParks';
 import { unescoSites } from '@/data/unescoSites';
 import { mountains } from '@/data/mountains';
 import { museums } from '@/data/museums';
-import { stadiums } from '@/data/stadiums';
+import { stadiums, getMlbStadiums, getNflStadiums, getNbaStadiums, getNhlStadiums, getSoccerStadiums } from '@/data/stadiums';
 import { marathons } from '@/data/marathons';
 
 interface MapVisualizationProps {
@@ -479,8 +479,28 @@ function getItemCoordinates(category: Category, itemId: string): [number, number
       if (museum?.lat && museum?.lng) return [museum.lng, museum.lat];
       return null;
     }
-    case 'stadiums': {
-      const stadium = stadiums.find(s => s.id === itemId);
+    case 'mlbStadiums': {
+      const stadium = getMlbStadiums().find(s => s.id === itemId);
+      if (stadium?.lat && stadium?.lng) return [stadium.lng, stadium.lat];
+      return null;
+    }
+    case 'nflStadiums': {
+      const stadium = getNflStadiums().find(s => s.id === itemId);
+      if (stadium?.lat && stadium?.lng) return [stadium.lng, stadium.lat];
+      return null;
+    }
+    case 'nbaStadiums': {
+      const stadium = getNbaStadiums().find(s => s.id === itemId);
+      if (stadium?.lat && stadium?.lng) return [stadium.lng, stadium.lat];
+      return null;
+    }
+    case 'nhlStadiums': {
+      const stadium = getNhlStadiums().find(s => s.id === itemId);
+      if (stadium?.lat && stadium?.lng) return [stadium.lng, stadium.lat];
+      return null;
+    }
+    case 'soccerStadiums': {
+      const stadium = getSoccerStadiums().find(s => s.id === itemId);
       if (stadium?.lat && stadium?.lng) return [stadium.lng, stadium.lat];
       return null;
     }
@@ -514,16 +534,18 @@ function getCategoryMarkers(
     const coords = getItemCoordinates(category, selection.id);
     if (coords) {
       const marker: MarkerData = { coordinates: coords, status: selection.status, id: selection.id };
-      // Add sport data for stadiums
-      if (category === 'stadiums') {
-        const stadium = stadiums.find(s => s.id === selection.id);
-        if (stadium) {
-          marker.sport = stadium.sport;
-          // Filter by subcategory if specified
-          if (subcategory && subcategory !== 'All' && stadium.sport !== subcategory) {
-            continue;
-          }
-        }
+      // Add sport data for stadium categories
+      if (category === 'mlbStadiums') {
+        marker.sport = 'Baseball';
+      } else if (category === 'nflStadiums') {
+        marker.sport = 'American Football';
+      } else if (category === 'nbaStadiums') {
+        marker.sport = 'Basketball';
+      } else if (category === 'nhlStadiums') {
+        marker.sport = 'Hockey';
+      } else if (category === 'soccerStadiums') {
+        const stadium = getSoccerStadiums().find(s => s.id === selection.id);
+        marker.sport = stadium?.sport || 'Football';
       }
       // Add park type for national parks
       if (category === 'nationalParks') {
@@ -866,7 +888,7 @@ function WorldMarkerMap({
 }) {
   const markers = getCategoryMarkers(category, selections, subcategory);
   const isMarathons = category === 'marathons';
-  const isStadiums = category === 'stadiums';
+  const isStadiums = category === 'mlbStadiums' || category === 'nflStadiums' || category === 'nbaStadiums' || category === 'nhlStadiums' || category === 'soccerStadiums';
 
   // Get the appropriate marker icon based on category and sport
   const getMarkerIcon = (marker: MarkerData) => {

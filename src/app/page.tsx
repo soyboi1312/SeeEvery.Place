@@ -36,7 +36,7 @@ import { stateParks } from '@/data/stateParks';
 import { unescoSites } from '@/data/unescoSites';
 import { mountains } from '@/data/mountains';
 import { museums } from '@/data/museums';
-import { stadiums } from '@/data/stadiums';
+import { stadiums, getMlbStadiums, getNflStadiums, getNbaStadiums, getNhlStadiums, getSoccerStadiums } from '@/data/stadiums';
 import { marathons } from '@/data/marathons';
 
 // Common country abbreviation aliases that differ from ISO codes
@@ -71,7 +71,11 @@ const categoryTotals: Record<Category, number> = {
   unesco: unescoSites.length,
   mountains: mountains.length,
   museums: museums.length,
-  stadiums: stadiums.length,
+  mlbStadiums: getMlbStadiums().length,
+  nflStadiums: getNflStadiums().length,
+  nbaStadiums: getNbaStadiums().length,
+  nhlStadiums: getNhlStadiums().length,
+  soccerStadiums: getSoccerStadiums().length,
   marathons: marathons.length,
 };
 
@@ -192,12 +196,39 @@ export default function Home() {
           group: m.country,
         }));
         break;
-      case 'stadiums':
-        items = stadiums.map(s => ({
+      case 'mlbStadiums':
+        items = getMlbStadiums().map(s => ({
           id: s.id,
           name: `${s.name} - ${s.city}`,
-          group: s.sport,
-          subcategory: s.sport,
+          group: s.team || s.city,
+        }));
+        break;
+      case 'nflStadiums':
+        items = getNflStadiums().map(s => ({
+          id: s.id,
+          name: `${s.name} - ${s.city}`,
+          group: s.team || s.city,
+        }));
+        break;
+      case 'nbaStadiums':
+        items = getNbaStadiums().map(s => ({
+          id: s.id,
+          name: `${s.name} - ${s.city}`,
+          group: s.team || s.city,
+        }));
+        break;
+      case 'nhlStadiums':
+        items = getNhlStadiums().map(s => ({
+          id: s.id,
+          name: `${s.name} - ${s.city}`,
+          group: s.team || s.city,
+        }));
+        break;
+      case 'soccerStadiums':
+        items = getSoccerStadiums().map(s => ({
+          id: s.id,
+          name: `${s.name} - ${s.city}`,
+          group: s.country,
         }));
         break;
       case 'marathons':
@@ -212,8 +243,8 @@ export default function Home() {
     }
 
     // Filter by subcategory if one is selected (not "All")
-    // Only mountains and stadiums have subcategory filtering
-    if (activeSubcategory !== 'All' && (activeCategory === 'mountains' || activeCategory === 'stadiums')) {
+    // Only mountains have subcategory filtering
+    if (activeSubcategory !== 'All' && activeCategory === 'mountains') {
       items = items.filter(item => item.subcategory === activeSubcategory);
     }
 
@@ -226,7 +257,7 @@ export default function Home() {
 
   const allStats = useMemo(() => {
     return Object.fromEntries(
-      (['countries', 'states', 'nationalParks', 'stateParks', 'unesco', 'mountains', 'museums', 'stadiums', 'marathons'] as Category[]).map(cat => [
+      (['countries', 'states', 'nationalParks', 'stateParks', 'unesco', 'mountains', 'museums', 'mlbStadiums', 'nflStadiums', 'nbaStadiums', 'nhlStadiums', 'soccerStadiums', 'marathons'] as Category[]).map(cat => [
         cat,
         getStats(selections, cat, categoryTotals[cat]),
       ])
@@ -236,12 +267,16 @@ export default function Home() {
   const categoryTitles: Record<Category, string> = {
     countries: 'Countries of the World',
     states: 'US States & Territories',
-    nationalParks: 'US Parks: National Parks',
-    stateParks: 'US Parks: State Parks',
+    nationalParks: 'National Parks',
+    stateParks: 'State Parks',
     unesco: 'UNESCO World Heritage Sites',
     mountains: 'Mountain Peaks',
     museums: 'Famous Museums',
-    stadiums: 'Sports Stadiums',
+    mlbStadiums: 'MLB Stadiums',
+    nflStadiums: 'NFL Stadiums',
+    nbaStadiums: 'NBA Arenas',
+    nhlStadiums: 'NHL Arenas',
+    soccerStadiums: 'Soccer & Other Venues',
     marathons: 'World Marathon Majors',
   };
 
