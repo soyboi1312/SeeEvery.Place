@@ -97,7 +97,8 @@ export default function AboutPage() {
             </p>
             <p className="text-gray-600 dark:text-gray-300">
               Track countries, US states, national parks, state parks, UNESCO World Heritage Sites, mountain peaks,
-              world-class museums, sports stadiums, Formula 1 circuits, and marathon races - all in one place.
+              world-class museums, sports stadiums, Formula 1 circuits, marathon races, major airports, ski resorts,
+              theme parks, and legendary surf spots - all in one place.
             </p>
           </section>
 
@@ -117,7 +118,7 @@ export default function AboutPage() {
                 <h3 className="font-bold text-gray-800 dark:text-white mb-2">Track Everything</h3>
                 <p className="text-gray-600 dark:text-gray-300 text-sm">
                   Go beyond countries - track parks, UNESCO sites, mountains, museums,
-                  stadiums, F1 circuits, and marathons.
+                  stadiums, airports, ski resorts, theme parks, and surf spots.
                 </p>
               </div>
               <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
@@ -153,6 +154,10 @@ export default function AboutPage() {
                     <span className="text-xl">🇺🇸</span>
                     <span><strong className="text-gray-800 dark:text-white">US States</strong> - 50 states plus DC and territories</span>
                   </li>
+                  <li className="flex items-center gap-3">
+                    <span className="text-xl">✈️</span>
+                    <span><strong className="text-gray-800 dark:text-white">Airports</strong> - Major hubs from JFK to Changi</span>
+                  </li>
                 </ul>
               </div>
               <div className="space-y-3 text-gray-600 dark:text-gray-300">
@@ -173,6 +178,14 @@ export default function AboutPage() {
                   <li className="flex items-center gap-3">
                     <span className="text-xl">⛰️</span>
                     <span><strong className="text-gray-800 dark:text-white">US 14ers</strong> - Peaks over 14,000 feet</span>
+                  </li>
+                  <li className="flex items-center gap-3">
+                    <span className="text-xl">⛷️</span>
+                    <span><strong className="text-gray-800 dark:text-white">Ski Resorts</strong> - Whistler, Zermatt, Niseko & more</span>
+                  </li>
+                  <li className="flex items-center gap-3">
+                    <span className="text-xl">🌊</span>
+                    <span><strong className="text-gray-800 dark:text-white">Surfing Reserves</strong> - Legendary breaks worldwide</span>
                   </li>
                 </ul>
               </div>
@@ -203,6 +216,10 @@ export default function AboutPage() {
                   <li className="flex items-center gap-3">
                     <span className="text-xl">🎨</span>
                     <span><strong className="text-gray-800 dark:text-white">Museums</strong> - World-class art and history</span>
+                  </li>
+                  <li className="flex items-center gap-3">
+                    <span className="text-xl">🎢</span>
+                    <span><strong className="text-gray-800 dark:text-white">Theme Parks</strong> - Disney, Universal & more</span>
                   </li>
                 </ul>
               </div>

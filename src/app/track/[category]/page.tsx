@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import Image from 'next/image';
+import Script from 'next/script';
 import { Category, categoryLabels, categoryIcons } from '@/lib/types';
 import Link from 'next/link';
 
@@ -25,6 +26,55 @@ const categories: Category[] = [
   'themeParks',
   'surfingReserves',
 ];
+
+// Category-specific keywords for SEO
+const categoryKeywords: Record<Category, string[]> = {
+  countries: ['country tracker', 'countries visited map', 'travel map', 'world travel tracker'],
+  states: ['US states tracker', 'states visited map', 'road trip tracker', 'USA travel map'],
+  nationalParks: ['national parks tracker', 'NPS checklist', 'park passport', 'national park visited'],
+  stateParks: ['state parks tracker', 'state park checklist', 'hiking tracker'],
+  unesco: ['UNESCO tracker', 'world heritage sites visited', 'UNESCO bucket list'],
+  fiveKPeaks: ['mountain tracker', '8000ers checklist', 'peak bagging', 'summit tracker'],
+  fourteeners: ['14ers tracker', 'fourteener checklist', 'Colorado 14ers', 'high altitude hiking'],
+  museums: ['museum tracker', 'museums visited', 'art museum checklist', 'museum bucket list'],
+  mlbStadiums: ['MLB stadium tracker', 'ballpark checklist', 'baseball stadium visited'],
+  nflStadiums: ['NFL stadium tracker', 'football stadium checklist', 'gridiron bucket list'],
+  nbaStadiums: ['NBA arena tracker', 'basketball arena checklist', 'courts visited'],
+  nhlStadiums: ['NHL arena tracker', 'hockey arena checklist', 'rinks visited'],
+  soccerStadiums: ['soccer stadium tracker', 'football grounds visited', 'pitch checklist'],
+  f1Tracks: ['F1 circuit tracker', 'Formula 1 tracks visited', 'Grand Prix checklist'],
+  marathons: ['marathon tracker', 'World Marathon Majors', 'running bucket list'],
+  airports: ['airport tracker', 'airports visited', 'aviation enthusiast', 'travel hubs'],
+  skiResorts: ['ski resort tracker', 'slopes visited', 'skiing bucket list', 'powder destinations'],
+  themeParks: ['theme park tracker', 'amusement parks visited', 'Disney checklist', 'roller coaster bucket list'],
+  surfingReserves: ['surf spot tracker', 'waves surfed', 'surfing bucket list', 'beach breaks visited'],
+};
+
+// Generate JSON-LD structured data for SEO
+function generateJsonLd(category: Category, label: string, description: string) {
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://seeevery.place';
+
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'WebApplication',
+    name: `Track ${label} | See Every Place`,
+    description: description,
+    url: `${baseUrl}/track/${category}`,
+    applicationCategory: 'TravelApplication',
+    operatingSystem: 'Web Browser',
+    offers: {
+      '@type': 'Offer',
+      price: '0',
+      priceCurrency: 'USD',
+    },
+    creator: {
+      '@type': 'Organization',
+      name: 'See Every Place',
+      url: baseUrl,
+    },
+    keywords: categoryKeywords[category]?.join(', ') || `${label} tracker`,
+  };
+}
 
 const categoryDescriptions: Record<Category, string> = {
   countries: 'Track all 197 countries around the world. Mark countries as visited or add them to your bucket list.',
@@ -60,10 +110,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { category } = await params;
   const label = categoryLabels[category as Category] || category;
   const description = categoryDescriptions[category as Category] || `Track ${label} you have visited.`;
+  const keywords = categoryKeywords[category as Category] || [`${label} tracker`];
 
   return {
     title: `Track ${label} Visited | Free Interactive Map | See Every Place`,
     description: `${description} Create beautiful shareable maps and bucket lists for free.`,
+    keywords: [...keywords, 'travel tracker', 'bucket list', 'free travel app'],
     openGraph: {
       title: `Track ${label} Visited | See Every Place`,
       description: description,
@@ -82,8 +134,16 @@ export default async function CategoryLandingPage({ params }: Props) {
   const label = categoryLabels[category as Category];
   const icon = categoryIcons[category as Category];
   const description = categoryDescriptions[category as Category];
+  const jsonLd = generateJsonLd(category as Category, label, description);
 
   return (
+    <>
+      {/* JSON-LD Structured Data for SEO */}
+      <Script
+        id={`json-ld-${category}`}
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-purple-50">
       <header className="bg-white/80 backdrop-blur-md border-b border-gray-200 sticky top-0 z-40">
         <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
@@ -187,5 +247,6 @@ export default async function CategoryLandingPage({ params }: Props) {
         </div>
       </footer>
     </div>
+    </>
   );
 }
