@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import Header from '@/components/Header';
@@ -39,8 +39,14 @@ export default function Home() {
   const [showShareCard, setShowShareCard] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
   const { user, signOut } = useAuth();
   const { isDarkMode, toggleDarkMode } = useDarkMode();
+
+  // Track which user we've synced for to prevent duplicate syncs
+  const lastSyncedUserId = useRef<string | null>(null);
+  // Track if initial sync is complete
+  const initialSyncComplete = useRef(false);
 
   const handleCategoryChange = useCallback((category: Category) => {
     setActiveCategory(category);
@@ -53,7 +59,7 @@ export default function Home() {
     setIsLoaded(true);
   }, []);
 
-  // Save selections whenever they change
+  // Save selections whenever they change (local storage)
   useEffect(() => {
     if (isLoaded) {
       saveSelections(selections);
@@ -61,37 +67,66 @@ export default function Home() {
   }, [selections, isLoaded]);
 
   // Cloud sync: fetch and merge when user signs in
+  // This effect handles the initial sync on login
   useEffect(() => {
-    if (!user || !isLoaded) return;
+    // Wait for local data to load first
+    if (!isLoaded) return;
 
-    const syncWithCloud = async () => {
+    // No user = no cloud sync needed
+    if (!user) {
+      lastSyncedUserId.current = null;
+      initialSyncComplete.current = false;
+      return;
+    }
+
+    // Skip if we've already synced for this user
+    if (lastSyncedUserId.current === user.id) return;
+
+    const performInitialSync = async () => {
+      setIsSyncing(true);
+      console.log('Starting cloud sync for user:', user.id);
+
       try {
         const cloudData = await loadFromCloud();
+
         if (cloudData) {
+          // Merge local + cloud data (local takes precedence for conflicts)
           const merged = await mergeSelectionsFromCloud(selections, cloudData);
           setSelections(merged);
-          // Save merged data back to cloud
+          // Push merged result back to cloud
           await syncToCloud(merged);
+          console.log('Cloud sync complete: merged local + cloud data');
         } else {
-          // No cloud data, push local to cloud
+          // No cloud data exists, push local data to cloud
           await syncToCloud(selections);
+          console.log('Cloud sync complete: pushed local data to cloud');
         }
+
+        // Mark this user as synced
+        lastSyncedUserId.current = user.id;
+        initialSyncComplete.current = true;
       } catch (error) {
         console.error('Cloud sync failed:', error);
+      } finally {
+        setIsSyncing(false);
       }
     };
 
-    syncWithCloud();
+    performInitialSync();
+    // Note: we intentionally exclude `selections` from deps to only run on user change
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user, isLoaded]);
+  }, [user?.id, isLoaded]);
 
-  // Sync to cloud when selections change (if signed in)
+  // Debounced sync to cloud when selections change (after initial sync)
   useEffect(() => {
-    if (!user || !isLoaded) return;
+    // Only sync if user is logged in, data is loaded, and initial sync is done
+    if (!user || !isLoaded || !initialSyncComplete.current) return;
 
     const debounceSync = setTimeout(() => {
-      syncToCloud(selections);
-    }, 2000); // Debounce by 2 seconds to avoid too many writes
+      syncToCloud(selections).catch(err =>
+        console.error('Failed to sync changes to cloud:', err)
+      );
+    }, 2000); // 2 second debounce
 
     return () => clearTimeout(debounceSync);
   }, [selections, user, isLoaded]);
@@ -152,6 +187,19 @@ export default function Home() {
         isDarkMode={isDarkMode}
         onToggleDarkMode={toggleDarkMode}
       />
+
+      {/* Cloud Sync Indicator */}
+      {isSyncing && (
+        <div className="fixed top-16 left-1/2 -translate-x-1/2 z-50 animate-fade-in">
+          <div className="bg-blue-600 text-white px-4 py-2 rounded-full shadow-lg flex items-center gap-2 text-sm">
+            <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+            </svg>
+            Syncing your data...
+          </div>
+        </div>
+      )}
 
       <div className="max-w-6xl mx-auto px-4 py-6 space-y-6">
         {/* Hero Section */}
