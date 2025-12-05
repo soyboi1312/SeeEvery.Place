@@ -3,7 +3,7 @@ export interface NationalPark {
   name: string;
   state: string;
   region: string;
-  type: "National Park" | "State Park";
+  type: "National Park";
   lat: number;
   lng: number;
 }
@@ -83,48 +83,9 @@ export const nationalParks: NationalPark[] = [
   { id: "haleakala", name: "Haleakala", state: "HI", region: "Pacific", type: "National Park", lat: 20.7097, lng: -156.1731 },
   { id: "hawaii-volcanoes", name: "Hawaii Volcanoes", state: "HI", region: "Pacific", type: "National Park", lat: 19.4194, lng: -155.2885 },
   { id: "american-samoa", name: "National Park of American Samoa", state: "AS", region: "Pacific", type: "National Park", lat: -14.2583, lng: -170.6883 },
-
-  // State Parks - West
-  { id: "antelope-canyon", name: "Antelope Canyon Navajo Tribal Park", state: "AZ", region: "West", type: "State Park", lat: 36.8619, lng: -111.3743 },
-  { id: "goblin-valley", name: "Goblin Valley", state: "UT", region: "West", type: "State Park", lat: 38.5569, lng: -110.7039 },
-  { id: "dead-horse-point", name: "Dead Horse Point", state: "UT", region: "West", type: "State Park", lat: 38.4877, lng: -109.7388 },
-  { id: "valley-of-fire", name: "Valley of Fire", state: "NV", region: "West", type: "State Park", lat: 36.4366, lng: -114.5135 },
-  { id: "anza-borrego", name: "Anza-Borrego Desert", state: "CA", region: "West", type: "State Park", lat: 33.1284, lng: -116.3011 },
-  { id: "big-sur-pfeiffer", name: "Pfeiffer Big Sur", state: "CA", region: "West", type: "State Park", lat: 36.2478, lng: -121.7826 },
-  { id: "point-lobos", name: "Point Lobos", state: "CA", region: "West", type: "State Park", lat: 36.5163, lng: -121.9386 },
-  { id: "humboldt-redwoods", name: "Humboldt Redwoods", state: "CA", region: "West", type: "State Park", lat: 40.3463, lng: -123.9536 },
-  { id: "julia-pfeiffer-burns", name: "Julia Pfeiffer Burns", state: "CA", region: "West", type: "State Park", lat: 36.1582, lng: -121.6697 },
-  { id: "smith-rock", name: "Smith Rock", state: "OR", region: "West", type: "State Park", lat: 44.3682, lng: -121.1404 },
-  { id: "silver-falls", name: "Silver Falls", state: "OR", region: "West", type: "State Park", lat: 44.8776, lng: -122.6540 },
-  { id: "deception-pass", name: "Deception Pass", state: "WA", region: "West", type: "State Park", lat: 48.4041, lng: -122.6451 },
-
-  // State Parks - Southwest
-  { id: "palo-duro-canyon", name: "Palo Duro Canyon", state: "TX", region: "Southwest", type: "State Park", lat: 34.9391, lng: -101.6617 },
-  { id: "enchanted-rock", name: "Enchanted Rock", state: "TX", region: "Southwest", type: "State Park", lat: 30.5068, lng: -98.8200 },
-  { id: "lost-maples", name: "Lost Maples", state: "TX", region: "Southwest", type: "State Park", lat: 29.8064, lng: -99.5741 },
-  { id: "slide-rock", name: "Slide Rock", state: "AZ", region: "Southwest", type: "State Park", lat: 34.9301, lng: -111.7518 },
-  { id: "kartchner-caverns", name: "Kartchner Caverns", state: "AZ", region: "Southwest", type: "State Park", lat: 31.8378, lng: -110.3470 },
-
-  // State Parks - Midwest
-  { id: "starved-rock", name: "Starved Rock", state: "IL", region: "Midwest", type: "State Park", lat: 41.3201, lng: -88.9939 },
-  { id: "devils-lake", name: "Devil's Lake", state: "WI", region: "Midwest", type: "State Park", lat: 43.4265, lng: -89.7298 },
-  { id: "pictured-rocks", name: "Pictured Rocks", state: "MI", region: "Midwest", type: "State Park", lat: 46.5652, lng: -86.3186 },
-  { id: "hocking-hills", name: "Hocking Hills", state: "OH", region: "Midwest", type: "State Park", lat: 39.4350, lng: -82.5415 },
-  { id: "tahquamenon-falls", name: "Tahquamenon Falls", state: "MI", region: "Midwest", type: "State Park", lat: 46.6022, lng: -85.2514 },
-
-  // State Parks - East
-  { id: "letchworth", name: "Letchworth", state: "NY", region: "East", type: "State Park", lat: 42.5700, lng: -77.9600 },
-  { id: "watkins-glen", name: "Watkins Glen", state: "NY", region: "East", type: "State Park", lat: 42.3717, lng: -76.8735 },
-  { id: "harriman", name: "Harriman", state: "NY", region: "East", type: "State Park", lat: 41.2498, lng: -74.0979 },
-  { id: "baxter", name: "Baxter", state: "ME", region: "East", type: "State Park", lat: 46.0856, lng: -68.9214 },
-  { id: "franconia-notch", name: "Franconia Notch", state: "NH", region: "East", type: "State Park", lat: 44.1406, lng: -71.6821 },
-  { id: "ricketts-glen", name: "Ricketts Glen", state: "PA", region: "East", type: "State Park", lat: 41.3306, lng: -76.2833 },
-  { id: "tallulah-gorge", name: "Tallulah Gorge", state: "GA", region: "East", type: "State Park", lat: 34.7378, lng: -83.3922 },
-  { id: "falls-creek-falls", name: "Fall Creek Falls", state: "TN", region: "East", type: "State Park", lat: 35.6615, lng: -85.3537 },
-  { id: "bahia-honda", name: "Bahia Honda", state: "FL", region: "East", type: "State Park", lat: 24.6656, lng: -81.2675 },
 ];
 
-export const parkTypes = ["National Park", "State Park"] as const;
+export const parkTypes = ["National Park"] as const;
 
 export const parkRegions = ["Alaska", "West", "Southwest", "Midwest", "East", "Pacific"];
 
