@@ -31,7 +31,7 @@ import {
 import { useAuth } from '@/lib/hooks/useAuth';
 import { useDarkMode } from '@/lib/hooks/useDarkMode';
 import { useCloudSync } from '@/lib/hooks/useCloudSync';
-import { categoryTotals, categoryTitles, getCategoryItems } from '@/lib/categoryUtils';
+import { categoryTotals, categoryTitles, getCategoryItemsAsync, type CategoryItem } from '@/lib/categoryUtils';
 
 export default function Home() {
   const [selections, setSelections] = useState<UserSelections>(emptySelections);
@@ -39,6 +39,7 @@ export default function Home() {
   const [showShareCard, setShowShareCard] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [currentItems, setCurrentItems] = useState<CategoryItem[]>([]);
   const { user, signOut } = useAuth();
   const { isDarkMode, toggleDarkMode } = useDarkMode();
 
@@ -87,8 +88,10 @@ export default function Home() {
     }));
   }, [activeCategory]);
 
-  // Get items for the active category (refactored to categoryUtils)
-  const currentItems = useMemo(() => getCategoryItems(activeCategory), [activeCategory]);
+  // Load items for the active category asynchronously (code-split)
+  useEffect(() => {
+    getCategoryItemsAsync(activeCategory).then(setCurrentItems);
+  }, [activeCategory]);
 
   const currentStats = useMemo(() => {
     return getStats(selections, activeCategory, categoryTotals[activeCategory]);
