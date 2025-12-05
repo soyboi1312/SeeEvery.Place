@@ -69,8 +69,8 @@ export default function AboutPage() {
               travel journey, See Every Place makes it easy to keep track of your adventures.
             </p>
             <p className="text-gray-600 dark:text-gray-300">
-              Mark countries, US states, national parks, UNESCO World Heritage Sites, famous mountains,
-              world-class museums, and iconic stadiums as visited or add them to your bucket list.
+              Track countries, US states, national parks, state parks, UNESCO World Heritage Sites, mountain peaks,
+              world-class museums, sports stadiums, Formula 1 circuits, and marathon races - all in one place.
             </p>
           </section>
 
@@ -89,8 +89,8 @@ export default function AboutPage() {
                 <div className="text-3xl mb-3">📊</div>
                 <h3 className="font-bold text-gray-800 dark:text-white mb-2">Track Everything</h3>
                 <p className="text-gray-600 dark:text-gray-300 text-sm">
-                  Go beyond countries - track national parks, UNESCO sites, mountains, museums,
-                  and stadiums.
+                  Go beyond countries - track parks, UNESCO sites, mountains, museums,
+                  stadiums, F1 circuits, and marathons.
                 </p>
               </div>
               <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
@@ -114,40 +114,72 @@ export default function AboutPage() {
 
           <section className="mb-12">
             <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-4">Categories</h2>
-            <ul className="space-y-3 text-gray-600 dark:text-gray-300">
-              <li className="flex items-center gap-3">
-                <span className="text-2xl">🌍</span>
-                <span><strong className="text-gray-800 dark:text-white">Countries</strong> - Track all 195+ countries around the world</span>
-              </li>
-              <li className="flex items-center gap-3">
-                <span className="text-2xl">🇺🇸</span>
-                <span><strong className="text-gray-800 dark:text-white">US States</strong> - Mark off all 50 states plus DC</span>
-              </li>
-              <li className="flex items-center gap-3">
-                <span className="text-2xl">🏞️</span>
-                <span><strong className="text-gray-800 dark:text-white">National Parks</strong> - Explore America&apos;s natural treasures</span>
-              </li>
-              <li className="flex items-center gap-3">
-                <span className="text-2xl">🏛️</span>
-                <span><strong className="text-gray-800 dark:text-white">UNESCO Sites</strong> - Visit world heritage locations</span>
-              </li>
-              <li className="flex items-center gap-3">
-                <span className="text-2xl">🏔️</span>
-                <span><strong className="text-gray-800 dark:text-white">Peaks</strong> - Conquer famous mountains worldwide</span>
-              </li>
-              <li className="flex items-center gap-3">
-                <span className="text-2xl">🎨</span>
-                <span><strong className="text-gray-800 dark:text-white">Museums</strong> - Experience world-class art and history</span>
-              </li>
-              <li className="flex items-center gap-3">
-                <span className="text-2xl">🏟️</span>
-                <span><strong className="text-gray-800 dark:text-white">Stadiums</strong> - Check off iconic sports venues</span>
-              </li>
-              <li className="flex items-center gap-3">
-                <span className="text-2xl">🏃</span>
-                <span><strong className="text-gray-800 dark:text-white">Marathon Majors</strong> - Track the world&apos;s most famous races</span>
-              </li>
-            </ul>
+            <div className="grid md:grid-cols-2 gap-4">
+              <div className="space-y-3 text-gray-600 dark:text-gray-300">
+                <h3 className="font-semibold text-gray-800 dark:text-white text-sm uppercase tracking-wide">Destinations</h3>
+                <ul className="space-y-2">
+                  <li className="flex items-center gap-3">
+                    <span className="text-xl">🌍</span>
+                    <span><strong className="text-gray-800 dark:text-white">Countries</strong> - All 197 countries worldwide</span>
+                  </li>
+                  <li className="flex items-center gap-3">
+                    <span className="text-xl">🇺🇸</span>
+                    <span><strong className="text-gray-800 dark:text-white">US States</strong> - 50 states plus DC and territories</span>
+                  </li>
+                </ul>
+              </div>
+              <div className="space-y-3 text-gray-600 dark:text-gray-300">
+                <h3 className="font-semibold text-gray-800 dark:text-white text-sm uppercase tracking-wide">Nature</h3>
+                <ul className="space-y-2">
+                  <li className="flex items-center gap-3">
+                    <span className="text-xl">🏞️</span>
+                    <span><strong className="text-gray-800 dark:text-white">National Parks</strong> - America&apos;s natural treasures</span>
+                  </li>
+                  <li className="flex items-center gap-3">
+                    <span className="text-xl">🌲</span>
+                    <span><strong className="text-gray-800 dark:text-white">State Parks</strong> - Hidden gems across all 50 states</span>
+                  </li>
+                  <li className="flex items-center gap-3">
+                    <span className="text-xl">🏔️</span>
+                    <span><strong className="text-gray-800 dark:text-white">5000m+ Peaks</strong> - World&apos;s highest mountains</span>
+                  </li>
+                  <li className="flex items-center gap-3">
+                    <span className="text-xl">⛰️</span>
+                    <span><strong className="text-gray-800 dark:text-white">US 14ers</strong> - Peaks over 14,000 feet</span>
+                  </li>
+                </ul>
+              </div>
+              <div className="space-y-3 text-gray-600 dark:text-gray-300">
+                <h3 className="font-semibold text-gray-800 dark:text-white text-sm uppercase tracking-wide">Sports</h3>
+                <ul className="space-y-2">
+                  <li className="flex items-center gap-3">
+                    <span className="text-xl">🏟️</span>
+                    <span><strong className="text-gray-800 dark:text-white">Stadiums</strong> - MLB, NFL, NBA, NHL, Soccer, Cricket, Rugby, Tennis</span>
+                  </li>
+                  <li className="flex items-center gap-3">
+                    <span className="text-xl">🏎️</span>
+                    <span><strong className="text-gray-800 dark:text-white">F1 Tracks</strong> - Formula 1 race circuits worldwide</span>
+                  </li>
+                  <li className="flex items-center gap-3">
+                    <span className="text-xl">🏃</span>
+                    <span><strong className="text-gray-800 dark:text-white">Marathons</strong> - World Marathon Majors</span>
+                  </li>
+                </ul>
+              </div>
+              <div className="space-y-3 text-gray-600 dark:text-gray-300">
+                <h3 className="font-semibold text-gray-800 dark:text-white text-sm uppercase tracking-wide">Culture</h3>
+                <ul className="space-y-2">
+                  <li className="flex items-center gap-3">
+                    <span className="text-xl">🏛️</span>
+                    <span><strong className="text-gray-800 dark:text-white">UNESCO Sites</strong> - 200 World Heritage locations</span>
+                  </li>
+                  <li className="flex items-center gap-3">
+                    <span className="text-xl">🎨</span>
+                    <span><strong className="text-gray-800 dark:text-white">Museums</strong> - World-class art and history</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
           </section>
 
           <section className="mb-12">

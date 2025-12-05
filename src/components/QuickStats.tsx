@@ -54,7 +54,7 @@ export default function QuickStats({ selections, onCategoryClick }: QuickStatsPr
         </div>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div className="flex overflow-x-auto pb-4 gap-3 sm:grid sm:grid-cols-4 sm:overflow-visible sm:pb-0 snap-x scrollbar-hide">
         {displayCategories.map((category) => {
           const stats = getStats(selections, category, categoryTotals[category]);
           const icon = categoryIcons[category];
@@ -65,7 +65,7 @@ export default function QuickStats({ selections, onCategoryClick }: QuickStatsPr
             <button
               key={category}
               onClick={() => onCategoryClick(category)}
-              className="text-left p-4 rounded-xl bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 transition-all group border border-transparent hover:border-gray-200 dark:hover:border-gray-500"
+              className="min-w-[160px] sm:min-w-0 flex-shrink-0 sm:flex-shrink snap-center text-left p-4 rounded-xl bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 transition-all group border border-transparent hover:border-gray-200 dark:hover:border-gray-500"
             >
               <div className="flex items-center gap-2 mb-3">
                 <span className="text-2xl">{icon}</span>

@@ -4,30 +4,40 @@ interface IconProps {
   className?: string;
 }
 
-// Football (Soccer)
+// Shared stroke style for consistency
+const strokeStyle = {
+  strokeLinecap: "round" as const,
+  strokeLinejoin: "round" as const,
+};
+
+// Football (Soccer) - Simplified internal geometry for better readability
 export function SoccerIcon({ className = "w-6 h-6" }: IconProps) {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className={className}>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className={className} {...strokeStyle}>
       <circle cx="12" cy="12" r="9" />
-      <path d="M12 7L9.5 10L10.5 14H13.5L14.5 10L12 7Z" />
-      <path d="M12 7V3" />
-      <path d="M14.5 10L18 8" />
-      <path d="M13.5 14L16 17.5" />
-      <path d="M10.5 14L8 17.5" />
-      <path d="M9.5 10L6 8" />
+      <path d="M12 7l-2.5 3h5L12 7z" />
+      <path d="M9.5 10l-3.5-1" />
+      <path d="M14.5 10l3.5-1" />
+      <path d="M9.5 10l.5 4" />
+      <path d="M14.5 10l-.5 4" />
+      <path d="M10 14l-2 3.5" />
+      <path d="M14 14l2 3.5" />
+      <path d="M10 14h4" />
     </svg>
   );
 }
 
-// American Football
+// American Football - Smoother version
 export function AmericanFootballIcon({ className = "w-6 h-6" }: IconProps) {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className={className}>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className={className} {...strokeStyle}>
       <ellipse cx="12" cy="12" rx="9" ry="5" transform="rotate(-45 12 12)" />
       <path d="M12 7v10" />
       <path d="M9 10h6" />
       <path d="M9 14h6" />
       <path d="M9 12h6" />
+      <path d="M6 18l1-1" />
+      <path d="M17 7l1-1" />
     </svg>
   );
 }
@@ -35,7 +45,7 @@ export function AmericanFootballIcon({ className = "w-6 h-6" }: IconProps) {
 // Baseball
 export function BaseballIcon({ className = "w-6 h-6" }: IconProps) {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className={className}>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className={className} {...strokeStyle}>
       <circle cx="12" cy="12" r="9" />
       <path d="M6.5 5.5C8 9 8 15 6.5 18.5" />
       <path d="M17.5 5.5C16 9 16 15 17.5 18.5" />
@@ -50,7 +60,7 @@ export function BaseballIcon({ className = "w-6 h-6" }: IconProps) {
 // Basketball
 export function BasketballIcon({ className = "w-6 h-6" }: IconProps) {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className={className}>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className={className} {...strokeStyle}>
       <circle cx="12" cy="12" r="9" />
       <path d="M3.2 13.5C6 12 9 12 12 12s6 0 8.8 1.5" />
       <path d="M12 3v18" />
@@ -60,14 +70,15 @@ export function BasketballIcon({ className = "w-6 h-6" }: IconProps) {
   );
 }
 
-// Cricket
+// Cricket - Clean seam curve instead of dashed line
 export function CricketIcon({ className = "w-6 h-6" }: IconProps) {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className={className}>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className={className} {...strokeStyle}>
       <circle cx="12" cy="12" r="9" />
-      {/* Seam of the ball */}
-      <path d="M12 3c3 3 3 15 0 18" strokeDasharray="2 2" />
-      <path d="M12 3c-3 3-3 15 0 18" strokeDasharray="2 2" />
+      <path d="M7 5c2 4 2 10 0 14" />
+      <path d="M17 5c-2 4-2 10 0 14" />
+      <path d="M10.5 3.5L13.5 3.5" />
+      <path d="M10.5 20.5L13.5 20.5" />
     </svg>
   );
 }
@@ -75,7 +86,7 @@ export function CricketIcon({ className = "w-6 h-6" }: IconProps) {
 // Rugby
 export function RugbyIcon({ className = "w-6 h-6" }: IconProps) {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className={className}>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className={className} {...strokeStyle}>
       <ellipse cx="12" cy="12" rx="10" ry="7" transform="rotate(-45 12 12)" />
       <path d="M9 15L7 17" />
       <path d="M17 7l-2 2" />
@@ -84,13 +95,13 @@ export function RugbyIcon({ className = "w-6 h-6" }: IconProps) {
   );
 }
 
-// Tennis
+// Tennis - Improved curves matching round aesthetic
 export function TennisIcon({ className = "w-6 h-6" }: IconProps) {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className={className}>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className={className} {...strokeStyle}>
       <circle cx="12" cy="12" r="9" />
-      <path d="M3 12c0 5 4 9 9 9" />
-      <path d="M21 12c0-5-4-9-9-9" />
+      <path d="M6 9a9 9 0 0 0 12 0" />
+      <path d="M6 15a9 9 0 0 1 12 0" />
     </svg>
   );
 }
@@ -98,7 +109,7 @@ export function TennisIcon({ className = "w-6 h-6" }: IconProps) {
 // Motorsport (Chequered Flag)
 export function MotorsportIcon({ className = "w-6 h-6" }: IconProps) {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className={className} {...strokeStyle}>
       <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" />
       <line x1="4" y1="22" x2="4" y2="15" />
       <path d="M4 9h16" />
@@ -117,9 +128,8 @@ export function SneakerIcon({ className = "w-6 h-6" }: IconProps) {
       fill="none"
       stroke="currentColor"
       strokeWidth={1.5}
-      strokeLinecap="round"
-      strokeLinejoin="round"
       className={className}
+      {...strokeStyle}
     >
       {/* Sole - Rocker shape */}
       <path d="M2 17c0 1.7 1.3 3 3 3h13c2.8 0 5-2.2 4-5l-1-2h-17l-2 4Z" />
@@ -138,7 +148,7 @@ export function SneakerIcon({ className = "w-6 h-6" }: IconProps) {
 // Generic Stadium Icon (fallback)
 export function StadiumIcon({ className = "w-6 h-6" }: IconProps) {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className={className}>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className={className} {...strokeStyle}>
       <ellipse cx="12" cy="12" rx="10" ry="6" />
       <path d="M2 12v4c0 3.3 4.5 6 10 6s10-2.7 10-6v-4" />
       <path d="M2 12c0-3.3 4.5-6 10-6s10 2.7 10 6" />
