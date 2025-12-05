@@ -948,10 +948,10 @@ function renderMountainMarker(fillColor: string) {
 function renderF1CarMarker(fillColor: string) {
   const strokeColor = "#ffffff";
   return (
-    <g transform="translate(-12, -12)">
+    <g transform="translate(-12, -15)">
       {/* Rear wing */}
       <path
-        d="M2 10h2v4H2z"
+        d="M2 8h4v3h-3"
         fill={fillColor}
         stroke={strokeColor}
         strokeWidth="1"
@@ -959,19 +959,19 @@ function renderF1CarMarker(fillColor: string) {
         strokeLinejoin="round"
       />
       {/* Rear wheel */}
-      <circle cx="7" cy="12" r="3" fill={fillColor} stroke={strokeColor} strokeWidth="1" />
+      <circle cx="7" cy="15" r="3" fill={fillColor} stroke={strokeColor} strokeWidth="1" />
       {/* Front wheel */}
-      <circle cx="17" cy="12" r="3" fill={fillColor} stroke={strokeColor} strokeWidth="1" />
+      <circle cx="17" cy="15" r="3" fill={fillColor} stroke={strokeColor} strokeWidth="1" />
       {/* Body/chassis */}
       <path
-        d="M7 12h10"
+        d="M10 15h4"
         stroke={strokeColor}
         strokeWidth="1"
         strokeLinecap="round"
       />
       {/* Cockpit/halo */}
       <path
-        d="M8 12c0-3 1.5-5 4-5s4 2 4 5"
+        d="M7 12c1-2 2-4 5-4h2c2 0 4 2 6 4"
         fill={fillColor}
         stroke={strokeColor}
         strokeWidth="1"
@@ -980,7 +980,7 @@ function renderF1CarMarker(fillColor: string) {
       />
       {/* Front wing */}
       <path
-        d="M20 12h2v1h-2z"
+        d="M20 15h2v-2h-3"
         fill={fillColor}
         stroke={strokeColor}
         strokeWidth="1"
@@ -989,7 +989,14 @@ function renderF1CarMarker(fillColor: string) {
       />
       {/* Air intake */}
       <path
-        d="M10.5 9h3"
+        d="M11 8l2 0"
+        stroke={strokeColor}
+        strokeWidth="1"
+        strokeLinecap="round"
+      />
+      {/* Side detail */}
+      <path
+        d="M13 10h2"
         stroke={strokeColor}
         strokeWidth="1"
         strokeLinecap="round"
