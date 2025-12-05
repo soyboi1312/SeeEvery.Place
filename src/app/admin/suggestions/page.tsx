@@ -21,14 +21,13 @@ interface Suggestion {
 
 type SuggestionStatus = 'pending' | 'approved' | 'rejected' | 'implemented';
 
+// This page is protected by middleware - only admin users can access it
 export default function AdminSuggestionsPage() {
   const { isDarkMode, toggleDarkMode } = useDarkMode();
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [authChecking, setAuthChecking] = useState(true);
   const [filterStatus, setFilterStatus] = useState<SuggestionStatus | 'all'>('all');
   const [supabaseReady, setSupabaseReady] = useState(false);
 
@@ -43,25 +42,6 @@ export default function AdminSuggestionsPage() {
       setSupabaseReady(true);
     }
   }, [supabase]);
-
-  // Check authentication
-  useEffect(() => {
-    if (!supabaseReady || !supabase) return;
-
-    const checkAuth = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      setIsAuthenticated(!!user);
-      setAuthChecking(false);
-    };
-
-    checkAuth();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setIsAuthenticated(!!session?.user);
-    });
-
-    return () => subscription.unsubscribe();
-  }, [supabase, supabaseReady]);
 
   const loadSuggestions = useCallback(async () => {
     if (!supabase) return;
@@ -81,11 +61,13 @@ export default function AdminSuggestionsPage() {
     }
   }, [supabase]);
 
+  // Load suggestions when supabase client is ready
+  // Middleware already verified admin access, so we can load immediately
   useEffect(() => {
-    if (supabaseReady && isAuthenticated) {
+    if (supabaseReady) {
       loadSuggestions();
     }
-  }, [supabaseReady, isAuthenticated, loadSuggestions]);
+  }, [supabaseReady, loadSuggestions]);
 
   const updateStatus = async (id: string, newStatus: SuggestionStatus) => {
     if (!supabase) return;
@@ -135,35 +117,8 @@ export default function AdminSuggestionsPage() {
     implemented: suggestions.filter(s => s.status === 'implemented').length,
   };
 
-  // Show login prompt if not authenticated
-  if (authChecking) {
-    return (
-      <div className="min-h-screen bg-gradient-to-b from-blue-50 to-purple-50 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center">
-        <div className="text-gray-600 dark:text-gray-300">Checking authentication...</div>
-      </div>
-    );
-  }
-
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen bg-gradient-to-b from-blue-50 to-purple-50 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center">
-        <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-lg border border-gray-100 dark:border-gray-700 text-center max-w-md mx-4">
-          <div className="text-5xl mb-4">🔐</div>
-          <h1 className="text-2xl font-bold text-gray-800 dark:text-white mb-2">Admin Access Required</h1>
-          <p className="text-gray-600 dark:text-gray-300 mb-6">
-            You must be signed in to access the admin panel.
-          </p>
-          <Link
-            href="/"
-            className="inline-block px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg font-medium hover:shadow-lg transition-all"
-          >
-            Sign In from Home
-          </Link>
-        </div>
-      </div>
-    );
-  }
-
+  // Note: Authentication and admin checks are handled by middleware
+  // This page will only render for authenticated admin users
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-purple-50 dark:from-gray-900 dark:to-gray-800">
       {/* Header */}

@@ -448,17 +448,25 @@ export default function MapVisualization({ category, selections, onToggle, subca
   const isRegionMap = usesRegionMap(category);
   const [tooltip, setTooltip] = useState<TooltipState | null>(null);
 
-  const tooltipHandlers: TooltipHandlers = {
-    onMouseEnter: useCallback((content: string, e: React.MouseEvent) => {
-      setTooltip({ content, x: e.clientX, y: e.clientY });
-    }, []),
-    onMouseLeave: useCallback(() => {
-      setTooltip(null);
-    }, []),
-    onMouseMove: useCallback((e: React.MouseEvent) => {
-      setTooltip(prev => prev ? { ...prev, x: e.clientX, y: e.clientY } : null);
-    }, []),
-  };
+  // Memoize individual handlers
+  const onMouseEnter = useCallback((content: string, e: React.MouseEvent) => {
+    setTooltip({ content, x: e.clientX, y: e.clientY });
+  }, []);
+
+  const onMouseLeave = useCallback(() => {
+    setTooltip(null);
+  }, []);
+
+  const onMouseMove = useCallback((e: React.MouseEvent) => {
+    setTooltip(prev => prev ? { ...prev, x: e.clientX, y: e.clientY } : null);
+  }, []);
+
+  // Memoize the handlers object to prevent unnecessary re-renders of child maps
+  const tooltipHandlers: TooltipHandlers = useMemo(() => ({
+    onMouseEnter,
+    onMouseLeave,
+    onMouseMove,
+  }), [onMouseEnter, onMouseLeave, onMouseMove]);
 
   return (
     <div className="w-full bg-blue-50/50 dark:bg-slate-800/50 rounded-2xl overflow-hidden border border-blue-100 dark:border-slate-700 shadow-inner mb-6 relative">

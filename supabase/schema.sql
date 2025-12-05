@@ -132,10 +132,48 @@ create policy "Anyone can submit suggestions"
   on public.suggestions for insert
   with check (true);
 
--- Authenticated users can update suggestions (for admin approval)
-create policy "Authenticated users can update suggestions"
+-- ============================================
+-- Admin Management
+-- ============================================
+
+-- Admin emails table to store admin user emails
+create table if not exists public.admin_emails (
+  id uuid default gen_random_uuid() primary key,
+  email text unique not null,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+-- Enable RLS on admin_emails
+alter table public.admin_emails enable row level security;
+
+-- Function to check if current user is an admin
+create or replace function public.is_admin()
+returns boolean as $$
+begin
+  return exists (
+    select 1 from public.admin_emails
+    where email = lower(auth.jwt() ->> 'email')
+  );
+end;
+$$ language plpgsql security definer;
+
+-- Admin emails table policies
+create policy "Only admins can view admin_emails"
+  on public.admin_emails for select
+  using (public.is_admin());
+
+create policy "Only admins can insert admin_emails"
+  on public.admin_emails for insert
+  with check (public.is_admin());
+
+create policy "Only admins can delete admin_emails"
+  on public.admin_emails for delete
+  using (public.is_admin());
+
+-- Only admin users can update suggestions (for approval/rejection)
+create policy "Only admins can update suggestions"
   on public.suggestions for update
-  using (auth.role() = 'authenticated');
+  using (public.is_admin());
 
 -- Authenticated users can view all suggestions (including rejected)
 create policy "Authenticated users can view all suggestions"
