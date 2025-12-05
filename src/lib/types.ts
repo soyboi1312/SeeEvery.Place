@@ -8,14 +8,16 @@ export type Category =
   | "unesco"
   | "mountains"
   | "museums"
-  | "stadiums"
+  | "mlbStadiums"
+  | "nflStadiums"
+  | "nbaStadiums"
+  | "nhlStadiums"
+  | "soccerStadiums"
   | "marathons";
 
 export type Status = "visited" | "bucketList" | "unvisited";
 
 // Subcategory definitions for categories that support filtering
-export type StadiumSubcategory = "All" | "Football" | "American Football" | "Baseball" | "Basketball" | "Hockey" | "Cricket" | "Rugby" | "Tennis" | "Motorsport";
-export type ParkSubcategory = "All" | "National Park" | "State Park";
 export type MountainSubcategory = "All" | "5000m+" | "US 14ers";
 
 // Map of categories to their subcategories (empty - subcategories are now handled in CategoryTabs)
@@ -39,7 +41,11 @@ export interface UserSelections {
   unesco: Selection[];
   mountains: Selection[];
   museums: Selection[];
-  stadiums: Selection[];
+  mlbStadiums: Selection[];
+  nflStadiums: Selection[];
+  nbaStadiums: Selection[];
+  nhlStadiums: Selection[];
+  soccerStadiums: Selection[];
   marathons: Selection[];
 }
 
@@ -69,7 +75,11 @@ export const categoryLabels: Record<Category, string> = {
   unesco: "UNESCO Sites",
   mountains: "Peaks",
   museums: "Museums",
-  stadiums: "Stadiums",
+  mlbStadiums: "MLB",
+  nflStadiums: "NFL",
+  nbaStadiums: "NBA",
+  nhlStadiums: "NHL",
+  soccerStadiums: "Soccer",
   marathons: "Marathon Majors",
 };
 
@@ -89,7 +99,11 @@ export const categoryIcons: Record<Category, ReactNode> = {
   unesco: "🏛️",
   mountains: "🏔️",
   museums: "🎨",
-  stadiums: "🏟️",
+  mlbStadiums: "⚾",
+  nflStadiums: "🏈",
+  nbaStadiums: "🏀",
+  nhlStadiums: "🏒",
+  soccerStadiums: "⚽",
   marathons: "🏃",
 };
 
@@ -101,6 +115,10 @@ export const emptySelections: UserSelections = {
   unesco: [],
   mountains: [],
   museums: [],
-  stadiums: [],
+  mlbStadiums: [],
+  nflStadiums: [],
+  nbaStadiums: [],
+  nhlStadiums: [],
+  soccerStadiums: [],
   marathons: [],
 };

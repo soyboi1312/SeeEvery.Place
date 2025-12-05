@@ -12,19 +12,27 @@ const categories: Category[] = [
   'unesco',
   'mountains',
   'museums',
-  'stadiums',
+  'mlbStadiums',
+  'nflStadiums',
+  'nbaStadiums',
+  'nhlStadiums',
+  'soccerStadiums',
   'marathons',
 ];
 
 const categoryDescriptions: Record<Category, string> = {
   countries: 'Track all 197 countries around the world. Mark countries as visited or add them to your bucket list.',
   states: 'Track all 50 US states plus Washington DC. Perfect for road trippers and domestic travelers.',
-  nationalParks: 'Track US Parks - National Parks. From Yellowstone to Yosemite, never lose track of your park adventures.',
-  stateParks: 'Track US Parks - State Parks. Discover hidden gems and scenic wonders across all 50 states.',
+  nationalParks: 'Track National Parks. From Yellowstone to Yosemite, never lose track of your park adventures.',
+  stateParks: 'Track State Parks. Discover hidden gems and scenic wonders across all 50 states.',
   unesco: 'Track UNESCO World Heritage Sites. Discover and check off the most culturally significant places on Earth.',
   mountains: 'Track famous peaks including 5000m+ mountains and US 14ers. For mountaineers and hiking enthusiasts tracking their summit achievements.',
   museums: 'Track world-class museums you have visited. From the Louvre to the Met, keep a record of your cultural experiences.',
-  stadiums: 'Track professional sports stadiums and arenas. MLB, NFL, NBA, NHL, MLS and iconic venues worldwide.',
+  mlbStadiums: 'Track all 30 Major League Baseball stadiums. From Fenway Park to Dodger Stadium.',
+  nflStadiums: 'Track all 30 NFL stadiums. From Lambeau Field to SoFi Stadium.',
+  nbaStadiums: 'Track all 30 NBA arenas. From Madison Square Garden to Crypto.com Arena.',
+  nhlStadiums: 'Track all 32 NHL arenas. From the Bell Centre to T-Mobile Arena.',
+  soccerStadiums: 'Track soccer stadiums and other sporting venues worldwide. MLS and international venues.',
   marathons: 'Track the World Marathon Majors. Boston, London, Berlin, Chicago, New York, and Tokyo.',
 };
 

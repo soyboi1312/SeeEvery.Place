@@ -11,7 +11,7 @@ import { stateParks } from '@/data/stateParks';
 import { unescoSites } from '@/data/unescoSites';
 import { mountains } from '@/data/mountains';
 import { museums } from '@/data/museums';
-import { stadiums } from '@/data/stadiums';
+import { stadiums, getMlbStadiums, getNflStadiums, getNbaStadiums, getNhlStadiums, getSoccerStadiums } from '@/data/stadiums';
 import { marathons } from '@/data/marathons';
 
 // Map Data URLs
@@ -261,11 +261,29 @@ function getItemCoordinates(
       }
       return null;
     }
-    case 'stadiums': {
-      const stadium = stadiums.find(s => s.id === itemId);
-      if (stadium?.lat && stadium?.lng) {
-        return [stadium.lng, stadium.lat];
-      }
+    case 'mlbStadiums': {
+      const stadium = getMlbStadiums().find(s => s.id === itemId);
+      if (stadium?.lat && stadium?.lng) return [stadium.lng, stadium.lat];
+      return null;
+    }
+    case 'nflStadiums': {
+      const stadium = getNflStadiums().find(s => s.id === itemId);
+      if (stadium?.lat && stadium?.lng) return [stadium.lng, stadium.lat];
+      return null;
+    }
+    case 'nbaStadiums': {
+      const stadium = getNbaStadiums().find(s => s.id === itemId);
+      if (stadium?.lat && stadium?.lng) return [stadium.lng, stadium.lat];
+      return null;
+    }
+    case 'nhlStadiums': {
+      const stadium = getNhlStadiums().find(s => s.id === itemId);
+      if (stadium?.lat && stadium?.lng) return [stadium.lng, stadium.lat];
+      return null;
+    }
+    case 'soccerStadiums': {
+      const stadium = getSoccerStadiums().find(s => s.id === itemId);
+      if (stadium?.lat && stadium?.lng) return [stadium.lng, stadium.lat];
       return null;
     }
     case 'marathons': {
@@ -323,16 +341,18 @@ function getCategoryMarkers(
     if (coords) {
       const marker: MarkerData = { coordinates: coords, status: selection.status, id: selection.id };
 
-      // Add sport data for stadiums
-      if (category === 'stadiums') {
-        const stadium = stadiums.find(s => s.id === selection.id);
-        if (stadium) {
-          marker.sport = stadium.sport;
-          // Filter by subcategory if specified
-          if (subcategory && subcategory !== 'All' && stadium.sport !== subcategory) {
-            continue;
-          }
-        }
+      // Add sport data for stadium categories
+      if (category === 'mlbStadiums') {
+        marker.sport = 'Baseball';
+      } else if (category === 'nflStadiums') {
+        marker.sport = 'American Football';
+      } else if (category === 'nbaStadiums') {
+        marker.sport = 'Basketball';
+      } else if (category === 'nhlStadiums') {
+        marker.sport = 'Hockey';
+      } else if (category === 'soccerStadiums') {
+        const stadium = getSoccerStadiums().find(s => s.id === selection.id);
+        marker.sport = stadium?.sport || 'Football';
       }
 
       // Add park type for national parks
@@ -532,7 +552,7 @@ function StaticMarkerMap({
 
   // Check if this is marathons category (uses shoe marker) or stadiums (uses sport-specific markers)
   const isMarathons = category === 'marathons';
-  const isStadiums = category === 'stadiums';
+  const isStadiums = category === 'mlbStadiums' || category === 'nflStadiums' || category === 'nbaStadiums' || category === 'nhlStadiums' || category === 'soccerStadiums';
 
   // Get the appropriate marker icon based on category and sport
   const getMarkerIcon = (marker: MarkerData) => {
@@ -727,7 +747,11 @@ const categoryTotals: Record<Category, number> = {
   unesco: unescoSites.length,
   mountains: mountains.length,
   museums: museums.length,
-  stadiums: stadiums.length,
+  mlbStadiums: getMlbStadiums().length,
+  nflStadiums: getNflStadiums().length,
+  nbaStadiums: getNbaStadiums().length,
+  nhlStadiums: getNhlStadiums().length,
+  soccerStadiums: getSoccerStadiums().length,
   marathons: marathons.length,
 };
 
@@ -852,8 +876,16 @@ export default function ShareCard({ selections, category, subcategory, onClose }
           return mountains.find(m => m.id === s.id)?.name;
         case 'museums':
           return museums.find(m => m.id === s.id)?.name;
-        case 'stadiums':
-          return stadiums.find(st => st.id === s.id)?.name;
+        case 'mlbStadiums':
+          return getMlbStadiums().find(st => st.id === s.id)?.name;
+        case 'nflStadiums':
+          return getNflStadiums().find(st => st.id === s.id)?.name;
+        case 'nbaStadiums':
+          return getNbaStadiums().find(st => st.id === s.id)?.name;
+        case 'nhlStadiums':
+          return getNhlStadiums().find(st => st.id === s.id)?.name;
+        case 'soccerStadiums':
+          return getSoccerStadiums().find(st => st.id === s.id)?.name;
         case 'marathons':
           return marathons.find(m => m.id === s.id)?.name;
         default:

@@ -10,7 +10,7 @@ import { stateParks } from '@/data/stateParks';
 import { unescoSites } from '@/data/unescoSites';
 import { mountains } from '@/data/mountains';
 import { museums } from '@/data/museums';
-import { stadiums } from '@/data/stadiums';
+import { getMlbStadiums, getNflStadiums, getNbaStadiums, getNhlStadiums, getSoccerStadiums } from '@/data/stadiums';
 import { marathons } from '@/data/marathons';
 
 interface QuickStatsProps {
@@ -26,17 +26,21 @@ const categoryTotals: Record<Category, number> = {
   unesco: unescoSites.length,
   mountains: mountains.length,
   museums: museums.length,
-  stadiums: stadiums.length,
+  mlbStadiums: getMlbStadiums().length,
+  nflStadiums: getNflStadiums().length,
+  nbaStadiums: getNbaStadiums().length,
+  nhlStadiums: getNhlStadiums().length,
+  soccerStadiums: getSoccerStadiums().length,
   marathons: marathons.length,
 };
 
-// Top-level display categories (US Parks combines nationalParks and stateParks)
-type DisplayCategory = Category | 'usParks';
-const displayCategories: DisplayCategory[] = ['countries', 'states', 'usParks', 'unesco', 'mountains', 'museums', 'stadiums', 'marathons'];
+// Top-level display categories (US Parks combines nationalParks and stateParks, Stadiums combines all stadium types)
+type DisplayCategory = Category | 'usParks' | 'allStadiums';
+const displayCategories: DisplayCategory[] = ['countries', 'states', 'usParks', 'unesco', 'mountains', 'museums', 'allStadiums', 'marathons'];
 
 export default function QuickStats({ selections, onCategoryClick }: QuickStatsProps) {
   // All actual data categories for calculating total
-  const allCategories: Category[] = ['countries', 'states', 'nationalParks', 'stateParks', 'unesco', 'mountains', 'museums', 'stadiums', 'marathons'];
+  const allCategories: Category[] = ['countries', 'states', 'nationalParks', 'stateParks', 'unesco', 'mountains', 'museums', 'mlbStadiums', 'nflStadiums', 'nbaStadiums', 'nhlStadiums', 'soccerStadiums', 'marathons'];
 
   const totalVisited = allCategories.reduce((sum, cat) => {
     return sum + getStats(selections, cat, categoryTotals[cat]).visited;
@@ -72,6 +76,21 @@ export default function QuickStats({ selections, onCategoryClick }: QuickStatsPr
             icon = '🏞️';
             label = 'US Parks';
             clickCategory = 'nationalParks';
+          } else if (displayCategory === 'allStadiums') {
+            // Combined stats for all stadium categories
+            const mlbStats = getStats(selections, 'mlbStadiums', categoryTotals.mlbStadiums);
+            const nflStats = getStats(selections, 'nflStadiums', categoryTotals.nflStadiums);
+            const nbaStats = getStats(selections, 'nbaStadiums', categoryTotals.nbaStadiums);
+            const nhlStats = getStats(selections, 'nhlStadiums', categoryTotals.nhlStadiums);
+            const soccerStats = getStats(selections, 'soccerStadiums', categoryTotals.soccerStadiums);
+            const combinedVisited = mlbStats.visited + nflStats.visited + nbaStats.visited + nhlStats.visited + soccerStats.visited;
+            const combinedTotal = mlbStats.total + nflStats.total + nbaStats.total + nhlStats.total + soccerStats.total;
+            const combinedBucketList = mlbStats.bucketList + nflStats.bucketList + nbaStats.bucketList + nhlStats.bucketList + soccerStats.bucketList;
+            const combinedPercentage = combinedTotal > 0 ? Math.round((combinedVisited / combinedTotal) * 100) : 0;
+            stats = { visited: combinedVisited, total: combinedTotal, bucketList: combinedBucketList, percentage: combinedPercentage };
+            icon = '🏟️';
+            label = 'Stadiums';
+            clickCategory = 'mlbStadiums';
           } else {
             const category = displayCategory as Category;
             stats = getStats(selections, category, categoryTotals[category]);

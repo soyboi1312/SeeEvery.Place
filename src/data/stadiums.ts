@@ -372,3 +372,12 @@ export const getStadiumsByCountry = (country: string) =>
   stadiums.filter(s => s.country === country);
 
 export const getTotalStadiums = () => stadiums.length;
+
+// Get stadiums for specific categories
+export const getMlbStadiums = () => stadiums.filter(s => s.sport === 'Baseball');
+export const getNflStadiums = () => stadiums.filter(s => s.sport === 'American Football');
+export const getNbaStadiums = () => stadiums.filter(s => s.sport === 'Basketball');
+export const getNhlStadiums = () => stadiums.filter(s => s.sport === 'Hockey');
+export const getSoccerStadiums = () => stadiums.filter(s =>
+  s.sport === 'Football' || s.sport === 'Cricket' || s.sport === 'Rugby' || s.sport === 'Tennis' || s.sport === 'Motorsport'
+);
