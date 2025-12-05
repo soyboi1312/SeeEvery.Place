@@ -34,9 +34,9 @@ import { usStates } from '@/data/usStates';
 import { nationalParks } from '@/data/nationalParks';
 import { stateParks } from '@/data/stateParks';
 import { unescoSites } from '@/data/unescoSites';
-import { mountains } from '@/data/mountains';
+import { get5000mPeaks, getUS14ers } from '@/data/mountains';
 import { museums } from '@/data/museums';
-import { stadiums, getMlbStadiums, getNflStadiums, getNbaStadiums, getNhlStadiums, getSoccerStadiums } from '@/data/stadiums';
+import { getMlbStadiums, getNflStadiums, getNbaStadiums, getNhlStadiums, getSoccerStadiums } from '@/data/stadiums';
 import { marathons } from '@/data/marathons';
 
 // Common country abbreviation aliases that differ from ISO codes
@@ -69,7 +69,8 @@ const categoryTotals: Record<Category, number> = {
   nationalParks: nationalParks.length,
   stateParks: stateParks.length,
   unesco: unescoSites.length,
-  mountains: mountains.length,
+  fiveKPeaks: get5000mPeaks().length,
+  fourteeners: getUS14ers().length,
   museums: museums.length,
   mlbStadiums: getMlbStadiums().length,
   nflStadiums: getNflStadiums().length,
@@ -82,17 +83,14 @@ const categoryTotals: Record<Category, number> = {
 export default function Home() {
   const [selections, setSelections] = useState<UserSelections>(emptySelections);
   const [activeCategory, setActiveCategory] = useState<Category>('countries');
-  const [activeSubcategory, setActiveSubcategory] = useState<string>('All');
   const [showShareCard, setShowShareCard] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const { user, signOut } = useAuth();
   const { isDarkMode, toggleDarkMode } = useDarkMode();
 
-  // Reset subcategory when category changes
   const handleCategoryChange = useCallback((category: Category) => {
     setActiveCategory(category);
-    setActiveSubcategory('All');
   }, []);
 
   // Load selections from localStorage on mount
@@ -173,20 +171,18 @@ export default function Home() {
           group: u.country,
         }));
         break;
-      case 'mountains':
-        // Filter mountains based on active subcategory
-        let filteredMountains = mountains;
-        if (activeSubcategory === '5000m+') {
-          filteredMountains = mountains.filter(m => m.elevation >= 5000);
-        } else if (activeSubcategory === 'US 14ers') {
-          filteredMountains = mountains.filter(m => m.elevation >= 4267 && m.countryCode === 'US');
-        }
-        items = filteredMountains.map(m => ({
+      case 'fiveKPeaks':
+        items = get5000mPeaks().map(m => ({
           id: m.id,
           name: `${m.name} (${m.elevation.toLocaleString()}m)`,
           group: m.range,
-          // Set subcategory to match activeSubcategory so the generic filter passes
-          subcategory: activeSubcategory,
+        }));
+        break;
+      case 'fourteeners':
+        items = getUS14ers().map(m => ({
+          id: m.id,
+          name: `${m.name} (${m.elevation.toLocaleString()}m)`,
+          group: m.range,
         }));
         break;
       case 'museums':
@@ -242,14 +238,8 @@ export default function Home() {
         items = [];
     }
 
-    // Filter by subcategory if one is selected (not "All")
-    // Only mountains have subcategory filtering
-    if (activeSubcategory !== 'All' && activeCategory === 'mountains') {
-      items = items.filter(item => item.subcategory === activeSubcategory);
-    }
-
     return items;
-  }, [activeCategory, activeSubcategory]);
+  }, [activeCategory]);
 
   const currentStats = useMemo(() => {
     return getStats(selections, activeCategory, categoryTotals[activeCategory]);
@@ -257,7 +247,7 @@ export default function Home() {
 
   const allStats = useMemo(() => {
     return Object.fromEntries(
-      (['countries', 'states', 'nationalParks', 'stateParks', 'unesco', 'mountains', 'museums', 'mlbStadiums', 'nflStadiums', 'nbaStadiums', 'nhlStadiums', 'soccerStadiums', 'marathons'] as Category[]).map(cat => [
+      (['countries', 'states', 'nationalParks', 'stateParks', 'unesco', 'fiveKPeaks', 'fourteeners', 'museums', 'mlbStadiums', 'nflStadiums', 'nbaStadiums', 'nhlStadiums', 'soccerStadiums', 'marathons'] as Category[]).map(cat => [
         cat,
         getStats(selections, cat, categoryTotals[cat]),
       ])
@@ -270,7 +260,8 @@ export default function Home() {
     nationalParks: 'National Parks',
     stateParks: 'State Parks',
     unesco: 'UNESCO World Heritage Sites',
-    mountains: 'Mountain Peaks',
+    fiveKPeaks: '5000m+ Mountain Peaks',
+    fourteeners: 'US 14ers (14,000+ ft)',
     museums: 'Famous Museums',
     mlbStadiums: 'MLB Stadiums',
     nflStadiums: 'NFL Stadiums',
@@ -329,7 +320,6 @@ export default function Home() {
             category={activeCategory}
             selections={selections}
             onToggle={handleToggle}
-            subcategory={activeSubcategory}
           />
         </div>
 
@@ -338,9 +328,6 @@ export default function Home() {
           activeCategory={activeCategory}
           onCategoryChange={handleCategoryChange}
           stats={allStats}
-          activeSubcategory={activeSubcategory}
-          onSubcategoryChange={setActiveSubcategory}
-          selections={selections}
         />
 
         {/* Selection List */}
@@ -399,7 +386,6 @@ export default function Home() {
         <ShareCard
           selections={selections}
           category={activeCategory}
-          subcategory={activeSubcategory}
           onClose={() => setShowShareCard(false)}
         />
       )}

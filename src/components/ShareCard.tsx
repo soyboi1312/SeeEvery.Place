@@ -9,9 +9,9 @@ import { usStates } from '@/data/usStates';
 import { nationalParks } from '@/data/nationalParks';
 import { stateParks } from '@/data/stateParks';
 import { unescoSites } from '@/data/unescoSites';
-import { mountains } from '@/data/mountains';
+import { get5000mPeaks, getUS14ers } from '@/data/mountains';
 import { museums } from '@/data/museums';
-import { stadiums, getMlbStadiums, getNflStadiums, getNbaStadiums, getNhlStadiums, getSoccerStadiums } from '@/data/stadiums';
+import { getMlbStadiums, getNflStadiums, getNbaStadiums, getNhlStadiums, getSoccerStadiums } from '@/data/stadiums';
 import { marathons } from '@/data/marathons';
 
 // Map Data URLs
@@ -247,8 +247,15 @@ function getItemCoordinates(
       }
       return null;
     }
-    case 'mountains': {
-      const mountain = mountains.find(m => m.id === itemId);
+    case 'fiveKPeaks': {
+      const mountain = get5000mPeaks().find(m => m.id === itemId);
+      if (mountain?.lat && mountain?.lng) {
+        return [mountain.lng, mountain.lat];
+      }
+      return null;
+    }
+    case 'fourteeners': {
+      const mountain = getUS14ers().find(m => m.id === itemId);
       if (mountain?.lat && mountain?.lng) {
         return [mountain.lng, mountain.lat];
       }
@@ -745,7 +752,8 @@ const categoryTotals: Record<Category, number> = {
   nationalParks: nationalParks.length,
   stateParks: stateParks.length,
   unesco: unescoSites.length,
-  mountains: mountains.length,
+  fiveKPeaks: get5000mPeaks().length,
+  fourteeners: getUS14ers().length,
   museums: museums.length,
   mlbStadiums: getMlbStadiums().length,
   nflStadiums: getNflStadiums().length,
@@ -872,8 +880,10 @@ export default function ShareCard({ selections, category, subcategory, onClose }
           return nationalParks.find(p => p.id === s.id)?.name;
         case 'unesco':
           return unescoSites.find(u => u.id === s.id)?.name;
-        case 'mountains':
-          return mountains.find(m => m.id === s.id)?.name;
+        case 'fiveKPeaks':
+          return get5000mPeaks().find(m => m.id === s.id)?.name;
+        case 'fourteeners':
+          return getUS14ers().find(m => m.id === s.id)?.name;
         case 'museums':
           return museums.find(m => m.id === s.id)?.name;
         case 'mlbStadiums':

@@ -9,9 +9,9 @@ import { getSelectionStatus } from '@/lib/storage';
 import { nationalParks } from '@/data/nationalParks';
 import { stateParks } from '@/data/stateParks';
 import { unescoSites } from '@/data/unescoSites';
-import { mountains } from '@/data/mountains';
+import { get5000mPeaks, getUS14ers } from '@/data/mountains';
 import { museums } from '@/data/museums';
-import { stadiums, getMlbStadiums, getNflStadiums, getNbaStadiums, getNhlStadiums, getSoccerStadiums } from '@/data/stadiums';
+import { getMlbStadiums, getNflStadiums, getNbaStadiums, getNhlStadiums, getSoccerStadiums } from '@/data/stadiums';
 import { marathons } from '@/data/marathons';
 
 interface MapVisualizationProps {
@@ -469,8 +469,13 @@ function getItemCoordinates(category: Category, itemId: string): [number, number
       if (site?.lat && site?.lng) return [site.lng, site.lat];
       return null;
     }
-    case 'mountains': {
-      const mountain = mountains.find(m => m.id === itemId);
+    case 'fiveKPeaks': {
+      const mountain = get5000mPeaks().find(m => m.id === itemId);
+      if (mountain?.lat && mountain?.lng) return [mountain.lng, mountain.lat];
+      return null;
+    }
+    case 'fourteeners': {
+      const mountain = getUS14ers().find(m => m.id === itemId);
       if (mountain?.lat && mountain?.lng) return [mountain.lng, mountain.lat];
       return null;
     }
@@ -983,6 +988,8 @@ function getMapComponent(
       return <USMarkerMap key="us-parks" category={category} selections={selections} onToggle={onToggle} />;
     case 'stateParks':
       return <USMarkerMap key="us-state-parks" category={category} selections={selections} onToggle={onToggle} />;
+    case 'fourteeners':
+      return <USMarkerMap key="us-14ers" category={category} selections={selections} onToggle={onToggle} />;
     default:
       return <WorldMarkerMap key="world-markers" category={category} selections={selections} onToggle={onToggle} subcategory={subcategory} />;
   }
