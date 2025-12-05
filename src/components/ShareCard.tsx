@@ -14,6 +14,10 @@ import { museums } from '@/data/museums';
 import { stadiums, getMlbStadiums, getNflStadiums, getNbaStadiums, getNhlStadiums, getSoccerStadiums } from '@/data/stadiums';
 import { f1Tracks } from '@/data/f1Tracks';
 import { marathons } from '@/data/marathons';
+import { airports } from '@/data/airports';
+import { skiResorts } from '@/data/skiResorts';
+import { themeParks } from '@/data/themeParks';
+import { surfingReserves } from '@/data/surfingReserves';
 
 // Map Data URLs
 const GEO_URL_WORLD = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json";
@@ -304,6 +308,26 @@ function getItemCoordinates(
       if (marathon?.lat && marathon?.lng) {
         return [marathon.lng, marathon.lat];
       }
+      return null;
+    }
+    case 'airports': {
+      const airport = airports.find(a => a.id === itemId);
+      if (airport?.lat && airport?.lng) return [airport.lng, airport.lat];
+      return null;
+    }
+    case 'skiResorts': {
+      const resort = skiResorts.find(r => r.id === itemId);
+      if (resort?.lat && resort?.lng) return [resort.lng, resort.lat];
+      return null;
+    }
+    case 'themeParks': {
+      const park = themeParks.find(p => p.id === itemId);
+      if (park?.lat && park?.lng) return [park.lng, park.lat];
+      return null;
+    }
+    case 'surfingReserves': {
+      const reserve = surfingReserves.find(s => s.id === itemId);
+      if (reserve?.lat && reserve?.lng) return [reserve.lng, reserve.lat];
       return null;
     }
     default:
@@ -897,6 +921,10 @@ const categoryTotals: Record<Category, number> = {
   soccerStadiums: getSoccerStadiums().length,
   f1Tracks: f1Tracks.length,
   marathons: marathons.length,
+  airports: airports.length,
+  skiResorts: skiResorts.length,
+  themeParks: themeParks.length,
+  surfingReserves: surfingReserves.length,
 };
 
 const gradients = [
@@ -1036,6 +1064,14 @@ export default function ShareCard({ selections, category, subcategory, onClose }
           return f1Tracks.find(t => t.id === s.id)?.name;
         case 'marathons':
           return marathons.find(m => m.id === s.id)?.name;
+        case 'airports':
+          return airports.find(a => a.id === s.id)?.name;
+        case 'skiResorts':
+          return skiResorts.find(r => r.id === s.id)?.name;
+        case 'themeParks':
+          return themeParks.find(p => p.id === s.id)?.name;
+        case 'surfingReserves':
+          return surfingReserves.find(sr => sr.id === s.id)?.name;
         default:
           return null;
       }

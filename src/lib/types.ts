@@ -10,13 +10,17 @@ export type Category =
   | "fiveKPeaks"
   | "fourteeners"
   | "museums"
-  | "mlbStadiums"     // Kept Separate
-  | "nflStadiums"     // Kept Separate
-  | "nbaStadiums"     // Kept Separate
-  | "nhlStadiums"     // Kept Separate
-  | "soccerStadiums"  // Kept Separate
+  | "mlbStadiums"
+  | "nflStadiums"
+  | "nbaStadiums"
+  | "nhlStadiums"
+  | "soccerStadiums"
   | "f1Tracks"
-  | "marathons";
+  | "marathons"
+  | "airports"
+  | "skiResorts"
+  | "themeParks"
+  | "surfingReserves";
 
 export type Status = "visited" | "bucketList" | "unvisited";
 
@@ -34,12 +38,12 @@ export const categoryGroups: Record<CategoryGroup, GroupConfig> = {
   destinations: {
     label: 'Destinations',
     icon: '🌍',
-    categories: ['countries', 'states'],
+    categories: ['countries', 'states', 'airports'],
   },
   nature: {
     label: 'Nature',
     icon: '🌲',
-    categories: ['nationalParks', 'stateParks', 'fiveKPeaks', 'fourteeners'],
+    categories: ['nationalParks', 'stateParks', 'fiveKPeaks', 'fourteeners', 'skiResorts', 'surfingReserves'],
   },
   sports: {
     label: 'Sports',
@@ -57,7 +61,7 @@ export const categoryGroups: Record<CategoryGroup, GroupConfig> = {
   culture: {
     label: 'Culture',
     icon: '🏛️',
-    categories: ['unesco', 'museums'],
+    categories: ['unesco', 'museums', 'themeParks'],
   },
 };
 
@@ -92,6 +96,10 @@ export interface UserSelections {
   soccerStadiums: Selection[];
   f1Tracks: Selection[];
   marathons: Selection[];
+  airports: Selection[];
+  skiResorts: Selection[];
+  themeParks: Selection[];
+  surfingReserves: Selection[];
 }
 
 export interface ShareStats {
@@ -129,6 +137,10 @@ export const categoryLabels: Record<Category, string> = {
   soccerStadiums: "Soccer Stadiums",
   f1Tracks: "F1 Tracks",
   marathons: "Marathon Majors",
+  airports: "Airports",
+  skiResorts: "Ski Resorts",
+  themeParks: "Theme Parks",
+  surfingReserves: "Surfing Reserves",
 };
 
 export const categoryIcons: Record<Category, ReactNode> = {
@@ -147,6 +159,10 @@ export const categoryIcons: Record<Category, ReactNode> = {
   soccerStadiums: "⚽",
   f1Tracks: "🏎️",
   marathons: "🏃",
+  airports: "✈️",
+  skiResorts: "⛷️",
+  themeParks: "🎢",
+  surfingReserves: "🌊",
 };
 
 export const emptySelections: UserSelections = {
@@ -165,4 +181,8 @@ export const emptySelections: UserSelections = {
   soccerStadiums: [],
   f1Tracks: [],
   marathons: [],
+  airports: [],
+  skiResorts: [],
+  themeParks: [],
+  surfingReserves: [],
 };
