@@ -1,7 +1,12 @@
 /**
  * Shared map marker SVG components
  * Used by both MapVisualization and ShareCard
+ *
+ * All marker components are memoized to prevent unnecessary re-renders
+ * when rendering many markers on the map.
  */
+
+import { memo } from 'react';
 
 export type MarkerSize = 'default' | 'small';
 
@@ -15,7 +20,7 @@ interface SportMarkerProps extends MarkerProps {
 }
 
 // Sport-specific marker SVG paths for stadiums
-export function SportMarker({ sport, fillColor, size = 'default' }: SportMarkerProps) {
+function SportMarkerBase({ sport, fillColor, size = 'default' }: SportMarkerProps) {
   const isSmall = size === 'small';
   const strokeColor = "#ffffff";
   const strokeWidth = isSmall ? 0.6 : 0.8;
@@ -205,8 +210,10 @@ export function SportMarker({ sport, fillColor, size = 'default' }: SportMarkerP
   }
 }
 
+export const SportMarker = memo(SportMarkerBase);
+
 // Sneaker marker for marathons
-export function SneakerMarker({ fillColor, size = 'default' }: MarkerProps) {
+function SneakerMarkerBase({ fillColor, size = 'default' }: MarkerProps) {
   const isSmall = size === 'small';
   const transform = isSmall ? "translate(-6, -6) scale(0.5)" : "translate(-12, -12)";
 
@@ -241,8 +248,10 @@ export function SneakerMarker({ fillColor, size = 'default' }: MarkerProps) {
   );
 }
 
+export const SneakerMarker = memo(SneakerMarkerBase);
+
 // Mountain peak marker with summit flag
-export function MountainMarker({ fillColor, size = 'default' }: MarkerProps) {
+function MountainMarkerBase({ fillColor, size = 'default' }: MarkerProps) {
   const isSmall = size === 'small';
   const strokeColor = "#ffffff";
   const transform = isSmall ? "translate(-6, -10) scale(0.5)" : "translate(-12, -20)";
@@ -287,8 +296,10 @@ export function MountainMarker({ fillColor, size = 'default' }: MarkerProps) {
   );
 }
 
+export const MountainMarker = memo(MountainMarkerBase);
+
 // F1 car marker for Formula 1 race tracks
-export function F1CarMarker({ fillColor, size = 'default' }: MarkerProps) {
+function F1CarMarkerBase({ fillColor, size = 'default' }: MarkerProps) {
   const isSmall = size === 'small';
   const strokeColor = "#ffffff";
   const transform = isSmall ? "translate(-6, -8) scale(0.5)" : "translate(-12, -15)";
@@ -351,8 +362,10 @@ export function F1CarMarker({ fillColor, size = 'default' }: MarkerProps) {
   );
 }
 
+export const F1CarMarker = memo(F1CarMarkerBase);
+
 // Flag marker for parks and general locations
-export function FlagMarker({ fillColor, size = 'default' }: MarkerProps) {
+function FlagMarkerBase({ fillColor, size = 'default' }: MarkerProps) {
   const isSmall = size === 'small';
 
   return isSmall ? (
@@ -379,6 +392,8 @@ export function FlagMarker({ fillColor, size = 'default' }: MarkerProps) {
     </g>
   );
 }
+
+export const FlagMarker = memo(FlagMarkerBase);
 
 // Legacy function exports for backwards compatibility
 export function renderSportMarker(sport: string | undefined, fillColor: string) {
