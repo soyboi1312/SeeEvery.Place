@@ -30,70 +30,8 @@ import {
 } from '@/lib/storage';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { useDarkMode } from '@/lib/hooks/useDarkMode';
-
-// Data Imports
-import { countries } from '@/data/countries';
-import { usStates } from '@/data/usStates';
-import { nationalParks } from '@/data/nationalParks';
-import { stateParks } from '@/data/stateParks';
-import { unescoSites } from '@/data/unescoSites';
-import { get5000mPeaks, getUS14ers } from '@/data/mountains';
-import { museums } from '@/data/museums';
-// Import specific getters for stadiums
-import { getMlbStadiums, getNflStadiums, getNbaStadiums, getNhlStadiums, getSoccerStadiums } from '@/data/stadiums';
-import { f1Tracks } from '@/data/f1Tracks';
-import { marathons } from '@/data/marathons';
-import { airports } from '@/data/airports';
-import { skiResorts } from '@/data/skiResorts';
-import { themeParks } from '@/data/themeParks';
-import { surfingReserves } from '@/data/surfingReserves';
-
-// Common country abbreviation aliases that differ from ISO codes
-const countryAliases: Record<string, string[]> = {
-  'GB': ['UK', 'Britain', 'England'],
-  'US': ['USA', 'America'],
-  'AE': ['UAE'],
-  'KR': ['ROK'],
-  'KP': ['DPRK'],
-  'RU': ['Russia'],
-  'CZ': ['Czech'],
-  'CD': ['DRC'],
-  'CF': ['CAR'],
-  'BA': ['Bosnia'],
-  'NZ': ['Kiwi'],
-  'ZA': ['RSA'],
-  'SA': ['KSA'],
-  'PH': ['PHL'],
-  'VN': ['Nam'],
-};
-
-// Common US state abbreviation aliases (for states where nickname differs from postal code)
-const stateAliases: Record<string, string[]> = {
-  'DC': ['Washington DC', 'District of Columbia'],
-};
-
-// Define totals for all distinct categories
-const categoryTotals: Record<Category, number> = {
-  countries: countries.length,
-  states: usStates.length,
-  nationalParks: nationalParks.length,
-  stateParks: stateParks.length,
-  unesco: unescoSites.length,
-  fiveKPeaks: get5000mPeaks().length,
-  fourteeners: getUS14ers().length,
-  museums: museums.length,
-  mlbStadiums: getMlbStadiums().length,
-  nflStadiums: getNflStadiums().length,
-  nbaStadiums: getNbaStadiums().length,
-  nhlStadiums: getNhlStadiums().length,
-  soccerStadiums: getSoccerStadiums().length,
-  f1Tracks: f1Tracks.length,
-  marathons: marathons.length,
-  airports: airports.length,
-  skiResorts: skiResorts.length,
-  themeParks: themeParks.length,
-  surfingReserves: surfingReserves.length,
-};
+import { loadFromCloud, mergeSelectionsFromCloud, syncToCloud } from '@/lib/sync';
+import { categoryTotals, categoryTitles, getCategoryItems } from '@/lib/categoryUtils';
 
 export default function Home() {
   const [selections, setSelections] = useState<UserSelections>(emptySelections);
@@ -122,6 +60,42 @@ export default function Home() {
     }
   }, [selections, isLoaded]);
 
+  // Cloud sync: fetch and merge when user signs in
+  useEffect(() => {
+    if (!user || !isLoaded) return;
+
+    const syncWithCloud = async () => {
+      try {
+        const cloudData = await loadFromCloud();
+        if (cloudData) {
+          const merged = await mergeSelectionsFromCloud(selections, cloudData);
+          setSelections(merged);
+          // Save merged data back to cloud
+          await syncToCloud(merged);
+        } else {
+          // No cloud data, push local to cloud
+          await syncToCloud(selections);
+        }
+      } catch (error) {
+        console.error('Cloud sync failed:', error);
+      }
+    };
+
+    syncWithCloud();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, isLoaded]);
+
+  // Sync to cloud when selections change (if signed in)
+  useEffect(() => {
+    if (!user || !isLoaded) return;
+
+    const debounceSync = setTimeout(() => {
+      syncToCloud(selections);
+    }, 2000); // Debounce by 2 seconds to avoid too many writes
+
+    return () => clearTimeout(debounceSync);
+  }, [selections, user, isLoaded]);
+
   const handleToggle = useCallback((id: string, currentStatus: Status) => {
     setSelections(prev => toggleSelection(prev, activeCategory, id, currentStatus));
   }, [activeCategory]);
@@ -141,159 +115,8 @@ export default function Home() {
     }));
   }, [activeCategory]);
 
-  // Mapping active category to actual data
-  const currentItems = useMemo(() => {
-    let items: { id: string; name: string; group: string; code?: string; aliases?: string[]; subcategory?: string }[] = [];
-
-    switch (activeCategory) {
-      case 'countries':
-        items = countries.map(c => ({
-          id: c.code,
-          name: c.name,
-          group: c.continent,
-          code: c.code,
-          aliases: countryAliases[c.code] || [],
-        }));
-        break;
-      case 'states':
-        items = usStates.map(s => ({
-          id: s.code,
-          name: s.name,
-          group: s.region,
-          code: s.code,
-          aliases: stateAliases[s.code] || [],
-        }));
-        break;
-      case 'nationalParks':
-        items = nationalParks.map(p => ({
-          id: p.id,
-          name: p.name,
-          group: p.region,
-          subcategory: p.type,
-        }));
-        break;
-      case 'stateParks':
-        items = stateParks.map(p => ({
-          id: p.id,
-          name: `${p.name} - ${p.state}`,
-          group: p.region,
-        }));
-        break;
-      case 'unesco':
-        items = unescoSites.map(u => ({
-          id: u.id,
-          name: u.name,
-          group: u.country,
-        }));
-        break;
-      case 'fiveKPeaks':
-        items = get5000mPeaks().map(m => ({
-          id: m.id,
-          name: `${m.name} (${m.elevation.toLocaleString()}m)`,
-          group: m.range,
-        }));
-        break;
-      case 'fourteeners':
-        items = getUS14ers().map(m => ({
-          id: m.id,
-          name: `${m.name} (${m.elevation.toLocaleString()}m)`,
-          group: m.range,
-        }));
-        break;
-      case 'museums':
-        items = museums.map(m => ({
-          id: m.id,
-          name: `${m.name} - ${m.city}`,
-          group: m.country,
-        }));
-        break;
-
-      // Distinct Stadium Categories
-      case 'mlbStadiums':
-        items = getMlbStadiums().map(s => ({
-          id: s.id,
-          name: `${s.name} - ${s.city}`,
-          group: s.team || s.city,
-        }));
-        break;
-      case 'nflStadiums':
-        items = getNflStadiums().map(s => ({
-          id: s.id,
-          name: `${s.name} - ${s.city}`,
-          group: s.team || s.city,
-        }));
-        break;
-      case 'nbaStadiums':
-        items = getNbaStadiums().map(s => ({
-          id: s.id,
-          name: `${s.name} - ${s.city}`,
-          group: s.team || s.city,
-        }));
-        break;
-      case 'nhlStadiums':
-        items = getNhlStadiums().map(s => ({
-          id: s.id,
-          name: `${s.name} - ${s.city}`,
-          group: s.team || s.city,
-        }));
-        break;
-      case 'soccerStadiums':
-        items = getSoccerStadiums().map(s => ({
-          id: s.id,
-          name: `${s.name} - ${s.city}`,
-          group: s.country,
-        }));
-        break;
-
-      case 'f1Tracks':
-        items = f1Tracks.map(t => ({
-          id: t.id,
-          name: `${t.name} - ${t.circuit}`,
-          group: t.country,
-        }));
-        break;
-      case 'marathons':
-        items = marathons.map(m => ({
-          id: m.id,
-          name: `${m.name} (${m.month})`,
-          group: m.country,
-        }));
-        break;
-      case 'airports':
-        items = airports.map(a => ({
-          id: a.id,
-          name: `${a.name} (${a.code})`,
-          group: a.region,
-          code: a.code,
-        }));
-        break;
-      case 'skiResorts':
-        items = skiResorts.map(r => ({
-          id: r.id,
-          name: `${r.name} - ${r.location}`,
-          group: r.region,
-        }));
-        break;
-      case 'themeParks':
-        items = themeParks.map(p => ({
-          id: p.id,
-          name: `${p.name} - ${p.location}`,
-          group: p.region,
-        }));
-        break;
-      case 'surfingReserves':
-        items = surfingReserves.map(s => ({
-          id: s.id,
-          name: `${s.name} - ${s.country}`,
-          group: s.region,
-        }));
-        break;
-      default:
-        items = [];
-    }
-
-    return items;
-  }, [activeCategory]);
+  // Get items for the active category (refactored to categoryUtils)
+  const currentItems = useMemo(() => getCategoryItems(activeCategory), [activeCategory]);
 
   const currentStats = useMemo(() => {
     return getStats(selections, activeCategory, categoryTotals[activeCategory]);
@@ -307,28 +130,6 @@ export default function Home() {
       ])
     ) as Record<Category, { visited: number; total: number; bucketList: number; percentage: number }>;
   }, [selections]);
-
-  const categoryTitles: Record<Category, string> = {
-    countries: 'Countries of the World',
-    states: 'US States & Territories',
-    nationalParks: 'National Parks',
-    stateParks: 'State Parks',
-    unesco: 'UNESCO World Heritage Sites',
-    fiveKPeaks: '5000m+ Mountain Peaks',
-    fourteeners: 'US 14ers (14,000+ ft)',
-    museums: 'Famous Museums',
-    mlbStadiums: 'MLB Stadiums',
-    nflStadiums: 'NFL Stadiums',
-    nbaStadiums: 'NBA Arenas',
-    nhlStadiums: 'NHL Arenas',
-    soccerStadiums: 'Soccer Stadiums',
-    f1Tracks: 'Formula 1 Race Tracks',
-    marathons: 'World Marathon Majors',
-    airports: 'Major World Airports',
-    skiResorts: 'World Ski Resorts',
-    themeParks: 'Theme Parks & Attractions',
-    surfingReserves: 'World Surfing Reserves',
-  };
 
   if (!isLoaded) {
     return (
