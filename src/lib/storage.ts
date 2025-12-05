@@ -1,38 +1,62 @@
 import { UserSelections, emptySelections, Selection, Status, Category } from './types';
 import { mountains } from '@/data/mountains';
+import { stadiums } from '@/data/stadiums';
 
 const STORAGE_KEY = 'travelmap_selections';
 
-// Migrate old sport-specific stadium selections to merged stadiums category
+// Migrate merged stadiums category back to individual sport-specific categories
 function migrateStadiumSelections(parsed: Record<string, Selection[]>): Record<string, Selection[]> {
-  const oldCategoryKeys = ['mlbStadiums', 'nflStadiums', 'nbaStadiums', 'nhlStadiums', 'soccerStadiums'];
-  const hasOldCategories = oldCategoryKeys.some(key => parsed[key] && parsed[key].length > 0);
-
-  if (!hasOldCategories) {
+  // Check if we have a merged stadiums category to split
+  if (!parsed.stadiums || parsed.stadiums.length === 0) {
     return parsed;
   }
 
   const result = { ...parsed };
+  const mergedStadiumSelections = parsed.stadiums;
 
-  // Initialize merged stadiums array
-  if (!result.stadiums) {
-    result.stadiums = [];
-  }
+  // Initialize individual stadium categories if they don't exist
+  if (!result.mlbStadiums) result.mlbStadiums = [];
+  if (!result.nflStadiums) result.nflStadiums = [];
+  if (!result.nbaStadiums) result.nbaStadiums = [];
+  if (!result.nhlStadiums) result.nhlStadiums = [];
+  if (!result.soccerStadiums) result.soccerStadiums = [];
 
-  // Merge all old stadium categories into the new unified stadiums category
-  oldCategoryKeys.forEach(key => {
-    if (result[key] && Array.isArray(result[key])) {
-      result[key].forEach((selection: Selection) => {
-        // Check if already exists in merged stadiums
-        const exists = result.stadiums.some((s: Selection) => s.id === selection.id);
-        if (!exists) {
-          result.stadiums.push(selection);
-        }
-      });
-      // Remove old category key
-      delete result[key];
+  // Distribute merged stadium selections to individual categories based on sport
+  mergedStadiumSelections.forEach((selection: Selection) => {
+    const stadium = stadiums.find(s => s.id === selection.id);
+    if (!stadium) return;
+
+    let targetCategory: string;
+    switch (stadium.sport) {
+      case 'Baseball':
+        targetCategory = 'mlbStadiums';
+        break;
+      case 'American Football':
+        targetCategory = 'nflStadiums';
+        break;
+      case 'Basketball':
+        targetCategory = 'nbaStadiums';
+        break;
+      case 'Hockey':
+        targetCategory = 'nhlStadiums';
+        break;
+      case 'Football': // Soccer
+        targetCategory = 'soccerStadiums';
+        break;
+      default:
+        // Skip other sports (Cricket, Rugby, Tennis, Motorsport) - they don't have dedicated categories
+        return;
+    }
+
+    // Check if already exists in target category
+    const exists = result[targetCategory].some((s: Selection) => s.id === selection.id);
+    if (!exists) {
+      result[targetCategory].push(selection);
     }
   });
+
+  // Remove the merged stadiums key
+  delete result.stadiums;
 
   return result;
 }
@@ -94,9 +118,8 @@ export function loadSelections(): UserSelections {
 
       let needsSave = false;
 
-      // Migrate old sport-specific stadium selections to merged stadiums
-      const oldCategoryKeys = ['mlbStadiums', 'nflStadiums', 'nbaStadiums', 'nhlStadiums', 'soccerStadiums'];
-      if (oldCategoryKeys.some(key => parsed[key])) {
+      // Migrate merged stadiums back to individual categories
+      if (parsed.stadiums) {
         parsed = migrateStadiumSelections(parsed);
         needsSave = true;
       }

@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 
-// 1. SIMPLIFIED CATEGORIES (Merged Stadiums)
+// 1. DISTINCT CATEGORIES (Restored)
 export type Category =
   | "countries"
   | "states"
@@ -10,13 +10,17 @@ export type Category =
   | "fiveKPeaks"
   | "fourteeners"
   | "museums"
-  | "stadiums" // Merged Category
+  | "mlbStadiums"     // Kept Separate
+  | "nflStadiums"     // Kept Separate
+  | "nbaStadiums"     // Kept Separate
+  | "nhlStadiums"     // Kept Separate
+  | "soccerStadiums"  // Kept Separate
   | "f1Tracks"
   | "marathons";
 
 export type Status = "visited" | "bucketList" | "unvisited";
 
-// 2. NEW GROUPING SYSTEM
+// 2. META-GROUPS (For UI Organization Only)
 export type CategoryGroup = 'destinations' | 'nature' | 'sports' | 'culture';
 
 export interface GroupConfig {
@@ -25,6 +29,7 @@ export interface GroupConfig {
   categories: Category[];
 }
 
+// Define which specific categories belong to which group
 export const categoryGroups: Record<CategoryGroup, GroupConfig> = {
   destinations: {
     label: 'Destinations',
@@ -39,7 +44,15 @@ export const categoryGroups: Record<CategoryGroup, GroupConfig> = {
   sports: {
     label: 'Sports',
     icon: '🏆',
-    categories: ['stadiums', 'f1Tracks', 'marathons'],
+    categories: [
+      'mlbStadiums',
+      'nflStadiums',
+      'nbaStadiums',
+      'nhlStadiums',
+      'soccerStadiums',
+      'f1Tracks',
+      'marathons'
+    ],
   },
   culture: {
     label: 'Culture',
@@ -57,7 +70,7 @@ export const getGroupForCategory = (category: Category): CategoryGroup => {
   return 'destinations';
 };
 
-// 3. UPDATED SELECTIONS INTERFACE
+// 3. SELECTIONS (Distinct Keys)
 export interface Selection {
   id: string;
   status: Status;
@@ -72,7 +85,11 @@ export interface UserSelections {
   fiveKPeaks: Selection[];
   fourteeners: Selection[];
   museums: Selection[];
-  stadiums: Selection[]; // Merged selections
+  mlbStadiums: Selection[];
+  nflStadiums: Selection[];
+  nbaStadiums: Selection[];
+  nhlStadiums: Selection[];
+  soccerStadiums: Selection[];
   f1Tracks: Selection[];
   marathons: Selection[];
 }
@@ -95,7 +112,7 @@ export interface UserProfile {
   updatedAt: Date;
 }
 
-// 4. UPDATED LABELS & ICONS
+// 4. LABELS & ICONS
 export const categoryLabels: Record<Category, string> = {
   countries: "Countries",
   states: "US States",
@@ -105,7 +122,11 @@ export const categoryLabels: Record<Category, string> = {
   fiveKPeaks: "5000m+ Peaks",
   fourteeners: "US 14ers",
   museums: "Museums",
-  stadiums: "Stadiums", // Generic Label
+  mlbStadiums: "MLB Stadiums",
+  nflStadiums: "NFL Stadiums",
+  nbaStadiums: "NBA Arenas",
+  nhlStadiums: "NHL Arenas",
+  soccerStadiums: "Soccer Stadiums",
   f1Tracks: "F1 Tracks",
   marathons: "Marathon Majors",
 };
@@ -119,7 +140,11 @@ export const categoryIcons: Record<Category, ReactNode> = {
   fiveKPeaks: "🏔️",
   fourteeners: "⛰️",
   museums: "🎨",
-  stadiums: "🏟️", // Generic Icon
+  mlbStadiums: "⚾",
+  nflStadiums: "🏈",
+  nbaStadiums: "🏀",
+  nhlStadiums: "🏒",
+  soccerStadiums: "⚽",
   f1Tracks: "🏎️",
   marathons: "🏃",
 };
@@ -133,10 +158,11 @@ export const emptySelections: UserSelections = {
   fiveKPeaks: [],
   fourteeners: [],
   museums: [],
-  stadiums: [],
+  mlbStadiums: [],
+  nflStadiums: [],
+  nbaStadiums: [],
+  nhlStadiums: [],
+  soccerStadiums: [],
   f1Tracks: [],
   marathons: [],
 };
-
-// 5. STADIUM FILTER TYPES
-export type StadiumFilter = 'ALL' | 'MLB' | 'NFL' | 'NBA' | 'NHL' | 'Soccer' | 'Cricket' | 'Rugby' | 'Tennis';
