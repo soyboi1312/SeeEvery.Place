@@ -27,6 +27,13 @@ import { airports } from '@/data/airports';
 import { skiResorts } from '@/data/skiResorts';
 import { themeParks } from '@/data/themeParks';
 import { surfingReserves } from '@/data/surfingReserves';
+import {
+  SportMarker,
+  SneakerMarker,
+  MountainMarker,
+  F1CarMarker,
+  FlagMarker,
+} from './MapMarkers';
 
 interface MapVisualizationProps {
   category: Category;
@@ -228,24 +235,11 @@ function USMarkerMap({
     const fillColor = marker.status === 'visited' ? '#22c55e' : '#f59e0b';
 
     if (isMountains) {
-      return renderMountainMarker(fillColor);
+      return <MountainMarker fillColor={fillColor} />;
     }
 
     // Default flag marker for parks
-    return (
-      <g transform="translate(-9, -18)">
-        {/* Flag pole */}
-        <line x1="2" y1="3" x2="2" y2="18" stroke="#1e3a5f" strokeWidth="2" strokeLinecap="round" />
-        {/* Waving Flag */}
-        <path
-          d="M2 3C2 3 6 1 10 3C14 5 17 3 17 3V10C17 10 14 12 10 10C6 8 2 10 2 10V3Z"
-          fill={fillColor}
-          stroke="#ffffff"
-          strokeWidth="1"
-          strokeLinejoin="round"
-        />
-      </g>
-    );
+    return <FlagMarker fillColor={fillColor} />;
   };
 
   return (
@@ -297,260 +291,6 @@ function USMarkerMap({
   );
 }
 
-// Sport-specific marker SVG paths for stadiums
-function renderSportMarker(sport: string | undefined, fillColor: string) {
-  const strokeColor = "#ffffff";
-  const strokeWidth = 0.8;
-
-  switch (sport) {
-    case "Football":
-      // Soccer ball
-      return (
-        <g transform="translate(-8, -8)">
-          <circle cx="8" cy="8" r="7" fill={fillColor} stroke={strokeColor} strokeWidth={strokeWidth} />
-          <path d="M8 4L6 6.5L7 9.5H9L10 6.5L8 4Z" fill={strokeColor} />
-          <path d="M8 4V2" stroke={strokeColor} strokeWidth={0.6} />
-          <path d="M10 6.5L12 5.5" stroke={strokeColor} strokeWidth={0.6} />
-          <path d="M9 9.5L11 12" stroke={strokeColor} strokeWidth={0.6} />
-          <path d="M7 9.5L5 12" stroke={strokeColor} strokeWidth={0.6} />
-          <path d="M6 6.5L4 5.5" stroke={strokeColor} strokeWidth={0.6} />
-        </g>
-      );
-    case "American Football":
-      // American football
-      return (
-        <g transform="translate(-8, -8)">
-          <ellipse cx="8" cy="8" rx="7" ry="4" transform="rotate(-45 8 8)" fill={fillColor} stroke={strokeColor} strokeWidth={strokeWidth} />
-          <path d="M8 5v6" stroke={strokeColor} strokeWidth={0.6} />
-          <path d="M6 7h4" stroke={strokeColor} strokeWidth={0.6} />
-          <path d="M6 9h4" stroke={strokeColor} strokeWidth={0.6} />
-        </g>
-      );
-    case "Baseball":
-      // Baseball
-      return (
-        <g transform="translate(-8, -8)">
-          <circle cx="8" cy="8" r="7" fill={fillColor} stroke={strokeColor} strokeWidth={strokeWidth} />
-          <path d="M4.5 4C5.5 6 5.5 10 4.5 12" stroke={strokeColor} strokeWidth={0.6} fill="none" />
-          <path d="M11.5 4C10.5 6 10.5 10 11.5 12" stroke={strokeColor} strokeWidth={0.6} fill="none" />
-          <path d="M5 5.5L4 6" stroke={strokeColor} strokeWidth={0.5} />
-          <path d="M5 10.5L4 10" stroke={strokeColor} strokeWidth={0.5} />
-          <path d="M11 5.5L12 6" stroke={strokeColor} strokeWidth={0.5} />
-          <path d="M11 10.5L12 10" stroke={strokeColor} strokeWidth={0.5} />
-        </g>
-      );
-    case "Basketball":
-      // Basketball
-      return (
-        <g transform="translate(-8, -8)">
-          <circle cx="8" cy="8" r="7" fill={fillColor} stroke={strokeColor} strokeWidth={strokeWidth} />
-          <path d="M2 9C4 8 6 8 8 8s4 0 6 1" stroke={strokeColor} strokeWidth={0.6} fill="none" />
-          <path d="M8 2v12" stroke={strokeColor} strokeWidth={0.6} />
-          <path d="M11.5 12C10 10 10 6 11.5 4" stroke={strokeColor} strokeWidth={0.6} fill="none" />
-          <path d="M4.5 12C6 10 6 6 4.5 4" stroke={strokeColor} strokeWidth={0.6} fill="none" />
-        </g>
-      );
-    case "Cricket":
-      // Cricket ball
-      return (
-        <g transform="translate(-8, -8)">
-          <circle cx="8" cy="8" r="7" fill={fillColor} stroke={strokeColor} strokeWidth={strokeWidth} />
-          <path d="M8 2c2 2 2 10 0 12" stroke={strokeColor} strokeWidth={0.6} strokeDasharray="1.5 1" fill="none" />
-          <path d="M8 2c-2 2-2 10 0 12" stroke={strokeColor} strokeWidth={0.6} strokeDasharray="1.5 1" fill="none" />
-        </g>
-      );
-    case "Rugby":
-      // Rugby ball
-      return (
-        <g transform="translate(-8, -8)">
-          <ellipse cx="8" cy="8" rx="8" ry="5.5" transform="rotate(-45 8 8)" fill={fillColor} stroke={strokeColor} strokeWidth={strokeWidth} />
-          <path d="M6 10L5 11" stroke={strokeColor} strokeWidth={0.6} />
-          <path d="M11 5L10 6" stroke={strokeColor} strokeWidth={0.6} />
-          <path d="M5.5 5.5l5 5" stroke={strokeColor} strokeWidth={0.6} />
-        </g>
-      );
-    case "Tennis":
-      // Tennis ball
-      return (
-        <g transform="translate(-8, -8)">
-          <circle cx="8" cy="8" r="7" fill={fillColor} stroke={strokeColor} strokeWidth={strokeWidth} />
-          <path d="M2 8c0 4 3 7 6 7" stroke={strokeColor} strokeWidth={0.8} fill="none" />
-          <path d="M14 8c0-4-3-7-6-7" stroke={strokeColor} strokeWidth={0.8} fill="none" />
-        </g>
-      );
-    case "Motorsport":
-      // Checkered flag
-      return (
-        <g transform="translate(-8, -14)">
-          <line x1="2" y1="2" x2="2" y2="14" stroke="#1e3a5f" strokeWidth="1.5" strokeLinecap="round" />
-          <rect x="2" y="2" width="10" height="8" fill={fillColor} stroke={strokeColor} strokeWidth={0.6} />
-          {/* Checkered pattern */}
-          <rect x="2" y="2" width="2.5" height="2" fill="#ffffff" />
-          <rect x="7" y="2" width="2.5" height="2" fill="#ffffff" />
-          <rect x="4.5" y="4" width="2.5" height="2" fill="#ffffff" />
-          <rect x="9.5" y="4" width="2.5" height="2" fill="#ffffff" />
-          <rect x="2" y="6" width="2.5" height="2" fill="#ffffff" />
-          <rect x="7" y="6" width="2.5" height="2" fill="#ffffff" />
-          <rect x="4.5" y="8" width="2.5" height="2" fill="#ffffff" />
-          <rect x="9.5" y="8" width="2.5" height="2" fill="#ffffff" />
-        </g>
-      );
-    default:
-      // Default flag marker (generic stadium)
-      return (
-        <g transform="translate(-6, -12)">
-          <line x1="1.5" y1="2" x2="1.5" y2="12" stroke="#1e3a5f" strokeWidth="1.5" strokeLinecap="round" />
-          <path
-            d="M1.5 2C1.5 2 4.5 0.5 7 2C9.5 3.5 12 2 12 2V7C12 7 9.5 8.5 7 7C4.5 5.5 1.5 7 1.5 7V2Z"
-            fill={fillColor}
-            stroke={strokeColor}
-            strokeWidth="0.8"
-            strokeLinejoin="round"
-          />
-        </g>
-      );
-  }
-}
-
-// Improved sneaker marker for marathons
-function renderSneakerMarker(fillColor: string) {
-  return (
-    <g transform="translate(-12, -12)">
-      {/* Running Shoe Body */}
-      <path
-        d="M3 16l1.5-6 4.5-3.5 5.5 1 4 4v4.5H3z"
-        fill={fillColor}
-        stroke="#ffffff"
-        strokeWidth="1"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-
-      {/* Thick Foam Sole */}
-      <path
-        d="M2 16h18.5c1.5 0 2.5 1 2 2.5s-2 2.5-3.5 2.5H5c-2 0-3.5-1.5-3-5z"
-        fill={fillColor}
-        stroke="#ffffff"
-        strokeWidth="1"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-
-      {/* Speed Stripes (White details) */}
-      <path
-        d="M9 16l3-4M12.5 16l3-4M16 16l3-4"
-        stroke="#ffffff"
-        strokeWidth="1"
-        strokeLinecap="round"
-      />
-    </g>
-  );
-}
-
-// Mountain peak marker with summit flag for mountains/peaks
-function renderMountainMarker(fillColor: string) {
-  const strokeColor = "#ffffff";
-  return (
-    <g transform="translate(-12, -20)">
-      {/* Mountain shape */}
-      <path
-        d="M3 20h18L12 5l-9 15z"
-        fill={fillColor}
-        stroke={strokeColor}
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      {/* Snow cap / ridge detail */}
-      <path
-        d="M7.5 12.5l2.5 2 2-2 2 2 2.5-2"
-        fill="none"
-        stroke={strokeColor}
-        strokeWidth="1"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      {/* Flag pole */}
-      <path
-        d="M12 5V1"
-        stroke={strokeColor}
-        strokeWidth="1.5"
-        strokeLinecap="round"
-      />
-      {/* Flag */}
-      <path
-        d="M12 1l5 2-5 2"
-        fill={strokeColor}
-        stroke={strokeColor}
-        strokeWidth="1"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </g>
-  );
-}
-
-// F1 car marker for Formula 1 race tracks
-function renderF1CarMarker(fillColor: string) {
-  const strokeColor = "#ffffff";
-  return (
-    <g transform="translate(-12, -15)">
-      {/* Rear wing */}
-      <path
-        d="M2 8h4v3h-3"
-        fill={fillColor}
-        stroke={strokeColor}
-        strokeWidth="1"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      {/* Rear wheel */}
-      <circle cx="7" cy="15" r="3" fill={fillColor} stroke={strokeColor} strokeWidth="1" />
-      {/* Front wheel */}
-      <circle cx="17" cy="15" r="3" fill={fillColor} stroke={strokeColor} strokeWidth="1" />
-      {/* Body/chassis */}
-      <path
-        d="M10 15h4"
-        stroke={strokeColor}
-        strokeWidth="1"
-        strokeLinecap="round"
-      />
-      {/* Cockpit/halo */}
-      <path
-        d="M7 12c1-2 2-4 5-4h2c2 0 4 2 6 4"
-        fill={fillColor}
-        stroke={strokeColor}
-        strokeWidth="1"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      {/* Front wing */}
-      <path
-        d="M20 15h2v-2h-3"
-        fill={fillColor}
-        stroke={strokeColor}
-        strokeWidth="1"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      {/* Air intake */}
-      <path
-        d="M11 8l2 0"
-        stroke={strokeColor}
-        strokeWidth="1"
-        strokeLinecap="round"
-      />
-      {/* Side detail */}
-      <path
-        d="M13 10h2"
-        stroke={strokeColor}
-        strokeWidth="1"
-        strokeLinecap="round"
-      />
-    </g>
-  );
-}
-
 // World Map with flag markers (for UNESCO, Mountains, Museums, Stadiums)
 // Marathons use shoe markers instead of flags
 function WorldMarkerMap({
@@ -577,34 +317,23 @@ function WorldMarkerMap({
     const fillColor = marker.status === 'visited' ? '#22c55e' : '#f59e0b';
 
     if (isMarathons) {
-      return renderSneakerMarker(fillColor);
+      return <SneakerMarker fillColor={fillColor} />;
     }
 
     if (isMountains) {
-      return renderMountainMarker(fillColor);
+      return <MountainMarker fillColor={fillColor} />;
     }
 
     if (isF1Tracks) {
-      return renderF1CarMarker(fillColor);
+      return <F1CarMarker fillColor={fillColor} />;
     }
 
     if (isStadiums) {
-      return renderSportMarker(marker.sport, fillColor);
+      return <SportMarker sport={marker.sport} fillColor={fillColor} />;
     }
 
     // Default flag marker for other categories (UNESCO, Museums)
-    return (
-      <g transform="translate(-6, -12)">
-        <line x1="1.5" y1="2" x2="1.5" y2="12" stroke="#1e3a5f" strokeWidth="1.5" strokeLinecap="round" />
-        <path
-          d="M1.5 2C1.5 2 4.5 0.5 7 2C9.5 3.5 12 2 12 2V7C12 7 9.5 8.5 7 7C4.5 5.5 1.5 7 1.5 7V2Z"
-          fill={fillColor}
-          stroke="#ffffff"
-          strokeWidth="0.8"
-          strokeLinejoin="round"
-        />
-      </g>
-    );
+    return <FlagMarker fillColor={fillColor} />;
   };
 
   return (
