@@ -313,16 +313,32 @@ export function getItemCoordinates(category: Category, itemId: string): [number,
   }
 }
 
+// US territories that cannot be displayed on the Albers USA projection
+// These are filtered out at the data layer to avoid hardcoding IDs in the UI
+export const UNSUPPORTED_ALBERS_USA_IDS = new Set([
+  'american-samoa',
+  'virgin-islands',
+]);
+
 // Get markers for a category
+// Options:
+//   - subcategory: filter by subcategory (for national parks)
+//   - filterAlbersUsa: filter out markers that can't be displayed on Albers USA projection
 export function getCategoryMarkers(
   category: Category,
   selections: UserSelections,
-  subcategory?: string
+  subcategory?: string,
+  filterAlbersUsa = false
 ): MarkerData[] {
   const markers: MarkerData[] = [];
   const categorySelections = selections[category] || [];
 
   for (const selection of categorySelections) {
+    // Filter out unsupported Albers USA territories if requested
+    if (filterAlbersUsa && UNSUPPORTED_ALBERS_USA_IDS.has(selection.id)) {
+      continue;
+    }
+
     const coords = getItemCoordinates(category, selection.id);
     if (coords) {
       const marker: MarkerData = { coordinates: coords, status: selection.status, id: selection.id };

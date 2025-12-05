@@ -37,3 +37,6 @@ Thumbs.db
 
 # Vercel
 .vercel
+
+# Auto-generated geo data (copied from node_modules via postinstall)
+public/geo/
