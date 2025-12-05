@@ -309,6 +309,10 @@ export default function Home() {
               <Link href="/privacy" className="text-blue-600 dark:text-blue-400 hover:underline">
                 Privacy
               </Link>
+              <span>•</span>
+              <Link href="/suggest" className="text-blue-600 dark:text-blue-400 hover:underline">
+                Suggest
+              </Link>
             </div>
           </div>
         </footer>
