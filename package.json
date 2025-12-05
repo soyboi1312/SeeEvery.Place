@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "pages:build": "npx @cloudflare/next-on-pages",
-    "preview": "npm run pages:build && wrangler pages dev .vercel/output/static"
+    "preview": "npm run pages:build && wrangler pages dev .vercel/output/static",
+    "postinstall": "mkdir -p public/geo && cp node_modules/world-atlas/countries-110m.json public/geo/ && cp node_modules/us-atlas/states-10m.json public/geo/"
   },
   "dependencies": {
     "@supabase/ssr": "^0.8.0",
@@ -17,7 +18,9 @@
     "next": "^15.5.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-simple-maps": "^3.0.0"
+    "react-simple-maps": "^3.0.0",
+    "us-atlas": "^3.0.1",
+    "world-atlas": "^2.0.2"
   },
   "devDependencies": {
     "@cloudflare/next-on-pages": "^1.13.16",
