@@ -239,8 +239,10 @@ export default function PrivacyPage() {
             <Link href="/about" className="hover:text-gray-700 dark:hover:text-gray-200 transition-colors">About</Link>
             <span>•</span>
             <Link href="/privacy" className="hover:text-gray-700 dark:hover:text-gray-200 transition-colors">Privacy</Link>
+            <span>•</span>
+            <Link href="/suggest" className="hover:text-gray-700 dark:hover:text-gray-200 transition-colors">Suggest</Link>
           </div>
-          <p>Made with ❤️ for travelers everywhere</p>
+          <p>Made with love for travelers everywhere</p>
         </div>
       </footer>
     </div>
