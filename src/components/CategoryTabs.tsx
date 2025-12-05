@@ -9,7 +9,7 @@ interface CategoryTabsProps {
 }
 
 // Top-level categories for the main tab bar
-const topLevelCategories: Category[] = ['countries', 'states', 'nationalParks', 'stateParks', 'unesco', 'fiveKPeaks', 'fourteeners', 'museums', 'mlbStadiums', 'nflStadiums', 'nbaStadiums', 'nhlStadiums', 'soccerStadiums', 'marathons'];
+const topLevelCategories: Category[] = ['countries', 'states', 'nationalParks', 'stateParks', 'unesco', 'fiveKPeaks', 'fourteeners', 'museums', 'mlbStadiums', 'nflStadiums', 'nbaStadiums', 'nhlStadiums', 'soccerStadiums', 'f1Tracks', 'marathons'];
 
 export default function CategoryTabs({ activeCategory, onCategoryChange, stats }: CategoryTabsProps) {
   return (

@@ -14,6 +14,7 @@ const categories = [
   'nbaStadiums',
   'nhlStadiums',
   'soccerStadiums',
+  'f1Tracks',
   'marathons',
 ]
 

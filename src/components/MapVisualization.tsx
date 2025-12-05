@@ -12,6 +12,7 @@ import { unescoSites } from '@/data/unescoSites';
 import { get5000mPeaks, getUS14ers } from '@/data/mountains';
 import { museums } from '@/data/museums';
 import { getMlbStadiums, getNflStadiums, getNbaStadiums, getNhlStadiums, getSoccerStadiums } from '@/data/stadiums';
+import { f1Tracks } from '@/data/f1Tracks';
 import { marathons } from '@/data/marathons';
 
 interface MapVisualizationProps {
@@ -509,6 +510,11 @@ function getItemCoordinates(category: Category, itemId: string): [number, number
       if (stadium?.lat && stadium?.lng) return [stadium.lng, stadium.lat];
       return null;
     }
+    case 'f1Tracks': {
+      const track = f1Tracks.find(t => t.id === itemId);
+      if (track?.lat && track?.lng) return [track.lng, track.lat];
+      return null;
+    }
     case 'marathons': {
       const marathon = marathons.find(m => m.id === itemId);
       if (marathon?.lat && marathon?.lng) return [marathon.lng, marathon.lat];
@@ -659,7 +665,7 @@ function USMap({ selections, onToggle }: { selections: UserSelections; onToggle?
 // US territories that cannot be displayed on the Albers USA projection
 const unsupportedUSTerritoriesParks = ['american-samoa', 'virgin-islands'];
 
-// US Map with flag markers (for National Parks)
+// US Map with flag markers (for National Parks) or mountain markers (for 14ers)
 function USMarkerMap({
   category,
   selections,
@@ -675,6 +681,32 @@ function USMarkerMap({
   const markers = getCategoryMarkers(category, selections, subcategory).filter(
     marker => !unsupportedUSTerritoriesParks.includes(marker.id)
   );
+  const isMountains = category === 'fourteeners';
+
+  // Get the appropriate marker for the category
+  const getUSMarkerIcon = (marker: MarkerData) => {
+    const fillColor = marker.status === 'visited' ? '#22c55e' : '#f59e0b';
+
+    if (isMountains) {
+      return renderMountainMarker(fillColor);
+    }
+
+    // Default flag marker for parks
+    return (
+      <g transform="translate(-9, -18)">
+        {/* Flag pole */}
+        <line x1="2" y1="3" x2="2" y2="18" stroke="#1e3a5f" strokeWidth="2" strokeLinecap="round" />
+        {/* Waving Flag */}
+        <path
+          d="M2 3C2 3 6 1 10 3C14 5 17 3 17 3V10C17 10 14 12 10 10C6 8 2 10 2 10V3Z"
+          fill={fillColor}
+          stroke="#ffffff"
+          strokeWidth="1"
+          strokeLinejoin="round"
+        />
+      </g>
+    );
+  };
 
   return (
     <ComposableMap
@@ -709,17 +741,8 @@ function USMarkerMap({
               }
             }}
           >
-            <g transform="translate(-9, -18)" className="cursor-pointer">
-              {/* Flag pole */}
-              <line x1="2" y1="3" x2="2" y2="18" stroke="#1e3a5f" strokeWidth="2" strokeLinecap="round" />
-              {/* Waving Flag */}
-              <path
-                d="M2 3C2 3 6 1 10 3C14 5 17 3 17 3V10C17 10 14 12 10 10C6 8 2 10 2 10V3Z"
-                fill={marker.status === 'visited' ? '#22c55e' : '#f59e0b'}
-                stroke="#ffffff"
-                strokeWidth="1"
-                strokeLinejoin="round"
-              />
+            <g className="cursor-pointer">
+              {getUSMarkerIcon(marker)}
             </g>
           </Marker>
         ))}
@@ -878,6 +901,103 @@ function renderSneakerMarker(fillColor: string) {
   );
 }
 
+// Mountain peak marker with summit flag for mountains/peaks
+function renderMountainMarker(fillColor: string) {
+  const strokeColor = "#ffffff";
+  return (
+    <g transform="translate(-12, -20)">
+      {/* Mountain shape */}
+      <path
+        d="M3 20h18L12 5l-9 15z"
+        fill={fillColor}
+        stroke={strokeColor}
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      {/* Snow cap / ridge detail */}
+      <path
+        d="M7.5 12.5l2.5 2 2-2 2 2 2.5-2"
+        fill="none"
+        stroke={strokeColor}
+        strokeWidth="1"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      {/* Flag pole */}
+      <path
+        d="M12 5V1"
+        stroke={strokeColor}
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
+      {/* Flag */}
+      <path
+        d="M12 1l5 2-5 2"
+        fill={strokeColor}
+        stroke={strokeColor}
+        strokeWidth="1"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </g>
+  );
+}
+
+// F1 car marker for Formula 1 race tracks
+function renderF1CarMarker(fillColor: string) {
+  const strokeColor = "#ffffff";
+  return (
+    <g transform="translate(-12, -12)">
+      {/* Rear wing */}
+      <path
+        d="M2 10h2v4H2z"
+        fill={fillColor}
+        stroke={strokeColor}
+        strokeWidth="1"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      {/* Rear wheel */}
+      <circle cx="7" cy="12" r="3" fill={fillColor} stroke={strokeColor} strokeWidth="1" />
+      {/* Front wheel */}
+      <circle cx="17" cy="12" r="3" fill={fillColor} stroke={strokeColor} strokeWidth="1" />
+      {/* Body/chassis */}
+      <path
+        d="M7 12h10"
+        stroke={strokeColor}
+        strokeWidth="1"
+        strokeLinecap="round"
+      />
+      {/* Cockpit/halo */}
+      <path
+        d="M8 12c0-3 1.5-5 4-5s4 2 4 5"
+        fill={fillColor}
+        stroke={strokeColor}
+        strokeWidth="1"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      {/* Front wing */}
+      <path
+        d="M20 12h2v1h-2z"
+        fill={fillColor}
+        stroke={strokeColor}
+        strokeWidth="1"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      {/* Air intake */}
+      <path
+        d="M10.5 9h3"
+        stroke={strokeColor}
+        strokeWidth="1"
+        strokeLinecap="round"
+      />
+    </g>
+  );
+}
+
 // World Map with flag markers (for UNESCO, Mountains, Museums, Stadiums)
 // Marathons use shoe markers instead of flags
 function WorldMarkerMap({
@@ -893,6 +1013,8 @@ function WorldMarkerMap({
 }) {
   const markers = getCategoryMarkers(category, selections, subcategory);
   const isMarathons = category === 'marathons';
+  const isMountains = category === 'fiveKPeaks' || category === 'fourteeners';
+  const isF1Tracks = category === 'f1Tracks';
   const isStadiums = category === 'mlbStadiums' || category === 'nflStadiums' || category === 'nbaStadiums' || category === 'nhlStadiums' || category === 'soccerStadiums';
 
   // Get the appropriate marker icon based on category and sport
@@ -903,11 +1025,19 @@ function WorldMarkerMap({
       return renderSneakerMarker(fillColor);
     }
 
+    if (isMountains) {
+      return renderMountainMarker(fillColor);
+    }
+
+    if (isF1Tracks) {
+      return renderF1CarMarker(fillColor);
+    }
+
     if (isStadiums) {
       return renderSportMarker(marker.sport, fillColor);
     }
 
-    // Default flag marker for other categories (UNESCO, Mountains, Museums)
+    // Default flag marker for other categories (UNESCO, Museums)
     return (
       <g transform="translate(-6, -12)">
         <line x1="1.5" y1="2" x2="1.5" y2="12" stroke="#1e3a5f" strokeWidth="1.5" strokeLinecap="round" />

@@ -37,6 +37,7 @@ import { unescoSites } from '@/data/unescoSites';
 import { get5000mPeaks, getUS14ers } from '@/data/mountains';
 import { museums } from '@/data/museums';
 import { getMlbStadiums, getNflStadiums, getNbaStadiums, getNhlStadiums, getSoccerStadiums } from '@/data/stadiums';
+import { f1Tracks } from '@/data/f1Tracks';
 import { marathons } from '@/data/marathons';
 
 // Common country abbreviation aliases that differ from ISO codes
@@ -77,6 +78,7 @@ const categoryTotals: Record<Category, number> = {
   nbaStadiums: getNbaStadiums().length,
   nhlStadiums: getNhlStadiums().length,
   soccerStadiums: getSoccerStadiums().length,
+  f1Tracks: f1Tracks.length,
   marathons: marathons.length,
 };
 
@@ -227,6 +229,13 @@ export default function Home() {
           group: s.country,
         }));
         break;
+      case 'f1Tracks':
+        items = f1Tracks.map(t => ({
+          id: t.id,
+          name: `${t.name} - ${t.circuit}`,
+          group: t.country,
+        }));
+        break;
       case 'marathons':
         items = marathons.map(m => ({
           id: m.id,
@@ -247,7 +256,7 @@ export default function Home() {
 
   const allStats = useMemo(() => {
     return Object.fromEntries(
-      (['countries', 'states', 'nationalParks', 'stateParks', 'unesco', 'fiveKPeaks', 'fourteeners', 'museums', 'mlbStadiums', 'nflStadiums', 'nbaStadiums', 'nhlStadiums', 'soccerStadiums', 'marathons'] as Category[]).map(cat => [
+      (['countries', 'states', 'nationalParks', 'stateParks', 'unesco', 'fiveKPeaks', 'fourteeners', 'museums', 'mlbStadiums', 'nflStadiums', 'nbaStadiums', 'nhlStadiums', 'soccerStadiums', 'f1Tracks', 'marathons'] as Category[]).map(cat => [
         cat,
         getStats(selections, cat, categoryTotals[cat]),
       ])
@@ -268,6 +277,7 @@ export default function Home() {
     nbaStadiums: 'NBA Arenas',
     nhlStadiums: 'NHL Arenas',
     soccerStadiums: 'Soccer & Other Venues',
+    f1Tracks: 'Formula 1 Race Tracks',
     marathons: 'World Marathon Majors',
   };
 
