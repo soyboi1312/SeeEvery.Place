@@ -44,15 +44,24 @@ function WorldMap({ selections, onToggle }: { selections: UserSelections; onTogg
                 <Geography
                   key={geo.rsmKey}
                   geography={geo}
-                  className={`region-path ${statusClass} outline-none focus:outline-none`}
+                  className={`region-path ${statusClass} outline-none focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500`}
                   style={{
                     default: { outline: "none" },
                     hover: { outline: "none", filter: "brightness(0.9)" },
                     pressed: { outline: "none" },
                   }}
                   data-tip={countryName}
+                  tabIndex={0}
+                  role="button"
+                  aria-label={`${countryName}, ${status === 'visited' ? 'visited' : status === 'bucketList' ? 'on bucket list' : 'not visited'}`}
                   onClick={() => {
                     if (id && onToggle) {
+                      onToggle(id, status);
+                    }
+                  }}
+                  onKeyDown={(e) => {
+                    if ((e.key === 'Enter' || e.key === ' ') && id && onToggle) {
+                      e.preventDefault();
                       onToggle(id, status);
                     }
                   }}
@@ -87,15 +96,24 @@ function USMap({ selections, onToggle }: { selections: UserSelections; onToggle?
                 <Geography
                   key={geo.rsmKey}
                   geography={geo}
-                  className={`region-path ${statusClass} outline-none focus:outline-none`}
+                  className={`region-path ${statusClass} outline-none focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500`}
                   style={{
                     default: { outline: "none" },
                     hover: { outline: "none", filter: "brightness(0.9)" },
                     pressed: { outline: "none" },
                   }}
                   data-tip={name}
+                  tabIndex={0}
+                  role="button"
+                  aria-label={`${name}, ${status === 'visited' ? 'visited' : status === 'bucketList' ? 'on bucket list' : 'not visited'}`}
                   onClick={() => {
                     if (id && onToggle) {
+                      onToggle(id, status);
+                    }
+                  }}
+                  onKeyDown={(e) => {
+                    if ((e.key === 'Enter' || e.key === ' ') && id && onToggle) {
+                      e.preventDefault();
                       onToggle(id, status);
                     }
                   }}
