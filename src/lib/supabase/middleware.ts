@@ -1,6 +1,19 @@
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
+// Admin emails can be configured via environment variable (comma-separated)
+function getAdminEmails(): string[] {
+  const adminEmails = process.env.ADMIN_EMAILS || process.env.NEXT_PUBLIC_ADMIN_EMAIL;
+  if (!adminEmails) return [];
+  return adminEmails.split(',').map(email => email.trim().toLowerCase());
+}
+
+function isAdminEmail(email: string | undefined): boolean {
+  if (!email) return false;
+  const adminEmails = getAdminEmails();
+  return adminEmails.includes(email.toLowerCase());
+}
+
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
     request,
@@ -37,8 +50,26 @@ export async function updateSession(request: NextRequest) {
     }
   );
 
-  // Refresh session if expired
-  await supabase.auth.getUser();
+  // Get current user
+  const { data: { user } } = await supabase.auth.getUser();
+
+  // Protect admin routes
+  const isAdminRoute = request.nextUrl.pathname.startsWith('/admin');
+  if (isAdminRoute) {
+    // No user = not authenticated, redirect to home
+    if (!user) {
+      const redirectUrl = new URL('/', request.url);
+      redirectUrl.searchParams.set('error', 'auth_required');
+      return NextResponse.redirect(redirectUrl);
+    }
+
+    // User is not an admin, redirect to home
+    if (!isAdminEmail(user.email)) {
+      const redirectUrl = new URL('/', request.url);
+      redirectUrl.searchParams.set('error', 'unauthorized');
+      return NextResponse.redirect(redirectUrl);
+    }
+  }
 
   return supabaseResponse;
 }
