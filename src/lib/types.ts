@@ -6,7 +6,8 @@ export type Category =
   | "nationalParks"
   | "stateParks"
   | "unesco"
-  | "mountains"
+  | "fiveKPeaks"
+  | "fourteeners"
   | "museums"
   | "mlbStadiums"
   | "nflStadiums"
@@ -17,8 +18,7 @@ export type Category =
 
 export type Status = "visited" | "bucketList" | "unvisited";
 
-// Subcategory definitions for categories that support filtering
-export type MountainSubcategory = "All" | "5000m+" | "US 14ers";
+// Subcategory definitions for categories that support filtering (deprecated - now using separate categories)
 
 // Map of categories to their subcategories (empty - subcategories are now handled in CategoryTabs)
 export const categorySubcategories: Partial<Record<Category, readonly string[]>> = {};
@@ -39,7 +39,8 @@ export interface UserSelections {
   nationalParks: Selection[];
   stateParks: Selection[];
   unesco: Selection[];
-  mountains: Selection[];
+  fiveKPeaks: Selection[];
+  fourteeners: Selection[];
   museums: Selection[];
   mlbStadiums: Selection[];
   nflStadiums: Selection[];
@@ -73,7 +74,8 @@ export const categoryLabels: Record<Category, string> = {
   nationalParks: "National Parks",
   stateParks: "State Parks",
   unesco: "UNESCO Sites",
-  mountains: "Peaks",
+  fiveKPeaks: "5000m+ Peaks",
+  fourteeners: "US 14ers",
   museums: "Museums",
   mlbStadiums: "MLB",
   nflStadiums: "NFL",
@@ -97,7 +99,8 @@ export const categoryIcons: Record<Category, ReactNode> = {
   nationalParks: "🏞️",
   stateParks: "🌲",
   unesco: "🏛️",
-  mountains: "🏔️",
+  fiveKPeaks: "🏔️",
+  fourteeners: "⛰️",
   museums: "🎨",
   mlbStadiums: "⚾",
   nflStadiums: "🏈",
@@ -113,7 +116,8 @@ export const emptySelections: UserSelections = {
   nationalParks: [],
   stateParks: [],
   unesco: [],
-  mountains: [],
+  fiveKPeaks: [],
+  fourteeners: [],
   museums: [],
   mlbStadiums: [],
   nflStadiums: [],

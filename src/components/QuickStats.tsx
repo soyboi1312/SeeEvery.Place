@@ -7,7 +7,7 @@ import { usStates } from '@/data/usStates';
 import { nationalParks } from '@/data/nationalParks';
 import { stateParks } from '@/data/stateParks';
 import { unescoSites } from '@/data/unescoSites';
-import { mountains } from '@/data/mountains';
+import { get5000mPeaks, getUS14ers } from '@/data/mountains';
 import { museums } from '@/data/museums';
 import { getMlbStadiums, getNflStadiums, getNbaStadiums, getNhlStadiums, getSoccerStadiums } from '@/data/stadiums';
 import { marathons } from '@/data/marathons';
@@ -23,7 +23,8 @@ const categoryTotals: Record<Category, number> = {
   nationalParks: nationalParks.length,
   stateParks: stateParks.length,
   unesco: unescoSites.length,
-  mountains: mountains.length,
+  fiveKPeaks: get5000mPeaks().length,
+  fourteeners: getUS14ers().length,
   museums: museums.length,
   mlbStadiums: getMlbStadiums().length,
   nflStadiums: getNflStadiums().length,
@@ -34,11 +35,11 @@ const categoryTotals: Record<Category, number> = {
 };
 
 // All categories displayed as individual tiles
-const displayCategories: Category[] = ['countries', 'states', 'nationalParks', 'stateParks', 'unesco', 'mountains', 'museums', 'mlbStadiums', 'nflStadiums', 'nbaStadiums', 'nhlStadiums', 'soccerStadiums', 'marathons'];
+const displayCategories: Category[] = ['countries', 'states', 'nationalParks', 'stateParks', 'unesco', 'fiveKPeaks', 'fourteeners', 'museums', 'mlbStadiums', 'nflStadiums', 'nbaStadiums', 'nhlStadiums', 'soccerStadiums', 'marathons'];
 
 export default function QuickStats({ selections, onCategoryClick }: QuickStatsProps) {
   // All actual data categories for calculating total
-  const allCategories: Category[] = ['countries', 'states', 'nationalParks', 'stateParks', 'unesco', 'mountains', 'museums', 'mlbStadiums', 'nflStadiums', 'nbaStadiums', 'nhlStadiums', 'soccerStadiums', 'marathons'];
+  const allCategories: Category[] = ['countries', 'states', 'nationalParks', 'stateParks', 'unesco', 'fiveKPeaks', 'fourteeners', 'museums', 'mlbStadiums', 'nflStadiums', 'nbaStadiums', 'nhlStadiums', 'soccerStadiums', 'marathons'];
 
   const totalVisited = allCategories.reduce((sum, cat) => {
     return sum + getStats(selections, cat, categoryTotals[cat]).visited;

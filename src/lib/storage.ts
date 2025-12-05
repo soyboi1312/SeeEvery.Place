@@ -1,5 +1,6 @@
 import { UserSelections, emptySelections, Selection, Status, Category } from './types';
 import { stadiums } from '@/data/stadiums';
+import { mountains } from '@/data/mountains';
 
 const STORAGE_KEY = 'travelmap_selections';
 
@@ -53,6 +54,53 @@ function migrateStadiumSelections(parsed: Record<string, Selection[]>): Record<s
   return result;
 }
 
+// Migrate old "mountains" selections to new fiveKPeaks and fourteeners categories
+function migrateMountainSelections(parsed: Record<string, Selection[]>): Record<string, Selection[]> {
+  if (!parsed.mountains || parsed.mountains.length === 0) {
+    return parsed;
+  }
+
+  const result = { ...parsed };
+  const oldMountainSelections = parsed.mountains;
+
+  // Create maps for categorization
+  // 5000m+ peaks: elevation >= 5000m
+  // US 14ers: elevation >= 4267m (14,000 ft) AND countryCode === 'US'
+  const fiveKPeakIds = new Set(
+    mountains.filter(m => m.elevation >= 5000).map(m => m.id)
+  );
+  const fourteenerIds = new Set(
+    mountains.filter(m => m.elevation >= 4267 && m.countryCode === 'US').map(m => m.id)
+  );
+
+  // Initialize new categories if they don't exist
+  if (!result.fiveKPeaks) result.fiveKPeaks = [];
+  if (!result.fourteeners) result.fourteeners = [];
+
+  // Distribute old mountain selections to new categories
+  oldMountainSelections.forEach((selection: Selection) => {
+    // Check if it's a 5000m+ peak
+    if (fiveKPeakIds.has(selection.id)) {
+      const exists = result.fiveKPeaks.some((s: Selection) => s.id === selection.id);
+      if (!exists) {
+        result.fiveKPeaks.push(selection);
+      }
+    }
+    // Check if it's a US 14er
+    if (fourteenerIds.has(selection.id)) {
+      const exists = result.fourteeners.some((s: Selection) => s.id === selection.id);
+      if (!exists) {
+        result.fourteeners.push(selection);
+      }
+    }
+  });
+
+  // Remove old mountains key
+  delete result.mountains;
+
+  return result;
+}
+
 export function loadSelections(): UserSelections {
   if (typeof window === 'undefined') return emptySelections;
 
@@ -62,9 +110,20 @@ export function loadSelections(): UserSelections {
       let parsed = JSON.parse(saved);
 
       // Migrate old stadium selections to new sport-specific categories
+      let needsSave = false;
       if (parsed.stadiums) {
         parsed = migrateStadiumSelections(parsed);
-        // Save migrated data back to localStorage
+        needsSave = true;
+      }
+
+      // Migrate old mountain selections to new fiveKPeaks and fourteeners categories
+      if (parsed.mountains) {
+        parsed = migrateMountainSelections(parsed);
+        needsSave = true;
+      }
+
+      // Save migrated data back to localStorage
+      if (needsSave) {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
       }
 
