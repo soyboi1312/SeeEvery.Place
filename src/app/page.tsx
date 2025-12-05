@@ -18,7 +18,7 @@ const MapVisualization = dynamic(() => import('@/components/MapVisualization'), 
   ),
   ssr: false,
 });
-import { Category, UserSelections, emptySelections, Status } from '@/lib/types';
+import { Category, UserSelections, emptySelections, Status, StadiumFilter } from '@/lib/types';
 import {
   loadSelections,
   saveSelections,
@@ -36,7 +36,7 @@ import { stateParks } from '@/data/stateParks';
 import { unescoSites } from '@/data/unescoSites';
 import { get5000mPeaks, getUS14ers } from '@/data/mountains';
 import { museums } from '@/data/museums';
-import { getMlbStadiums, getNflStadiums, getNbaStadiums, getNhlStadiums, getSoccerStadiums } from '@/data/stadiums';
+import { stadiums } from '@/data/stadiums';
 import { f1Tracks } from '@/data/f1Tracks';
 import { marathons } from '@/data/marathons';
 
@@ -73,18 +73,28 @@ const categoryTotals: Record<Category, number> = {
   fiveKPeaks: get5000mPeaks().length,
   fourteeners: getUS14ers().length,
   museums: museums.length,
-  mlbStadiums: getMlbStadiums().length,
-  nflStadiums: getNflStadiums().length,
-  nbaStadiums: getNbaStadiums().length,
-  nhlStadiums: getNhlStadiums().length,
-  soccerStadiums: getSoccerStadiums().length,
+  stadiums: stadiums.length,
   f1Tracks: f1Tracks.length,
   marathons: marathons.length,
+};
+
+// Stadium filter sport mapping
+const stadiumFilterToSport: Record<StadiumFilter, string | null> = {
+  ALL: null,
+  MLB: 'Baseball',
+  NFL: 'American Football',
+  NBA: 'Basketball',
+  NHL: 'Hockey',
+  Soccer: 'Football',
+  Cricket: 'Cricket',
+  Rugby: 'Rugby',
+  Tennis: 'Tennis',
 };
 
 export default function Home() {
   const [selections, setSelections] = useState<UserSelections>(emptySelections);
   const [activeCategory, setActiveCategory] = useState<Category>('countries');
+  const [stadiumFilter, setStadiumFilter] = useState<StadiumFilter>('ALL');
   const [showShareCard, setShowShareCard] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -194,41 +204,18 @@ export default function Home() {
           group: m.country,
         }));
         break;
-      case 'mlbStadiums':
-        items = getMlbStadiums().map(s => ({
+      case 'stadiums': {
+        const sportFilter = stadiumFilterToSport[stadiumFilter];
+        const filteredStadiums = sportFilter
+          ? stadiums.filter(s => s.sport === sportFilter)
+          : stadiums;
+        items = filteredStadiums.map(s => ({
           id: s.id,
           name: `${s.name} - ${s.city}`,
-          group: s.team || s.city,
+          group: s.team || s.country,
         }));
         break;
-      case 'nflStadiums':
-        items = getNflStadiums().map(s => ({
-          id: s.id,
-          name: `${s.name} - ${s.city}`,
-          group: s.team || s.city,
-        }));
-        break;
-      case 'nbaStadiums':
-        items = getNbaStadiums().map(s => ({
-          id: s.id,
-          name: `${s.name} - ${s.city}`,
-          group: s.team || s.city,
-        }));
-        break;
-      case 'nhlStadiums':
-        items = getNhlStadiums().map(s => ({
-          id: s.id,
-          name: `${s.name} - ${s.city}`,
-          group: s.team || s.city,
-        }));
-        break;
-      case 'soccerStadiums':
-        items = getSoccerStadiums().map(s => ({
-          id: s.id,
-          name: `${s.name} - ${s.city}`,
-          group: s.country,
-        }));
-        break;
+      }
       case 'f1Tracks':
         items = f1Tracks.map(t => ({
           id: t.id,
@@ -248,7 +235,7 @@ export default function Home() {
     }
 
     return items;
-  }, [activeCategory]);
+  }, [activeCategory, stadiumFilter]);
 
   const currentStats = useMemo(() => {
     return getStats(selections, activeCategory, categoryTotals[activeCategory]);
@@ -256,7 +243,7 @@ export default function Home() {
 
   const allStats = useMemo(() => {
     return Object.fromEntries(
-      (['countries', 'states', 'nationalParks', 'stateParks', 'unesco', 'fiveKPeaks', 'fourteeners', 'museums', 'mlbStadiums', 'nflStadiums', 'nbaStadiums', 'nhlStadiums', 'soccerStadiums', 'f1Tracks', 'marathons'] as Category[]).map(cat => [
+      (['countries', 'states', 'nationalParks', 'stateParks', 'unesco', 'fiveKPeaks', 'fourteeners', 'museums', 'stadiums', 'f1Tracks', 'marathons'] as Category[]).map(cat => [
         cat,
         getStats(selections, cat, categoryTotals[cat]),
       ])
@@ -272,11 +259,7 @@ export default function Home() {
     fiveKPeaks: '5000m+ Mountain Peaks',
     fourteeners: 'US 14ers (14,000+ ft)',
     museums: 'Famous Museums',
-    mlbStadiums: 'MLB Stadiums',
-    nflStadiums: 'NFL Stadiums',
-    nbaStadiums: 'NBA Arenas',
-    nhlStadiums: 'NHL Arenas',
-    soccerStadiums: 'Soccer & Other Venues',
+    stadiums: 'Sports Stadiums & Arenas',
     f1Tracks: 'Formula 1 Race Tracks',
     marathons: 'World Marathon Majors',
   };
@@ -339,6 +322,25 @@ export default function Home() {
           onCategoryChange={handleCategoryChange}
           stats={allStats}
         />
+
+        {/* Stadium Filter Bar */}
+        {activeCategory === 'stadiums' && (
+          <div className="flex flex-wrap justify-center gap-2 py-2">
+            {(['ALL', 'MLB', 'NFL', 'NBA', 'NHL', 'Soccer', 'Cricket', 'Rugby', 'Tennis'] as StadiumFilter[]).map((filter) => (
+              <button
+                key={filter}
+                onClick={() => setStadiumFilter(filter)}
+                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                  stadiumFilter === filter
+                    ? 'bg-blue-600 text-white shadow-md'
+                    : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700'
+                }`}
+              >
+                {filter === 'ALL' ? 'All Sports' : filter}
+              </button>
+            ))}
+          </div>
+        )}
 
         {/* Selection List */}
         <SelectionList

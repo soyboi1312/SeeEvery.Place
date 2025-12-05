@@ -9,11 +9,7 @@ const categories = [
   'fiveKPeaks',
   'fourteeners',
   'museums',
-  'mlbStadiums',
-  'nflStadiums',
-  'nbaStadiums',
-  'nhlStadiums',
-  'soccerStadiums',
+  'stadiums',
   'f1Tracks',
   'marathons',
 ]
