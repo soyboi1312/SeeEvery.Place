@@ -1,6 +1,5 @@
 'use client';
 
-import { ReactNode } from 'react';
 import { Category, categoryLabels, categoryIcons, UserSelections } from '@/lib/types';
 import { getStats } from '@/lib/storage';
 import { countries } from '@/data/countries';
@@ -34,9 +33,8 @@ const categoryTotals: Record<Category, number> = {
   marathons: marathons.length,
 };
 
-// Top-level display categories (US Parks combines nationalParks and stateParks, Stadiums combines all stadium types)
-type DisplayCategory = Category | 'usParks' | 'allStadiums';
-const displayCategories: DisplayCategory[] = ['countries', 'states', 'usParks', 'unesco', 'mountains', 'museums', 'allStadiums', 'marathons'];
+// All categories displayed as individual tiles
+const displayCategories: Category[] = ['countries', 'states', 'nationalParks', 'stateParks', 'unesco', 'mountains', 'museums', 'mlbStadiums', 'nflStadiums', 'nbaStadiums', 'nhlStadiums', 'soccerStadiums', 'marathons'];
 
 export default function QuickStats({ selections, onCategoryClick }: QuickStatsProps) {
   // All actual data categories for calculating total
@@ -58,53 +56,16 @@ export default function QuickStats({ selections, onCategoryClick }: QuickStatsPr
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        {displayCategories.map((displayCategory) => {
-          let stats: { visited: number; total: number; bucketList: number; percentage: number };
-          let icon: ReactNode;
-          let label: string;
-          let clickCategory: Category;
-
-          // Special handling for US Parks (combined category)
-          if (displayCategory === 'usParks') {
-            const nationalStats = getStats(selections, 'nationalParks', categoryTotals.nationalParks);
-            const stateStats = getStats(selections, 'stateParks', categoryTotals.stateParks);
-            const combinedVisited = nationalStats.visited + stateStats.visited;
-            const combinedTotal = nationalStats.total + stateStats.total;
-            const combinedBucketList = nationalStats.bucketList + stateStats.bucketList;
-            const combinedPercentage = combinedTotal > 0 ? Math.round((combinedVisited / combinedTotal) * 100) : 0;
-            stats = { visited: combinedVisited, total: combinedTotal, bucketList: combinedBucketList, percentage: combinedPercentage };
-            icon = '🏞️';
-            label = 'US Parks';
-            clickCategory = 'nationalParks';
-          } else if (displayCategory === 'allStadiums') {
-            // Combined stats for all stadium categories
-            const mlbStats = getStats(selections, 'mlbStadiums', categoryTotals.mlbStadiums);
-            const nflStats = getStats(selections, 'nflStadiums', categoryTotals.nflStadiums);
-            const nbaStats = getStats(selections, 'nbaStadiums', categoryTotals.nbaStadiums);
-            const nhlStats = getStats(selections, 'nhlStadiums', categoryTotals.nhlStadiums);
-            const soccerStats = getStats(selections, 'soccerStadiums', categoryTotals.soccerStadiums);
-            const combinedVisited = mlbStats.visited + nflStats.visited + nbaStats.visited + nhlStats.visited + soccerStats.visited;
-            const combinedTotal = mlbStats.total + nflStats.total + nbaStats.total + nhlStats.total + soccerStats.total;
-            const combinedBucketList = mlbStats.bucketList + nflStats.bucketList + nbaStats.bucketList + nhlStats.bucketList + soccerStats.bucketList;
-            const combinedPercentage = combinedTotal > 0 ? Math.round((combinedVisited / combinedTotal) * 100) : 0;
-            stats = { visited: combinedVisited, total: combinedTotal, bucketList: combinedBucketList, percentage: combinedPercentage };
-            icon = '🏟️';
-            label = 'Stadiums';
-            clickCategory = 'mlbStadiums';
-          } else {
-            const category = displayCategory as Category;
-            stats = getStats(selections, category, categoryTotals[category]);
-            icon = categoryIcons[category];
-            label = categoryLabels[category];
-            clickCategory = category;
-          }
-
+        {displayCategories.map((category) => {
+          const stats = getStats(selections, category, categoryTotals[category]);
+          const icon = categoryIcons[category];
+          const label = categoryLabels[category];
           const progressWidth = `${stats.percentage}%`;
 
           return (
             <button
-              key={displayCategory}
-              onClick={() => onCategoryClick(clickCategory)}
+              key={category}
+              onClick={() => onCategoryClick(category)}
               className="text-left p-4 rounded-xl bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 transition-all group border border-transparent hover:border-gray-200 dark:hover:border-gray-500"
             >
               <div className="flex items-center gap-2 mb-3">
