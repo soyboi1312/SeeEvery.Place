@@ -234,9 +234,6 @@ function USMap({ selections, onToggle, tooltip }: { selections: UserSelections; 
   );
 }
 
-// US territories that cannot be displayed on the Albers USA projection
-const unsupportedUSTerritoriesParks = ['american-samoa', 'virgin-islands'];
-
 // US Map with flag markers (for National Parks) or mountain markers (for 14ers)
 function USMarkerMap({
   category,
@@ -251,10 +248,8 @@ function USMarkerMap({
   subcategory?: string;
   tooltip: TooltipHandlers;
 }) {
-  // Filter out parks in territories that can't be displayed on Albers USA projection
-  const markers = getCategoryMarkers(category, selections, subcategory).filter(
-    marker => !unsupportedUSTerritoriesParks.includes(marker.id)
-  );
+  // Get markers with Albers USA filtering applied at the data layer
+  const markers = getCategoryMarkers(category, selections, subcategory, true);
   const isMountains = category === 'fourteeners';
 
   // Get the appropriate marker for the category

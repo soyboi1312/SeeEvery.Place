@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import Header from '@/components/Header';
@@ -30,7 +30,7 @@ import {
 } from '@/lib/storage';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { useDarkMode } from '@/lib/hooks/useDarkMode';
-import { loadFromCloud, mergeSelectionsFromCloud, syncToCloud } from '@/lib/sync';
+import { useCloudSync } from '@/lib/hooks/useCloudSync';
 import { categoryTotals, categoryTitles, getCategoryItems } from '@/lib/categoryUtils';
 
 export default function Home() {
@@ -39,14 +39,16 @@ export default function Home() {
   const [showShareCard, setShowShareCard] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
-  const [isSyncing, setIsSyncing] = useState(false);
   const { user, signOut } = useAuth();
   const { isDarkMode, toggleDarkMode } = useDarkMode();
 
-  // Track which user we've synced for to prevent duplicate syncs
-  const lastSyncedUserId = useRef<string | null>(null);
-  // Track if initial sync is complete
-  const initialSyncComplete = useRef(false);
+  // Cloud sync hook - handles all sync logic
+  const { isSyncing } = useCloudSync({
+    user,
+    selections,
+    setSelections,
+    isLoaded,
+  });
 
   const handleCategoryChange = useCallback((category: Category) => {
     setActiveCategory(category);
@@ -65,71 +67,6 @@ export default function Home() {
       saveSelections(selections);
     }
   }, [selections, isLoaded]);
-
-  // Cloud sync: fetch and merge when user signs in
-  // This effect handles the initial sync on login
-  useEffect(() => {
-    // Wait for local data to load first
-    if (!isLoaded) return;
-
-    // No user = no cloud sync needed
-    if (!user) {
-      lastSyncedUserId.current = null;
-      initialSyncComplete.current = false;
-      return;
-    }
-
-    // Skip if we've already synced for this user
-    if (lastSyncedUserId.current === user.id) return;
-
-    const performInitialSync = async () => {
-      setIsSyncing(true);
-      console.log('Starting cloud sync for user:', user.id);
-
-      try {
-        const cloudData = await loadFromCloud();
-
-        if (cloudData) {
-          // Merge local + cloud data (local takes precedence for conflicts)
-          const merged = await mergeSelectionsFromCloud(selections, cloudData);
-          setSelections(merged);
-          // Push merged result back to cloud
-          await syncToCloud(merged);
-          console.log('Cloud sync complete: merged local + cloud data');
-        } else {
-          // No cloud data exists, push local data to cloud
-          await syncToCloud(selections);
-          console.log('Cloud sync complete: pushed local data to cloud');
-        }
-
-        // Mark this user as synced
-        lastSyncedUserId.current = user.id;
-        initialSyncComplete.current = true;
-      } catch (error) {
-        console.error('Cloud sync failed:', error);
-      } finally {
-        setIsSyncing(false);
-      }
-    };
-
-    performInitialSync();
-    // Note: we intentionally exclude `selections` from deps to only run on user change
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.id, isLoaded]);
-
-  // Debounced sync to cloud when selections change (after initial sync)
-  useEffect(() => {
-    // Only sync if user is logged in, data is loaded, and initial sync is done
-    if (!user || !isLoaded || !initialSyncComplete.current) return;
-
-    const debounceSync = setTimeout(() => {
-      syncToCloud(selections).catch(err =>
-        console.error('Failed to sync changes to cloud:', err)
-      );
-    }, 2000); // 2 second debounce
-
-    return () => clearTimeout(debounceSync);
-  }, [selections, user, isLoaded]);
 
   const handleToggle = useCallback((id: string, currentStatus: Status) => {
     setSelections(prev => toggleSelection(prev, activeCategory, id, currentStatus));

@@ -96,149 +96,177 @@ export const categoryTitles: Record<Category, string> = {
   surfingReserves: 'World Surfing Reserves',
 };
 
-// Get items for a specific category
+// Category data configuration - maps category to data source and transformer
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type CategoryConfig = {
+  getData: () => any[];
+  transform: (item: any) => CategoryItem;
+};
+
+const categoryConfig: Record<Category, CategoryConfig> = {
+  countries: {
+    getData: () => countries,
+    transform: (c) => ({
+      id: c.code,
+      name: c.name,
+      group: c.continent,
+      code: c.code,
+      aliases: countryAliases[c.code] || [],
+    }),
+  },
+  states: {
+    getData: () => usStates,
+    transform: (s) => ({
+      id: s.code,
+      name: s.name,
+      group: s.region,
+      code: s.code,
+      aliases: stateAliases[s.code] || [],
+    }),
+  },
+  nationalParks: {
+    getData: () => nationalParks,
+    transform: (p) => ({
+      id: p.id,
+      name: p.name,
+      group: p.region,
+      subcategory: p.type,
+    }),
+  },
+  stateParks: {
+    getData: () => stateParks,
+    transform: (p) => ({
+      id: p.id,
+      name: `${p.name} - ${p.state}`,
+      group: p.region,
+    }),
+  },
+  unesco: {
+    getData: () => unescoSites,
+    transform: (u) => ({
+      id: u.id,
+      name: u.name,
+      group: u.country,
+    }),
+  },
+  fiveKPeaks: {
+    getData: () => get5000mPeaks(),
+    transform: (m) => ({
+      id: m.id,
+      name: `${m.name} (${m.elevation.toLocaleString()}m)`,
+      group: m.range,
+    }),
+  },
+  fourteeners: {
+    getData: () => getUS14ers(),
+    transform: (m) => ({
+      id: m.id,
+      name: `${m.name} (${m.elevation.toLocaleString()}m)`,
+      group: m.range,
+    }),
+  },
+  museums: {
+    getData: () => museums,
+    transform: (m) => ({
+      id: m.id,
+      name: `${m.name} - ${m.city}`,
+      group: m.country,
+    }),
+  },
+  mlbStadiums: {
+    getData: () => getMlbStadiums(),
+    transform: (s) => ({
+      id: s.id,
+      name: `${s.name} - ${s.city}`,
+      group: s.team || s.city,
+    }),
+  },
+  nflStadiums: {
+    getData: () => getNflStadiums(),
+    transform: (s) => ({
+      id: s.id,
+      name: `${s.name} - ${s.city}`,
+      group: s.team || s.city,
+    }),
+  },
+  nbaStadiums: {
+    getData: () => getNbaStadiums(),
+    transform: (s) => ({
+      id: s.id,
+      name: `${s.name} - ${s.city}`,
+      group: s.team || s.city,
+    }),
+  },
+  nhlStadiums: {
+    getData: () => getNhlStadiums(),
+    transform: (s) => ({
+      id: s.id,
+      name: `${s.name} - ${s.city}`,
+      group: s.team || s.city,
+    }),
+  },
+  soccerStadiums: {
+    getData: () => getSoccerStadiums(),
+    transform: (s) => ({
+      id: s.id,
+      name: `${s.name} - ${s.city}`,
+      group: s.country,
+    }),
+  },
+  f1Tracks: {
+    getData: () => f1Tracks,
+    transform: (t) => ({
+      id: t.id,
+      name: `${t.name} - ${t.circuit}`,
+      group: t.country,
+    }),
+  },
+  marathons: {
+    getData: () => marathons,
+    transform: (m) => ({
+      id: m.id,
+      name: `${m.name} (${m.month})`,
+      group: m.country,
+    }),
+  },
+  airports: {
+    getData: () => airports,
+    transform: (a) => ({
+      id: a.id,
+      name: `${a.name} (${a.code})`,
+      group: a.region,
+      code: a.code,
+    }),
+  },
+  skiResorts: {
+    getData: () => skiResorts,
+    transform: (r) => ({
+      id: r.id,
+      name: `${r.name} - ${r.location}`,
+      group: r.region,
+    }),
+  },
+  themeParks: {
+    getData: () => themeParks,
+    transform: (p) => ({
+      id: p.id,
+      name: `${p.name} - ${p.location}`,
+      group: p.region,
+    }),
+  },
+  surfingReserves: {
+    getData: () => surfingReserves,
+    transform: (s) => ({
+      id: s.id,
+      name: `${s.name} - ${s.country}`,
+      group: s.region,
+    }),
+  },
+};
+
+// Get items for a specific category using strategy pattern
 export function getCategoryItems(category: Category): CategoryItem[] {
-  switch (category) {
-    case 'countries':
-      return countries.map(c => ({
-        id: c.code,
-        name: c.name,
-        group: c.continent,
-        code: c.code,
-        aliases: countryAliases[c.code] || [],
-      }));
-
-    case 'states':
-      return usStates.map(s => ({
-        id: s.code,
-        name: s.name,
-        group: s.region,
-        code: s.code,
-        aliases: stateAliases[s.code] || [],
-      }));
-
-    case 'nationalParks':
-      return nationalParks.map(p => ({
-        id: p.id,
-        name: p.name,
-        group: p.region,
-        subcategory: p.type,
-      }));
-
-    case 'stateParks':
-      return stateParks.map(p => ({
-        id: p.id,
-        name: `${p.name} - ${p.state}`,
-        group: p.region,
-      }));
-
-    case 'unesco':
-      return unescoSites.map(u => ({
-        id: u.id,
-        name: u.name,
-        group: u.country,
-      }));
-
-    case 'fiveKPeaks':
-      return get5000mPeaks().map(m => ({
-        id: m.id,
-        name: `${m.name} (${m.elevation.toLocaleString()}m)`,
-        group: m.range,
-      }));
-
-    case 'fourteeners':
-      return getUS14ers().map(m => ({
-        id: m.id,
-        name: `${m.name} (${m.elevation.toLocaleString()}m)`,
-        group: m.range,
-      }));
-
-    case 'museums':
-      return museums.map(m => ({
-        id: m.id,
-        name: `${m.name} - ${m.city}`,
-        group: m.country,
-      }));
-
-    case 'mlbStadiums':
-      return getMlbStadiums().map(s => ({
-        id: s.id,
-        name: `${s.name} - ${s.city}`,
-        group: s.team || s.city,
-      }));
-
-    case 'nflStadiums':
-      return getNflStadiums().map(s => ({
-        id: s.id,
-        name: `${s.name} - ${s.city}`,
-        group: s.team || s.city,
-      }));
-
-    case 'nbaStadiums':
-      return getNbaStadiums().map(s => ({
-        id: s.id,
-        name: `${s.name} - ${s.city}`,
-        group: s.team || s.city,
-      }));
-
-    case 'nhlStadiums':
-      return getNhlStadiums().map(s => ({
-        id: s.id,
-        name: `${s.name} - ${s.city}`,
-        group: s.team || s.city,
-      }));
-
-    case 'soccerStadiums':
-      return getSoccerStadiums().map(s => ({
-        id: s.id,
-        name: `${s.name} - ${s.city}`,
-        group: s.country,
-      }));
-
-    case 'f1Tracks':
-      return f1Tracks.map(t => ({
-        id: t.id,
-        name: `${t.name} - ${t.circuit}`,
-        group: t.country,
-      }));
-
-    case 'marathons':
-      return marathons.map(m => ({
-        id: m.id,
-        name: `${m.name} (${m.month})`,
-        group: m.country,
-      }));
-
-    case 'airports':
-      return airports.map(a => ({
-        id: a.id,
-        name: `${a.name} (${a.code})`,
-        group: a.region,
-        code: a.code,
-      }));
-
-    case 'skiResorts':
-      return skiResorts.map(r => ({
-        id: r.id,
-        name: `${r.name} - ${r.location}`,
-        group: r.region,
-      }));
-
-    case 'themeParks':
-      return themeParks.map(p => ({
-        id: p.id,
-        name: `${p.name} - ${p.location}`,
-        group: p.region,
-      }));
-
-    case 'surfingReserves':
-      return surfingReserves.map(s => ({
-        id: s.id,
-        name: `${s.name} - ${s.country}`,
-        group: s.region,
-      }));
-
-    default:
-      return [];
-  }
+  const config = categoryConfig[category];
+  if (!config) return [];
+  return config.getData().map(config.transform);
 }
