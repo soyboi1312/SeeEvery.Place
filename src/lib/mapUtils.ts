@@ -17,9 +17,9 @@ import { skiResorts } from '@/data/skiResorts';
 import { themeParks } from '@/data/themeParks';
 import { surfingReserves } from '@/data/surfingReserves';
 
-// Map Data URLs - using reliable CDN sources
-export const GEO_URL_WORLD = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json";
-export const GEO_URL_USA = "https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json";
+// Map Data URLs - served locally for reliability (no CDN dependency)
+export const GEO_URL_WORLD = "/geo/countries-110m.json";
+export const GEO_URL_USA = "/geo/states-10m.json";
 
 // Mapping FIPS codes (from US topojson) to Postal Codes
 export const fipsToAbbr: Record<string, string> = {

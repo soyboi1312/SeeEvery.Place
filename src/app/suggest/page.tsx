@@ -17,13 +17,37 @@ interface Suggestion {
   created_at: string;
 }
 
-// Generate a simple anonymous voter ID based on browser fingerprint
+// Generate a more robust anonymous voter ID using browser fingerprinting
+// Note: For production, consider requiring authentication for voting
+// or implementing rate limiting via Supabase Edge Functions
 function getVoterId(): string {
   if (typeof window === 'undefined') return 'ssr';
 
   let voterId = localStorage.getItem('voter_id');
   if (!voterId) {
-    voterId = 'anon_' + Math.random().toString(36).substring(2, 15) + Date.now().toString(36);
+    // Create fingerprint from multiple browser signals
+    const signals = [
+      navigator.userAgent,
+      navigator.language,
+      screen.width.toString(),
+      screen.height.toString(),
+      screen.colorDepth.toString(),
+      new Date().getTimezoneOffset().toString(),
+      navigator.hardwareConcurrency?.toString() || '',
+      navigator.maxTouchPoints?.toString() || '',
+    ];
+
+    // Simple hash function for fingerprint
+    const fingerprint = signals.join('|');
+    let hash = 0;
+    for (let i = 0; i < fingerprint.length; i++) {
+      const char = fingerprint.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash; // Convert to 32-bit integer
+    }
+
+    // Combine hash with a random component for uniqueness across similar devices
+    voterId = 'fp_' + Math.abs(hash).toString(36) + '_' + Date.now().toString(36);
     localStorage.setItem('voter_id', voterId);
   }
   return voterId;
