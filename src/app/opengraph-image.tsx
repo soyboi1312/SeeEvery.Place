@@ -73,7 +73,7 @@ export default async function Image() {
             <path
               d="M236 228l-20-20-12 12 32 32 64-64-12-12-52 52z"
               fill={blue}
-              transform="scale(1.2) translate(-22, -22)"
+              transform="scale(1.2) translate(-39, -41)"
             />
           </svg>
         </div>
