@@ -53,33 +53,32 @@ export async function mergeSelectionsFromCloud(
   localSelections: UserSelections,
   cloudSelections: UserSelections
 ): Promise<UserSelections> {
-  // Merge strategy: combine unique selections, preferring visited over bucket list
+  // Merge strategy: LOCAL is the source of truth
+  // - Items in local stay as-is (including deletions)
+  // - Items ONLY in cloud get added (synced from other devices)
+  // - This prevents "zombie" data where deleted items reappear
   const merged: UserSelections = { ...emptySelections };
 
   const categories = Object.keys(localSelections) as (keyof UserSelections)[];
 
   for (const category of categories) {
-    const localItems = localSelections[category];
-    const cloudItems = cloudSelections[category];
+    const localItems = localSelections[category] || [];
+    const cloudItems = cloudSelections[category] || [];
 
-    // Create a map of all items
+    // Start with local items as the base (preserves deletions)
+    const localIds = new Set(localItems.map(item => item.id));
     const itemMap = new Map<string, { id: string; status: 'visited' | 'bucketList' | 'unvisited' }>();
 
-    // Add cloud items first
-    for (const item of cloudItems) {
+    // Add all local items first (local is truth)
+    for (const item of localItems) {
       itemMap.set(item.id, item);
     }
 
-    // Add/override with local items (local takes precedence for conflicts)
-    for (const item of localItems) {
-      const existing = itemMap.get(item.id);
-      if (!existing) {
+    // Only add cloud items that DON'T exist locally
+    // (these are new items from other devices)
+    for (const item of cloudItems) {
+      if (!localIds.has(item.id)) {
         itemMap.set(item.id, item);
-      } else {
-        // If local is visited, it takes precedence
-        if (item.status === 'visited' || existing.status !== 'visited') {
-          itemMap.set(item.id, item);
-        }
       }
     }
 
