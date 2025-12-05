@@ -470,6 +470,110 @@ function renderSportMarker(sport: string | undefined, fillColor: string) {
   }
 }
 
+// Mountain peak marker for share card (smaller scale)
+function renderMountainMarkerSmall(fillColor: string) {
+  const strokeColor = "#ffffff";
+  return (
+    <g transform="translate(-6, -10) scale(0.5)">
+      {/* Mountain shape */}
+      <path
+        d="M3 20h18L12 5l-9 15z"
+        fill={fillColor}
+        stroke={strokeColor}
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      {/* Snow cap / ridge detail */}
+      <path
+        d="M7.5 12.5l2.5 2 2-2 2 2 2.5-2"
+        fill="none"
+        stroke={strokeColor}
+        strokeWidth="1"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      {/* Flag pole */}
+      <path
+        d="M12 5V1"
+        stroke={strokeColor}
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
+      {/* Flag */}
+      <path
+        d="M12 1l5 2-5 2"
+        fill={strokeColor}
+        stroke={strokeColor}
+        strokeWidth="1"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </g>
+  );
+}
+
+// F1 car marker for share card (smaller scale)
+function renderF1CarMarkerSmall(fillColor: string) {
+  const strokeColor = "#ffffff";
+  return (
+    <g transform="translate(-6, -8) scale(0.5)">
+      {/* Rear wing */}
+      <path
+        d="M2 8h4v3h-3"
+        fill={fillColor}
+        stroke={strokeColor}
+        strokeWidth="1"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      {/* Rear wheel */}
+      <circle cx="7" cy="15" r="3" fill={fillColor} stroke={strokeColor} strokeWidth="1" />
+      {/* Front wheel */}
+      <circle cx="17" cy="15" r="3" fill={fillColor} stroke={strokeColor} strokeWidth="1" />
+      {/* Body/chassis */}
+      <path
+        d="M10 15h4"
+        stroke={strokeColor}
+        strokeWidth="1"
+        strokeLinecap="round"
+      />
+      {/* Cockpit/halo */}
+      <path
+        d="M7 12c1-2 2-4 5-4h2c2 0 4 2 6 4"
+        fill={fillColor}
+        stroke={strokeColor}
+        strokeWidth="1"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      {/* Front wing */}
+      <path
+        d="M20 15h2v-2h-3"
+        fill={fillColor}
+        stroke={strokeColor}
+        strokeWidth="1"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      {/* Air intake */}
+      <path
+        d="M11 8l2 0"
+        stroke={strokeColor}
+        strokeWidth="1"
+        strokeLinecap="round"
+      />
+      {/* Side detail */}
+      <path
+        d="M13 10h2"
+        stroke={strokeColor}
+        strokeWidth="1"
+        strokeLinecap="round"
+      />
+    </g>
+  );
+}
+
 // Static Marker Map for sharing (world map with flag markers)
 function StaticMarkerMap({
   category,
@@ -482,11 +586,36 @@ function StaticMarkerMap({
 }) {
   const allMarkers = getCategoryMarkers(category, selections, subcategory);
 
-  // For national parks, use US map and filter out territories that can't be displayed
-  const isUSOnly = category === 'nationalParks';
+  // US-only categories: National Parks, State Parks, and Fourteeners
+  const isUSOnly = category === 'nationalParks' || category === 'stateParks' || category === 'fourteeners';
   const markers = isUSOnly
     ? allMarkers.filter(marker => !unsupportedUSTerritoriesParks.includes(marker.id))
     : allMarkers;
+
+  // Get US map marker based on category
+  const getUSMarkerIcon = (marker: MarkerData) => {
+    const fillColor = marker.status === 'visited' ? '#22c55e' : '#f59e0b';
+
+    if (category === 'fourteeners') {
+      return renderMountainMarkerSmall(fillColor);
+    }
+
+    // Default flag marker for parks
+    return (
+      <g transform="translate(-6, -12)">
+        {/* Flag pole */}
+        <line x1="1" y1="2" x2="1" y2="12" stroke="#1e3a5f" strokeWidth="1.5" strokeLinecap="round" />
+        {/* Waving Flag */}
+        <path
+          d="M1 2C1 2 4 1 6 2C8 3 11 2 11 2V7C11 7 8 8 6 7C4 6 1 7 1 7V2Z"
+          fill={fillColor}
+          stroke="#ffffff"
+          strokeWidth="0.5"
+          strokeLinejoin="round"
+        />
+      </g>
+    );
+  };
 
   if (isUSOnly) {
     return (
@@ -517,26 +646,18 @@ function StaticMarkerMap({
         </Geographies>
         {markers.map((marker, index) => (
           <Marker key={index} coordinates={marker.coordinates}>
-            <g transform="translate(-6, -12)">
-              {/* Flag pole */}
-              <line x1="1" y1="2" x2="1" y2="12" stroke="#1e3a5f" strokeWidth="1.5" strokeLinecap="round" />
-              {/* Waving Flag */}
-              <path
-                d="M1 2C1 2 4 1 6 2C8 3 11 2 11 2V7C11 7 8 8 6 7C4 6 1 7 1 7V2Z"
-                fill={marker.status === 'visited' ? '#22c55e' : '#f59e0b'}
-                stroke="#ffffff"
-                strokeWidth="0.5"
-                strokeLinejoin="round"
-              />
-            </g>
+            {getUSMarkerIcon(marker)}
           </Marker>
         ))}
       </ComposableMap>
     );
   }
 
-  // Check if this is marathons category (uses shoe marker) or stadiums (uses sport-specific markers)
+  // Check category types for appropriate markers
+  // Note: fourteeners is handled above in US-only section, so only fiveKPeaks needs mountain marker here
   const isMarathons = category === 'marathons';
+  const isMountains = category === 'fiveKPeaks';
+  const isF1Tracks = category === 'f1Tracks';
   const isStadiums = category === 'stadiums';
 
   // Get the appropriate marker icon based on category and sport
@@ -575,11 +696,19 @@ function StaticMarkerMap({
       );
     }
 
+    if (isMountains) {
+      return renderMountainMarkerSmall(fillColor);
+    }
+
+    if (isF1Tracks) {
+      return renderF1CarMarkerSmall(fillColor);
+    }
+
     if (isStadiums) {
       return renderSportMarker(marker.sport, fillColor);
     }
 
-    // Default flag marker for other categories
+    // Default flag marker for other categories (UNESCO, Museums)
     return (
       <g transform="translate(-4, -8)">
         <line x1="1" y1="1.5" x2="1" y2="8" stroke="#1e3a5f" strokeWidth="1" strokeLinecap="round" />
