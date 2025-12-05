@@ -94,8 +94,8 @@ function StaticMarkerMap({
             ))
           }
         </Geographies>
-        {markers.map((marker, index) => (
-          <Marker key={index} coordinates={marker.coordinates}>
+        {markers.map((marker) => (
+          <Marker key={marker.id} coordinates={marker.coordinates}>
             {getUSMarkerIcon(marker)}
           </Marker>
         ))}
@@ -162,8 +162,8 @@ function StaticMarkerMap({
           ))
         }
       </Geographies>
-      {markers.map((marker, index) => (
-        <Marker key={index} coordinates={marker.coordinates}>
+      {markers.map((marker) => (
+        <Marker key={marker.id} coordinates={marker.coordinates}>
           {getMarkerIcon(marker)}
         </Marker>
       ))}

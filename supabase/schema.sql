@@ -158,9 +158,14 @@ end;
 $$ language plpgsql security definer;
 
 -- Admin emails table policies
-create policy "Only admins can view admin_emails"
+-- Allow authenticated users to check if their own email is in the admin list
+-- (Required for middleware to verify admin status without circular dependency)
+create policy "Authenticated users can check own admin status"
   on public.admin_emails for select
-  using (public.is_admin());
+  using (
+    auth.role() = 'authenticated'
+    and email = lower(auth.jwt() ->> 'email')
+  );
 
 create policy "Only admins can insert admin_emails"
   on public.admin_emails for insert

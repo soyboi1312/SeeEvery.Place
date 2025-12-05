@@ -1,19 +1,6 @@
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
-// Admin emails can be configured via environment variable (comma-separated)
-function getAdminEmails(): string[] {
-  const adminEmails = process.env.ADMIN_EMAILS || process.env.NEXT_PUBLIC_ADMIN_EMAIL;
-  if (!adminEmails) return [];
-  return adminEmails.split(',').map(email => email.trim().toLowerCase());
-}
-
-function isAdminEmail(email: string | undefined): boolean {
-  if (!email) return false;
-  const adminEmails = getAdminEmails();
-  return adminEmails.includes(email.toLowerCase());
-}
-
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
     request,
@@ -63,8 +50,14 @@ export async function updateSession(request: NextRequest) {
       return NextResponse.redirect(redirectUrl);
     }
 
-    // User is not an admin, redirect to home
-    if (!isAdminEmail(user.email)) {
+    // Check if user is admin by querying the database (single source of truth)
+    const { data: adminRecord } = await supabase
+      .from('admin_emails')
+      .select('id')
+      .eq('email', user.email?.toLowerCase())
+      .single();
+
+    if (!adminRecord) {
       const redirectUrl = new URL('/', request.url);
       redirectUrl.searchParams.set('error', 'unauthorized');
       return NextResponse.redirect(redirectUrl);
