@@ -3,10 +3,9 @@
  */
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { ComposableMap, Geographies, Geography, ZoomableGroup, Sphere, Graticule, Marker } from 'react-simple-maps';
 import { Category, UserSelections, Status } from '@/lib/types';
-import { getSelectionStatus } from '@/lib/storage';
 import {
   GEO_URL_WORLD,
   GEO_URL_USA,
@@ -97,6 +96,20 @@ function getItemName(category: Category, id: string): string {
 }
 
 function WorldMap({ selections, onToggle, tooltip }: { selections: UserSelections; onToggle?: (id: string, currentStatus: Status) => void; tooltip: TooltipHandlers }) {
+  // Memoize status lookup for O(1) access instead of O(n) per geography
+  const statusMap = useMemo(() => {
+    const map = new Map<string, Status>();
+    const countrySelections = selections.countries || [];
+    for (const sel of countrySelections) {
+      map.set(sel.id, sel.status);
+    }
+    return map;
+  }, [selections.countries]);
+
+  const getStatus = useCallback((id: string): Status => {
+    return statusMap.get(id) || 'unvisited';
+  }, [statusMap]);
+
   return (
     <ComposableMap
       projection="geoEqualEarth"
@@ -111,7 +124,7 @@ function WorldMap({ selections, onToggle, tooltip }: { selections: UserSelection
             geographies.map((geo) => {
               const countryName = geo.properties.name;
               const id = countryNameToISO[countryName] || geo.properties["ISO_A2"] || geo.id;
-              const status = id ? getSelectionStatus(selections, 'countries', id) : 'unvisited';
+              const status = id ? getStatus(id) : 'unvisited';
               const statusClass = status === 'bucketList' ? 'bucket-list' : status;
 
               return (
@@ -153,6 +166,20 @@ function WorldMap({ selections, onToggle, tooltip }: { selections: UserSelection
 }
 
 function USMap({ selections, onToggle, tooltip }: { selections: UserSelections; onToggle?: (id: string, currentStatus: Status) => void; tooltip: TooltipHandlers }) {
+  // Memoize status lookup for O(1) access instead of O(n) per geography
+  const statusMap = useMemo(() => {
+    const map = new Map<string, Status>();
+    const stateSelections = selections.states || [];
+    for (const sel of stateSelections) {
+      map.set(sel.id, sel.status);
+    }
+    return map;
+  }, [selections.states]);
+
+  const getStatus = useCallback((id: string): Status => {
+    return statusMap.get(id) || 'unvisited';
+  }, [statusMap]);
+
   return (
     <ComposableMap
       projection="geoAlbersUsa"
@@ -166,7 +193,7 @@ function USMap({ selections, onToggle, tooltip }: { selections: UserSelections; 
               const fips = geo.id as string;
               const id = fipsToAbbr[fips];
               const name = geo.properties.name;
-              const status = id ? getSelectionStatus(selections, 'states', id) : 'unvisited';
+              const status = id ? getStatus(id) : 'unvisited';
               const statusClass = status === 'bucketList' ? 'bucket-list' : status;
 
               return (

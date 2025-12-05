@@ -1,16 +1,27 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import type { User, Session } from '@supabase/supabase-js';
+import type { User, Session, SupabaseClient } from '@supabase/supabase-js';
 
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // Use ref to store singleton client (avoids SSR issues with useMemo)
+  const clientRef = useRef<SupabaseClient | null>(null);
+
+  // Get or create the singleton client (browser-only)
+  const getClient = useCallback(() => {
+    if (!clientRef.current) {
+      clientRef.current = createClient();
+    }
+    return clientRef.current;
+  }, []);
+
   useEffect(() => {
-    const supabase = createClient();
+    const supabase = getClient();
 
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -29,46 +40,42 @@ export function useAuth() {
     );
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [getClient]);
 
-  const signInWithGoogle = async () => {
-    const supabase = createClient();
-    const { error } = await supabase.auth.signInWithOAuth({
+  const signInWithGoogle = useCallback(async () => {
+    const { error } = await getClient().auth.signInWithOAuth({
       provider: 'google',
       options: {
         redirectTo: `${window.location.origin}/auth/callback`,
       },
     });
     if (error) throw error;
-  };
+  }, [getClient]);
 
-  const signInWithApple = async () => {
-    const supabase = createClient();
-    const { error } = await supabase.auth.signInWithOAuth({
+  const signInWithApple = useCallback(async () => {
+    const { error } = await getClient().auth.signInWithOAuth({
       provider: 'apple',
       options: {
         redirectTo: `${window.location.origin}/auth/callback`,
       },
     });
     if (error) throw error;
-  };
+  }, [getClient]);
 
-  const signInWithEmail = async (email: string) => {
-    const supabase = createClient();
-    const { error } = await supabase.auth.signInWithOtp({
+  const signInWithEmail = useCallback(async (email: string) => {
+    const { error } = await getClient().auth.signInWithOtp({
       email,
       options: {
         emailRedirectTo: `${window.location.origin}/auth/callback`,
       },
     });
     if (error) throw error;
-  };
+  }, [getClient]);
 
-  const signOut = async () => {
-    const supabase = createClient();
-    const { error } = await supabase.auth.signOut();
+  const signOut = useCallback(async () => {
+    const { error } = await getClient().auth.signOut();
     if (error) throw error;
-  };
+  }, [getClient]);
 
   return {
     user,
