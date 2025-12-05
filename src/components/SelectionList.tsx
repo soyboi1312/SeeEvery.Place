@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { Status } from '@/lib/types';
+import { Status, Category } from '@/lib/types';
 
 interface Item {
   id: string;
@@ -21,7 +21,87 @@ interface SelectionListProps {
   showSearch?: boolean;
   title: string;
   stats: { visited: number; bucketList: number; total: number; percentage: number };
+  category?: Category;
 }
+
+// Empty state content by category
+const emptyStateContent: Record<Category, { icon: string; title: string; subtitle: string }> = {
+  countries: {
+    icon: '🌍',
+    title: 'Your World Map Awaits',
+    subtitle: 'Tap any country on the map to mark it as visited and watch your journey unfold!',
+  },
+  states: {
+    icon: '🇺🇸',
+    title: 'Start Your American Adventure',
+    subtitle: 'Click a state to mark it visited. Road trip across all 50 states!',
+  },
+  nationalParks: {
+    icon: '🏞️',
+    title: 'Explore Nature\'s Wonders',
+    subtitle: 'From Yellowstone to Yosemite - mark the parks you\'ve explored!',
+  },
+  stateParks: {
+    icon: '🌲',
+    title: 'Discover Hidden Gems',
+    subtitle: 'State parks offer incredible beauty. Start tracking your visits!',
+  },
+  unesco: {
+    icon: '🏛️',
+    title: 'World Heritage Awaits',
+    subtitle: 'Mark the UNESCO sites you\'ve visited and discover new ones!',
+  },
+  fiveKPeaks: {
+    icon: '🏔️',
+    title: 'Conquer the Giants',
+    subtitle: 'Track the world\'s highest peaks including the mighty 8000ers!',
+  },
+  fourteeners: {
+    icon: '⛰️',
+    title: 'Summit the 14ers',
+    subtitle: 'Colorado\'s iconic peaks await. How many have you conquered?',
+  },
+  museums: {
+    icon: '🎨',
+    title: 'Culture Awaits',
+    subtitle: 'From the Louvre to the Met - track your museum adventures!',
+  },
+  mlbStadiums: {
+    icon: '⚾',
+    title: 'Play Ball!',
+    subtitle: 'Visit every MLB ballpark. Fenway to Dodger Stadium awaits!',
+  },
+  nflStadiums: {
+    icon: '🏈',
+    title: 'Gridiron Glory',
+    subtitle: 'Experience the roar of NFL stadiums across America!',
+  },
+  nbaStadiums: {
+    icon: '🏀',
+    title: 'Nothing But Net',
+    subtitle: 'From MSG to Crypto.com Arena - every court has a story!',
+  },
+  nhlStadiums: {
+    icon: '🏒',
+    title: 'Hit the Ice',
+    subtitle: 'Track your visits to NHL arenas across North America!',
+  },
+  soccerStadiums: {
+    icon: '⚽',
+    title: 'The Beautiful Game',
+    subtitle: 'Camp Nou, Old Trafford, Maracanã - legendary pitches await!',
+  },
+  f1Tracks: {
+    icon: '🏎️',
+    title: 'Start Your Engines',
+    subtitle: 'Monaco, Silverstone, Monza - experience F1 circuits worldwide!',
+  },
+  marathons: {
+    icon: '🏃',
+    title: 'Chase the Majors',
+    subtitle: 'Track the World Marathon Majors. 42.195km of glory awaits!',
+  },
+};
 
 export default function SelectionList({
   items,
@@ -33,6 +113,7 @@ export default function SelectionList({
   showSearch = true,
   title,
   stats,
+  category,
 }: SelectionListProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterMode, setFilterMode] = useState<'all' | 'visited' | 'bucketList' | 'unvisited'>('all');
@@ -160,9 +241,50 @@ export default function SelectionList({
           </div>
         ))}
 
-        {filteredItems.length === 0 && (
+        {/* Empty state when no items match search */}
+        {filteredItems.length === 0 && searchQuery && (
           <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-            No items found matching your search
+            No items found matching &quot;{searchQuery}&quot;
+          </div>
+        )}
+
+        {/* Compelling empty state when no selections at all */}
+        {filteredItems.length === 0 && !searchQuery && filterMode !== 'all' && (
+          <div className="text-center py-12">
+            <div className="text-5xl mb-4">
+              {filterMode === 'visited' ? '✓' : filterMode === 'bucketList' ? '★' : '○'}
+            </div>
+            <p className="text-gray-500 dark:text-gray-400">
+              {filterMode === 'visited' && 'No visited items yet. Start exploring!'}
+              {filterMode === 'bucketList' && 'No bucket list items yet. Dream big!'}
+              {filterMode === 'unvisited' && 'All items have been visited or added!'}
+            </p>
+          </div>
+        )}
+
+        {/* Welcome empty state when user has no selections */}
+        {stats.visited === 0 && stats.bucketList === 0 && filterMode === 'all' && !searchQuery && category && (
+          <div className="text-center py-12 px-4">
+            <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/30 dark:to-purple-900/30 mb-4">
+              <span className="text-4xl">{emptyStateContent[category].icon}</span>
+            </div>
+            <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-2">
+              {emptyStateContent[category].title}
+            </h3>
+            <p className="text-gray-500 dark:text-gray-400 max-w-sm mx-auto mb-6">
+              {emptyStateContent[category].subtitle}
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
+              <div className="flex items-center gap-2 text-sm text-gray-400 dark:text-gray-500">
+                <span className="w-6 h-6 rounded-full bg-green-500 text-white flex items-center justify-center text-xs font-bold">✓</span>
+                <span>Tap to mark visited</span>
+              </div>
+              <div className="hidden sm:block text-gray-300 dark:text-gray-600">|</div>
+              <div className="flex items-center gap-2 text-sm text-gray-400 dark:text-gray-500">
+                <span className="w-6 h-6 rounded-full bg-amber-500 text-white flex items-center justify-center text-xs font-bold">★</span>
+                <span>Long-press for bucket list</span>
+              </div>
+            </div>
           </div>
         )}
       </div>

@@ -359,6 +359,7 @@ export default function Home() {
           showSearch={true}
           title={categoryTitles[activeCategory]}
           stats={currentStats}
+          category={activeCategory}
         />
 
         {/* Floating Share Button */}

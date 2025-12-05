@@ -61,6 +61,35 @@ export default function AboutPage() {
             Track your adventures, build your bucket list, and share beautiful maps with friends and family.
           </p>
 
+          {/* The Story Section */}
+          <section className="mb-12 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-2xl p-6 md:p-8 border border-blue-100 dark:border-blue-800">
+            <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-4 flex items-center gap-2">
+              <span className="text-2xl">✨</span> Why We Built This
+            </h2>
+            <div className="space-y-4 text-gray-600 dark:text-gray-300">
+              <p>
+                It started with a simple question: <em>&quot;How many countries have I actually visited?&quot;</em>
+              </p>
+              <p>
+                After a road trip through the Southwest, I realized I couldn&apos;t remember which national parks
+                we&apos;d stopped at versus which ones we just drove past. The photos were scattered across phones
+                and cloud folders. The memories were starting to blur together.
+              </p>
+              <p>
+                I wanted something simple - a visual way to see where I&apos;d been and dream about where I&apos;d go next.
+                Not another app that wanted my email, credit card, or to post on my behalf. Just a beautiful map
+                that showed my journey.
+              </p>
+              <p>
+                <strong className="text-gray-800 dark:text-white">So I built one.</strong> And now I&apos;m sharing it with you.
+              </p>
+              <p className="text-sm text-gray-500 dark:text-gray-400 pt-2 border-t border-gray-200 dark:border-gray-700">
+                See Every Place is free, works offline, and your data stays on your device.
+                No sign-up required. No tracking. Just you and your adventures.
+              </p>
+            </div>
+          </section>
+
           <section className="mb-12">
             <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-4">What is See Every Place?</h2>
             <p className="text-gray-600 dark:text-gray-300 mb-4">
