@@ -12,6 +12,7 @@ import { unescoSites } from '@/data/unescoSites';
 import { get5000mPeaks, getUS14ers } from '@/data/mountains';
 import { museums } from '@/data/museums';
 import { getMlbStadiums, getNflStadiums, getNbaStadiums, getNhlStadiums, getSoccerStadiums } from '@/data/stadiums';
+import { f1Tracks } from '@/data/f1Tracks';
 import { marathons } from '@/data/marathons';
 
 // Map Data URLs
@@ -291,6 +292,11 @@ function getItemCoordinates(
     case 'soccerStadiums': {
       const stadium = getSoccerStadiums().find(s => s.id === itemId);
       if (stadium?.lat && stadium?.lng) return [stadium.lng, stadium.lat];
+      return null;
+    }
+    case 'f1Tracks': {
+      const track = f1Tracks.find(t => t.id === itemId);
+      if (track?.lat && track?.lng) return [track.lng, track.lat];
       return null;
     }
     case 'marathons': {
@@ -760,6 +766,7 @@ const categoryTotals: Record<Category, number> = {
   nbaStadiums: getNbaStadiums().length,
   nhlStadiums: getNhlStadiums().length,
   soccerStadiums: getSoccerStadiums().length,
+  f1Tracks: f1Tracks.length,
   marathons: marathons.length,
 };
 
@@ -896,6 +903,8 @@ export default function ShareCard({ selections, category, subcategory, onClose }
           return getNhlStadiums().find(st => st.id === s.id)?.name;
         case 'soccerStadiums':
           return getSoccerStadiums().find(st => st.id === s.id)?.name;
+        case 'f1Tracks':
+          return f1Tracks.find(t => t.id === s.id)?.name;
         case 'marathons':
           return marathons.find(m => m.id === s.id)?.name;
         default:

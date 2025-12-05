@@ -18,6 +18,7 @@ const categories: Category[] = [
   'nbaStadiums',
   'nhlStadiums',
   'soccerStadiums',
+  'f1Tracks',
   'marathons',
 ];
 
@@ -35,6 +36,7 @@ const categoryDescriptions: Record<Category, string> = {
   nbaStadiums: 'Track all 30 NBA arenas. From Madison Square Garden to Crypto.com Arena.',
   nhlStadiums: 'Track all 32 NHL arenas. From the Bell Centre to T-Mobile Arena.',
   soccerStadiums: 'Track soccer stadiums and other sporting venues worldwide. MLS and international venues.',
+  f1Tracks: 'Track Formula 1 race tracks. From Monaco to Silverstone, record every Grand Prix circuit you have visited.',
   marathons: 'Track the World Marathon Majors. Boston, London, Berlin, Chicago, New York, and Tokyo.',
 };
 

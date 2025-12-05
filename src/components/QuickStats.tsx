@@ -10,6 +10,7 @@ import { unescoSites } from '@/data/unescoSites';
 import { get5000mPeaks, getUS14ers } from '@/data/mountains';
 import { museums } from '@/data/museums';
 import { getMlbStadiums, getNflStadiums, getNbaStadiums, getNhlStadiums, getSoccerStadiums } from '@/data/stadiums';
+import { f1Tracks } from '@/data/f1Tracks';
 import { marathons } from '@/data/marathons';
 
 interface QuickStatsProps {
@@ -31,15 +32,16 @@ const categoryTotals: Record<Category, number> = {
   nbaStadiums: getNbaStadiums().length,
   nhlStadiums: getNhlStadiums().length,
   soccerStadiums: getSoccerStadiums().length,
+  f1Tracks: f1Tracks.length,
   marathons: marathons.length,
 };
 
 // All categories displayed as individual tiles
-const displayCategories: Category[] = ['countries', 'states', 'nationalParks', 'stateParks', 'unesco', 'fiveKPeaks', 'fourteeners', 'museums', 'mlbStadiums', 'nflStadiums', 'nbaStadiums', 'nhlStadiums', 'soccerStadiums', 'marathons'];
+const displayCategories: Category[] = ['countries', 'states', 'nationalParks', 'stateParks', 'unesco', 'fiveKPeaks', 'fourteeners', 'museums', 'mlbStadiums', 'nflStadiums', 'nbaStadiums', 'nhlStadiums', 'soccerStadiums', 'f1Tracks', 'marathons'];
 
 export default function QuickStats({ selections, onCategoryClick }: QuickStatsProps) {
   // All actual data categories for calculating total
-  const allCategories: Category[] = ['countries', 'states', 'nationalParks', 'stateParks', 'unesco', 'fiveKPeaks', 'fourteeners', 'museums', 'mlbStadiums', 'nflStadiums', 'nbaStadiums', 'nhlStadiums', 'soccerStadiums', 'marathons'];
+  const allCategories: Category[] = ['countries', 'states', 'nationalParks', 'stateParks', 'unesco', 'fiveKPeaks', 'fourteeners', 'museums', 'mlbStadiums', 'nflStadiums', 'nbaStadiums', 'nhlStadiums', 'soccerStadiums', 'f1Tracks', 'marathons'];
 
   const totalVisited = allCategories.reduce((sum, cat) => {
     return sum + getStats(selections, cat, categoryTotals[cat]).visited;

@@ -12,6 +12,7 @@ import { unescoSites } from '@/data/unescoSites';
 import { get5000mPeaks, getUS14ers } from '@/data/mountains';
 import { museums } from '@/data/museums';
 import { getMlbStadiums, getNflStadiums, getNbaStadiums, getNhlStadiums, getSoccerStadiums } from '@/data/stadiums';
+import { f1Tracks } from '@/data/f1Tracks';
 import { marathons } from '@/data/marathons';
 
 interface MapVisualizationProps {
@@ -507,6 +508,11 @@ function getItemCoordinates(category: Category, itemId: string): [number, number
     case 'soccerStadiums': {
       const stadium = getSoccerStadiums().find(s => s.id === itemId);
       if (stadium?.lat && stadium?.lng) return [stadium.lng, stadium.lat];
+      return null;
+    }
+    case 'f1Tracks': {
+      const track = f1Tracks.find(t => t.id === itemId);
+      if (track?.lat && track?.lng) return [track.lng, track.lat];
       return null;
     }
     case 'marathons': {

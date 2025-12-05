@@ -14,6 +14,7 @@ export type Category =
   | "nbaStadiums"
   | "nhlStadiums"
   | "soccerStadiums"
+  | "f1Tracks"
   | "marathons";
 
 export type Status = "visited" | "bucketList" | "unvisited";
@@ -47,6 +48,7 @@ export interface UserSelections {
   nbaStadiums: Selection[];
   nhlStadiums: Selection[];
   soccerStadiums: Selection[];
+  f1Tracks: Selection[];
   marathons: Selection[];
 }
 
@@ -82,6 +84,7 @@ export const categoryLabels: Record<Category, string> = {
   nbaStadiums: "NBA",
   nhlStadiums: "NHL",
   soccerStadiums: "Soccer",
+  f1Tracks: "F1 Tracks",
   marathons: "Marathon Majors",
 };
 
@@ -107,6 +110,7 @@ export const categoryIcons: Record<Category, ReactNode> = {
   nbaStadiums: "🏀",
   nhlStadiums: "🏒",
   soccerStadiums: "⚽",
+  f1Tracks: "🏎️",
   marathons: "🏃",
 };
 
@@ -124,5 +128,6 @@ export const emptySelections: UserSelections = {
   nbaStadiums: [],
   nhlStadiums: [],
   soccerStadiums: [],
+  f1Tracks: [],
   marathons: [],
 };
