@@ -826,7 +826,7 @@ export default function ShareCard({ selections, category, subcategory, onClose }
 
             {/* Branding */}
             <div className="mt-4 text-center text-xs opacity-60">
-              seeevery.place
+              SeeEvery.Place
             </div>
           </div>
         </div>
