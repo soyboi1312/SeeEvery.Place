@@ -1,5 +1,6 @@
 import { ReactNode } from "react";
 
+// 1. SIMPLIFIED CATEGORIES (Merged Stadiums)
 export type Category =
   | "countries"
   | "states"
@@ -9,26 +10,54 @@ export type Category =
   | "fiveKPeaks"
   | "fourteeners"
   | "museums"
-  | "mlbStadiums"
-  | "nflStadiums"
-  | "nbaStadiums"
-  | "nhlStadiums"
-  | "soccerStadiums"
+  | "stadiums" // Merged Category
   | "f1Tracks"
   | "marathons";
 
 export type Status = "visited" | "bucketList" | "unvisited";
 
-// Subcategory definitions for categories that support filtering (deprecated - now using separate categories)
+// 2. NEW GROUPING SYSTEM
+export type CategoryGroup = 'destinations' | 'nature' | 'sports' | 'culture';
 
-// Map of categories to their subcategories (empty - subcategories are now handled in CategoryTabs)
-export const categorySubcategories: Partial<Record<Category, readonly string[]>> = {};
+export interface GroupConfig {
+  label: string;
+  icon: string;
+  categories: Category[];
+}
 
-// Check if a category has subcategories
-export const hasSubcategories = (category: Category): boolean => {
-  return category in categorySubcategories;
+export const categoryGroups: Record<CategoryGroup, GroupConfig> = {
+  destinations: {
+    label: 'Destinations',
+    icon: '🌍',
+    categories: ['countries', 'states'],
+  },
+  nature: {
+    label: 'Nature',
+    icon: '🌲',
+    categories: ['nationalParks', 'stateParks', 'fiveKPeaks', 'fourteeners'],
+  },
+  sports: {
+    label: 'Sports',
+    icon: '🏆',
+    categories: ['stadiums', 'f1Tracks', 'marathons'],
+  },
+  culture: {
+    label: 'Culture',
+    icon: '🏛️',
+    categories: ['unesco', 'museums'],
+  },
 };
 
+export const getGroupForCategory = (category: Category): CategoryGroup => {
+  for (const [group, config] of Object.entries(categoryGroups)) {
+    if (config.categories.includes(category)) {
+      return group as CategoryGroup;
+    }
+  }
+  return 'destinations';
+};
+
+// 3. UPDATED SELECTIONS INTERFACE
 export interface Selection {
   id: string;
   status: Status;
@@ -43,11 +72,7 @@ export interface UserSelections {
   fiveKPeaks: Selection[];
   fourteeners: Selection[];
   museums: Selection[];
-  mlbStadiums: Selection[];
-  nflStadiums: Selection[];
-  nbaStadiums: Selection[];
-  nhlStadiums: Selection[];
-  soccerStadiums: Selection[];
+  stadiums: Selection[]; // Merged selections
   f1Tracks: Selection[];
   marathons: Selection[];
 }
@@ -70,6 +95,7 @@ export interface UserProfile {
   updatedAt: Date;
 }
 
+// 4. UPDATED LABELS & ICONS
 export const categoryLabels: Record<Category, string> = {
   countries: "Countries",
   states: "US States",
@@ -79,21 +105,9 @@ export const categoryLabels: Record<Category, string> = {
   fiveKPeaks: "5000m+ Peaks",
   fourteeners: "US 14ers",
   museums: "Museums",
-  mlbStadiums: "MLB",
-  nflStadiums: "NFL",
-  nbaStadiums: "NBA",
-  nhlStadiums: "NHL",
-  soccerStadiums: "Soccer",
+  stadiums: "Stadiums", // Generic Label
   f1Tracks: "F1 Tracks",
   marathons: "Marathon Majors",
-};
-
-// US Parks is a parent category that contains nationalParks and stateParks
-export const usParksSubcategories: Category[] = ["nationalParks", "stateParks"];
-
-export const subcategoryLabels: Record<string, string> = {
-  nationalParks: "National Parks",
-  stateParks: "State Parks",
 };
 
 export const categoryIcons: Record<Category, ReactNode> = {
@@ -105,11 +119,7 @@ export const categoryIcons: Record<Category, ReactNode> = {
   fiveKPeaks: "🏔️",
   fourteeners: "⛰️",
   museums: "🎨",
-  mlbStadiums: "⚾",
-  nflStadiums: "🏈",
-  nbaStadiums: "🏀",
-  nhlStadiums: "🏒",
-  soccerStadiums: "⚽",
+  stadiums: "🏟️", // Generic Icon
   f1Tracks: "🏎️",
   marathons: "🏃",
 };
@@ -123,11 +133,10 @@ export const emptySelections: UserSelections = {
   fiveKPeaks: [],
   fourteeners: [],
   museums: [],
-  mlbStadiums: [],
-  nflStadiums: [],
-  nbaStadiums: [],
-  nhlStadiums: [],
-  soccerStadiums: [],
+  stadiums: [],
   f1Tracks: [],
   marathons: [],
 };
+
+// 5. STADIUM FILTER TYPES
+export type StadiumFilter = 'ALL' | 'MLB' | 'NFL' | 'NBA' | 'NHL' | 'Soccer' | 'Cricket' | 'Rugby' | 'Tennis';

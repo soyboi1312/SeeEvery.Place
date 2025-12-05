@@ -1,55 +1,38 @@
 import { UserSelections, emptySelections, Selection, Status, Category } from './types';
-import { stadiums } from '@/data/stadiums';
 import { mountains } from '@/data/mountains';
 
 const STORAGE_KEY = 'travelmap_selections';
 
-// Map sport names from stadium data to category keys
-const sportToCategoryMap: Record<string, keyof UserSelections> = {
-  'Baseball': 'mlbStadiums',
-  'American Football': 'nflStadiums',
-  'Basketball': 'nbaStadiums',
-  'Hockey': 'nhlStadiums',
-  'Football': 'soccerStadiums',
-  'Cricket': 'soccerStadiums',  // Group cricket, rugby, tennis, motorsport with soccer for simplicity
-  'Rugby': 'soccerStadiums',
-  'Tennis': 'soccerStadiums',
-  'Motorsport': 'soccerStadiums',
-};
-
-// Migrate old "stadiums" selections to new sport-specific categories
+// Migrate old sport-specific stadium selections to merged stadiums category
 function migrateStadiumSelections(parsed: Record<string, Selection[]>): Record<string, Selection[]> {
-  if (!parsed.stadiums || parsed.stadiums.length === 0) {
+  const oldCategoryKeys = ['mlbStadiums', 'nflStadiums', 'nbaStadiums', 'nhlStadiums', 'soccerStadiums'];
+  const hasOldCategories = oldCategoryKeys.some(key => parsed[key] && parsed[key].length > 0);
+
+  if (!hasOldCategories) {
     return parsed;
   }
 
   const result = { ...parsed };
-  const oldStadiumSelections = parsed.stadiums;
 
-  // Create a map of stadium IDs to their sports
-  const stadiumSportMap = new Map<string, string>();
-  stadiums.forEach(s => stadiumSportMap.set(s.id, s.sport));
+  // Initialize merged stadiums array
+  if (!result.stadiums) {
+    result.stadiums = [];
+  }
 
-  // Distribute old stadium selections to new categories
-  oldStadiumSelections.forEach((selection: Selection) => {
-    const sport = stadiumSportMap.get(selection.id);
-    if (sport) {
-      const categoryKey = sportToCategoryMap[sport];
-      if (categoryKey) {
-        if (!result[categoryKey]) {
-          result[categoryKey] = [];
-        }
-        // Check if already exists
-        const exists = result[categoryKey].some((s: Selection) => s.id === selection.id);
+  // Merge all old stadium categories into the new unified stadiums category
+  oldCategoryKeys.forEach(key => {
+    if (result[key] && Array.isArray(result[key])) {
+      result[key].forEach((selection: Selection) => {
+        // Check if already exists in merged stadiums
+        const exists = result.stadiums.some((s: Selection) => s.id === selection.id);
         if (!exists) {
-          result[categoryKey].push(selection);
+          result.stadiums.push(selection);
         }
-      }
+      });
+      // Remove old category key
+      delete result[key];
     }
   });
-
-  // Remove old stadiums key
-  delete result.stadiums;
 
   return result;
 }
@@ -109,9 +92,11 @@ export function loadSelections(): UserSelections {
     if (saved) {
       let parsed = JSON.parse(saved);
 
-      // Migrate old stadium selections to new sport-specific categories
       let needsSave = false;
-      if (parsed.stadiums) {
+
+      // Migrate old sport-specific stadium selections to merged stadiums
+      const oldCategoryKeys = ['mlbStadiums', 'nflStadiums', 'nbaStadiums', 'nhlStadiums', 'soccerStadiums'];
+      if (oldCategoryKeys.some(key => parsed[key])) {
         parsed = migrateStadiumSelections(parsed);
         needsSave = true;
       }
@@ -232,7 +217,7 @@ export function getStats(selections: UserSelections, category: Category, total: 
   const categorySelections = selections[category] || [];
   const visited = categorySelections.filter(s => s.status === 'visited').length;
   const bucketList = categorySelections.filter(s => s.status === 'bucketList').length;
-  const percentage = Math.round((visited / total) * 100);
+  const percentage = total > 0 ? Math.round((visited / total) * 100) : 0;
 
   return { visited, bucketList, total, percentage };
 }

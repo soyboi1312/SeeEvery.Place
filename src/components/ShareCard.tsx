@@ -11,7 +11,7 @@ import { stateParks } from '@/data/stateParks';
 import { unescoSites } from '@/data/unescoSites';
 import { get5000mPeaks, getUS14ers } from '@/data/mountains';
 import { museums } from '@/data/museums';
-import { getMlbStadiums, getNflStadiums, getNbaStadiums, getNhlStadiums, getSoccerStadiums } from '@/data/stadiums';
+import { stadiums } from '@/data/stadiums';
 import { f1Tracks } from '@/data/f1Tracks';
 import { marathons } from '@/data/marathons';
 
@@ -269,28 +269,8 @@ function getItemCoordinates(
       }
       return null;
     }
-    case 'mlbStadiums': {
-      const stadium = getMlbStadiums().find(s => s.id === itemId);
-      if (stadium?.lat && stadium?.lng) return [stadium.lng, stadium.lat];
-      return null;
-    }
-    case 'nflStadiums': {
-      const stadium = getNflStadiums().find(s => s.id === itemId);
-      if (stadium?.lat && stadium?.lng) return [stadium.lng, stadium.lat];
-      return null;
-    }
-    case 'nbaStadiums': {
-      const stadium = getNbaStadiums().find(s => s.id === itemId);
-      if (stadium?.lat && stadium?.lng) return [stadium.lng, stadium.lat];
-      return null;
-    }
-    case 'nhlStadiums': {
-      const stadium = getNhlStadiums().find(s => s.id === itemId);
-      if (stadium?.lat && stadium?.lng) return [stadium.lng, stadium.lat];
-      return null;
-    }
-    case 'soccerStadiums': {
-      const stadium = getSoccerStadiums().find(s => s.id === itemId);
+    case 'stadiums': {
+      const stadium = stadiums.find(s => s.id === itemId);
       if (stadium?.lat && stadium?.lng) return [stadium.lng, stadium.lat];
       return null;
     }
@@ -354,17 +334,9 @@ function getCategoryMarkers(
     if (coords) {
       const marker: MarkerData = { coordinates: coords, status: selection.status, id: selection.id };
 
-      // Add sport data for stadium categories
-      if (category === 'mlbStadiums') {
-        marker.sport = 'Baseball';
-      } else if (category === 'nflStadiums') {
-        marker.sport = 'American Football';
-      } else if (category === 'nbaStadiums') {
-        marker.sport = 'Basketball';
-      } else if (category === 'nhlStadiums') {
-        marker.sport = 'Hockey';
-      } else if (category === 'soccerStadiums') {
-        const stadium = getSoccerStadiums().find(s => s.id === selection.id);
+      // Add sport data for merged stadiums category
+      if (category === 'stadiums') {
+        const stadium = stadiums.find(s => s.id === selection.id);
         marker.sport = stadium?.sport || 'Football';
       }
 
@@ -565,7 +537,7 @@ function StaticMarkerMap({
 
   // Check if this is marathons category (uses shoe marker) or stadiums (uses sport-specific markers)
   const isMarathons = category === 'marathons';
-  const isStadiums = category === 'mlbStadiums' || category === 'nflStadiums' || category === 'nbaStadiums' || category === 'nhlStadiums' || category === 'soccerStadiums';
+  const isStadiums = category === 'stadiums';
 
   // Get the appropriate marker icon based on category and sport
   const getMarkerIcon = (marker: MarkerData) => {
@@ -761,11 +733,7 @@ const categoryTotals: Record<Category, number> = {
   fiveKPeaks: get5000mPeaks().length,
   fourteeners: getUS14ers().length,
   museums: museums.length,
-  mlbStadiums: getMlbStadiums().length,
-  nflStadiums: getNflStadiums().length,
-  nbaStadiums: getNbaStadiums().length,
-  nhlStadiums: getNhlStadiums().length,
-  soccerStadiums: getSoccerStadiums().length,
+  stadiums: stadiums.length,
   f1Tracks: f1Tracks.length,
   marathons: marathons.length,
 };
@@ -893,16 +861,8 @@ export default function ShareCard({ selections, category, subcategory, onClose }
           return getUS14ers().find(m => m.id === s.id)?.name;
         case 'museums':
           return museums.find(m => m.id === s.id)?.name;
-        case 'mlbStadiums':
-          return getMlbStadiums().find(st => st.id === s.id)?.name;
-        case 'nflStadiums':
-          return getNflStadiums().find(st => st.id === s.id)?.name;
-        case 'nbaStadiums':
-          return getNbaStadiums().find(st => st.id === s.id)?.name;
-        case 'nhlStadiums':
-          return getNhlStadiums().find(st => st.id === s.id)?.name;
-        case 'soccerStadiums':
-          return getSoccerStadiums().find(st => st.id === s.id)?.name;
+        case 'stadiums':
+          return stadiums.find(st => st.id === s.id)?.name;
         case 'f1Tracks':
           return f1Tracks.find(t => t.id === s.id)?.name;
         case 'marathons':
