@@ -71,12 +71,10 @@ export default function AboutPage() {
                 It started with a simple question: <em>&quot;How many countries have I actually visited?&quot;</em>
               </p>
               <p>
-                After a road trip through the Southwest, I realized I couldn&apos;t remember which national parks
-                we&apos;d stopped at versus which ones we just drove past. The photos were scattered across phones
-                and cloud folders. The memories were starting to blur together.
+                We looked around for some way to log and show where we'd been but the solutions were either too generic, too complicated, or too expensive. 
               </p>
               <p>
-                I wanted something simple - a visual way to see where I&apos;d been and dream about where I&apos;d go next.
+                We wanted something simple - a visual way to see where we&apos;d been and dream about where we&apos;d go next.
                 Not another app that wanted my email, credit card, or to post on my behalf. Just a beautiful map
                 that showed my journey.
               </p>
