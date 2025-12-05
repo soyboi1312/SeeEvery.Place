@@ -1,7 +1,8 @@
 'use client';
 
-import { Category, categoryLabels, categoryIcons, UserSelections } from '@/lib/types';
+import { Category, UserSelections } from '@/lib/types';
 import { getStats } from '@/lib/storage';
+// Data imports for totals
 import { countries } from '@/data/countries';
 import { usStates } from '@/data/usStates';
 import { nationalParks } from '@/data/nationalParks';
@@ -9,7 +10,7 @@ import { stateParks } from '@/data/stateParks';
 import { unescoSites } from '@/data/unescoSites';
 import { get5000mPeaks, getUS14ers } from '@/data/mountains';
 import { museums } from '@/data/museums';
-import { stadiums } from '@/data/stadiums';
+import { getMlbStadiums, getNflStadiums, getNbaStadiums, getNhlStadiums, getSoccerStadiums } from '@/data/stadiums';
 import { f1Tracks } from '@/data/f1Tracks';
 import { marathons } from '@/data/marathons';
 
@@ -17,6 +18,13 @@ interface QuickStatsProps {
   selections: UserSelections;
   onCategoryClick: (category: Category) => void;
 }
+
+// Categories that are "Points of Interest" (everything except countries and states)
+const markerCategories: Category[] = [
+  'nationalParks', 'stateParks', 'unesco', 'fiveKPeaks',
+  'fourteeners', 'museums', 'mlbStadiums', 'nflStadiums',
+  'nbaStadiums', 'nhlStadiums', 'soccerStadiums', 'f1Tracks', 'marathons'
+];
 
 const categoryTotals: Record<Category, number> = {
   countries: countries.length,
@@ -27,74 +35,98 @@ const categoryTotals: Record<Category, number> = {
   fiveKPeaks: get5000mPeaks().length,
   fourteeners: getUS14ers().length,
   museums: museums.length,
-  stadiums: stadiums.length,
+  mlbStadiums: getMlbStadiums().length,
+  nflStadiums: getNflStadiums().length,
+  nbaStadiums: getNbaStadiums().length,
+  nhlStadiums: getNhlStadiums().length,
+  soccerStadiums: getSoccerStadiums().length,
   f1Tracks: f1Tracks.length,
   marathons: marathons.length,
 };
 
-// All categories displayed as individual tiles
-const displayCategories: Category[] = ['countries', 'states', 'nationalParks', 'stateParks', 'unesco', 'fiveKPeaks', 'fourteeners', 'museums', 'stadiums', 'f1Tracks', 'marathons'];
-
 export default function QuickStats({ selections, onCategoryClick }: QuickStatsProps) {
-  // All actual data categories for calculating total
-  const allCategories: Category[] = ['countries', 'states', 'nationalParks', 'stateParks', 'unesco', 'fiveKPeaks', 'fourteeners', 'museums', 'stadiums', 'f1Tracks', 'marathons'];
 
-  const totalVisited = allCategories.reduce((sum, cat) => {
-    return sum + getStats(selections, cat, categoryTotals[cat]).visited;
-  }, 0);
+  // Helper to get stats for a specific category
+  const getCatStats = (cat: Category) => getStats(selections, cat, categoryTotals[cat]);
 
+  // Calculate Aggregates
+  const countryStats = getCatStats('countries');
+  const stateStats = getCatStats('states');
+
+  const markersStats = markerCategories.reduce((acc, cat) => {
+    const stat = getCatStats(cat);
+    return {
+      visited: acc.visited + stat.visited,
+      total: acc.total + stat.total,
+    };
+  }, { visited: 0, total: 0 });
+
+  const markersPercentage = Math.round((markersStats.visited / markersStats.total) * 100) || 0;
+
+  // Render only the "Big 3" Cards
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-4 sm:p-6">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-bold text-gray-800 dark:text-white">Your Travel Stats</h2>
-        <div className="px-3 py-1 bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900/50 dark:to-purple-900/50 rounded-full">
-          <span className="text-sm font-medium bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-            {totalVisited} places visited
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+
+      {/* Card 1: Countries */}
+      <button
+        onClick={() => onCategoryClick('countries')}
+        className="bg-white dark:bg-gray-800 p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition-all text-left group"
+      >
+        <div className="flex justify-between items-start mb-2">
+          <div className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-2xl">🌍</div>
+          <span className="text-xs font-bold px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded-full text-gray-500">
+            {countryStats.percentage}%
           </span>
         </div>
+        <h3 className="text-gray-500 dark:text-gray-400 font-medium text-sm">Countries Visited</h3>
+        <div className="text-3xl font-bold text-gray-800 dark:text-white mt-1">
+          {countryStats.visited}
+          <span className="text-lg text-gray-300 dark:text-gray-600 font-normal">/{countryStats.total}</span>
+        </div>
+        <div className="w-full h-1.5 bg-gray-100 dark:bg-gray-700 rounded-full mt-3 overflow-hidden">
+          <div className="h-full bg-blue-500 rounded-full" style={{ width: `${countryStats.percentage}%` }} />
+        </div>
+      </button>
+
+      {/* Card 2: US States */}
+      <button
+        onClick={() => onCategoryClick('states')}
+        className="bg-white dark:bg-gray-800 p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition-all text-left group"
+      >
+        <div className="flex justify-between items-start mb-2">
+          <div className="p-2 bg-purple-50 dark:bg-purple-900/20 rounded-lg text-2xl">🇺🇸</div>
+          <span className="text-xs font-bold px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded-full text-gray-500">
+            {stateStats.percentage}%
+          </span>
+        </div>
+        <h3 className="text-gray-500 dark:text-gray-400 font-medium text-sm">States Visited</h3>
+        <div className="text-3xl font-bold text-gray-800 dark:text-white mt-1">
+          {stateStats.visited}
+          <span className="text-lg text-gray-300 dark:text-gray-600 font-normal">/{stateStats.total}</span>
+        </div>
+        <div className="w-full h-1.5 bg-gray-100 dark:bg-gray-700 rounded-full mt-3 overflow-hidden">
+          <div className="h-full bg-purple-500 rounded-full" style={{ width: `${stateStats.percentage}%` }} />
+        </div>
+      </button>
+
+      {/* Card 3: Points of Interest (Aggregate) */}
+      <div className="bg-white dark:bg-gray-800 p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 text-left">
+        <div className="flex justify-between items-start mb-2">
+          <div className="p-2 bg-green-50 dark:bg-green-900/20 rounded-lg text-2xl">📍</div>
+          <span className="text-xs font-bold px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded-full text-gray-500">
+            {markersPercentage}%
+          </span>
+        </div>
+        <h3 className="text-gray-500 dark:text-gray-400 font-medium text-sm">Points of Interest</h3>
+        <div className="text-3xl font-bold text-gray-800 dark:text-white mt-1">
+          {markersStats.visited}
+          <span className="text-lg text-gray-300 dark:text-gray-600 font-normal">/{markersStats.total}</span>
+        </div>
+        <p className="text-xs text-gray-400 mt-3">
+          Parks, Stadiums, Landmarks & more
+        </p>
       </div>
 
-      <div className="flex overflow-x-auto pb-4 gap-3 sm:grid sm:grid-cols-4 sm:overflow-visible sm:pb-0 snap-x scrollbar-hide">
-        {displayCategories.map((category) => {
-          const stats = getStats(selections, category, categoryTotals[category]);
-          const icon = categoryIcons[category];
-          const label = categoryLabels[category];
-          const progressWidth = `${stats.percentage}%`;
-
-          return (
-            <button
-              key={category}
-              onClick={() => onCategoryClick(category)}
-              className="min-w-[160px] sm:min-w-0 flex-shrink-0 sm:flex-shrink snap-center text-left p-4 rounded-xl bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 transition-all group border border-transparent hover:border-gray-200 dark:hover:border-gray-500"
-            >
-              <div className="flex items-center gap-2 mb-3">
-                <span className="text-2xl">{icon}</span>
-                <span className="text-sm font-medium text-gray-600 dark:text-gray-300">
-                  {label}
-                </span>
-              </div>
-
-              <div className="text-3xl font-bold text-gray-800 dark:text-white mb-2">
-                {stats.visited}
-                <span className="text-base font-normal text-gray-400 dark:text-gray-500">/{stats.total}</span>
-              </div>
-
-              <div className="h-2 bg-gray-200 dark:bg-gray-600 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-gradient-to-r from-green-400 to-green-500 rounded-full transition-all duration-500"
-                  style={{ width: progressWidth }}
-                />
-              </div>
-
-              {stats.bucketList > 0 && (
-                <div className="text-xs text-amber-600 dark:text-amber-400 mt-2">
-                  ★ {stats.bucketList} on bucket list
-                </div>
-              )}
-            </button>
-          );
-        })}
-      </div>
     </div>
   );
 }
