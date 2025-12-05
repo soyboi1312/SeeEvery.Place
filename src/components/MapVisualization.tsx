@@ -944,6 +944,60 @@ function renderMountainMarker(fillColor: string) {
   );
 }
 
+// F1 car marker for Formula 1 race tracks
+function renderF1CarMarker(fillColor: string) {
+  const strokeColor = "#ffffff";
+  return (
+    <g transform="translate(-12, -12)">
+      {/* Rear wing */}
+      <path
+        d="M2 10h2v4H2z"
+        fill={fillColor}
+        stroke={strokeColor}
+        strokeWidth="1"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      {/* Rear wheel */}
+      <circle cx="7" cy="12" r="3" fill={fillColor} stroke={strokeColor} strokeWidth="1" />
+      {/* Front wheel */}
+      <circle cx="17" cy="12" r="3" fill={fillColor} stroke={strokeColor} strokeWidth="1" />
+      {/* Body/chassis */}
+      <path
+        d="M7 12h10"
+        stroke={strokeColor}
+        strokeWidth="1"
+        strokeLinecap="round"
+      />
+      {/* Cockpit/halo */}
+      <path
+        d="M8 12c0-3 1.5-5 4-5s4 2 4 5"
+        fill={fillColor}
+        stroke={strokeColor}
+        strokeWidth="1"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      {/* Front wing */}
+      <path
+        d="M20 12h2v1h-2z"
+        fill={fillColor}
+        stroke={strokeColor}
+        strokeWidth="1"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      {/* Air intake */}
+      <path
+        d="M10.5 9h3"
+        stroke={strokeColor}
+        strokeWidth="1"
+        strokeLinecap="round"
+      />
+    </g>
+  );
+}
+
 // World Map with flag markers (for UNESCO, Mountains, Museums, Stadiums)
 // Marathons use shoe markers instead of flags
 function WorldMarkerMap({
@@ -960,6 +1014,7 @@ function WorldMarkerMap({
   const markers = getCategoryMarkers(category, selections, subcategory);
   const isMarathons = category === 'marathons';
   const isMountains = category === 'fiveKPeaks' || category === 'fourteeners';
+  const isF1Tracks = category === 'f1Tracks';
   const isStadiums = category === 'mlbStadiums' || category === 'nflStadiums' || category === 'nbaStadiums' || category === 'nhlStadiums' || category === 'soccerStadiums';
 
   // Get the appropriate marker icon based on category and sport
@@ -972,6 +1027,10 @@ function WorldMarkerMap({
 
     if (isMountains) {
       return renderMountainMarker(fillColor);
+    }
+
+    if (isF1Tracks) {
+      return renderF1CarMarker(fillColor);
     }
 
     if (isStadiums) {
