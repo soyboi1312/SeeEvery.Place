@@ -101,6 +101,26 @@ const emptyStateContent: Record<Category, { icon: string; title: string; subtitl
     title: 'Chase the Majors',
     subtitle: 'Track the World Marathon Majors. 42.195km of glory awaits!',
   },
+  airports: {
+    icon: '✈️',
+    title: 'Jet Set Journey',
+    subtitle: 'From JFK to Changi - track the world\'s greatest airports!',
+  },
+  skiResorts: {
+    icon: '⛷️',
+    title: 'Powder Paradise',
+    subtitle: 'Whistler, Zermatt, Niseko - chase the perfect run worldwide!',
+  },
+  themeParks: {
+    icon: '🎢',
+    title: 'Thrill Seeker',
+    subtitle: 'Disney, Universal, Europa-Park - where dreams come true!',
+  },
+  surfingReserves: {
+    icon: '🌊',
+    title: 'Ride the Wave',
+    subtitle: 'Pipeline, Malibu, Teahupo\'o - legendary breaks await!',
+  },
 };
 
 export default function SelectionList({

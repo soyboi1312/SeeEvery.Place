@@ -14,6 +14,10 @@ import { museums } from '@/data/museums';
 import { getMlbStadiums, getNflStadiums, getNbaStadiums, getNhlStadiums, getSoccerStadiums } from '@/data/stadiums';
 import { f1Tracks } from '@/data/f1Tracks';
 import { marathons } from '@/data/marathons';
+import { airports } from '@/data/airports';
+import { skiResorts } from '@/data/skiResorts';
+import { themeParks } from '@/data/themeParks';
+import { surfingReserves } from '@/data/surfingReserves';
 
 interface QuickStatsProps {
   selections: UserSelections;
@@ -24,7 +28,8 @@ interface QuickStatsProps {
 const markerCategories: Category[] = [
   'nationalParks', 'stateParks', 'unesco', 'fiveKPeaks',
   'fourteeners', 'museums', 'mlbStadiums', 'nflStadiums',
-  'nbaStadiums', 'nhlStadiums', 'soccerStadiums', 'f1Tracks', 'marathons'
+  'nbaStadiums', 'nhlStadiums', 'soccerStadiums', 'f1Tracks', 'marathons',
+  'airports', 'skiResorts', 'themeParks', 'surfingReserves'
 ];
 
 const categoryTotals: Record<Category, number> = {
@@ -43,6 +48,10 @@ const categoryTotals: Record<Category, number> = {
   soccerStadiums: getSoccerStadiums().length,
   f1Tracks: f1Tracks.length,
   marathons: marathons.length,
+  airports: airports.length,
+  skiResorts: skiResorts.length,
+  themeParks: themeParks.length,
+  surfingReserves: surfingReserves.length,
 };
 
 // Continent icons and colors

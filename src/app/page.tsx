@@ -43,6 +43,10 @@ import { museums } from '@/data/museums';
 import { getMlbStadiums, getNflStadiums, getNbaStadiums, getNhlStadiums, getSoccerStadiums } from '@/data/stadiums';
 import { f1Tracks } from '@/data/f1Tracks';
 import { marathons } from '@/data/marathons';
+import { airports } from '@/data/airports';
+import { skiResorts } from '@/data/skiResorts';
+import { themeParks } from '@/data/themeParks';
+import { surfingReserves } from '@/data/surfingReserves';
 
 // Common country abbreviation aliases that differ from ISO codes
 const countryAliases: Record<string, string[]> = {
@@ -85,6 +89,10 @@ const categoryTotals: Record<Category, number> = {
   soccerStadiums: getSoccerStadiums().length,
   f1Tracks: f1Tracks.length,
   marathons: marathons.length,
+  airports: airports.length,
+  skiResorts: skiResorts.length,
+  themeParks: themeParks.length,
+  surfingReserves: surfingReserves.length,
 };
 
 export default function Home() {
@@ -251,6 +259,35 @@ export default function Home() {
           group: m.country,
         }));
         break;
+      case 'airports':
+        items = airports.map(a => ({
+          id: a.id,
+          name: `${a.name} (${a.code})`,
+          group: a.region,
+          code: a.code,
+        }));
+        break;
+      case 'skiResorts':
+        items = skiResorts.map(r => ({
+          id: r.id,
+          name: `${r.name} - ${r.location}`,
+          group: r.region,
+        }));
+        break;
+      case 'themeParks':
+        items = themeParks.map(p => ({
+          id: p.id,
+          name: `${p.name} - ${p.location}`,
+          group: p.region,
+        }));
+        break;
+      case 'surfingReserves':
+        items = surfingReserves.map(s => ({
+          id: s.id,
+          name: `${s.name} - ${s.country}`,
+          group: s.region,
+        }));
+        break;
       default:
         items = [];
     }
@@ -287,6 +324,10 @@ export default function Home() {
     soccerStadiums: 'Soccer Stadiums',
     f1Tracks: 'Formula 1 Race Tracks',
     marathons: 'World Marathon Majors',
+    airports: 'Major World Airports',
+    skiResorts: 'World Ski Resorts',
+    themeParks: 'Theme Parks & Attractions',
+    surfingReserves: 'World Surfing Reserves',
   };
 
   if (!isLoaded) {

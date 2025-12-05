@@ -20,6 +20,10 @@ const categories: Category[] = [
   'soccerStadiums',
   'f1Tracks',
   'marathons',
+  'airports',
+  'skiResorts',
+  'themeParks',
+  'surfingReserves',
 ];
 
 const categoryDescriptions: Record<Category, string> = {
@@ -38,6 +42,10 @@ const categoryDescriptions: Record<Category, string> = {
   soccerStadiums: 'Track famous soccer stadiums worldwide. From Camp Nou to Old Trafford, mark every pitch.',
   f1Tracks: 'Track Formula 1 race tracks. From Monaco to Silverstone, record every Grand Prix circuit you have visited.',
   marathons: 'Track the World Marathon Majors. Boston, London, Berlin, Chicago, New York, and Tokyo.',
+  airports: 'Track major airports worldwide. From JFK to Changi, record every hub you have traveled through.',
+  skiResorts: 'Track world-class ski resorts. From Whistler to Zermatt, mark every powder paradise you have conquered.',
+  themeParks: 'Track theme parks and attractions. From Disney to Universal, check off every magical destination.',
+  surfingReserves: 'Track World Surfing Reserves and legendary breaks. From Pipeline to Teahupo\'o, mark every wave you have ridden.',
 };
 
 export function generateStaticParams() {
