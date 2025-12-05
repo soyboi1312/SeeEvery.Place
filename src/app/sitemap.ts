@@ -9,9 +9,17 @@ const categories = [
   'fiveKPeaks',
   'fourteeners',
   'museums',
-  'stadiums',
+  'mlbStadiums',
+  'nflStadiums',
+  'nbaStadiums',
+  'nhlStadiums',
+  'soccerStadiums',
   'f1Tracks',
   'marathons',
+  'airports',
+  'skiResorts',
+  'themeParks',
+  'surfingReserves',
 ]
 
 export default function sitemap(): MetadataRoute.Sitemap {
