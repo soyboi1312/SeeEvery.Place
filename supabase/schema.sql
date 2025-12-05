@@ -132,6 +132,16 @@ create policy "Anyone can submit suggestions"
   on public.suggestions for insert
   with check (true);
 
+-- Authenticated users can update suggestions (for admin approval)
+create policy "Authenticated users can update suggestions"
+  on public.suggestions for update
+  using (auth.role() = 'authenticated');
+
+-- Authenticated users can view all suggestions (including rejected)
+create policy "Authenticated users can view all suggestions"
+  on public.suggestions for select
+  using (auth.role() = 'authenticated');
+
 -- Votes table to track who voted for what
 create table if not exists public.suggestion_votes (
   id uuid default gen_random_uuid() primary key,
