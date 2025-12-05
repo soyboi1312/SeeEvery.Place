@@ -665,7 +665,7 @@ function USMap({ selections, onToggle }: { selections: UserSelections; onToggle?
 // US territories that cannot be displayed on the Albers USA projection
 const unsupportedUSTerritoriesParks = ['american-samoa', 'virgin-islands'];
 
-// US Map with flag markers (for National Parks)
+// US Map with flag markers (for National Parks) or mountain markers (for 14ers)
 function USMarkerMap({
   category,
   selections,
@@ -681,6 +681,32 @@ function USMarkerMap({
   const markers = getCategoryMarkers(category, selections, subcategory).filter(
     marker => !unsupportedUSTerritoriesParks.includes(marker.id)
   );
+  const isMountains = category === 'fourteeners';
+
+  // Get the appropriate marker for the category
+  const getUSMarkerIcon = (marker: MarkerData) => {
+    const fillColor = marker.status === 'visited' ? '#22c55e' : '#f59e0b';
+
+    if (isMountains) {
+      return renderMountainMarker(fillColor);
+    }
+
+    // Default flag marker for parks
+    return (
+      <g transform="translate(-9, -18)">
+        {/* Flag pole */}
+        <line x1="2" y1="3" x2="2" y2="18" stroke="#1e3a5f" strokeWidth="2" strokeLinecap="round" />
+        {/* Waving Flag */}
+        <path
+          d="M2 3C2 3 6 1 10 3C14 5 17 3 17 3V10C17 10 14 12 10 10C6 8 2 10 2 10V3Z"
+          fill={fillColor}
+          stroke="#ffffff"
+          strokeWidth="1"
+          strokeLinejoin="round"
+        />
+      </g>
+    );
+  };
 
   return (
     <ComposableMap
@@ -715,17 +741,8 @@ function USMarkerMap({
               }
             }}
           >
-            <g transform="translate(-9, -18)" className="cursor-pointer">
-              {/* Flag pole */}
-              <line x1="2" y1="3" x2="2" y2="18" stroke="#1e3a5f" strokeWidth="2" strokeLinecap="round" />
-              {/* Waving Flag */}
-              <path
-                d="M2 3C2 3 6 1 10 3C14 5 17 3 17 3V10C17 10 14 12 10 10C6 8 2 10 2 10V3Z"
-                fill={marker.status === 'visited' ? '#22c55e' : '#f59e0b'}
-                stroke="#ffffff"
-                strokeWidth="1"
-                strokeLinejoin="round"
-              />
+            <g className="cursor-pointer">
+              {getUSMarkerIcon(marker)}
             </g>
           </Marker>
         ))}
@@ -884,6 +901,49 @@ function renderSneakerMarker(fillColor: string) {
   );
 }
 
+// Mountain peak marker with summit flag for mountains/peaks
+function renderMountainMarker(fillColor: string) {
+  const strokeColor = "#ffffff";
+  return (
+    <g transform="translate(-12, -20)">
+      {/* Mountain shape */}
+      <path
+        d="M3 20h18L12 5l-9 15z"
+        fill={fillColor}
+        stroke={strokeColor}
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      {/* Snow cap / ridge detail */}
+      <path
+        d="M7.5 12.5l2.5 2 2-2 2 2 2.5-2"
+        fill="none"
+        stroke={strokeColor}
+        strokeWidth="1"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      {/* Flag pole */}
+      <path
+        d="M12 5V1"
+        stroke={strokeColor}
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
+      {/* Flag */}
+      <path
+        d="M12 1l5 2-5 2"
+        fill={strokeColor}
+        stroke={strokeColor}
+        strokeWidth="1"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </g>
+  );
+}
+
 // World Map with flag markers (for UNESCO, Mountains, Museums, Stadiums)
 // Marathons use shoe markers instead of flags
 function WorldMarkerMap({
@@ -899,6 +959,7 @@ function WorldMarkerMap({
 }) {
   const markers = getCategoryMarkers(category, selections, subcategory);
   const isMarathons = category === 'marathons';
+  const isMountains = category === 'fiveKPeaks' || category === 'fourteeners';
   const isStadiums = category === 'mlbStadiums' || category === 'nflStadiums' || category === 'nbaStadiums' || category === 'nhlStadiums' || category === 'soccerStadiums';
 
   // Get the appropriate marker icon based on category and sport
@@ -909,11 +970,15 @@ function WorldMarkerMap({
       return renderSneakerMarker(fillColor);
     }
 
+    if (isMountains) {
+      return renderMountainMarker(fillColor);
+    }
+
     if (isStadiums) {
       return renderSportMarker(marker.sport, fillColor);
     }
 
-    // Default flag marker for other categories (UNESCO, Mountains, Museums)
+    // Default flag marker for other categories (UNESCO, Museums)
     return (
       <g transform="translate(-6, -12)">
         <line x1="1.5" y1="2" x2="1.5" y2="12" stroke="#1e3a5f" strokeWidth="1.5" strokeLinecap="round" />
