@@ -154,6 +154,11 @@ create policy "Anyone can vote"
   on public.suggestion_votes for insert
   with check (true);
 
+-- Anyone can delete their own votes (for unvoting)
+create policy "Anyone can unvote"
+  on public.suggestion_votes for delete
+  using (true);
+
 -- Function to update vote count when a vote is added
 create or replace function public.handle_vote_insert()
 returns trigger as $$
