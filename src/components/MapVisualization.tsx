@@ -486,17 +486,37 @@ export default function MapVisualization({ category, selections, onToggle, subca
   const [tooltip, setTooltip] = useState<TooltipState | null>(null);
 
   // Memoize individual handlers
-  const onMouseEnter = useCallback((content: string, e: React.MouseEvent) => {
-    setTooltip({ content, x: e.clientX, y: e.clientY });
+  // Handle both React synthetic events and native events from react-simple-maps
+  const getMousePosition = useCallback((e: React.MouseEvent | MouseEvent) => {
+    // Try clientX/Y first (most reliable for fixed positioning)
+    if ('clientX' in e && typeof e.clientX === 'number') {
+      return { x: e.clientX, y: e.clientY };
+    }
+    // Fallback to nativeEvent if available
+    if ('nativeEvent' in e && e.nativeEvent) {
+      const native = e.nativeEvent as MouseEvent;
+      return { x: native.clientX, y: native.clientY };
+    }
+    return null;
   }, []);
+
+  const onMouseEnter = useCallback((content: string, e: React.MouseEvent) => {
+    const pos = getMousePosition(e);
+    if (pos) {
+      setTooltip({ content, x: pos.x, y: pos.y });
+    }
+  }, [getMousePosition]);
 
   const onMouseLeave = useCallback(() => {
     setTooltip(null);
   }, []);
 
   const onMouseMove = useCallback((e: React.MouseEvent) => {
-    setTooltip(prev => prev ? { ...prev, x: e.clientX, y: e.clientY } : null);
-  }, []);
+    const pos = getMousePosition(e);
+    if (pos) {
+      setTooltip(prev => prev ? { ...prev, x: pos.x, y: pos.y } : null);
+    }
+  }, [getMousePosition]);
 
   // Memoize the handlers object to prevent unnecessary re-renders of child maps
   const tooltipHandlers: TooltipHandlers = useMemo(() => ({
