@@ -25,6 +25,7 @@ const categories: Category[] = [
   'skiResorts',
   'themeParks',
   'surfingReserves',
+  'weirdAmericana',
 ];
 
 // Category-specific keywords for SEO
@@ -48,6 +49,7 @@ const categoryKeywords: Record<Category, string[]> = {
   skiResorts: ['ski resort tracker', 'slopes visited', 'skiing bucket list', 'powder destinations'],
   themeParks: ['theme park tracker', 'amusement parks visited', 'Disney checklist', 'roller coaster bucket list'],
   surfingReserves: ['surf spot tracker', 'waves surfed', 'surfing bucket list', 'beach breaks visited'],
+  weirdAmericana: ['roadside attractions', 'quirky landmarks', 'weird museums', 'unusual USA sights', 'Americana bucket list'],
 };
 
 // Generate JSON-LD structured data for SEO
@@ -96,6 +98,7 @@ const categoryDescriptions: Record<Category, string> = {
   skiResorts: 'Track world-class ski resorts. From Whistler to Zermatt, mark every powder paradise you have conquered.',
   themeParks: 'Track theme parks and attractions. From Disney to Universal, check off every magical destination.',
   surfingReserves: 'Track World Surfing Reserves and legendary breaks. From Pipeline to Teahupo\'o, mark every wave you have ridden.',
+  weirdAmericana: 'Track quirky roadside attractions across America. From giant balls of twine to mystery spots, collect the weird and wonderful!',
 };
 
 // Example places for each category with unique facts and reasons to visit
@@ -287,6 +290,18 @@ const categoryExamples: Record<Category, PlaceExample[]> = {
     { name: 'Manly Beach, Australia', fact: 'Site of Australia\'s first surfing demonstrations in 1914', reason: 'Surf one of Australia\'s most accessible urban beach breaks' },
     { name: 'Huanchaco, Peru', fact: 'Locals still surf on traditional reed boats called caballitos de totora', reason: 'See 3,000-year-old surfing tradition still practiced today' },
     { name: 'Guéthary, France', fact: 'Part of the Basque Country with big wave surfing at Parlementia', reason: 'Experience European big wave surfing and Basque culture' },
+  ],
+  weirdAmericana: [
+    { name: 'Cadillac Ranch, Texas', fact: 'Ten Cadillacs buried nose-first have been spray-painted by millions of visitors since 1974', reason: 'Add your own layer of paint to this ever-evolving public art installation' },
+    { name: 'World\'s Largest Ball of Twine, Kansas', fact: 'Over 40 feet in circumference, with annual twine-a-thons to keep it growing', reason: 'Witness Midwestern dedication and add your own strand to history' },
+    { name: 'Carhenge, Nebraska', fact: 'Replica of Stonehenge made from 39 vintage cars spray-painted gray', reason: 'See American ingenuity turn junkyard cars into prehistoric art' },
+    { name: 'Winchester Mystery House, California', fact: 'Has stairs leading to ceilings and doors opening to walls, built to confuse ghosts', reason: 'Explore 160 rooms of architectural madness built by a grieving widow' },
+    { name: 'Wall Drug, South Dakota', fact: 'Famous for billboards starting hundreds of miles away advertising free ice water', reason: 'Experience the ultimate American roadside tourist trap' },
+    { name: 'International UFO Museum, New Mexico', fact: 'Located in Roswell, home of the famous 1947 alleged UFO crash', reason: 'Dive into alien conspiracy theories and extraterrestrial exhibits' },
+    { name: 'Salvation Mountain, California', fact: 'One man spent 30 years building this painted desert mountain with adobe and donated paint', reason: 'See Leonard Knight\'s colorful message of love in the California desert' },
+    { name: 'House on the Rock, Wisconsin', fact: 'Contains the world\'s largest carousel with 269 animals but no horses', reason: 'Get lost in eccentric collections including a 200-foot sea creature' },
+    { name: 'Corn Palace, South Dakota', fact: 'Exterior murals made entirely of corn are redesigned every year', reason: 'See the world\'s only palace decorated with thousands of ears of corn' },
+    { name: 'Mystery Spot, California', fact: 'Balls appear to roll uphill and people seem to change height in this gravitational anomaly', reason: 'Experience mind-bending optical illusions in a tilted cabin' },
   ],
 };
 

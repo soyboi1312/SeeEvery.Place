@@ -20,7 +20,8 @@ export type Category =
   | "airports"
   | "skiResorts"
   | "themeParks"
-  | "surfingReserves";
+  | "surfingReserves"
+  | "weirdAmericana";
 
 export type Status = "visited" | "bucketList" | "unvisited";
 
@@ -61,7 +62,7 @@ export const categoryGroups: Record<CategoryGroup, GroupConfig> = {
   culture: {
     label: 'Culture',
     icon: '🏛️',
-    categories: ['unesco', 'museums', 'themeParks'],
+    categories: ['unesco', 'museums', 'themeParks', 'weirdAmericana'],
   },
 };
 
@@ -100,6 +101,7 @@ export interface UserSelections {
   skiResorts: Selection[];
   themeParks: Selection[];
   surfingReserves: Selection[];
+  weirdAmericana: Selection[];
 }
 
 export interface ShareStats {
@@ -141,6 +143,7 @@ export const categoryLabels: Record<Category, string> = {
   skiResorts: "Ski Resorts",
   themeParks: "Theme Parks",
   surfingReserves: "Surfing Reserves",
+  weirdAmericana: "Weird Americana",
 };
 
 export const categoryIcons: Record<Category, ReactNode> = {
@@ -163,6 +166,7 @@ export const categoryIcons: Record<Category, ReactNode> = {
   skiResorts: "⛷️",
   themeParks: "🎢",
   surfingReserves: "🌊",
+  weirdAmericana: "🗿",
 };
 
 export const emptySelections: UserSelections = {
@@ -185,4 +189,5 @@ export const emptySelections: UserSelections = {
   skiResorts: [],
   themeParks: [],
   surfingReserves: [],
+  weirdAmericana: [],
 };

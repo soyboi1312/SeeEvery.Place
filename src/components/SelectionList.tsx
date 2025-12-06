@@ -121,6 +121,11 @@ const emptyStateContent: Record<Category, { icon: string; title: string; subtitl
     title: 'Ride the Wave',
     subtitle: 'Pipeline, Malibu, Teahupo\'o - legendary breaks await!',
   },
+  weirdAmericana: {
+    icon: '🗿',
+    title: 'Discover Weird America',
+    subtitle: 'Giant twine balls, mystery spots, UFO museums - embrace the quirky!',
+  },
 };
 
 export default function SelectionList({

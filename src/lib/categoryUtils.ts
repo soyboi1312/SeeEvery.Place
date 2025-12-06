@@ -56,6 +56,7 @@ export const categoryTotals: Record<Category, number> = {
   skiResorts: 32,
   themeParks: 37,
   surfingReserves: 26,
+  weirdAmericana: 56,
 };
 
 // Category display titles
@@ -79,6 +80,7 @@ export const categoryTitles: Record<Category, string> = {
   skiResorts: 'World Ski Resorts',
   themeParks: 'Theme Parks & Attractions',
   surfingReserves: 'World Surfing Reserves',
+  weirdAmericana: 'Quirky Roadside Attractions',
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -187,6 +189,11 @@ const transforms: Record<Category, TransformFn> = {
     name: `${s.name} - ${s.country}`,
     group: s.region,
   }),
+  weirdAmericana: (w) => ({
+    id: w.id,
+    name: `${w.name} - ${w.city}, ${w.state}`,
+    group: w.region,
+  }),
 };
 
 // Cache for loaded data to avoid re-importing
@@ -260,6 +267,9 @@ async function loadCategoryData(category: Category): Promise<any[]> {
       break;
     case 'surfingReserves':
       data = (await import('@/data/surfingReserves')).surfingReserves;
+      break;
+    case 'weirdAmericana':
+      data = (await import('@/data/weirdAmericana')).weirdAmericana;
       break;
     default:
       data = [];

@@ -18,6 +18,7 @@ import { airports } from '@/data/airports';
 import { skiResorts } from '@/data/skiResorts';
 import { themeParks } from '@/data/themeParks';
 import { surfingReserves } from '@/data/surfingReserves';
+import { weirdAmericana } from '@/data/weirdAmericana';
 
 interface QuickStatsProps {
   selections: UserSelections;
@@ -29,7 +30,7 @@ const markerCategories: Category[] = [
   'nationalParks', 'stateParks', 'unesco', 'fiveKPeaks',
   'fourteeners', 'museums', 'mlbStadiums', 'nflStadiums',
   'nbaStadiums', 'nhlStadiums', 'soccerStadiums', 'f1Tracks', 'marathons',
-  'airports', 'skiResorts', 'themeParks', 'surfingReserves'
+  'airports', 'skiResorts', 'themeParks', 'surfingReserves', 'weirdAmericana'
 ];
 
 const categoryTotals: Record<Category, number> = {
@@ -52,6 +53,7 @@ const categoryTotals: Record<Category, number> = {
   skiResorts: skiResorts.length,
   themeParks: themeParks.length,
   surfingReserves: surfingReserves.length,
+  weirdAmericana: weirdAmericana.length,
 };
 
 // Continent icons and colors
