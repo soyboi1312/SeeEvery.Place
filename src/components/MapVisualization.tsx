@@ -3,7 +3,7 @@
  */
 'use client';
 
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, memo } from 'react';
 import { ComposableMap, Geographies, Geography, ZoomableGroup, Sphere, Graticule, Marker } from 'react-simple-maps';
 import { Category, UserSelections, Status } from '@/lib/types';
 import {
@@ -102,7 +102,7 @@ function getItemName(category: Category, id: string): string {
   }
 }
 
-function WorldMap({ selections, onToggle, tooltip }: { selections: UserSelections; onToggle?: (id: string, currentStatus: Status) => void; tooltip: TooltipHandlers }) {
+const WorldMap = memo(function WorldMap({ selections, onToggle, tooltip }: { selections: UserSelections; onToggle?: (id: string, currentStatus: Status) => void; tooltip: TooltipHandlers }) {
   // Memoize status lookup for O(1) access instead of O(n) per geography
   const statusMap = useMemo(() => {
     const map = new Map<string, Status>();
@@ -170,9 +170,9 @@ function WorldMap({ selections, onToggle, tooltip }: { selections: UserSelection
       </ZoomableGroup>
     </ComposableMap>
   );
-}
+});
 
-function USMap({ selections, onToggle, tooltip }: { selections: UserSelections; onToggle?: (id: string, currentStatus: Status) => void; tooltip: TooltipHandlers }) {
+const USMap = memo(function USMap({ selections, onToggle, tooltip }: { selections: UserSelections; onToggle?: (id: string, currentStatus: Status) => void; tooltip: TooltipHandlers }) {
   // Memoize status lookup for O(1) access instead of O(n) per geography
   const statusMap = useMemo(() => {
     const map = new Map<string, Status>();
@@ -239,10 +239,10 @@ function USMap({ selections, onToggle, tooltip }: { selections: UserSelections; 
       </ZoomableGroup>
     </ComposableMap>
   );
-}
+});
 
 // US Map with specific markers (Parks, Mountains)
-function USMarkerMap({
+const USMarkerMap = memo(function USMarkerMap({
   category,
   selections,
   onToggle,
@@ -335,10 +335,10 @@ function USMarkerMap({
       </ZoomableGroup>
     </ComposableMap>
   );
-}
+});
 
 // World Map with category-specific markers
-function WorldMarkerMap({
+const WorldMarkerMap = memo(function WorldMarkerMap({
   category,
   selections,
   onToggle,
@@ -444,7 +444,7 @@ function WorldMarkerMap({
       </ZoomableGroup>
     </ComposableMap>
   );
-}
+});
 
 // Check if category uses region coloring (countries/states) vs markers (other categories)
 function usesRegionMap(category: Category): boolean {
@@ -486,17 +486,37 @@ export default function MapVisualization({ category, selections, onToggle, subca
   const [tooltip, setTooltip] = useState<TooltipState | null>(null);
 
   // Memoize individual handlers
-  const onMouseEnter = useCallback((content: string, e: React.MouseEvent) => {
-    setTooltip({ content, x: e.clientX, y: e.clientY });
+  // Handle both React synthetic events and native events from react-simple-maps
+  const getMousePosition = useCallback((e: React.MouseEvent | MouseEvent) => {
+    // Try clientX/Y first (most reliable for fixed positioning)
+    if ('clientX' in e && typeof e.clientX === 'number') {
+      return { x: e.clientX, y: e.clientY };
+    }
+    // Fallback to nativeEvent if available
+    if ('nativeEvent' in e && e.nativeEvent) {
+      const native = e.nativeEvent as MouseEvent;
+      return { x: native.clientX, y: native.clientY };
+    }
+    return null;
   }, []);
+
+  const onMouseEnter = useCallback((content: string, e: React.MouseEvent) => {
+    const pos = getMousePosition(e);
+    if (pos) {
+      setTooltip({ content, x: pos.x, y: pos.y });
+    }
+  }, [getMousePosition]);
 
   const onMouseLeave = useCallback(() => {
     setTooltip(null);
   }, []);
 
   const onMouseMove = useCallback((e: React.MouseEvent) => {
-    setTooltip(prev => prev ? { ...prev, x: e.clientX, y: e.clientY } : null);
-  }, []);
+    const pos = getMousePosition(e);
+    if (pos) {
+      setTooltip(prev => prev ? { ...prev, x: pos.x, y: pos.y } : null);
+    }
+  }, [getMousePosition]);
 
   // Memoize the handlers object to prevent unnecessary re-renders of child maps
   const tooltipHandlers: TooltipHandlers = useMemo(() => ({
