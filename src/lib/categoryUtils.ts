@@ -34,9 +34,13 @@ export interface CategoryItem {
   subcategory?: string;
 }
 
-// Static totals - precomputed to avoid loading all data at once
-// Update these values when adding/removing items from data files
-export const categoryTotals: Record<Category, number> = {
+// Cache for loaded data to avoid re-importing (moved up for getCategoryTotal)
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const dataCache: Partial<Record<Category, any[]>> = {};
+
+// Fallback totals for initial SSR render before data loads
+// These are kept in sync via getCategoryTotal() which uses actual data when cached
+const fallbackTotals: Record<Category, number> = {
   countries: 197,
   states: 51,
   nationalParks: 63,
@@ -57,6 +61,25 @@ export const categoryTotals: Record<Category, number> = {
   surfingReserves: 26,
   weirdAmericana: 56,
 };
+
+// Dynamic getter that uses cached data when available, falls back to static values
+export function getCategoryTotal(category: Category): number {
+  const cachedData = dataCache[category];
+  if (cachedData) {
+    return cachedData.length;
+  }
+  return fallbackTotals[category] || 0;
+}
+
+// For backwards compatibility - use getCategoryTotal() for new code
+export const categoryTotals: Record<Category, number> = new Proxy(fallbackTotals, {
+  get(target, prop: string) {
+    if (prop in target) {
+      return getCategoryTotal(prop as Category);
+    }
+    return target[prop as Category];
+  },
+});
 
 // Category display titles
 export const categoryTitles: Record<Category, string> = {
@@ -188,10 +211,6 @@ const transforms: Record<Category, TransformFn> = {
     group: w.region,
   }),
 };
-
-// Cache for loaded data to avoid re-importing
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const dataCache: Partial<Record<Category, any[]>> = {};
 
 // Dynamic data loaders - only load when needed
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
