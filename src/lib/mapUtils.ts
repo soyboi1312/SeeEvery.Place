@@ -16,6 +16,7 @@ import { airports } from '@/data/airports';
 import { skiResorts } from '@/data/skiResorts';
 import { themeParks } from '@/data/themeParks';
 import { surfingReserves } from '@/data/surfingReserves';
+import { weirdAmericana } from '@/data/weirdAmericana';
 
 // Map Data URLs - served locally for reliability (no CDN dependency)
 export const GEO_URL_WORLD = "/geo/countries-110m.json";
@@ -306,6 +307,11 @@ export function getItemCoordinates(category: Category, itemId: string): [number,
     case 'surfingReserves': {
       const reserve = surfingReserves.find(r => r.id === itemId);
       if (reserve?.lat && reserve?.lng) return [reserve.lng, reserve.lat];
+      return null;
+    }
+    case 'weirdAmericana': {
+      const attraction = weirdAmericana.find(w => w.id === itemId);
+      if (attraction?.lat && attraction?.lng) return [attraction.lng, attraction.lat];
       return null;
     }
     default:

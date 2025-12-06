@@ -26,6 +26,7 @@ import { airports } from '@/data/airports';
 import { skiResorts } from '@/data/skiResorts';
 import { themeParks } from '@/data/themeParks';
 import { surfingReserves } from '@/data/surfingReserves';
+import { weirdAmericana } from '@/data/weirdAmericana';
 import {
   SportMarker,
   SneakerMarker,
@@ -90,6 +91,8 @@ function getItemName(category: Category, id: string): string {
       return themeParks.find(p => p.id === id)?.name || id;
     case 'surfingReserves':
       return surfingReserves.find(s => s.id === id)?.name || id;
+    case 'weirdAmericana':
+      return weirdAmericana.find(w => w.id === id)?.name || id;
     default:
       return id;
   }

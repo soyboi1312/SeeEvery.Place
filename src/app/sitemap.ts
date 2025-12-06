@@ -20,6 +20,7 @@ const categories = [
   'skiResorts',
   'themeParks',
   'surfingReserves',
+  'weirdAmericana',
 ]
 
 export default function sitemap(): MetadataRoute.Sitemap {
