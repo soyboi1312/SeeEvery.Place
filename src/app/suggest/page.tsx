@@ -218,7 +218,7 @@ export default function SuggestPage() {
             </div>
             <div className="flex flex-col">
               <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent leading-none">
-                See Every Place
+                See Every Place<span className="text-[10px] align-super">™</span>
               </h1>
               <span className="text-[10px] text-gray-500 dark:text-gray-400 font-medium tracking-wider uppercase hidden sm:block">
                 Free Travel Tracker
@@ -496,6 +496,8 @@ export default function SuggestPage() {
             <Link href="/about" className="hover:text-gray-700 dark:hover:text-gray-200 transition-colors">About</Link>
             <span>•</span>
             <Link href="/privacy" className="hover:text-gray-700 dark:hover:text-gray-200 transition-colors">Privacy</Link>
+            <span>•</span>
+            <Link href="/terms" className="hover:text-gray-700 dark:hover:text-gray-200 transition-colors">Terms</Link>
             <span>•</span>
             <Link href="/suggest" className="hover:text-gray-700 dark:hover:text-gray-200 transition-colors font-medium text-blue-600 dark:text-blue-400">Suggest</Link>
           </div>
