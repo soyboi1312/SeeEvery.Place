@@ -130,7 +130,7 @@ export default function AdminSuggestionsPage() {
             </div>
             <div className="flex flex-col">
               <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent leading-none">
-                See Every Place
+                See Every Place<span className="text-[10px] align-super">™</span>
               </h1>
               <span className="text-[10px] text-gray-500 dark:text-gray-400 font-medium tracking-wider uppercase">
                 Admin Panel
