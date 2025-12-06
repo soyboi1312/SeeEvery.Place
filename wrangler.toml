@@ -3,8 +3,10 @@ compatibility_date = "2024-09-23"
 compatibility_flags = ["nodejs_compat"]
 pages_build_output_dir = ".vercel/output/static"
 
-[vars]
-NEXT_PUBLIC_SUPABASE_URL = "https://miutxzmojvfdpihqvjsa.supabase.co"
-NEXT_PUBLIC_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1pdXR4em1vanZmZHBpaHF2anNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ0MTgyMjYsImV4cCI6MjA3OTk5NDIyNn0.lu0vLGAVpcTTSmu2ytDnECWbGGOQEIMRLYcSCxUnxfA"
-NEXT_PUBLIC_SITE_URL = "https://seeevery.place"
-ADMIN_EMAILS = "spencers@gmail.com"
+# All environment variables are managed in Cloudflare dashboard:
+# Settings > Variables > Environment Variables
+#
+# Required variables:
+#   NEXT_PUBLIC_SUPABASE_URL     - Your Supabase project URL
+#   NEXT_PUBLIC_SUPABASE_ANON_KEY - Your Supabase anon/public key
+#   NEXT_PUBLIC_SITE_URL         - Your site URL (https://seeevery.place)
