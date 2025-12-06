@@ -32,12 +32,15 @@ export function useCloudSync({
   const lastSyncedUserId = useRef<string | null>(null);
   // Track if initial sync is complete
   const initialSyncComplete = useRef(false);
+  // Track last synced data to prevent unnecessary syncs when content hasn't changed
+  const lastSyncedData = useRef<string | null>(null);
 
   // Reset state when user logs out
   useEffect(() => {
     if (!user) {
       lastSyncedUserId.current = null;
       initialSyncComplete.current = false;
+      lastSyncedData.current = null;
     }
   }, [user]);
 
@@ -71,9 +74,10 @@ export function useCloudSync({
           await syncToCloud(selections);
         }
 
-        // Mark this user as synced
+        // Mark this user as synced and record the synced data
         lastSyncedUserId.current = user.id;
         initialSyncComplete.current = true;
+        lastSyncedData.current = JSON.stringify(selections);
       } catch (error) {
         console.error('Cloud sync failed:', error);
       } finally {
@@ -91,10 +95,20 @@ export function useCloudSync({
     // Only sync if user is logged in, data is loaded, and initial sync is done
     if (!user || !isLoaded || !initialSyncComplete.current) return;
 
+    // Serialize current selections for comparison
+    const currentData = JSON.stringify(selections);
+
+    // Skip sync if data hasn't actually changed (prevents unnecessary network calls
+    // when setSelections creates new object references with same content)
+    if (lastSyncedData.current === currentData) return;
+
     const debounceSync = setTimeout(() => {
-      syncToCloud(selections).catch(err =>
-        console.error('Failed to sync changes to cloud:', err)
-      );
+      syncToCloud(selections)
+        .then(() => {
+          // Update last synced data after successful sync
+          lastSyncedData.current = currentData;
+        })
+        .catch(err => console.error('Failed to sync changes to cloud:', err));
     }, 2000); // 2 second debounce
 
     return () => clearTimeout(debounceSync);
