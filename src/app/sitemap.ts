@@ -5,7 +5,6 @@ const categories = [
   'states',
   'nationalParks',
   'stateParks',
-  'unesco',
   'fiveKPeaks',
   'fourteeners',
   'museums',

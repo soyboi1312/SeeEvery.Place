@@ -8,7 +8,6 @@ import { countries, continents, getCountriesByContinent } from '@/data/countries
 import { usStates } from '@/data/usStates';
 import { nationalParks } from '@/data/nationalParks';
 import { stateParks } from '@/data/stateParks';
-import { unescoSites } from '@/data/unescoSites';
 import { get5000mPeaks, getUS14ers } from '@/data/mountains';
 import { museums } from '@/data/museums';
 import { getMlbStadiums, getNflStadiums, getNbaStadiums, getNhlStadiums, getSoccerStadiums } from '@/data/stadiums';
@@ -27,7 +26,7 @@ interface QuickStatsProps {
 
 // Categories that are "Points of Interest" (everything except countries and states)
 const markerCategories: Category[] = [
-  'nationalParks', 'stateParks', 'unesco', 'fiveKPeaks',
+  'nationalParks', 'stateParks', 'fiveKPeaks',
   'fourteeners', 'museums', 'mlbStadiums', 'nflStadiums',
   'nbaStadiums', 'nhlStadiums', 'soccerStadiums', 'f1Tracks', 'marathons',
   'airports', 'skiResorts', 'themeParks', 'surfingReserves', 'weirdAmericana'
@@ -38,7 +37,6 @@ const categoryTotals: Record<Category, number> = {
   states: usStates.length,
   nationalParks: nationalParks.length,
   stateParks: stateParks.length,
-  unesco: unescoSites.length,
   fiveKPeaks: get5000mPeaks().length,
   fourteeners: getUS14ers().length,
   museums: museums.length,

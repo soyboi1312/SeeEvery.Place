@@ -46,11 +46,6 @@ const emptyStateContent: Record<Category, { icon: string; title: string; subtitl
     title: 'Discover Hidden Gems',
     subtitle: 'State parks offer incredible beauty. Start tracking your visits!',
   },
-  unesco: {
-    icon: '🏛️',
-    title: 'World Heritage Awaits',
-    subtitle: 'Mark the UNESCO sites you\'ve visited and discover new ones!',
-  },
   fiveKPeaks: {
     icon: '🏔️',
     title: 'Conquer the Giants',
