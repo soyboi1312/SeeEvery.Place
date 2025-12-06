@@ -212,11 +212,11 @@ function SportMarkerBase({ sport, fillColor, size = 'default' }: SportMarkerProp
 
 export const SportMarker = memo(SportMarkerBase);
 
-// High-fidelity Adizero Evo SL inspired marker
+// High-fidelity Adizero Evo SL inspired marker (25% larger for visibility)
 function SneakerMarkerBase({ fillColor, size = 'default' }: MarkerProps) {
   const isSmall = size === 'small';
-  // Scale up slightly for detail, centering the "contact point" of the shoe (mid-sole) at 0,0
-  const transform = isSmall ? "translate(-8, -8) scale(0.6)" : "translate(-12, -12) scale(1)";
+  // Scale up 25% for better visibility since there are fewer marathon locations
+  const transform = isSmall ? "translate(-10, -10) scale(0.75)" : "translate(-15, -15) scale(1.25)";
 
   // Contrast color for the stripes (white usually looks best against the visited/bucket colors)
   const stripeColor = "#ffffff";
