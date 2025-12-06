@@ -44,15 +44,19 @@ import {
 // US territories that cannot be displayed on the Albers USA projection
 const unsupportedUSTerritoriesParks = ['american-samoa', 'virgin-islands'];
 
+import type { MarkerSize } from './MapMarkers';
+
 // Static Marker Map for sharing (world map with flag markers)
 function StaticMarkerMap({
   category,
   selections,
-  subcategory
+  subcategory,
+  iconSize = 'small'
 }: {
   category: Category;
   selections: UserSelections;
   subcategory?: string;
+  iconSize?: MarkerSize;
 }) {
   const allMarkers = getCategoryMarkers(category, selections, subcategory);
 
@@ -67,15 +71,15 @@ function StaticMarkerMap({
     const fillColor = marker.status === 'visited' ? '#22c55e' : '#f59e0b';
 
     if (category === 'fourteeners') {
-      return <MountainMarker fillColor={fillColor} size="small" />;
+      return <MountainMarker fillColor={fillColor} size={iconSize} />;
     }
 
     if (category === 'nationalParks' || category === 'stateParks') {
-      return <ParkMarker fillColor={fillColor} size="small" />;
+      return <ParkMarker fillColor={fillColor} size={iconSize} />;
     }
 
     // Default flag marker for parks
-    return <FlagMarker fillColor={fillColor} size="small" />;
+    return <FlagMarker fillColor={fillColor} size={iconSize} />;
   };
 
   if (isUSOnly) {
@@ -130,19 +134,19 @@ function StaticMarkerMap({
   const getMarkerIcon = (marker: MarkerData) => {
     const fillColor = marker.status === 'visited' ? '#22c55e' : '#f59e0b';
 
-    if (isMarathons) return <SneakerMarker fillColor={fillColor} size="small" />;
-    if (isMountains) return <MountainMarker fillColor={fillColor} size="small" />;
-    if (isF1Tracks) return <F1CarMarker fillColor={fillColor} size="small" />;
-    if (isAirports) return <AirplaneMarker fillColor={fillColor} size="small" />;
-    if (isStadiums) return <SportMarker sport={marker.sport} fillColor={fillColor} size="small" />;
-    if (isMuseums) return <MuseumMarker fillColor={fillColor} size="small" />;
-    if (isSkiResorts) return <SkiMarker fillColor={fillColor} size="small" />;
-    if (isThemeParks) return <ThemeParkMarker fillColor={fillColor} size="small" />;
-    if (isSurfing) return <SurfingMarker fillColor={fillColor} size="small" />;
-    if (isWeird) return <WeirdMarker fillColor={fillColor} size="small" />;
+    if (isMarathons) return <SneakerMarker fillColor={fillColor} size={iconSize} />;
+    if (isMountains) return <MountainMarker fillColor={fillColor} size={iconSize} />;
+    if (isF1Tracks) return <F1CarMarker fillColor={fillColor} size={iconSize} />;
+    if (isAirports) return <AirplaneMarker fillColor={fillColor} size={iconSize} />;
+    if (isStadiums) return <SportMarker sport={marker.sport} fillColor={fillColor} size={iconSize} />;
+    if (isMuseums) return <MuseumMarker fillColor={fillColor} size={iconSize} />;
+    if (isSkiResorts) return <SkiMarker fillColor={fillColor} size={iconSize} />;
+    if (isThemeParks) return <ThemeParkMarker fillColor={fillColor} size={iconSize} />;
+    if (isSurfing) return <SurfingMarker fillColor={fillColor} size={iconSize} />;
+    if (isWeird) return <WeirdMarker fillColor={fillColor} size={iconSize} />;
 
     // Default flag marker for other categories
-    return <FlagMarker fillColor={fillColor} size="small" />;
+    return <FlagMarker fillColor={fillColor} size={iconSize} />;
   };
 
   return (
@@ -315,6 +319,7 @@ export default function ShareCard({ selections, category, subcategory, onClose }
   const [isDownloading, setIsDownloading] = useState(false);
   const [selectedGradient, setSelectedGradient] = useState(0);
   const [includeMap, setIncludeMap] = useState(true);
+  const [iconSize, setIconSize] = useState<MarkerSize>('small');
 
   const stats = getStats(selections, category, categoryTotals[category]);
 
@@ -477,24 +482,51 @@ export default function ShareCard({ selections, category, subcategory, onClose }
         </div>
 
         {/* Map Toggle */}
-        {(
-          <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-            <label className="flex items-center justify-between cursor-pointer">
-              <span className="text-sm text-gray-600 dark:text-gray-300">Include map snapshot</span>
-              <div className="relative">
-                <input
-                  type="checkbox"
-                  checked={includeMap}
-                  onChange={(e) => setIncludeMap(e.target.checked)}
-                  className="sr-only"
-                />
-                <div className={`w-11 h-6 rounded-full transition-colors ${includeMap ? 'bg-blue-600' : 'bg-gray-300 dark:bg-gray-600'}`}>
-                  <div className={`w-5 h-5 bg-white rounded-full shadow-md transform transition-transform absolute top-0.5 ${includeMap ? 'translate-x-5.5 right-0.5' : 'left-0.5'}`} />
-                </div>
+        <div className="p-4 border-b border-gray-200 dark:border-gray-700 space-y-3">
+          <label className="flex items-center justify-between cursor-pointer">
+            <span className="text-sm text-gray-600 dark:text-gray-300">Include map snapshot</span>
+            <div className="relative">
+              <input
+                type="checkbox"
+                checked={includeMap}
+                onChange={(e) => setIncludeMap(e.target.checked)}
+                className="sr-only"
+              />
+              <div className={`w-11 h-6 rounded-full transition-colors ${includeMap ? 'bg-blue-600' : 'bg-gray-300 dark:bg-gray-600'}`}>
+                <div className={`w-5 h-5 bg-white rounded-full shadow-md transform transition-transform absolute top-0.5 ${includeMap ? 'translate-x-5.5 right-0.5' : 'left-0.5'}`} />
               </div>
-            </label>
-          </div>
-        )}
+            </div>
+          </label>
+
+          {/* Icon Size Toggle - only show for marker-based maps when map is included */}
+          {includeMap && !usesRegionMap(category) && (
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-gray-600 dark:text-gray-300">Icon size</span>
+              <div className="flex gap-1 bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
+                <button
+                  onClick={() => setIconSize('small')}
+                  className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${
+                    iconSize === 'small'
+                      ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm'
+                      : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                  }`}
+                >
+                  Small
+                </button>
+                <button
+                  onClick={() => setIconSize('default')}
+                  className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${
+                    iconSize === 'default'
+                      ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm'
+                      : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                  }`}
+                >
+                  Large
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
 
         {/* Card Preview */}
         <div className="p-4">
@@ -558,7 +590,7 @@ export default function ShareCard({ selections, category, subcategory, onClose }
                       <StaticUSMap selections={selections} />
                     )
                   ) : (
-                    <StaticMarkerMap category={category} selections={selections} subcategory={subcategory} />
+                    <StaticMarkerMap category={category} selections={selections} subcategory={subcategory} iconSize={iconSize} />
                   )}
                 </div>
                 {/* Map Legend */}

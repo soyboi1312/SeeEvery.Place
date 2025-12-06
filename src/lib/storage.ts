@@ -4,6 +4,44 @@ import { stadiums } from '@/data/stadiums';
 
 const STORAGE_KEY = 'travelmap_selections';
 
+// 30 days in milliseconds for cleanup of permanently deleted items
+const PERMANENT_DELETE_THRESHOLD_MS = 30 * 24 * 60 * 60 * 1000;
+
+// Clean up items that have been soft-deleted for more than 30 days
+// This prevents localStorage from growing indefinitely
+function cleanupOldDeletedItems(parsed: Record<string, Selection[]>): { data: Record<string, Selection[]>; cleaned: boolean } {
+  const now = Date.now();
+  let cleaned = false;
+
+  const result: Record<string, Selection[]> = {};
+
+  for (const [category, selections] of Object.entries(parsed)) {
+    if (!Array.isArray(selections)) {
+      result[category] = selections;
+      continue;
+    }
+
+    result[category] = selections.filter((selection: Selection) => {
+      // Keep if not deleted
+      if (!selection.deleted) return true;
+
+      // Keep if deleted but no timestamp (legacy data)
+      if (!selection.updatedAt) return true;
+
+      // Remove if deleted for more than 30 days
+      const deletedDuration = now - selection.updatedAt;
+      if (deletedDuration > PERMANENT_DELETE_THRESHOLD_MS) {
+        cleaned = true;
+        return false;
+      }
+
+      return true;
+    });
+  }
+
+  return { data: result, cleaned };
+}
+
 // Migrate merged stadiums category back to individual sport-specific categories
 function migrateStadiumSelections(parsed: Record<string, Selection[]>): Record<string, Selection[]> {
   // Check if we have a merged stadiums category to split
@@ -130,7 +168,14 @@ export function loadSelections(): UserSelections {
         needsSave = true;
       }
 
-      // Save migrated data back to localStorage
+      // Clean up items deleted more than 30 days ago to prevent storage bloat
+      const cleanup = cleanupOldDeletedItems(parsed);
+      if (cleanup.cleaned) {
+        parsed = cleanup.data;
+        needsSave = true;
+      }
+
+      // Save migrated/cleaned data back to localStorage
       if (needsSave) {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
       }
