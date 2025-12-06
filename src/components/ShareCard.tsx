@@ -302,11 +302,23 @@ const categoryTotals: Record<Category, number> = {
 };
 
 const gradients = [
+  // Vibrant themes
   'from-blue-600 to-purple-700',
   'from-green-500 to-teal-600',
   'from-orange-500 to-red-600',
   'from-pink-500 to-purple-600',
   'from-indigo-600 to-blue-700',
+  // Premium: Midnight Collection
+  'from-gray-900 via-slate-800 to-black',          // Obsidian
+  'from-slate-900 via-indigo-950 to-slate-900',    // Deep Space
+  'from-indigo-950 via-purple-950 to-fuchsia-950', // Royal Velvet
+  // Premium: Metallic Collection
+  'from-yellow-600 via-amber-500 to-yellow-700',   // Gold
+  'from-slate-500 via-gray-400 to-slate-600',      // Platinum
+  'from-rose-400 via-orange-300 to-rose-500',      // Rose Gold
+  // Premium: Nature Collection
+  'from-emerald-900 via-green-800 to-teal-900',    // Forest
+  'from-cyan-900 via-blue-900 to-indigo-900',      // Oceanic
 ];
 
 // Check if category uses colored regions (countries/states) vs markers (other categories)
@@ -468,14 +480,15 @@ export default function ShareCard({ selections, category, subcategory, onClose }
         {/* Color Picker */}
         <div className="p-4 border-b border-gray-200 dark:border-gray-700">
           <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">Choose a style:</p>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             {gradients.map((gradient, index) => (
               <button
                 key={index}
                 onClick={() => setSelectedGradient(index)}
-                className={`w-10 h-10 rounded-lg bg-gradient-to-br ${gradient} ${
+                className={`w-9 h-9 rounded-lg bg-gradient-to-br ${gradient} transition-transform hover:scale-105 ${
                   selectedGradient === index ? 'ring-2 ring-offset-2 ring-blue-500 dark:ring-offset-gray-800' : ''
                 }`}
+                title={index < 5 ? 'Vibrant' : index < 8 ? 'Midnight' : index < 11 ? 'Metallic' : 'Nature'}
               />
             ))}
           </div>
@@ -532,7 +545,7 @@ export default function ShareCard({ selections, category, subcategory, onClose }
         <div className="p-4">
           <div
             ref={cardRef}
-            className={`bg-gradient-to-br ${gradients[selectedGradient]} p-4 sm:p-6 rounded-2xl text-white ${includeMap ? 'min-h-[280px]' : 'aspect-square'} flex flex-col`}
+            className={`bg-gradient-to-br ${gradients[selectedGradient]} p-4 sm:p-6 rounded-2xl text-white ${includeMap ? 'min-h-[280px]' : 'aspect-square'} flex flex-col border border-white/20`}
           >
             {/* Icon & Title */}
             <div className={`text-center ${includeMap ? 'mb-2' : 'mb-4'}`}>
@@ -608,7 +621,7 @@ export default function ShareCard({ selections, category, subcategory, onClose }
             )}
 
             {/* Branding */}
-            <div className="mt-4 text-center text-xs opacity-60">
+            <div className="mt-4 text-center text-xs opacity-70 tracking-widest uppercase font-medium">
               SeeEvery.Place
             </div>
           </div>
