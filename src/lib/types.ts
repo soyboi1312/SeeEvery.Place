@@ -6,7 +6,6 @@ export type Category =
   | "states"
   | "nationalParks"
   | "stateParks"
-  | "unesco"
   | "fiveKPeaks"
   | "fourteeners"
   | "museums"
@@ -62,7 +61,7 @@ export const categoryGroups: Record<CategoryGroup, GroupConfig> = {
   culture: {
     label: 'Culture',
     icon: '🏛️',
-    categories: ['unesco', 'museums', 'themeParks', 'weirdAmericana'],
+    categories: ['museums', 'themeParks', 'weirdAmericana'],
   },
 };
 
@@ -86,7 +85,6 @@ export interface UserSelections {
   states: Selection[];
   nationalParks: Selection[];
   stateParks: Selection[];
-  unesco: Selection[];
   fiveKPeaks: Selection[];
   fourteeners: Selection[];
   museums: Selection[];
@@ -128,7 +126,6 @@ export const categoryLabels: Record<Category, string> = {
   states: "US States",
   nationalParks: "National Parks",
   stateParks: "State Parks",
-  unesco: "UNESCO Sites",
   fiveKPeaks: "5000m+ Peaks",
   fourteeners: "US 14ers",
   museums: "Museums",
@@ -151,7 +148,6 @@ export const categoryIcons: Record<Category, ReactNode> = {
   states: "🇺🇸",
   nationalParks: "🏞️",
   stateParks: "🌲",
-  unesco: "🏛️",
   fiveKPeaks: "🏔️",
   fourteeners: "⛰️",
   museums: "🎨",
@@ -174,7 +170,6 @@ export const emptySelections: UserSelections = {
   states: [],
   nationalParks: [],
   stateParks: [],
-  unesco: [],
   fiveKPeaks: [],
   fourteeners: [],
   museums: [],

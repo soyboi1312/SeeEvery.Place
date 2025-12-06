@@ -16,7 +16,6 @@ import {
 } from '@/lib/mapUtils';
 import { nationalParks } from '@/data/nationalParks';
 import { stateParks } from '@/data/stateParks';
-import { unescoSites } from '@/data/unescoSites';
 import { get5000mPeaks, getUS14ers } from '@/data/mountains';
 import { museums } from '@/data/museums';
 import { getMlbStadiums, getNflStadiums, getNbaStadiums, getNhlStadiums, getSoccerStadiums, type Stadium } from '@/data/stadiums';
@@ -61,8 +60,6 @@ function getItemName(category: Category, id: string): string {
       return nationalParks.find(p => p.id === id)?.name || id;
     case 'stateParks':
       return stateParks.find(p => p.id === id)?.name || id;
-    case 'unesco':
-      return unescoSites.find(s => s.id === id)?.name || id;
     case 'fiveKPeaks':
       return get5000mPeaks().find(m => m.id === id)?.name || id;
     case 'fourteeners':
@@ -316,7 +313,7 @@ function USMarkerMap({
   );
 }
 
-// World Map with flag markers (for UNESCO, Mountains, Museums, Stadiums)
+// World Map with flag markers (for Mountains, Museums, Stadiums)
 // Marathons use shoe markers instead of flags
 function WorldMarkerMap({
   category,
@@ -357,7 +354,7 @@ function WorldMarkerMap({
       return <SportMarker sport={marker.sport} fillColor={fillColor} />;
     }
 
-    // Default flag marker for other categories (UNESCO, Museums)
+    // Default flag marker for other categories (Museums, etc.)
     return <FlagMarker fillColor={fillColor} />;
   };
 

@@ -41,7 +41,6 @@ export const categoryTotals: Record<Category, number> = {
   states: 51,
   nationalParks: 63,
   stateParks: 304,
-  unesco: 213,
   fiveKPeaks: 37,
   fourteeners: 62,
   museums: 46,
@@ -65,7 +64,6 @@ export const categoryTitles: Record<Category, string> = {
   states: 'US States & Territories',
   nationalParks: 'National Parks',
   stateParks: 'State Parks',
-  unesco: 'UNESCO World Heritage Sites',
   fiveKPeaks: '5000m+ Mountain Peaks',
   fourteeners: 'US 14ers (14,000+ ft)',
   museums: 'Famous Museums',
@@ -112,11 +110,6 @@ const transforms: Record<Category, TransformFn> = {
     id: p.id,
     name: `${p.name} - ${p.state}`,
     group: p.region,
-  }),
-  unesco: (u) => ({
-    id: u.id,
-    name: u.name,
-    group: u.country,
   }),
   fiveKPeaks: (m) => ({
     id: m.id,
@@ -222,9 +215,6 @@ async function loadCategoryData(category: Category): Promise<any[]> {
       break;
     case 'stateParks':
       data = (await import('@/data/stateParks')).stateParks;
-      break;
-    case 'unesco':
-      data = (await import('@/data/unescoSites')).unescoSites;
       break;
     case 'fiveKPeaks':
       data = (await import('@/data/mountains')).get5000mPeaks();

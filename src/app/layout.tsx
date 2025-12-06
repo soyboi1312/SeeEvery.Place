@@ -31,7 +31,7 @@ export const metadata: Metadata = {
     'countries visited',
     'US states visited',
     'national parks checklist',
-    'UNESCO world heritage sites',
+    'world heritage sites',
     'travel bucket list',
     'where have I been',
     'travel goals',

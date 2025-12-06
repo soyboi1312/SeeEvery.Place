@@ -8,7 +8,6 @@ import { countries } from '@/data/countries';
 import { usStates } from '@/data/usStates';
 import { nationalParks } from '@/data/nationalParks';
 import { stateParks } from '@/data/stateParks';
-import { unescoSites } from '@/data/unescoSites';
 import { get5000mPeaks, getUS14ers } from '@/data/mountains';
 import { museums } from '@/data/museums';
 import { getMlbStadiums, getNflStadiums, getNbaStadiums, getNhlStadiums, getSoccerStadiums, type Stadium } from '@/data/stadiums';
@@ -131,7 +130,7 @@ function StaticMarkerMap({
       return <SportMarker sport={marker.sport} fillColor={fillColor} size="small" />;
     }
 
-    // Default flag marker for other categories (UNESCO, Museums)
+    // Default flag marker for other categories (Museums, etc.)
     return <FlagMarker fillColor={fillColor} size="small" />;
   };
 
@@ -270,7 +269,6 @@ const categoryTotals: Record<Category, number> = {
   states: usStates.length,
   nationalParks: nationalParks.length,
   stateParks: stateParks.length,
-  unesco: unescoSites.length,
   fiveKPeaks: get5000mPeaks().length,
   fourteeners: getUS14ers().length,
   museums: museums.length,
@@ -398,8 +396,6 @@ export default function ShareCard({ selections, category, subcategory, onClose }
           return usStates.find(st => st.code === s.id)?.name;
         case 'nationalParks':
           return nationalParks.find(p => p.id === s.id)?.name;
-        case 'unesco':
-          return unescoSites.find(u => u.id === s.id)?.name;
         case 'fiveKPeaks':
           return get5000mPeaks().find(m => m.id === s.id)?.name;
         case 'fourteeners':

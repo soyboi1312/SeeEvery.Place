@@ -96,7 +96,7 @@ export default function AboutPage() {
               travel journey, See Every Place makes it easy to keep track of your adventures.
             </p>
             <p className="text-gray-600 dark:text-gray-300">
-              Track countries, US states, national parks, state parks, UNESCO World Heritage Sites, mountain peaks,
+              Track countries, US states, national parks, state parks, mountain peaks,
               world-class museums, sports stadiums, Formula 1 circuits, marathon races, major airports, ski resorts,
               theme parks, and legendary surf spots - all in one place.
             </p>
@@ -117,7 +117,7 @@ export default function AboutPage() {
                 <div className="text-3xl mb-3">📊</div>
                 <h3 className="font-bold text-gray-800 dark:text-white mb-2">Track Everything</h3>
                 <p className="text-gray-600 dark:text-gray-300 text-sm">
-                  Go beyond countries - track parks, UNESCO sites, mountains, museums,
+                  Go beyond countries - track parks, mountains, museums,
                   stadiums, airports, ski resorts, theme parks, and surf spots.
                 </p>
               </div>
@@ -210,16 +210,16 @@ export default function AboutPage() {
                 <h3 className="font-semibold text-gray-800 dark:text-white text-sm uppercase tracking-wide">Culture</h3>
                 <ul className="space-y-2">
                   <li className="flex items-center gap-3">
-                    <span className="text-xl">🏛️</span>
-                    <span><strong className="text-gray-800 dark:text-white">UNESCO Sites</strong> - 200 World Heritage locations</span>
-                  </li>
-                  <li className="flex items-center gap-3">
                     <span className="text-xl">🎨</span>
                     <span><strong className="text-gray-800 dark:text-white">Museums</strong> - World-class art and history</span>
                   </li>
                   <li className="flex items-center gap-3">
                     <span className="text-xl">🎢</span>
                     <span><strong className="text-gray-800 dark:text-white">Theme Parks</strong> - Disney, Universal & more</span>
+                  </li>
+                  <li className="flex items-center gap-3">
+                    <span className="text-xl">🗿</span>
+                    <span><strong className="text-gray-800 dark:text-white">Weird Americana</strong> - Quirky roadside attractions</span>
                   </li>
                 </ul>
               </div>

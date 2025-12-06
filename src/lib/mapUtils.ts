@@ -6,7 +6,6 @@
 import { Category, UserSelections, Status } from '@/lib/types';
 import { nationalParks } from '@/data/nationalParks';
 import { stateParks } from '@/data/stateParks';
-import { unescoSites } from '@/data/unescoSites';
 import { get5000mPeaks, getUS14ers } from '@/data/mountains';
 import { museums } from '@/data/museums';
 import { getMlbStadiums, getNflStadiums, getNbaStadiums, getNhlStadiums, getSoccerStadiums } from '@/data/stadiums';
@@ -232,11 +231,6 @@ export function getItemCoordinates(category: Category, itemId: string): [number,
     case 'stateParks': {
       const park = stateParks.find(p => p.id === itemId);
       if (park?.lat && park?.lng) return [park.lng, park.lat];
-      return null;
-    }
-    case 'unesco': {
-      const site = unescoSites.find(s => s.id === itemId);
-      if (site?.lat && site?.lng) return [site.lng, site.lat];
       return null;
     }
     case 'fiveKPeaks': {
