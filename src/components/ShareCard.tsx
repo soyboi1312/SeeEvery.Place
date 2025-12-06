@@ -18,6 +18,7 @@ import { airports } from '@/data/airports';
 import { skiResorts } from '@/data/skiResorts';
 import { themeParks } from '@/data/themeParks';
 import { surfingReserves } from '@/data/surfingReserves';
+import { weirdAmericana } from '@/data/weirdAmericana';
 import {
   GEO_URL_WORLD,
   GEO_URL_USA,
@@ -284,6 +285,7 @@ const categoryTotals: Record<Category, number> = {
   skiResorts: skiResorts.length,
   themeParks: themeParks.length,
   surfingReserves: surfingReserves.length,
+  weirdAmericana: weirdAmericana.length,
 };
 
 const gradients = [
@@ -426,6 +428,8 @@ export default function ShareCard({ selections, category, subcategory, onClose }
           return themeParks.find(p => p.id === s.id)?.name;
         case 'surfingReserves':
           return surfingReserves.find(sr => sr.id === s.id)?.name;
+        case 'weirdAmericana':
+          return weirdAmericana.find(w => w.id === s.id)?.name;
         default:
           return null;
       }
