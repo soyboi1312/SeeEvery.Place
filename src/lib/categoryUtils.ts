@@ -1,4 +1,35 @@
 import { Category } from '@/lib/types';
+import type { Country } from '@/data/countries';
+import type { USState } from '@/data/usStates';
+import type { NationalPark } from '@/data/nationalParks';
+import type { StatePark } from '@/data/stateParks';
+import type { Mountain } from '@/data/mountains';
+import type { Museum } from '@/data/museums';
+import type { Stadium } from '@/data/stadiums';
+import type { F1Track } from '@/data/f1Tracks';
+import type { Marathon } from '@/data/marathons';
+import type { Airport } from '@/data/airports';
+import type { SkiResort } from '@/data/skiResorts';
+import type { ThemePark } from '@/data/themeParks';
+import type { SurfingReserve } from '@/data/surfingReserves';
+import type { WeirdAmericana } from '@/data/weirdAmericana';
+
+// Union type for all category data items
+type CategoryDataItem =
+  | Country
+  | USState
+  | NationalPark
+  | StatePark
+  | Mountain
+  | Museum
+  | Stadium
+  | F1Track
+  | Marathon
+  | Airport
+  | SkiResort
+  | ThemePark
+  | SurfingReserve
+  | WeirdAmericana;
 
 // Common country abbreviation aliases that differ from ISO codes
 export const countryAliases: Record<string, string[]> = {
@@ -35,8 +66,7 @@ export interface CategoryItem {
 }
 
 // Cache for loaded data to avoid re-importing (moved up for getCategoryTotal)
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const dataCache: Partial<Record<Category, any[]>> = {};
+const dataCache: Partial<Record<Category, CategoryDataItem[]>> = {};
 
 // Fallback totals for initial SSR render before data loads
 // These are kept in sync via getCategoryTotal() which uses actual data when cached
@@ -104,6 +134,8 @@ export const categoryTitles: Record<Category, string> = {
   weirdAmericana: 'Quirky Roadside Attractions',
 };
 
+// Transform functions receive category-specific data at runtime via lookup.
+// Each transform handles properties specific to its category type.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type TransformFn = (item: any) => CategoryItem;
 
@@ -213,15 +245,13 @@ const transforms: Record<Category, TransformFn> = {
 };
 
 // Dynamic data loaders - only load when needed
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function loadCategoryData(category: Category): Promise<any[]> {
+async function loadCategoryData(category: Category): Promise<CategoryDataItem[]> {
   // Return cached data if available
   if (dataCache[category]) {
     return dataCache[category]!;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let data: any[];
+  let data: CategoryDataItem[];
   switch (category) {
     case 'countries':
       data = (await import('@/data/countries')).countries;
