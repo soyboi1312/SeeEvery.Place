@@ -337,6 +337,211 @@ function FlagMarkerBase({ fillColor, size = 'default' }: MarkerProps) {
 }
 export const FlagMarker = memo(FlagMarkerBase);
 
+// -----------------------------------------------------------------------------
+// 7. PARK MARKER (Pine Tree)
+// -----------------------------------------------------------------------------
+
+function ParkMarkerBase({ fillColor, size = 'default' }: MarkerProps) {
+  const isSmall = size === 'small';
+  const transform = isSmall ? "translate(-8, -8) scale(0.6)" : "translate(-12, -12) scale(1)";
+
+  return (
+    <g transform={transform}>
+      {/* Tree trunk */}
+      <rect x="10" y="18" width="4" height="5" fill="#8B4513" stroke={STROKE_COLOR} strokeWidth="0.5" />
+      {/* Tree foliage - 3 tiers */}
+      <path
+        d="M12 2 L 6 10 L 8 10 L 4 16 L 9 16 L 9 18 L 15 18 L 15 16 L 20 16 L 16 10 L 18 10 Z"
+        fill={fillColor}
+        stroke={STROKE_COLOR}
+        strokeWidth="1"
+        strokeLinejoin="round"
+      />
+    </g>
+  );
+}
+export const ParkMarker = memo(ParkMarkerBase);
+
+// -----------------------------------------------------------------------------
+// 8. MUSEUM MARKER (Classical Building)
+// -----------------------------------------------------------------------------
+
+function MuseumMarkerBase({ fillColor, size = 'default' }: MarkerProps) {
+  const isSmall = size === 'small';
+  const transform = isSmall ? "translate(-8, -8) scale(0.6)" : "translate(-12, -12) scale(1)";
+
+  return (
+    <g transform={transform}>
+      {/* Pediment (triangle roof) */}
+      <path
+        d="M12 2 L 3 8 L 21 8 Z"
+        fill={fillColor}
+        stroke={STROKE_COLOR}
+        strokeWidth="1"
+        strokeLinejoin="round"
+      />
+      {/* Frieze */}
+      <rect x="3" y="8" width="18" height="2" fill={fillColor} stroke={STROKE_COLOR} strokeWidth="0.5" />
+      {/* Pillars */}
+      <rect x="4" y="10" width="2" height="10" fill={fillColor} stroke={STROKE_COLOR} strokeWidth="0.5" />
+      <rect x="8" y="10" width="2" height="10" fill={fillColor} stroke={STROKE_COLOR} strokeWidth="0.5" />
+      <rect x="14" y="10" width="2" height="10" fill={fillColor} stroke={STROKE_COLOR} strokeWidth="0.5" />
+      <rect x="18" y="10" width="2" height="10" fill={fillColor} stroke={STROKE_COLOR} strokeWidth="0.5" />
+      {/* Steps */}
+      <rect x="2" y="20" width="20" height="2" fill={fillColor} stroke={STROKE_COLOR} strokeWidth="0.5" />
+      <rect x="1" y="22" width="22" height="1" fill={fillColor} stroke={STROKE_COLOR} strokeWidth="0.3" />
+    </g>
+  );
+}
+export const MuseumMarker = memo(MuseumMarkerBase);
+
+// -----------------------------------------------------------------------------
+// 9. SKI MARKER (Skier)
+// -----------------------------------------------------------------------------
+
+function SkiMarkerBase({ fillColor, size = 'default' }: MarkerProps) {
+  const isSmall = size === 'small';
+  const transform = isSmall ? "translate(-8, -8) scale(0.6)" : "translate(-12, -12) scale(1)";
+
+  return (
+    <g transform={transform}>
+      {/* Head */}
+      <circle cx="14" cy="5" r="3" fill={fillColor} stroke={STROKE_COLOR} strokeWidth="1" />
+      {/* Body (leaning forward) */}
+      <path
+        d="M14 8 L 10 16"
+        stroke={fillColor}
+        strokeWidth="3"
+        strokeLinecap="round"
+      />
+      <path
+        d="M14 8 L 10 16"
+        stroke={STROKE_COLOR}
+        strokeWidth="1"
+        strokeLinecap="round"
+        fill="none"
+      />
+      {/* Arms with poles */}
+      <path d="M12 10 L 6 8 L 5 14" stroke={fillColor} strokeWidth="2" strokeLinecap="round" fill="none" />
+      <path d="M12 10 L 18 8 L 19 14" stroke={fillColor} strokeWidth="2" strokeLinecap="round" fill="none" />
+      <path d="M12 10 L 6 8 L 5 14" stroke={STROKE_COLOR} strokeWidth="0.8" strokeLinecap="round" fill="none" />
+      <path d="M12 10 L 18 8 L 19 14" stroke={STROKE_COLOR} strokeWidth="0.8" strokeLinecap="round" fill="none" />
+      {/* Legs */}
+      <path d="M10 16 L 6 20" stroke={fillColor} strokeWidth="2.5" strokeLinecap="round" />
+      <path d="M10 16 L 14 20" stroke={fillColor} strokeWidth="2.5" strokeLinecap="round" />
+      <path d="M10 16 L 6 20" stroke={STROKE_COLOR} strokeWidth="0.8" strokeLinecap="round" />
+      <path d="M10 16 L 14 20" stroke={STROKE_COLOR} strokeWidth="0.8" strokeLinecap="round" />
+      {/* Skis */}
+      <path d="M3 21 L 9 19" stroke={fillColor} strokeWidth="2" strokeLinecap="round" />
+      <path d="M11 21 L 17 19" stroke={fillColor} strokeWidth="2" strokeLinecap="round" />
+      <path d="M3 21 L 9 19" stroke={STROKE_COLOR} strokeWidth="0.5" strokeLinecap="round" />
+      <path d="M11 21 L 17 19" stroke={STROKE_COLOR} strokeWidth="0.5" strokeLinecap="round" />
+    </g>
+  );
+}
+export const SkiMarker = memo(SkiMarkerBase);
+
+// -----------------------------------------------------------------------------
+// 10. THEME PARK MARKER (Castle)
+// -----------------------------------------------------------------------------
+
+function ThemeParkMarkerBase({ fillColor, size = 'default' }: MarkerProps) {
+  const isSmall = size === 'small';
+  const transform = isSmall ? "translate(-8, -8) scale(0.6)" : "translate(-12, -12) scale(1)";
+
+  return (
+    <g transform={transform}>
+      {/* Main tower */}
+      <rect x="9" y="8" width="6" height="14" fill={fillColor} stroke={STROKE_COLOR} strokeWidth="0.8" />
+      {/* Main tower top */}
+      <path d="M8 8 L 12 2 L 16 8 Z" fill={fillColor} stroke={STROKE_COLOR} strokeWidth="0.8" />
+      {/* Left tower */}
+      <rect x="3" y="12" width="4" height="10" fill={fillColor} stroke={STROKE_COLOR} strokeWidth="0.8" />
+      <path d="M2 12 L 5 7 L 8 12 Z" fill={fillColor} stroke={STROKE_COLOR} strokeWidth="0.8" />
+      {/* Right tower */}
+      <rect x="17" y="12" width="4" height="10" fill={fillColor} stroke={STROKE_COLOR} strokeWidth="0.8" />
+      <path d="M16 12 L 19 7 L 22 12 Z" fill={fillColor} stroke={STROKE_COLOR} strokeWidth="0.8" />
+      {/* Gate */}
+      <path d="M10 22 L 10 17 Q 12 15, 14 17 L 14 22 Z" fill={STROKE_COLOR} opacity="0.8" />
+      {/* Flag on main tower */}
+      <line x1="12" y1="2" x2="12" y2="-1" stroke={STROKE_COLOR} strokeWidth="0.8" />
+      <path d="M12 -1 L 15 0.5 L 12 2 Z" fill={fillColor} stroke={STROKE_COLOR} strokeWidth="0.3" />
+    </g>
+  );
+}
+export const ThemeParkMarker = memo(ThemeParkMarkerBase);
+
+// -----------------------------------------------------------------------------
+// 11. SURFING MARKER (Wave with Board)
+// -----------------------------------------------------------------------------
+
+function SurfingMarkerBase({ fillColor, size = 'default' }: MarkerProps) {
+  const isSmall = size === 'small';
+  const transform = isSmall ? "translate(-8, -8) scale(0.6)" : "translate(-12, -12) scale(1)";
+
+  return (
+    <g transform={transform}>
+      {/* Wave */}
+      <path
+        d="M2 14 Q 6 8, 12 8 Q 18 8, 20 12 Q 22 16, 18 18 Q 14 20, 10 18 Q 6 16, 2 14 Z"
+        fill={fillColor}
+        stroke={STROKE_COLOR}
+        strokeWidth="1"
+      />
+      {/* Wave curl/foam */}
+      <path
+        d="M18 12 Q 16 10, 12 10 Q 8 10, 6 12"
+        fill="none"
+        stroke={STROKE_COLOR}
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
+      {/* Surfboard */}
+      <ellipse
+        cx="12" cy="16" rx="6" ry="1.5"
+        transform="rotate(-15 12 16)"
+        fill={STROKE_COLOR}
+        stroke={fillColor}
+        strokeWidth="0.5"
+      />
+    </g>
+  );
+}
+export const SurfingMarker = memo(SurfingMarkerBase);
+
+// -----------------------------------------------------------------------------
+// 12. WEIRD MARKER (UFO)
+// -----------------------------------------------------------------------------
+
+function WeirdMarkerBase({ fillColor, size = 'default' }: MarkerProps) {
+  const isSmall = size === 'small';
+  const transform = isSmall ? "translate(-8, -8) scale(0.6)" : "translate(-12, -12) scale(1)";
+
+  return (
+    <g transform={transform}>
+      {/* UFO dome */}
+      <ellipse cx="12" cy="8" rx="5" ry="4" fill={fillColor} stroke={STROKE_COLOR} strokeWidth="0.8" />
+      {/* UFO saucer */}
+      <ellipse cx="12" cy="10" rx="10" ry="3" fill={fillColor} stroke={STROKE_COLOR} strokeWidth="1" />
+      {/* Lights on saucer */}
+      <circle cx="6" cy="10" r="1" fill={STROKE_COLOR} />
+      <circle cx="12" cy="11" r="1" fill={STROKE_COLOR} />
+      <circle cx="18" cy="10" r="1" fill={STROKE_COLOR} />
+      {/* Beam */}
+      <path
+        d="M8 13 L 6 22 L 18 22 L 16 13"
+        fill={fillColor}
+        stroke={STROKE_COLOR}
+        strokeWidth="0.5"
+        opacity="0.5"
+      />
+      {/* Dome window */}
+      <ellipse cx="12" cy="7" rx="2" ry="1.5" fill={STROKE_COLOR} opacity="0.6" />
+    </g>
+  );
+}
+export const WeirdMarker = memo(WeirdMarkerBase);
+
 // Exports for backwards compatibility
 export function renderSportMarker(sport: string | undefined, fillColor: string) {
   return <SportMarker sport={sport} fillColor={fillColor} size="default" />;

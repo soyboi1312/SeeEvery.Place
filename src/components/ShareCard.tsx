@@ -33,6 +33,12 @@ import {
   F1CarMarker,
   FlagMarker,
   AirplaneMarker,
+  ParkMarker,
+  MuseumMarker,
+  SkiMarker,
+  ThemeParkMarker,
+  SurfingMarker,
+  WeirdMarker,
 } from './MapMarkers';
 
 // US territories that cannot be displayed on the Albers USA projection
@@ -62,6 +68,10 @@ function StaticMarkerMap({
 
     if (category === 'fourteeners') {
       return <MountainMarker fillColor={fillColor} size="small" />;
+    }
+
+    if (category === 'nationalParks' || category === 'stateParks') {
+      return <ParkMarker fillColor={fillColor} size="small" />;
     }
 
     // Default flag marker for parks
@@ -105,38 +115,33 @@ function StaticMarkerMap({
   }
 
   // Check category types for appropriate markers
-  // Note: fourteeners is handled above in US-only section, so only fiveKPeaks needs mountain marker here
   const isMarathons = category === 'marathons';
   const isMountains = category === 'fiveKPeaks';
   const isF1Tracks = category === 'f1Tracks';
   const isAirports = category === 'airports';
+  const isMuseums = category === 'museums';
+  const isSkiResorts = category === 'skiResorts';
+  const isThemeParks = category === 'themeParks';
+  const isSurfing = category === 'surfingReserves';
+  const isWeird = category === 'weirdAmericana';
   const isStadiums = ['mlbStadiums', 'nflStadiums', 'nbaStadiums', 'nhlStadiums', 'soccerStadiums'].includes(category);
 
   // Get the appropriate marker icon based on category and sport
   const getMarkerIcon = (marker: MarkerData) => {
     const fillColor = marker.status === 'visited' ? '#22c55e' : '#f59e0b';
 
-    if (isMarathons) {
-      return <SneakerMarker fillColor={fillColor} size="small" />;
-    }
+    if (isMarathons) return <SneakerMarker fillColor={fillColor} size="small" />;
+    if (isMountains) return <MountainMarker fillColor={fillColor} size="small" />;
+    if (isF1Tracks) return <F1CarMarker fillColor={fillColor} size="small" />;
+    if (isAirports) return <AirplaneMarker fillColor={fillColor} size="small" />;
+    if (isStadiums) return <SportMarker sport={marker.sport} fillColor={fillColor} size="small" />;
+    if (isMuseums) return <MuseumMarker fillColor={fillColor} size="small" />;
+    if (isSkiResorts) return <SkiMarker fillColor={fillColor} size="small" />;
+    if (isThemeParks) return <ThemeParkMarker fillColor={fillColor} size="small" />;
+    if (isSurfing) return <SurfingMarker fillColor={fillColor} size="small" />;
+    if (isWeird) return <WeirdMarker fillColor={fillColor} size="small" />;
 
-    if (isMountains) {
-      return <MountainMarker fillColor={fillColor} size="small" />;
-    }
-
-    if (isF1Tracks) {
-      return <F1CarMarker fillColor={fillColor} size="small" />;
-    }
-
-    if (isAirports) {
-      return <AirplaneMarker fillColor={fillColor} size="small" />;
-    }
-
-    if (isStadiums) {
-      return <SportMarker sport={marker.sport} fillColor={fillColor} size="small" />;
-    }
-
-    // Default flag marker for other categories (Museums, etc.)
+    // Default flag marker for other categories
     return <FlagMarker fillColor={fillColor} size="small" />;
   };
 
