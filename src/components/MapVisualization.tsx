@@ -32,6 +32,7 @@ import {
   MountainMarker,
   F1CarMarker,
   FlagMarker,
+  AirplaneMarker,
 } from './MapMarkers';
 
 interface MapVisualizationProps {
@@ -332,6 +333,7 @@ function WorldMarkerMap({
   const isMarathons = category === 'marathons';
   const isMountains = category === 'fiveKPeaks' || category === 'fourteeners';
   const isF1Tracks = category === 'f1Tracks';
+  const isAirports = category === 'airports';
   const isStadiums = ['mlbStadiums', 'nflStadiums', 'nbaStadiums', 'nhlStadiums', 'soccerStadiums'].includes(category);
 
   // Get the appropriate marker icon based on category and sport
@@ -348,6 +350,10 @@ function WorldMarkerMap({
 
     if (isF1Tracks) {
       return <F1CarMarker fillColor={fillColor} />;
+    }
+
+    if (isAirports) {
+      return <AirplaneMarker fillColor={fillColor} />;
     }
 
     if (isStadiums) {

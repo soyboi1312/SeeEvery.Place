@@ -1,9 +1,7 @@
 /**
- * Shared map marker SVG components
- * Used by both MapVisualization and ShareCard
- *
- * All marker components are memoized to prevent unnecessary re-renders
- * when rendering many markers on the map.
+ * src/components/MapMarkers.tsx
+ * Shared map marker SVG components.
+ * All marker components are memoized to prevent unnecessary re-renders.
  */
 
 import { memo } from 'react';
@@ -19,7 +17,100 @@ interface SportMarkerProps extends MarkerProps {
   sport: string | undefined;
 }
 
-// Sport-specific marker SVG paths for stadiums
+// -----------------------------------------------------------------------------
+// 1. AIRPLANE MARKER
+// -----------------------------------------------------------------------------
+
+function AirplaneMarkerBase({ fillColor, size = 'default' }: MarkerProps) {
+  const isSmall = size === 'small';
+  const transform = isSmall ? "translate(-8, -8) scale(0.6)" : "translate(-12, -12) scale(1)";
+  const strokeColor = "#ffffff";
+
+  return (
+    <g transform={transform}>
+      {/* Rear Wing (Horizontal Stabilizer) - Far side (peeking out) */}
+      <path
+        d="M17 11 L 21 9 L 22 10 L 19 12 Z"
+        fill={fillColor}
+        stroke={strokeColor}
+        strokeWidth="0.5"
+      />
+
+      {/* Main Fuselage */}
+      <path
+        d="M2 13
+           Q 2 10, 5 9
+           L 7 8
+           L 16 8
+           L 19 4
+           L 22 4
+           L 20.5 10
+           Q 22 11, 22 12
+           Q 22 14, 18 13.5
+           L 10 13.5
+           Q 2 14.5, 2 13 Z"
+        fill={fillColor}
+        stroke={strokeColor}
+        strokeWidth="0.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+
+      {/* Cockpit Windows */}
+      <path
+        d="M5.5 9.5 L 7.5 9"
+        stroke={strokeColor}
+        strokeWidth="1"
+        strokeLinecap="round"
+      />
+
+      {/* Tail Fin Rudder Line */}
+      <path
+        d="M19.5 5 L 18.5 9"
+        stroke={strokeColor}
+        strokeWidth="0.5"
+        opacity="0.6"
+      />
+
+      {/* Main Wing */}
+      <path
+        d="M9 11
+           L 14 17
+           L 17 16
+           L 15 11 Z"
+        fill={fillColor}
+        stroke={strokeColor}
+        strokeWidth="0.8"
+        strokeLinejoin="round"
+      />
+
+      {/* Jet Engine */}
+      <path
+        d="M10 15
+           L 10 16
+           Q 10 17.5, 13 17
+           L 13 16
+           Q 13 15, 10 15 Z"
+        fill={strokeColor}
+        stroke={fillColor}
+        strokeWidth="0.5"
+      />
+
+      {/* Engine Pylon (Connects engine to wing) */}
+      <path
+        d="M11.5 15 L 12.5 13"
+        stroke={strokeColor}
+        strokeWidth="0.8"
+      />
+    </g>
+  );
+}
+
+export const AirplaneMarker = memo(AirplaneMarkerBase);
+
+// -----------------------------------------------------------------------------
+// 2. SPORT MARKER (Ball icons for stadiums)
+// -----------------------------------------------------------------------------
 function SportMarkerBase({ sport, fillColor, size = 'default' }: SportMarkerProps) {
   const isSmall = size === 'small';
   const strokeColor = "#ffffff";
@@ -482,4 +573,8 @@ export function renderMountainMarker(fillColor: string) {
 
 export function renderF1CarMarker(fillColor: string) {
   return <F1CarMarker fillColor={fillColor} size="default" />;
+}
+
+export function renderAirplaneMarker(fillColor: string) {
+  return <AirplaneMarker fillColor={fillColor} size="default" />;
 }

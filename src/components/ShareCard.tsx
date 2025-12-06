@@ -32,6 +32,7 @@ import {
   MountainMarker,
   F1CarMarker,
   FlagMarker,
+  AirplaneMarker,
 } from './MapMarkers';
 
 // US territories that cannot be displayed on the Albers USA projection
@@ -108,6 +109,7 @@ function StaticMarkerMap({
   const isMarathons = category === 'marathons';
   const isMountains = category === 'fiveKPeaks';
   const isF1Tracks = category === 'f1Tracks';
+  const isAirports = category === 'airports';
   const isStadiums = ['mlbStadiums', 'nflStadiums', 'nbaStadiums', 'nhlStadiums', 'soccerStadiums'].includes(category);
 
   // Get the appropriate marker icon based on category and sport
@@ -124,6 +126,10 @@ function StaticMarkerMap({
 
     if (isF1Tracks) {
       return <F1CarMarker fillColor={fillColor} size="small" />;
+    }
+
+    if (isAirports) {
+      return <AirplaneMarker fillColor={fillColor} size="small" />;
     }
 
     if (isStadiums) {
