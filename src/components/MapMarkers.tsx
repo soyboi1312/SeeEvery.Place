@@ -19,6 +19,10 @@ interface SportMarkerProps extends MarkerProps {
 
 const STROKE_COLOR = "#ffffff";
 
+// Helper for consistent sizing transforms
+const getTransform = (size: MarkerSize) =>
+  size === 'small' ? "translate(-8, -8) scale(0.6)" : "translate(-12, -12) scale(1)";
+
 // -----------------------------------------------------------------------------
 // 1. AIRPLANE MARKER (High Fidelity)
 // -----------------------------------------------------------------------------
@@ -396,46 +400,40 @@ function MuseumMarkerBase({ fillColor, size = 'default' }: MarkerProps) {
 export const MuseumMarker = memo(MuseumMarkerBase);
 
 // -----------------------------------------------------------------------------
-// 9. SKI MARKER (Skier)
+// 9. SKI MARKER (Dynamic Tuck Position)
 // -----------------------------------------------------------------------------
 
 function SkiMarkerBase({ fillColor, size = 'default' }: MarkerProps) {
-  const isSmall = size === 'small';
-  const transform = isSmall ? "translate(-8, -8) scale(0.6)" : "translate(-12, -12) scale(1)";
+  const transform = getTransform(size);
 
   return (
     <g transform={transform}>
+      {/* Skis: Two parallel diagonal lines */}
+      <path d="M2 18 L 16 12" stroke={fillColor} strokeWidth="2" strokeLinecap="round" />
+      <path d="M6 21 L 20 15" stroke={fillColor} strokeWidth="2" strokeLinecap="round" />
+      {/* Contrast lines for skis */}
+      <path d="M2 18 L 16 12" stroke={STROKE_COLOR} strokeWidth="0.5" strokeLinecap="round" />
+      <path d="M6 21 L 20 15" stroke={STROKE_COLOR} strokeWidth="0.5" strokeLinecap="round" />
+
+      {/* Skier Body: Dynamic tuck position */}
       {/* Head */}
-      <circle cx="14" cy="5" r="3" fill={fillColor} stroke={STROKE_COLOR} strokeWidth="1" />
-      {/* Body (leaning forward) */}
+      <circle cx="16" cy="6" r="3" fill={fillColor} stroke={STROKE_COLOR} strokeWidth="1" />
+
+      {/* Back/Torso */}
       <path
-        d="M14 8 L 10 16"
-        stroke={fillColor}
-        strokeWidth="3"
-        strokeLinecap="round"
-      />
-      <path
-        d="M14 8 L 10 16"
-        stroke={STROKE_COLOR}
-        strokeWidth="1"
-        strokeLinecap="round"
+        d="M16 8 Q 10 10, 8 13"
         fill="none"
+        stroke={fillColor}
+        strokeWidth="3.5"
+        strokeLinecap="round"
       />
-      {/* Arms with poles */}
-      <path d="M12 10 L 6 8 L 5 14" stroke={fillColor} strokeWidth="2" strokeLinecap="round" fill="none" />
-      <path d="M12 10 L 18 8 L 19 14" stroke={fillColor} strokeWidth="2" strokeLinecap="round" fill="none" />
-      <path d="M12 10 L 6 8 L 5 14" stroke={STROKE_COLOR} strokeWidth="0.8" strokeLinecap="round" fill="none" />
-      <path d="M12 10 L 18 8 L 19 14" stroke={STROKE_COLOR} strokeWidth="0.8" strokeLinecap="round" fill="none" />
+      <path d="M16 8 Q 10 10, 8 13" fill="none" stroke={STROKE_COLOR} strokeWidth="1" strokeLinecap="round" />
+
       {/* Legs */}
-      <path d="M10 16 L 6 20" stroke={fillColor} strokeWidth="2.5" strokeLinecap="round" />
-      <path d="M10 16 L 14 20" stroke={fillColor} strokeWidth="2.5" strokeLinecap="round" />
-      <path d="M10 16 L 6 20" stroke={STROKE_COLOR} strokeWidth="0.8" strokeLinecap="round" />
-      <path d="M10 16 L 14 20" stroke={STROKE_COLOR} strokeWidth="0.8" strokeLinecap="round" />
-      {/* Skis */}
-      <path d="M3 21 L 9 19" stroke={fillColor} strokeWidth="2" strokeLinecap="round" />
-      <path d="M11 21 L 17 19" stroke={fillColor} strokeWidth="2" strokeLinecap="round" />
-      <path d="M3 21 L 9 19" stroke={STROKE_COLOR} strokeWidth="0.5" strokeLinecap="round" />
-      <path d="M11 21 L 17 19" stroke={STROKE_COLOR} strokeWidth="0.5" strokeLinecap="round" />
+      <path d="M8 13 L 11 17" fill="none" stroke={fillColor} strokeWidth="3" strokeLinecap="round" />
+
+      {/* Pole */}
+      <path d="M14 9 L 4 15" stroke={STROKE_COLOR} strokeWidth="1" strokeLinecap="round" />
     </g>
   );
 }
@@ -472,38 +470,43 @@ function ThemeParkMarkerBase({ fillColor, size = 'default' }: MarkerProps) {
 export const ThemeParkMarker = memo(ThemeParkMarkerBase);
 
 // -----------------------------------------------------------------------------
-// 11. SURFING MARKER (Wave with Board)
+// 11. SURFING MARKER (Curling Wave with Board)
 // -----------------------------------------------------------------------------
 
 function SurfingMarkerBase({ fillColor, size = 'default' }: MarkerProps) {
-  const isSmall = size === 'small';
-  const transform = isSmall ? "translate(-8, -8) scale(0.6)" : "translate(-12, -12) scale(1)";
+  const transform = getTransform(size);
 
   return (
     <g transform={transform}>
-      {/* Wave */}
+      {/* Wave Body - Clean curling shape */}
       <path
-        d="M2 14 Q 6 8, 12 8 Q 18 8, 20 12 Q 22 16, 18 18 Q 14 20, 10 18 Q 6 16, 2 14 Z"
+        d="M2 18 C 2 18, 6 12, 12 8 C 16 5, 21 6, 22 9 C 23 12, 18 14, 14 14 C 10 14, 8 18, 8 18 H 2 Z"
         fill={fillColor}
         stroke={STROKE_COLOR}
         strokeWidth="1"
+        strokeLinejoin="round"
       />
-      {/* Wave curl/foam */}
+
+      {/* Wave Crest/Foam detail */}
       <path
-        d="M18 12 Q 16 10, 12 10 Q 8 10, 6 12"
+        d="M12 8 C 14 7, 18 7, 20 8.5"
         fill="none"
         stroke={STROKE_COLOR}
-        strokeWidth="1.5"
+        strokeWidth="1"
         strokeLinecap="round"
+        opacity="0.8"
       />
-      {/* Surfboard */}
+
+      {/* Surfboard - Contrasting shape cutting the wave */}
       <ellipse
-        cx="12" cy="16" rx="6" ry="1.5"
-        transform="rotate(-15 12 16)"
+        cx="12" cy="14" rx="7" ry="2"
+        transform="rotate(-20 12 14)"
         fill={STROKE_COLOR}
         stroke={fillColor}
         strokeWidth="0.5"
       />
+      {/* Fin */}
+      <path d="M10 16 L 9 17 L 11 16.5" fill={fillColor} />
     </g>
   );
 }

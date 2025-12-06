@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Category, UserSelections } from '@/lib/types';
+import { Category, UserSelections, categoryGroups } from '@/lib/types';
 import { getStats } from '@/lib/storage';
 // Data imports for totals
 import { countries, continents, getCountriesByContinent } from '@/data/countries';
@@ -24,13 +24,11 @@ interface QuickStatsProps {
   onCategoryClick: (category: Category) => void;
 }
 
-// Categories that are "Points of Interest" (everything except countries and states)
-const markerCategories: Category[] = [
-  'nationalParks', 'stateParks', 'fiveKPeaks',
-  'fourteeners', 'museums', 'mlbStadiums', 'nflStadiums',
-  'nbaStadiums', 'nhlStadiums', 'soccerStadiums', 'f1Tracks', 'marathons',
-  'airports', 'skiResorts', 'themeParks', 'surfingReserves', 'weirdAmericana'
-];
+// Derive "Points of Interest" categories dynamically from categoryGroups
+// (everything except countries and states)
+const markerCategories: Category[] = Object.values(categoryGroups)
+  .flatMap(group => group.categories)
+  .filter(cat => cat !== 'countries' && cat !== 'states');
 
 const categoryTotals: Record<Category, number> = {
   countries: countries.length,
