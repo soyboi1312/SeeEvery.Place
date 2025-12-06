@@ -4,6 +4,7 @@
 'use client';
 
 import { useState, useCallback, useMemo, memo } from 'react';
+import { createPortal } from 'react-dom';
 import { ComposableMap, Geographies, Geography, ZoomableGroup, Sphere, Graticule, Marker } from 'react-simple-maps';
 import { Category, UserSelections, Status } from '@/lib/types';
 import {
@@ -531,8 +532,8 @@ export default function MapVisualization({ category, selections, onToggle, subca
         {getMapComponent(category, selections, onToggle, subcategory, tooltipHandlers)}
       </div>
 
-      {/* Tooltip */}
-      {tooltip && (
+      {/* Tooltip - rendered via portal to escape CSS transform stacking context */}
+      {tooltip && typeof document !== 'undefined' && createPortal(
         <div
           className="fixed z-50 px-2 py-1 text-sm font-medium text-white bg-gray-900 rounded shadow-lg pointer-events-none whitespace-nowrap"
           style={{
@@ -541,7 +542,8 @@ export default function MapVisualization({ category, selections, onToggle, subca
           }}
         >
           {tooltip.content}
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Legend */}
