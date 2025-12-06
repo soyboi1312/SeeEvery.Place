@@ -527,7 +527,7 @@ export default function MapVisualization({ category, selections, onToggle, subca
   }), [onMouseEnter, onMouseLeave, onMouseMove]);
 
   return (
-    <div className="w-full bg-blue-50/50 dark:bg-slate-800/50 rounded-2xl overflow-hidden border border-blue-100 dark:border-slate-700 shadow-inner mb-6 relative">
+    <div className="w-full bg-primary-50/50 dark:bg-slate-800/50 rounded-2xl overflow-hidden border border-black/5 dark:border-white/10 shadow-premium-lg mb-6 relative">
       <div className="aspect-[4/3] sm:aspect-[16/9] w-full max-h-[500px]">
         {getMapComponent(category, selections, onToggle, subcategory, tooltipHandlers)}
       </div>
@@ -547,7 +547,7 @@ export default function MapVisualization({ category, selections, onToggle, subca
       )}
 
       {/* Legend */}
-      <div className="flex justify-center gap-6 pb-4 text-sm text-gray-600 dark:text-gray-300">
+      <div className="flex justify-center gap-6 pb-4 text-sm text-primary-600 dark:text-primary-300">
         <div className="flex items-center gap-2">
           <span className="w-3 h-3 rounded-full bg-green-500"></span>
           <span>Visited</span>
