@@ -87,9 +87,13 @@ export default async function Image() {
             lineHeight: 1,
             marginBottom: 20,
             textShadow: '0 4px 20px rgba(0,0,0,0.2)',
+            display: 'flex',
+            alignItems: 'baseline',
           }}
         >
-          See Every Place
+          <span>SeeEvery</span>
+          <span style={{ color: 'rgba(255,255,255,0.7)', margin: '0 2px' }}>.</span>
+          <span>Place</span>
         </div>
 
         {/* Tagline */}
