@@ -215,33 +215,33 @@ export const SportMarker = memo(SportMarkerBase);
 // Sneaker marker for marathons
 function SneakerMarkerBase({ fillColor, size = 'default' }: MarkerProps) {
   const isSmall = size === 'small';
-  const transform = isSmall ? "translate(-6, -6) scale(0.5)" : "translate(-12, -12)";
+  // Adjusted transform to center the new shape
+  const transform = isSmall ? "translate(-7, -7) scale(0.6)" : "translate(-12, -12)";
 
   return (
     <g transform={transform}>
-      {/* Running Shoe Body */}
+      {/* Shoe Silhouette */}
       <path
-        d="M3 16l1.5-6 4.5-3.5 5.5 1 4 4v4.5H3z"
+        d="M21.5 14.5c0-1.5-1-2.5-2.5-2.5h-1l-2-4h-3.5l-3 3-4-1.5L2 13v3.5c0 2 2.5 3.5 5 3.5h11c2.5 0 3.5-1.5 3.5-3.5V14.5z"
         fill={fillColor}
         stroke="#ffffff"
-        strokeWidth="1"
+        strokeWidth="1.5"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
-      {/* Thick Foam Sole */}
+      {/* Sole Line */}
       <path
-        d="M2 16h18.5c1.5 0 2.5 1 2 2.5s-2 2.5-3.5 2.5H5c-2 0-3.5-1.5-3-5z"
-        fill={fillColor}
+        d="M2.5 16.5c0 0 3 1.5 9 1.5s10-1.5 10-1.5"
         stroke="#ffffff"
-        strokeWidth="1"
+        strokeWidth="1.5"
         strokeLinecap="round"
-        strokeLinejoin="round"
+        fill="none"
       />
-      {/* Speed Stripes */}
+      {/* Laces */}
       <path
-        d="M9 16l3-4M12.5 16l3-4M16 16l3-4"
+        d="M9 10.5l2-2M11 12.5l2-2"
         stroke="#ffffff"
-        strokeWidth="1"
+        strokeWidth="1.5"
         strokeLinecap="round"
       />
     </g>
