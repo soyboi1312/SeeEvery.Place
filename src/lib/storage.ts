@@ -177,17 +177,24 @@ export function toggleSelection(
     newStatus = null; // Remove
   }
 
+  const now = Date.now();
+
   if (newStatus === null) {
-    // Remove the selection
+    // Soft-delete the selection (mark as deleted with timestamp)
     if (existingIndex !== -1) {
-      categorySelections.splice(existingIndex, 1);
+      categorySelections[existingIndex] = {
+        id,
+        status: 'unvisited',
+        updatedAt: now,
+        deleted: true,
+      };
     }
   } else {
-    // Add or update
+    // Add or update with timestamp
     if (existingIndex !== -1) {
-      categorySelections[existingIndex] = { id, status: newStatus };
+      categorySelections[existingIndex] = { id, status: newStatus, updatedAt: now, deleted: false };
     } else {
-      categorySelections.push({ id, status: newStatus });
+      categorySelections.push({ id, status: newStatus, updatedAt: now, deleted: false });
     }
   }
 
@@ -205,18 +212,24 @@ export function setSelectionStatus(
 ): UserSelections {
   const categorySelections = [...(selections[category] || [])];
   const existingIndex = categorySelections.findIndex(s => s.id === id);
+  const now = Date.now();
 
   if (status === null) {
-    // Remove the selection
+    // Soft-delete the selection (mark as deleted with timestamp)
     if (existingIndex !== -1) {
-      categorySelections.splice(existingIndex, 1);
+      categorySelections[existingIndex] = {
+        id,
+        status: 'unvisited',
+        updatedAt: now,
+        deleted: true,
+      };
     }
   } else {
-    // Add or update
+    // Add or update with timestamp
     if (existingIndex !== -1) {
-      categorySelections[existingIndex] = { id, status };
+      categorySelections[existingIndex] = { id, status, updatedAt: now, deleted: false };
     } else {
-      categorySelections.push({ id, status });
+      categorySelections.push({ id, status, updatedAt: now, deleted: false });
     }
   }
 
@@ -233,13 +246,17 @@ export function getSelectionStatus(
 ): Status {
   const categorySelections = selections[category] || [];
   const selection = categorySelections.find(s => s.id === id);
-  return selection?.status || 'unvisited';
+  // Return unvisited if selection is deleted or doesn't exist
+  if (!selection || selection.deleted) return 'unvisited';
+  return selection.status;
 }
 
 export function getStats(selections: UserSelections, category: Category, total: number) {
   const categorySelections = selections[category] || [];
-  const visited = categorySelections.filter(s => s.status === 'visited').length;
-  const bucketList = categorySelections.filter(s => s.status === 'bucketList').length;
+  // Filter out deleted items when calculating stats
+  const activeSelections = categorySelections.filter(s => !s.deleted);
+  const visited = activeSelections.filter(s => s.status === 'visited').length;
+  const bucketList = activeSelections.filter(s => s.status === 'bucketList').length;
   const percentage = total > 0 ? Math.round((visited / total) * 100) : 0;
 
   return { visited, bucketList, total, percentage };

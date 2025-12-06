@@ -301,6 +301,7 @@ function USMarkerMap({
         </Geographies>
         {markers.map((marker) => {
           const markerName = getItemName(category, marker.id);
+          const statusLabel = marker.status === 'visited' ? 'visited' : marker.status === 'bucketList' ? 'on bucket list' : 'not visited';
           return (
             <Marker
               key={marker.id}
@@ -314,7 +315,18 @@ function USMarkerMap({
               onMouseLeave={tooltip.onMouseLeave}
               onMouseMove={tooltip.onMouseMove}
             >
-              <g className="cursor-pointer">
+              <g
+                className="cursor-pointer outline-none focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                tabIndex={0}
+                role="button"
+                aria-label={`${markerName}, ${statusLabel}`}
+                onKeyDown={(e) => {
+                  if ((e.key === 'Enter' || e.key === ' ') && onToggle) {
+                    e.preventDefault();
+                    onToggle(marker.id, marker.status);
+                  }
+                }}
+              >
                 {getUSMarkerIcon(marker)}
               </g>
             </Marker>
@@ -398,6 +410,7 @@ function WorldMarkerMap({
         </Geographies>
         {markers.map((marker) => {
           const markerName = getItemName(category, marker.id);
+          const statusLabel = marker.status === 'visited' ? 'visited' : marker.status === 'bucketList' ? 'on bucket list' : 'not visited';
           return (
             <Marker
               key={marker.id}
@@ -411,7 +424,18 @@ function WorldMarkerMap({
               onMouseLeave={tooltip.onMouseLeave}
               onMouseMove={tooltip.onMouseMove}
             >
-              <g className="cursor-pointer">
+              <g
+                className="cursor-pointer outline-none focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                tabIndex={0}
+                role="button"
+                aria-label={`${markerName}, ${statusLabel}`}
+                onKeyDown={(e) => {
+                  if ((e.key === 'Enter' || e.key === ' ') && onToggle) {
+                    e.preventDefault();
+                    onToggle(marker.id, marker.status);
+                  }
+                }}
+              >
                 {getMarkerIcon(marker)}
               </g>
             </Marker>

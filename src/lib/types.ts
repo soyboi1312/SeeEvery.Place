@@ -78,6 +78,10 @@ export const getGroupForCategory = (category: Category): CategoryGroup => {
 export interface Selection {
   id: string;
   status: Status;
+  /** Timestamp of last update (ms since epoch) for sync conflict resolution */
+  updatedAt?: number;
+  /** Soft-delete flag for tracking deletions across devices */
+  deleted?: boolean;
 }
 
 export interface UserSelections {
