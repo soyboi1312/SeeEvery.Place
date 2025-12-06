@@ -1,5 +1,8 @@
 import { createClient } from '@/lib/supabase/client';
-import { UserSelections, emptySelections } from '@/lib/types';
+import { UserSelections, emptySelections, Selection } from '@/lib/types';
+
+// Retention period for deleted items (7 days in milliseconds)
+const DELETED_RETENTION_MS = 7 * 24 * 60 * 60 * 1000;
 
 export async function syncToCloud(selections: UserSelections): Promise<boolean> {
   const supabase = createClient();
@@ -53,11 +56,12 @@ export async function mergeSelectionsFromCloud(
   localSelections: UserSelections,
   cloudSelections: UserSelections
 ): Promise<UserSelections> {
-  // Merge strategy: LOCAL is the source of truth
-  // - Items in local stay as-is (including deletions)
-  // - Items ONLY in cloud get added (synced from other devices)
-  // - This prevents "zombie" data where deleted items reappear
+  // Merge strategy: Use timestamps for conflict resolution
+  // - Compare updatedAt timestamps to determine which version is newer
+  // - Respect deleted flags - a newer deletion should not be overwritten by old data
+  // - Clean up old deleted items past retention period
   const merged: UserSelections = { ...emptySelections };
+  const now = Date.now();
 
   const categories = Object.keys(localSelections) as (keyof UserSelections)[];
 
@@ -65,24 +69,45 @@ export async function mergeSelectionsFromCloud(
     const localItems = localSelections[category] || [];
     const cloudItems = cloudSelections[category] || [];
 
-    // Start with local items as the base (preserves deletions)
-    const localIds = new Set(localItems.map(item => item.id));
-    const itemMap = new Map<string, { id: string; status: 'visited' | 'bucketList' | 'unvisited' }>();
+    // Create a map to merge items by ID, using timestamps for conflict resolution
+    const itemMap = new Map<string, Selection>();
 
-    // Add all local items first (local is truth)
+    // Add all local items first
     for (const item of localItems) {
       itemMap.set(item.id, item);
     }
 
-    // Only add cloud items that DON'T exist locally
-    // (these are new items from other devices)
-    for (const item of cloudItems) {
-      if (!localIds.has(item.id)) {
-        itemMap.set(item.id, item);
+    // Merge cloud items, using timestamp to determine winner
+    for (const cloudItem of cloudItems) {
+      const localItem = itemMap.get(cloudItem.id);
+
+      if (!localItem) {
+        // Item only exists in cloud - add it (new from other device)
+        itemMap.set(cloudItem.id, cloudItem);
+      } else {
+        // Item exists in both - compare timestamps
+        const localTime = localItem.updatedAt || 0;
+        const cloudTime = cloudItem.updatedAt || 0;
+
+        if (cloudTime > localTime) {
+          // Cloud is newer - use cloud version
+          itemMap.set(cloudItem.id, cloudItem);
+        }
+        // Otherwise keep local (already in map)
       }
     }
 
-    merged[category] = Array.from(itemMap.values());
+    // Convert map to array and clean up old deleted items
+    const mergedItems: Selection[] = [];
+    for (const item of itemMap.values()) {
+      // Skip items that have been deleted for longer than retention period
+      if (item.deleted && item.updatedAt && (now - item.updatedAt) > DELETED_RETENTION_MS) {
+        continue;
+      }
+      mergedItems.push(item);
+    }
+
+    merged[category] = mergedItems;
   }
 
   return merged;
