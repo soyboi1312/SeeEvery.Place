@@ -212,36 +212,75 @@ function SportMarkerBase({ sport, fillColor, size = 'default' }: SportMarkerProp
 
 export const SportMarker = memo(SportMarkerBase);
 
-// Sneaker marker for marathons
+// High-fidelity Adizero Evo SL inspired marker
 function SneakerMarkerBase({ fillColor, size = 'default' }: MarkerProps) {
   const isSmall = size === 'small';
-  // Adjusted transform to center the new shape
-  const transform = isSmall ? "translate(-7, -7) scale(0.6)" : "translate(-12, -12)";
+  // Scale up slightly for detail, centering the "contact point" of the shoe (mid-sole) at 0,0
+  const transform = isSmall ? "translate(-8, -8) scale(0.6)" : "translate(-12, -12) scale(1)";
+
+  // Contrast color for the stripes (white usually looks best against the visited/bucket colors)
+  const stripeColor = "#ffffff";
 
   return (
     <g transform={transform}>
-      {/* Shoe Silhouette */}
+      {/* Shoe Silhouette (Adizero Shape)
+        Combined Upper and Midsole for a solid fill
+      */}
       <path
-        d="M21.5 14.5c0-1.5-1-2.5-2.5-2.5h-1l-2-4h-3.5l-3 3-4-1.5L2 13v3.5c0 2 2.5 3.5 5 3.5h11c2.5 0 3.5-1.5 3.5-3.5V14.5z"
+        d="M2.5 12.5
+           C 2.5 15.5, 3 18, 5 18.5
+           C 8 19.2, 15 19.2, 19 17.5
+           C 22 16.2, 23.5 13.5, 23.5 11.5
+           C 23.5 11.5, 20 12.5, 16.5 10.5
+           L 12 5.5
+           C 11.5 5, 10.5 5, 9 6.5
+           L 6 7.5
+           C 4.5 8, 2.5 8.5, 2.5 10.5
+           V 12.5 Z"
         fill={fillColor}
         stroke="#ffffff"
-        strokeWidth="1.5"
+        strokeWidth="0.8"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
-      {/* Sole Line */}
+
+      {/* Heel Tab Detail (The black patch on the back)
+      */}
       <path
-        d="M2.5 16.5c0 0 3 1.5 9 1.5s10-1.5 10-1.5"
-        stroke="#ffffff"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        fill="none"
+        d="M2.5 10.5 L 3.5 9 L 2.8 8.5 C 2.5 9, 2.5 10, 2.5 10.5 Z"
+        fill={stripeColor}
+        opacity="0.8"
       />
-      {/* Laces */}
+
+      {/* Midsole Separation Line
+        Visualizes the thick foam stack
+      */}
       <path
-        d="M9 10.5l2-2M11 12.5l2-2"
+        d="M2.8 15 C 8 16.5, 16 15.5, 23 11.8"
+        fill="none"
         stroke="#ffffff"
-        strokeWidth="1.5"
+        strokeWidth="0.5"
+        opacity="0.6"
+      />
+
+      {/* The Three Stripes
+        Thick, diagonal, parallel, cut off at the midsole line
+      */}
+      <g transform="skewX(-20)">
+        {/* Stripe 1 (Front) */}
+        <rect x="16" y="8" width="2.5" height="8" fill={stripeColor} rx="0.2" />
+        {/* Stripe 2 (Middle) */}
+        <rect x="12.5" y="8.5" width="2.5" height="7" fill={stripeColor} rx="0.2" />
+        {/* Stripe 3 (Rear) */}
+        <rect x="9" y="10" width="2.5" height="5" fill={stripeColor} rx="0.2" />
+      </g>
+
+      {/* Laces Detail */}
+      <path
+        d="M9 6.5 L 10.5 8 L 12 7 L 13.5 8.5"
+        stroke={stripeColor}
+        strokeWidth="0.6"
+        fill="none"
         strokeLinecap="round"
       />
     </g>
@@ -250,47 +289,63 @@ function SneakerMarkerBase({ fillColor, size = 'default' }: MarkerProps) {
 
 export const SneakerMarker = memo(SneakerMarkerBase);
 
-// Mountain peak marker with summit flag
+// High-fidelity Rugged Mountain with Snow Cap
 function MountainMarkerBase({ fillColor, size = 'default' }: MarkerProps) {
   const isSmall = size === 'small';
   const strokeColor = "#ffffff";
-  const transform = isSmall ? "translate(-6, -10) scale(0.5)" : "translate(-12, -20)";
+  const transform = isSmall ? "translate(-8, -8) scale(0.6)" : "translate(-12, -12) scale(1)";
 
   return (
     <g transform={transform}>
-      {/* Mountain shape */}
+      {/* Main Mountain Body (Jagged Rock) */}
       <path
-        d="M3 20h18L12 5l-9 15z"
+        d="M2 21
+           L 8 8
+           L 12 2
+           L 15 6
+           L 18 5
+           L 22 21
+           Z"
         fill={fillColor}
         stroke={strokeColor}
         strokeWidth="1.5"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
-      {/* Snow cap / ridge detail */}
+
+      {/* Snow Cap (White peak) */}
       <path
-        d="M7.5 12.5l2.5 2 2-2 2 2 2.5-2"
-        fill="none"
-        stroke={strokeColor}
-        strokeWidth="1"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      {/* Flag pole */}
-      <path
-        d="M12 5V1"
-        stroke={strokeColor}
-        strokeWidth="1.5"
-        strokeLinecap="round"
-      />
-      {/* Flag */}
-      <path
-        d="M12 1l5 2-5 2"
+        d="M12 2
+           L 8 8
+           L 9.5 9
+           L 11 7.5
+           L 12.5 9.5
+           L 14 8
+           L 15 6
+           L 12 2"
         fill={strokeColor}
+        opacity="0.9"
+      />
+
+      {/* Internal Ridge Line for Depth */}
+      <path
+        d="M12 2 L 12.5 21"
+        stroke={strokeColor}
+        strokeWidth="0.5"
+        opacity="0.3"
+      />
+
+      {/* Summit Flag */}
+      <path
+        d="M12 2 V -2"
         stroke={strokeColor}
         strokeWidth="1"
-        strokeLinecap="round"
-        strokeLinejoin="round"
+      />
+      <path
+        d="M12 -2 L 15 -0.5 L 12 1"
+        fill={fillColor}
+        stroke={strokeColor}
+        strokeWidth="0.5"
       />
     </g>
   );
@@ -298,66 +353,68 @@ function MountainMarkerBase({ fillColor, size = 'default' }: MarkerProps) {
 
 export const MountainMarker = memo(MountainMarkerBase);
 
-// F1 car marker for Formula 1 race tracks
+// High-fidelity Modern F1 Car (Top-down)
 function F1CarMarkerBase({ fillColor, size = 'default' }: MarkerProps) {
   const isSmall = size === 'small';
   const strokeColor = "#ffffff";
-  const transform = isSmall ? "translate(-6, -8) scale(0.5)" : "translate(-12, -15)";
+  const transform = isSmall ? "translate(-8, -8) scale(0.6)" : "translate(-12, -12) scale(1)";
 
   return (
     <g transform={transform}>
-      {/* Rear wing */}
+      {/* 1. Rear Wing (Wide, rectangular) */}
       <path
-        d="M2 8h4v3h-3"
+        d="M6 19 h12 v2 h-12 z"
         fill={fillColor}
         stroke={strokeColor}
-        strokeWidth="1"
-        strokeLinecap="round"
-        strokeLinejoin="round"
+        strokeWidth="0.8"
       />
-      {/* Rear wheel */}
-      <circle cx="7" cy="15" r="3" fill={fillColor} stroke={strokeColor} strokeWidth="1" />
-      {/* Front wheel */}
-      <circle cx="17" cy="15" r="3" fill={fillColor} stroke={strokeColor} strokeWidth="1" />
-      {/* Body/chassis */}
+
+      {/* 2. Main Body (Coke Bottle Shape) */}
       <path
-        d="M10 15h4"
-        stroke={strokeColor}
-        strokeWidth="1"
-        strokeLinecap="round"
-      />
-      {/* Cockpit/halo */}
-      <path
-        d="M7 12c1-2 2-4 5-4h2c2 0 4 2 6 4"
+        d="M10.5 19
+           V 16
+           C 8 14, 8 10, 9 8
+           L 11 3
+           L 13 3
+           L 15 8
+           C 16 10, 16 14, 13.5 16
+           V 19 Z"
         fill={fillColor}
         stroke={strokeColor}
-        strokeWidth="1"
-        strokeLinecap="round"
-        strokeLinejoin="round"
+        strokeWidth="0.8"
       />
-      {/* Front wing */}
+
+      {/* 3. Front Wing (Arrow shape) */}
       <path
-        d="M20 15h2v-2h-3"
+        d="M8 4 L 12 2 L 16 4 L 15 5 L 9 5 Z"
         fill={fillColor}
         stroke={strokeColor}
-        strokeWidth="1"
-        strokeLinecap="round"
-        strokeLinejoin="round"
+        strokeWidth="0.8"
       />
-      {/* Air intake */}
+
+      {/* 4. Wheels (Wide Slicks) */}
+      {/* Front Left */}
+      <rect x="4" y="5" width="3" height="5" rx="1" fill={strokeColor} />
+      {/* Front Right */}
+      <rect x="17" y="5" width="3" height="5" rx="1" fill={strokeColor} />
+      {/* Rear Left */}
+      <rect x="4" y="14" width="3.5" height="6" rx="1" fill={strokeColor} />
+      {/* Rear Right */}
+      <rect x="16.5" y="14" width="3.5" height="6" rx="1" fill={strokeColor} />
+
+      {/* 5. The Halo (Cockpit Protection) */}
       <path
-        d="M11 8l2 0"
+        d="M11 10
+           L 10.5 12
+           C 10.5 13.5, 13.5 13.5, 13.5 12
+           L 13 10"
         stroke={strokeColor}
         strokeWidth="1"
-        strokeLinecap="round"
+        fill="none"
       />
-      {/* Side detail */}
-      <path
-        d="M13 10h2"
-        stroke={strokeColor}
-        strokeWidth="1"
-        strokeLinecap="round"
-      />
+
+      {/* 6. Driver Helmet/Cockpit */}
+      <circle cx="12" cy="11.5" r="1" fill={strokeColor} />
     </g>
   );
 }
