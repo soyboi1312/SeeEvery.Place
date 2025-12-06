@@ -353,68 +353,83 @@ function MountainMarkerBase({ fillColor, size = 'default' }: MarkerProps) {
 
 export const MountainMarker = memo(MountainMarkerBase);
 
-// High-fidelity Modern F1 Car (Top-down)
+// High-fidelity Modern F1 Car (Side View)
 function F1CarMarkerBase({ fillColor, size = 'default' }: MarkerProps) {
   const isSmall = size === 'small';
   const strokeColor = "#ffffff";
+  // Centered and scaled
   const transform = isSmall ? "translate(-8, -8) scale(0.6)" : "translate(-12, -12) scale(1)";
 
   return (
     <g transform={transform}>
-      {/* 1. Rear Wing (Wide, rectangular) */}
+      {/* F1 Side Profile (2025 Era)
+         Features: Low nose, Halo, High Airbox, Raked Stance
+      */}
+
+      {/* Rear Wing (High and boxed) */}
       <path
-        d="M6 19 h12 v2 h-12 z"
+        d="M19 4 L 22 4 L 22.5 9 L 20 9 Z"
         fill={fillColor}
         stroke={strokeColor}
         strokeWidth="0.8"
       />
 
-      {/* 2. Main Body (Coke Bottle Shape) */}
+      {/* Main Body & Engine Cover */}
       <path
-        d="M10.5 19
-           V 16
-           C 8 14, 8 10, 9 8
-           L 11 3
-           L 13 3
-           L 15 8
-           C 16 10, 16 14, 13.5 16
-           V 19 Z"
+        d="M1.5 13
+           Q 4 11, 6 11
+           L 10 8
+           L 12 5
+           Q 16 5, 20 11
+           L 21 14
+           H 6 Z"
         fill={fillColor}
         stroke={strokeColor}
         strokeWidth="0.8"
+        strokeLinejoin="round"
       />
 
-      {/* 3. Front Wing (Arrow shape) */}
+      {/* The Halo (Cockpit Protection - Distinct curved bar) */}
       <path
-        d="M8 4 L 12 2 L 16 4 L 15 5 L 9 5 Z"
-        fill={fillColor}
-        stroke={strokeColor}
-        strokeWidth="0.8"
-      />
-
-      {/* 4. Wheels (Wide Slicks) */}
-      {/* Front Left */}
-      <rect x="4" y="5" width="3" height="5" rx="1" fill={strokeColor} />
-      {/* Front Right */}
-      <rect x="17" y="5" width="3" height="5" rx="1" fill={strokeColor} />
-      {/* Rear Left */}
-      <rect x="4" y="14" width="3.5" height="6" rx="1" fill={strokeColor} />
-      {/* Rear Right */}
-      <rect x="16.5" y="14" width="3.5" height="6" rx="1" fill={strokeColor} />
-
-      {/* 5. The Halo (Cockpit Protection) */}
-      <path
-        d="M11 10
-           L 10.5 12
-           C 10.5 13.5, 13.5 13.5, 13.5 12
-           L 13 10"
+        d="M9 9 Q 12 8, 13 9"
+        fill="none"
         stroke={strokeColor}
         strokeWidth="1"
-        fill="none"
+        strokeLinecap="round"
       />
 
-      {/* 6. Driver Helmet/Cockpit */}
-      <circle cx="12" cy="11.5" r="1" fill={strokeColor} />
+      {/* Front Wing (Multi-element) */}
+      <path
+        d="M0.5 13 L 4 13 L 3.5 11 Z"
+        fill={fillColor}
+        stroke={strokeColor}
+        strokeWidth="0.6"
+      />
+
+      {/* Wheels (Large Slicks) */}
+      {/* Front Wheel */}
+      <circle
+        cx="5"
+        cy="13"
+        r="3.5"
+        fill={fillColor}
+        stroke={strokeColor}
+        strokeWidth="1.2"
+      />
+      {/* Rear Wheel (Slightly larger) */}
+      <circle
+        cx="19"
+        cy="13"
+        r="3.8"
+        fill={fillColor}
+        stroke={strokeColor}
+        strokeWidth="1.2"
+      />
+
+      {/* Wheel Rims (Inner detail) */}
+      <circle cx="5" cy="13" r="1" fill={strokeColor} />
+      <circle cx="19" cy="13" r="1" fill={strokeColor} />
+
     </g>
   );
 }
