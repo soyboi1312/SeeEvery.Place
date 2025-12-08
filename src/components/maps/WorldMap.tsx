@@ -47,7 +47,10 @@ const WorldMap = memo(function WorldMap({ selections, onToggle, tooltip }: BaseM
     <div className="relative w-full h-full group">
       <ComposableMap
         projection="geoEqualEarth"
-        projectionConfig={{ scale: 160, center: CENTER_ORIGIN }}
+        projectionConfig={{ scale: 140, center: CENTER_ORIGIN }}
+        width={800}
+        height={400}
+        viewBox="0 0 800 400"
         className="w-full h-full"
       >
         <ZoomableGroup
