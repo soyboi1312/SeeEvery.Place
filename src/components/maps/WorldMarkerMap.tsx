@@ -74,7 +74,10 @@ const WorldMarkerMap = memo(function WorldMarkerMap({
     handleMoveEnd,
     canZoomIn,
     canZoomOut,
-  } = useMapZoom({ maxZoom: 8 });
+  } = useMapZoom({
+    maxZoom: 8,
+    initialCenter: [0, -20] // Shift center south to move map visually up
+  });
 
   // Determine marker size based on zoom level
   // Less than 2x zoom = small markers to prevent overcrowding
