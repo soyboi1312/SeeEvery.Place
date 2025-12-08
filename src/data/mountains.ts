@@ -176,11 +176,16 @@ export const getTotalMountains = () => mountains.length;
 export const get5000mPeaks = () =>
   mountains.filter(m => m.elevation >= 5000);
 
-// US 14ers (peaks >= 14,000 ft / 4267m in the contiguous United States)
-// Excludes Alaska peaks which are categorized separately in 5000m+ peaks
+// US 14ers (peaks 14,000-14,999 ft / 4267-4571m in the contiguous United States)
+// Peaks >= 15,000 ft (4572m) belong in the 5000m+ category
 const alaskaRanges = ['Alaska Range', 'Saint Elias'];
 export const getUS14ers = () =>
-  mountains.filter(m => m.elevation >= 4267 && m.countryCode === 'US' && !alaskaRanges.includes(m.range));
+  mountains.filter(m =>
+    m.elevation >= 4267 &&
+    m.elevation < 4572 && // Less than 15,000 ft
+    m.countryCode === 'US' &&
+    !alaskaRanges.includes(m.range)
+  );
 
 // Peak subcategory type
 export type PeakSubcategory = "All" | "5000m+" | "US 14ers";
