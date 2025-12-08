@@ -104,7 +104,7 @@ export default function StaticMarkerMap({
     return (
       <ComposableMap
         projection="geoAlbersUsa"
-        projectionConfig={{ scale: 1000 }}
+        projectionConfig={{ scale: 900 }}
         viewBox="0 0 800 500"
         width={800}
         height={500}
