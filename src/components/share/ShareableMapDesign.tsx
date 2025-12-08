@@ -61,7 +61,7 @@ const ShareableMapDesign = forwardRef<HTMLDivElement, ShareableMapDesignProps>(
     return (
       <div
         ref={ref}
-        className={`bg-gradient-to-br ${gradients[selectedGradient]} p-4 sm:p-6 rounded-2xl text-white ${includeMap ? 'min-h-[280px]' : 'aspect-square'} flex flex-col border border-white/20 shadow-2xl relative overflow-hidden`}
+        className={`bg-gradient-to-br ${gradients[selectedGradient]} p-4 sm:p-6 text-white ${includeMap ? 'min-h-[280px]' : 'aspect-square'} flex flex-col border border-white/20 shadow-2xl relative overflow-hidden`}
       >
         <div className="relative z-10 flex flex-col h-full">
             {/* Icon & Title */}
