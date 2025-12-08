@@ -1,12 +1,13 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Tooltip } from 'react-tooltip';
 import { useDarkMode } from '@/lib/hooks/useDarkMode';
-import { categoryLabels } from '@/lib/types';
+import { categoryLabels, ALL_CATEGORIES, Category } from '@/lib/types';
 import { AnalyticsUSMap, AnalyticsWorldMap, HeatmapLegend } from './AnalyticsMaps';
+import { lookupPlace, PlaceDetails } from './placeLookup';
 
 interface CategoryStat {
   category: string;
@@ -33,7 +34,13 @@ interface AnalyticsData {
   categoryStats: CategoryStat[];
   popularStates: PopularItem[];
   popularCountries: PopularItem[];
+  popularItems: Record<string, PopularItem[]>;
+  timeframe: string;
+  timeframeLabel: string;
 }
+
+type ViewMode = 'top' | 'bottom' | 'zero';
+type Timeframe = 'allTime' | 'last7Days' | 'last30Days' | 'previousMonth';
 
 // US state abbreviation to full name mapping
 const stateNames: Record<string, string> = {
@@ -55,11 +62,35 @@ export default function AnalyticsDashboard() {
   const [data, setData] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<Category>('nationalParks');
+  const [viewMode, setViewMode] = useState<ViewMode>('top');
+  const [timeframe, setTimeframe] = useState<Timeframe>('allTime');
+  const [selectedPlace, setSelectedPlace] = useState<PlaceDetails | null>(null);
+
+  // Handle place click to show details
+  const handlePlaceClick = useCallback((category: Category, id: string) => {
+    const details = lookupPlace(category, id);
+    setSelectedPlace(details);
+  }, []);
+
+  // Get items based on view mode
+  const getFilteredItems = (items: PopularItem[]): PopularItem[] => {
+    if (viewMode === 'top') {
+      return items.slice(0, 10);
+    } else if (viewMode === 'bottom') {
+      // Get items with at least 1 visit, sorted ascending
+      return items.filter(i => i.timesVisited > 0).sort((a, b) => a.timesVisited - b.timesVisited).slice(0, 10);
+    } else {
+      // Zero visits - items only on bucket lists (visited = 0)
+      return items.filter(i => i.timesVisited === 0 && i.timesBucketListed > 0).slice(0, 20);
+    }
+  };
 
   useEffect(() => {
     async function fetchAnalytics() {
+      setLoading(true);
       try {
-        const response = await fetch('/api/admin/analytics');
+        const response = await fetch(`/api/admin/analytics?timeframe=${timeframe}`);
         if (!response.ok) {
           throw new Error('Failed to fetch analytics');
         }
@@ -73,7 +104,7 @@ export default function AnalyticsDashboard() {
     }
 
     fetchAnalytics();
-  }, []);
+  }, [timeframe]);
 
   const getCategoryLabel = (category: string): string => {
     return categoryLabels[category as keyof typeof categoryLabels] || category;
@@ -130,11 +161,27 @@ export default function AnalyticsDashboard() {
 
       {/* Content */}
       <div className="max-w-6xl mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-primary-900 dark:text-white mb-2">User Analytics</h1>
-          <p className="text-primary-600 dark:text-primary-300">
-            Insights into how users are tracking their travels.
-          </p>
+        <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-bold text-primary-900 dark:text-white mb-2">User Analytics</h1>
+            <p className="text-primary-600 dark:text-primary-300">
+              Insights into how users are tracking their travels.
+            </p>
+          </div>
+          {/* Timeframe Selector */}
+          <div className="flex items-center gap-2">
+            <label className="text-sm font-medium text-primary-600 dark:text-primary-300">Timeframe:</label>
+            <select
+              value={timeframe}
+              onChange={(e) => setTimeframe(e.target.value as Timeframe)}
+              className="px-3 py-2 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-lg text-sm font-medium text-primary-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+            >
+              <option value="allTime">All Time</option>
+              <option value="last7Days">Last 7 Days</option>
+              <option value="last30Days">Last 30 Days</option>
+              <option value="previousMonth">Previous Month</option>
+            </select>
+          </div>
         </div>
 
         {loading && (
@@ -275,6 +322,112 @@ export default function AnalyticsDashboard() {
             {/* Tooltip for heatmaps */}
             <Tooltip id="analytics-tooltip" />
 
+            {/* Category Explorer - All Categories */}
+            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-premium border border-black/5 dark:border-white/10 overflow-hidden">
+              <div className="p-5 border-b border-gray-100 dark:border-gray-700">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                  <h2 className="text-xl font-bold text-primary-900 dark:text-white">Category Explorer</h2>
+                  <div className="flex flex-wrap items-center gap-3">
+                    {/* Category Selector */}
+                    <select
+                      value={selectedCategory}
+                      onChange={(e) => setSelectedCategory(e.target.value as Category)}
+                      className="px-3 py-2 bg-gray-100 dark:bg-slate-700 rounded-lg text-sm font-medium text-primary-900 dark:text-white border-0 focus:ring-2 focus:ring-primary-500"
+                    >
+                      {ALL_CATEGORIES.filter(cat => cat !== 'states' && cat !== 'countries').map(cat => (
+                        <option key={cat} value={cat}>{getCategoryLabel(cat)}</option>
+                      ))}
+                    </select>
+                    {/* View Mode Tabs */}
+                    <div className="flex bg-gray-100 dark:bg-slate-700 rounded-lg p-1">
+                      <button
+                        onClick={() => setViewMode('top')}
+                        className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+                          viewMode === 'top'
+                            ? 'bg-white dark:bg-slate-600 text-primary-900 dark:text-white shadow-sm'
+                            : 'text-gray-600 dark:text-gray-400 hover:text-primary-900 dark:hover:text-white'
+                        }`}
+                      >
+                        Top 10
+                      </button>
+                      <button
+                        onClick={() => setViewMode('bottom')}
+                        className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+                          viewMode === 'bottom'
+                            ? 'bg-white dark:bg-slate-600 text-primary-900 dark:text-white shadow-sm'
+                            : 'text-gray-600 dark:text-gray-400 hover:text-primary-900 dark:hover:text-white'
+                        }`}
+                      >
+                        Hidden Gems
+                      </button>
+                      <button
+                        onClick={() => setViewMode('zero')}
+                        className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+                          viewMode === 'zero'
+                            ? 'bg-white dark:bg-slate-600 text-primary-900 dark:text-white shadow-sm'
+                            : 'text-gray-600 dark:text-gray-400 hover:text-primary-900 dark:hover:text-white'
+                        }`}
+                      >
+                        Unvisited
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                <p className="text-sm text-primary-600 dark:text-primary-300 mt-2">
+                  {viewMode === 'top' && 'Most visited places in this category'}
+                  {viewMode === 'bottom' && 'Least visited places (hidden gems for newsletter challenges)'}
+                  {viewMode === 'zero' && 'Places on bucket lists but never visited yet'}
+                </p>
+              </div>
+              <div className="p-4">
+                {data.popularItems && data.popularItems[selectedCategory] ? (
+                  (() => {
+                    const filteredItems = getFilteredItems(data.popularItems[selectedCategory]);
+                    return filteredItems.length > 0 ? (
+                      <div className="space-y-3">
+                        {filteredItems.map((item, index) => (
+                          <div key={item.id} className="flex items-center gap-3">
+                            <span className={`w-6 h-6 flex items-center justify-center rounded-full text-xs font-bold ${
+                              viewMode === 'top' && index < 3
+                                ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
+                                : viewMode === 'bottom'
+                                ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400'
+                                : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'
+                            }`}>
+                              {index + 1}
+                            </span>
+                            <button
+                              onClick={() => handlePlaceClick(selectedCategory, item.id)}
+                              className="flex-1 text-sm font-medium text-primary-900 dark:text-white truncate text-left hover:text-primary-600 dark:hover:text-primary-400 hover:underline cursor-pointer"
+                              title={`Click for details: ${item.id}`}
+                            >
+                              {item.id}
+                            </button>
+                            <span className="text-sm text-green-600 dark:text-green-400">
+                              {item.timesVisited} visits
+                            </span>
+                            {item.timesBucketListed > 0 && (
+                              <span className="text-xs text-amber-600 dark:text-amber-400">
+                                +{item.timesBucketListed} bucket
+                              </span>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-center text-gray-500 dark:text-gray-400 py-8">
+                        {viewMode === 'zero' ? 'No unvisited bucket list items in this category.' : 'No data available for this category yet.'}
+                      </p>
+                    );
+                  })()
+                ) : (
+                  <p className="text-center text-gray-500 dark:text-gray-400 py-8">
+                    No data available for this category yet.
+                  </p>
+                )}
+              </div>
+            </div>
+
             {/* Popular Items */}
             <div className="grid md:grid-cols-2 gap-6">
               {/* Popular States */}
@@ -358,6 +511,80 @@ export default function AnalyticsDashboard() {
           </div>
         )}
       </div>
+
+      {/* Place Details Modal */}
+      {selectedPlace && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setSelectedPlace(null)}>
+          <div
+            className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-md w-full overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-5 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
+              <h3 className="text-lg font-bold text-primary-900 dark:text-white">Place Details</h3>
+              <button
+                onClick={() => setSelectedPlace(null)}
+                className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div className="p-5 space-y-4">
+              <div>
+                <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Name</p>
+                <p className="text-lg font-bold text-primary-900 dark:text-white mt-1">{selectedPlace.name}</p>
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">ID</p>
+                <p className="text-sm font-mono text-primary-700 dark:text-primary-300 mt-1 bg-gray-100 dark:bg-slate-700 px-2 py-1 rounded">
+                  {selectedPlace.id}
+                </p>
+              </div>
+              {selectedPlace.location && (
+                <div>
+                  <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Location</p>
+                  <p className="text-sm text-primary-700 dark:text-primary-300 mt-1">{selectedPlace.location}</p>
+                </div>
+              )}
+              {selectedPlace.type && (
+                <div>
+                  <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Type</p>
+                  <p className="text-sm text-primary-700 dark:text-primary-300 mt-1">{selectedPlace.type}</p>
+                </div>
+              )}
+              {selectedPlace.coordinates && (
+                <div>
+                  <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Coordinates</p>
+                  <p className="text-sm font-mono text-primary-700 dark:text-primary-300 mt-1">
+                    {selectedPlace.coordinates.lat.toFixed(4)}, {selectedPlace.coordinates.lng.toFixed(4)}
+                  </p>
+                </div>
+              )}
+            </div>
+            <div className="p-5 border-t border-gray-100 dark:border-gray-700 flex gap-3">
+              {selectedPlace.googleMapsUrl && (
+                <a
+                  href={selectedPlace.googleMapsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1 px-4 py-2 bg-primary-600 text-white rounded-lg font-medium text-sm text-center hover:bg-primary-700 transition-colors"
+                >
+                  Open in Google Maps
+                </a>
+              )}
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(selectedPlace.name);
+                }}
+                className="px-4 py-2 bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 rounded-lg font-medium text-sm hover:bg-gray-200 dark:hover:bg-slate-600 transition-colors"
+              >
+                Copy Name
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Footer */}
       <footer className="border-t border-black/5 dark:border-white/10 bg-white/50 dark:bg-slate-900/50 mt-12">

@@ -27,10 +27,42 @@ interface AnalyticsData {
   categoryStats: CategoryStat[];
   popularStates: PopularItem[];
   popularCountries: PopularItem[];
+  // Popular items for ALL categories (sorted by visits descending)
+  popularItems: Record<string, PopularItem[]>;
+  // Timeframe info
+  timeframe: string;
+  timeframeLabel: string;
+}
+
+type Timeframe = 'allTime' | 'last30Days' | 'last7Days' | 'previousMonth';
+
+function getTimeframeBounds(timeframe: Timeframe): { start: number | null; end: number | null; label: string } {
+  const now = Date.now();
+  const day = 24 * 60 * 60 * 1000;
+
+  switch (timeframe) {
+    case 'last7Days':
+      return { start: now - 7 * day, end: null, label: 'Last 7 Days' };
+    case 'last30Days':
+      return { start: now - 30 * day, end: null, label: 'Last 30 Days' };
+    case 'previousMonth': {
+      const date = new Date();
+      const firstOfThisMonth = new Date(date.getFullYear(), date.getMonth(), 1).getTime();
+      const firstOfLastMonth = new Date(date.getFullYear(), date.getMonth() - 1, 1).getTime();
+      return { start: firstOfLastMonth, end: firstOfThisMonth, label: 'Previous Month' };
+    }
+    default:
+      return { start: null, end: null, label: 'All Time' };
+  }
 }
 
 export async function GET(request: NextRequest) {
   try {
+    // Parse timeframe from query params
+    const { searchParams } = new URL(request.url);
+    const timeframe = (searchParams.get('timeframe') || 'allTime') as Timeframe;
+    const timeframeBounds = getTimeframeBounds(timeframe);
+
     // Verify admin access using the user's session
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
@@ -55,16 +87,19 @@ export async function GET(request: NextRequest) {
 
     // Try database-side aggregation first (more scalable)
     // Falls back to in-memory processing if RPC doesn't exist
-    const { data: rpcData, error: rpcError } = await adminClient.rpc('get_analytics_summary');
+    // Note: RPC doesn't support timeframe filtering yet
+    if (timeframe === 'allTime') {
+      const { data: rpcData, error: rpcError } = await adminClient.rpc('get_analytics_summary');
 
-    if (!rpcError && rpcData) {
-      // RPC succeeded - return database-aggregated data
-      return NextResponse.json(rpcData);
+      if (!rpcError && rpcData) {
+        // RPC succeeded - return database-aggregated data
+        return NextResponse.json({ ...rpcData, timeframe, timeframeLabel: timeframeBounds.label });
+      }
     }
 
     // Fallback: fetch and process in-memory (works without migration)
     // Note: This approach doesn't scale well with many users
-    console.warn('Analytics RPC not available, falling back to in-memory processing');
+    console.warn('Analytics RPC not available or timeframe filtering requested, falling back to in-memory processing');
 
     const { data: allSelections, error } = await adminClient
       .from('user_selections')
@@ -75,9 +110,9 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to fetch analytics' }, { status: 500 });
     }
 
-    const analytics = processAnalytics(allSelections || []);
+    const analytics = processAnalytics(allSelections || [], timeframeBounds.start, timeframeBounds.end);
 
-    return NextResponse.json(analytics);
+    return NextResponse.json({ ...analytics, timeframe, timeframeLabel: timeframeBounds.label });
   } catch (error) {
     console.error('Analytics API error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
@@ -88,6 +123,7 @@ interface SelectionItem {
   id: string;
   status: 'visited' | 'bucketList' | 'unvisited';
   deleted?: boolean;
+  updatedAt?: number;
 }
 
 interface UserSelectionsRow {
@@ -95,7 +131,11 @@ interface UserSelectionsRow {
   selections: Record<string, SelectionItem[]>;
 }
 
-function processAnalytics(rows: UserSelectionsRow[]): AnalyticsData {
+function processAnalytics(
+  rows: UserSelectionsRow[],
+  startTime: number | null = null,
+  endTime: number | null = null
+): Omit<AnalyticsData, 'timeframe' | 'timeframeLabel'> {
   const totalUsers = rows.length;
   let usersWithSelections = 0;
   let usersTrackingStates = 0;
@@ -107,9 +147,11 @@ function processAnalytics(rows: UserSelectionsRow[]): AnalyticsData {
     categoryData[cat] = { users: new Set(), visited: [], bucketList: [], totalVisited: 0 };
   }
 
-  // Popular items tracking
-  const stateVisits: Record<string, { visited: number; bucketList: number }> = {};
-  const countryVisits: Record<string, { visited: number; bucketList: number }> = {};
+  // Popular items tracking for ALL categories
+  const itemVisits: Record<string, Record<string, { visited: number; bucketList: number }>> = {};
+  for (const cat of ALL_CATEGORIES) {
+    itemVisits[cat] = {};
+  }
 
   for (const row of rows) {
     const selections = row.selections || {};
@@ -117,7 +159,18 @@ function processAnalytics(rows: UserSelectionsRow[]): AnalyticsData {
 
     for (const category of ALL_CATEGORIES) {
       const items = (selections[category] || []) as SelectionItem[];
-      const activeItems = items.filter(item => !item.deleted);
+      // Filter by deletion status and timeframe
+      const activeItems = items.filter(item => {
+        if (item.deleted) return false;
+        // If no timeframe filtering, include all
+        if (!startTime && !endTime) return true;
+        // If item has no updatedAt, include it (legacy data)
+        if (!item.updatedAt) return true;
+        // Check timeframe bounds
+        if (startTime && item.updatedAt < startTime) return false;
+        if (endTime && item.updatedAt >= endTime) return false;
+        return true;
+      });
 
       if (activeItems.length > 0) {
         hasAnySelection = true;
@@ -132,24 +185,15 @@ function processAnalytics(rows: UserSelectionsRow[]): AnalyticsData {
           visitedCount++;
           categoryData[category].totalVisited++;
 
-          // Track popular items
-          if (category === 'states') {
-            stateVisits[item.id] = stateVisits[item.id] || { visited: 0, bucketList: 0 };
-            stateVisits[item.id].visited++;
-          } else if (category === 'countries') {
-            countryVisits[item.id] = countryVisits[item.id] || { visited: 0, bucketList: 0 };
-            countryVisits[item.id].visited++;
-          }
+          // Track popular items for ALL categories
+          itemVisits[category][item.id] = itemVisits[category][item.id] || { visited: 0, bucketList: 0 };
+          itemVisits[category][item.id].visited++;
         } else if (item.status === 'bucketList') {
           bucketListCount++;
 
-          if (category === 'states') {
-            stateVisits[item.id] = stateVisits[item.id] || { visited: 0, bucketList: 0 };
-            stateVisits[item.id].bucketList++;
-          } else if (category === 'countries') {
-            countryVisits[item.id] = countryVisits[item.id] || { visited: 0, bucketList: 0 };
-            countryVisits[item.id].bucketList++;
-          }
+          // Track bucket list items for ALL categories
+          itemVisits[category][item.id] = itemVisits[category][item.id] || { visited: 0, bucketList: 0 };
+          itemVisits[category][item.id].bucketList++;
         }
       }
 
@@ -188,14 +232,17 @@ function processAnalytics(rows: UserSelectionsRow[]): AnalyticsData {
     .filter(stat => stat.usersTracking > 0)
     .sort((a, b) => b.usersTracking - a.usersTracking);
 
-  // Get all state/country stats (no limit - needed for heatmap visualization)
-  const popularStates: PopularItem[] = Object.entries(stateVisits)
-    .map(([id, counts]) => ({ id, timesVisited: counts.visited, timesBucketListed: counts.bucketList }))
-    .sort((a, b) => b.timesVisited - a.timesVisited);
+  // Build popular items for ALL categories (sorted by visits descending)
+  const popularItems: Record<string, PopularItem[]> = {};
+  for (const category of ALL_CATEGORIES) {
+    popularItems[category] = Object.entries(itemVisits[category])
+      .map(([id, counts]) => ({ id, timesVisited: counts.visited, timesBucketListed: counts.bucketList }))
+      .sort((a, b) => b.timesVisited - a.timesVisited);
+  }
 
-  const popularCountries: PopularItem[] = Object.entries(countryVisits)
-    .map(([id, counts]) => ({ id, timesVisited: counts.visited, timesBucketListed: counts.bucketList }))
-    .sort((a, b) => b.timesVisited - a.timesVisited);
+  // Keep backward compatibility with existing dashboard
+  const popularStates = popularItems['states'] || [];
+  const popularCountries = popularItems['countries'] || [];
 
   return {
     overview: {
@@ -207,5 +254,6 @@ function processAnalytics(rows: UserSelectionsRow[]): AnalyticsData {
     categoryStats,
     popularStates,
     popularCountries,
+    popularItems,
   };
 }
