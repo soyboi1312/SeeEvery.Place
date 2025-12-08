@@ -1,0 +1,52 @@
+{
+  "name": "travel-tracker",
+  "version": "1.0.0",
+  "description": "Map out your travels and share on social media",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "preview": "opennextjs-cloudflare build && wrangler dev",
+    "deploy": "opennextjs-cloudflare build && wrangler deploy",
+    "postinstall": "mkdir -p public/geo && cp node_modules/world-atlas/countries-110m.json public/geo/ && cp node_modules/us-atlas/states-10m.json public/geo/"
+  },
+  "dependencies": {
+    "@ducanh2912/next-pwa": "^10.2.9",
+    "@hookform/resolvers": "^5.2.2",
+    "@supabase/ssr": "^0.8.0",
+    "@supabase/supabase-js": "^2.86.0",
+    "@tanstack/react-query": "^5.90.12",
+    "@vnedyalk0v/react19-simple-maps": "^1.2.1",
+    "html-to-image": "^1.11.11",
+    "next": "15.5.7",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-hook-form": "^7.68.0",
+    "react-tooltip": "^5.30.0",
+    "us-atlas": "^3.0.1",
+    "world-atlas": "^2.0.2",
+    "zod": "^4.1.13"
+  },
+  "devDependencies": {
+    "@opennextjs/cloudflare": "^1.14.4",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.0",
+    "@types/node": "^20.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react": "^5.1.1",
+    "autoprefixer": "^10.4.0",
+    "eslint": "^8.0.0",
+    "eslint-config-next": "^14.2.0",
+    "jsdom": "^27.2.0",
+    "postcss": "^8.4.0",
+    "tailwindcss": "^3.4.0",
+    "typescript": "^5.0.0",
+    "vitest": "^4.0.15",
+    "wrangler": "^4.51.0"
+  }
+}
