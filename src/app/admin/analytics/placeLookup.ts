@@ -7,13 +7,12 @@ import { Category } from '@/lib/types';
 import { nationalParks } from '@/data/nationalParks';
 import { museums } from '@/data/museums';
 import { marathons } from '@/data/marathons';
-import { mountains } from '@/data/mountains';
+import { mountains, getUS14ers } from '@/data/mountains';
 import { f1Tracks } from '@/data/f1Tracks';
 import { airports } from '@/data/airports';
 import { skiResorts } from '@/data/skiResorts';
 import { themeParks } from '@/data/themeParks';
 import { surfingReserves } from '@/data/surfingReserves';
-import { unescoSites } from '@/data/unescoSites';
 import { nationalMonuments } from '@/data/nationalMonuments';
 import { stateParks } from '@/data/stateParks';
 import { weirdAmericana } from '@/data/weirdAmericana';
@@ -79,6 +78,10 @@ export function lookupPlace(category: Category, id: string): PlaceDetails | null
       dataSource = mountains;
       locationFields = ['country', 'range'];
       break;
+    case 'fourteeners':
+      dataSource = getUS14ers();
+      locationFields = ['country', 'range'];
+      break;
     case 'f1Tracks':
       dataSource = f1Tracks;
       locationFields = ['country'];
@@ -97,10 +100,6 @@ export function lookupPlace(category: Category, id: string): PlaceDetails | null
       break;
     case 'surfingReserves':
       dataSource = surfingReserves;
-      locationFields = ['country'];
-      break;
-    case 'unescoSites':
-      dataSource = unescoSites;
       locationFields = ['country'];
       break;
     case 'nationalMonuments':
@@ -178,6 +177,10 @@ export function getPlaceDetailsMap(category: Category): Map<string, PlaceDetails
       dataSource = mountains;
       locationFields = ['country', 'range'];
       break;
+    case 'fourteeners':
+      dataSource = getUS14ers();
+      locationFields = ['country', 'range'];
+      break;
     case 'f1Tracks':
       dataSource = f1Tracks;
       locationFields = ['country'];
@@ -196,10 +199,6 @@ export function getPlaceDetailsMap(category: Category): Map<string, PlaceDetails
       break;
     case 'surfingReserves':
       dataSource = surfingReserves;
-      locationFields = ['country'];
-      break;
-    case 'unescoSites':
-      dataSource = unescoSites;
       locationFields = ['country'];
       break;
     case 'nationalMonuments':
