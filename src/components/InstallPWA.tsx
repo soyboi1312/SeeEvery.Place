@@ -4,6 +4,10 @@
 import { useEffect, useState } from 'react';
 
 export default function InstallPWA() {
+  // Temporarily hidden to avoid blocking share button
+  return null;
+
+  /* Original implementation - uncomment to restore
   const [supportsPWA, setSupportsPWA] = useState(false);
   const [promptInstall, setPromptInstall] = useState<any>(null);
 
@@ -47,4 +51,5 @@ export default function InstallPWA() {
       Install App
     </button>
   );
+  */
 }
