@@ -178,6 +178,10 @@ export async function DELETE(request: NextRequest) {
     // Use admin client to delete user
     const adminClient = createAdminClient();
 
+    // Get user email before deletion for logging
+    const { data: targetUser } = await adminClient.auth.admin.getUserById(userId);
+    const targetEmail = targetUser?.user?.email || 'unknown';
+
     // First, delete user's selections data
     const { error: selectionsError } = await adminClient
       .from('user_selections')
@@ -195,6 +199,21 @@ export async function DELETE(request: NextRequest) {
     if (deleteError) {
       console.error('Error deleting user:', deleteError);
       return NextResponse.json({ error: 'Failed to delete user' }, { status: 500 });
+    }
+
+    // Log the admin action
+    const ip = request.headers.get('x-forwarded-for')?.split(',')[0] || 'unknown';
+    try {
+      await adminClient.from('admin_logs').insert({
+        admin_email: user.email,
+        action: 'delete_user',
+        target_type: 'user',
+        target_id: userId,
+        details: { deleted_email: targetEmail },
+        ip_address: ip,
+      });
+    } catch (logErr) {
+      console.error('Failed to log admin action:', logErr);
     }
 
     return NextResponse.json({ success: true });
