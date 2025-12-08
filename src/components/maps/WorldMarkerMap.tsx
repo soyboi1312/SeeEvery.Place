@@ -76,7 +76,7 @@ const WorldMarkerMap = memo(function WorldMarkerMap({
     canZoomOut,
   } = useMapZoom({
     maxZoom: 8,
-    initialCenter: [0, -20] // Shift center south to move map visually up
+    initialCenter: [0, 0] // Center on equator
   });
 
   // Determine marker size based on zoom level
