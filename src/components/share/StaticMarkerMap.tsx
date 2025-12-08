@@ -26,7 +26,7 @@ import {
 
 // Type helper for center coordinates (library uses branded types)
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const CENTER_ORIGIN: any = [0, 0];
+const CENTER_ORIGIN: any = [0, 20]; // Centered on 20°N to focus on major landmasses
 
 // US territories that cannot be displayed on the Albers USA projection
 const unsupportedUSTerritoriesParks = ['american-samoa', 'virgin-islands'];
