@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Tooltip } from 'react-tooltip';
 import { useDarkMode } from '@/lib/hooks/useDarkMode';
-import { categoryLabels } from '@/lib/types';
+import { categoryLabels, ALL_CATEGORIES, Category } from '@/lib/types';
 import { AnalyticsUSMap, AnalyticsWorldMap, HeatmapLegend } from './AnalyticsMaps';
 
 interface CategoryStat {
@@ -33,7 +33,10 @@ interface AnalyticsData {
   categoryStats: CategoryStat[];
   popularStates: PopularItem[];
   popularCountries: PopularItem[];
+  popularItems: Record<string, PopularItem[]>;
 }
+
+type ViewMode = 'top' | 'bottom' | 'zero';
 
 // US state abbreviation to full name mapping
 const stateNames: Record<string, string> = {
@@ -55,6 +58,21 @@ export default function AnalyticsDashboard() {
   const [data, setData] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<Category>('nationalParks');
+  const [viewMode, setViewMode] = useState<ViewMode>('top');
+
+  // Get items based on view mode
+  const getFilteredItems = (items: PopularItem[]): PopularItem[] => {
+    if (viewMode === 'top') {
+      return items.slice(0, 10);
+    } else if (viewMode === 'bottom') {
+      // Get items with at least 1 visit, sorted ascending
+      return items.filter(i => i.timesVisited > 0).sort((a, b) => a.timesVisited - b.timesVisited).slice(0, 10);
+    } else {
+      // Zero visits - items only on bucket lists (visited = 0)
+      return items.filter(i => i.timesVisited === 0 && i.timesBucketListed > 0).slice(0, 20);
+    }
+  };
 
   useEffect(() => {
     async function fetchAnalytics() {
@@ -274,6 +292,108 @@ export default function AnalyticsDashboard() {
 
             {/* Tooltip for heatmaps */}
             <Tooltip id="analytics-tooltip" />
+
+            {/* Category Explorer - All Categories */}
+            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-premium border border-black/5 dark:border-white/10 overflow-hidden">
+              <div className="p-5 border-b border-gray-100 dark:border-gray-700">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                  <h2 className="text-xl font-bold text-primary-900 dark:text-white">Category Explorer</h2>
+                  <div className="flex flex-wrap items-center gap-3">
+                    {/* Category Selector */}
+                    <select
+                      value={selectedCategory}
+                      onChange={(e) => setSelectedCategory(e.target.value as Category)}
+                      className="px-3 py-2 bg-gray-100 dark:bg-slate-700 rounded-lg text-sm font-medium text-primary-900 dark:text-white border-0 focus:ring-2 focus:ring-primary-500"
+                    >
+                      {ALL_CATEGORIES.filter(cat => cat !== 'states' && cat !== 'countries').map(cat => (
+                        <option key={cat} value={cat}>{getCategoryLabel(cat)}</option>
+                      ))}
+                    </select>
+                    {/* View Mode Tabs */}
+                    <div className="flex bg-gray-100 dark:bg-slate-700 rounded-lg p-1">
+                      <button
+                        onClick={() => setViewMode('top')}
+                        className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+                          viewMode === 'top'
+                            ? 'bg-white dark:bg-slate-600 text-primary-900 dark:text-white shadow-sm'
+                            : 'text-gray-600 dark:text-gray-400 hover:text-primary-900 dark:hover:text-white'
+                        }`}
+                      >
+                        Top 10
+                      </button>
+                      <button
+                        onClick={() => setViewMode('bottom')}
+                        className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+                          viewMode === 'bottom'
+                            ? 'bg-white dark:bg-slate-600 text-primary-900 dark:text-white shadow-sm'
+                            : 'text-gray-600 dark:text-gray-400 hover:text-primary-900 dark:hover:text-white'
+                        }`}
+                      >
+                        Hidden Gems
+                      </button>
+                      <button
+                        onClick={() => setViewMode('zero')}
+                        className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+                          viewMode === 'zero'
+                            ? 'bg-white dark:bg-slate-600 text-primary-900 dark:text-white shadow-sm'
+                            : 'text-gray-600 dark:text-gray-400 hover:text-primary-900 dark:hover:text-white'
+                        }`}
+                      >
+                        Unvisited
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                <p className="text-sm text-primary-600 dark:text-primary-300 mt-2">
+                  {viewMode === 'top' && 'Most visited places in this category'}
+                  {viewMode === 'bottom' && 'Least visited places (hidden gems for newsletter challenges)'}
+                  {viewMode === 'zero' && 'Places on bucket lists but never visited yet'}
+                </p>
+              </div>
+              <div className="p-4">
+                {data.popularItems && data.popularItems[selectedCategory] ? (
+                  (() => {
+                    const filteredItems = getFilteredItems(data.popularItems[selectedCategory]);
+                    return filteredItems.length > 0 ? (
+                      <div className="space-y-3">
+                        {filteredItems.map((item, index) => (
+                          <div key={item.id} className="flex items-center gap-3">
+                            <span className={`w-6 h-6 flex items-center justify-center rounded-full text-xs font-bold ${
+                              viewMode === 'top' && index < 3
+                                ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
+                                : viewMode === 'bottom'
+                                ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400'
+                                : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'
+                            }`}>
+                              {index + 1}
+                            </span>
+                            <span className="flex-1 text-sm font-medium text-primary-900 dark:text-white truncate" title={item.id}>
+                              {item.id}
+                            </span>
+                            <span className="text-sm text-green-600 dark:text-green-400">
+                              {item.timesVisited} visits
+                            </span>
+                            {item.timesBucketListed > 0 && (
+                              <span className="text-xs text-amber-600 dark:text-amber-400">
+                                +{item.timesBucketListed} bucket
+                              </span>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-center text-gray-500 dark:text-gray-400 py-8">
+                        {viewMode === 'zero' ? 'No unvisited bucket list items in this category.' : 'No data available for this category yet.'}
+                      </p>
+                    );
+                  })()
+                ) : (
+                  <p className="text-center text-gray-500 dark:text-gray-400 py-8">
+                    No data available for this category yet.
+                  </p>
+                )}
+              </div>
+            </div>
 
             {/* Popular Items */}
             <div className="grid md:grid-cols-2 gap-6">

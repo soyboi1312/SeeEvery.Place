@@ -27,6 +27,8 @@ interface AnalyticsData {
   categoryStats: CategoryStat[];
   popularStates: PopularItem[];
   popularCountries: PopularItem[];
+  // Popular items for ALL categories (sorted by visits descending)
+  popularItems: Record<string, PopularItem[]>;
 }
 
 export async function GET(request: NextRequest) {
@@ -107,9 +109,11 @@ function processAnalytics(rows: UserSelectionsRow[]): AnalyticsData {
     categoryData[cat] = { users: new Set(), visited: [], bucketList: [], totalVisited: 0 };
   }
 
-  // Popular items tracking
-  const stateVisits: Record<string, { visited: number; bucketList: number }> = {};
-  const countryVisits: Record<string, { visited: number; bucketList: number }> = {};
+  // Popular items tracking for ALL categories
+  const itemVisits: Record<string, Record<string, { visited: number; bucketList: number }>> = {};
+  for (const cat of ALL_CATEGORIES) {
+    itemVisits[cat] = {};
+  }
 
   for (const row of rows) {
     const selections = row.selections || {};
@@ -132,24 +136,15 @@ function processAnalytics(rows: UserSelectionsRow[]): AnalyticsData {
           visitedCount++;
           categoryData[category].totalVisited++;
 
-          // Track popular items
-          if (category === 'states') {
-            stateVisits[item.id] = stateVisits[item.id] || { visited: 0, bucketList: 0 };
-            stateVisits[item.id].visited++;
-          } else if (category === 'countries') {
-            countryVisits[item.id] = countryVisits[item.id] || { visited: 0, bucketList: 0 };
-            countryVisits[item.id].visited++;
-          }
+          // Track popular items for ALL categories
+          itemVisits[category][item.id] = itemVisits[category][item.id] || { visited: 0, bucketList: 0 };
+          itemVisits[category][item.id].visited++;
         } else if (item.status === 'bucketList') {
           bucketListCount++;
 
-          if (category === 'states') {
-            stateVisits[item.id] = stateVisits[item.id] || { visited: 0, bucketList: 0 };
-            stateVisits[item.id].bucketList++;
-          } else if (category === 'countries') {
-            countryVisits[item.id] = countryVisits[item.id] || { visited: 0, bucketList: 0 };
-            countryVisits[item.id].bucketList++;
-          }
+          // Track bucket list items for ALL categories
+          itemVisits[category][item.id] = itemVisits[category][item.id] || { visited: 0, bucketList: 0 };
+          itemVisits[category][item.id].bucketList++;
         }
       }
 
@@ -188,14 +183,17 @@ function processAnalytics(rows: UserSelectionsRow[]): AnalyticsData {
     .filter(stat => stat.usersTracking > 0)
     .sort((a, b) => b.usersTracking - a.usersTracking);
 
-  // Get all state/country stats (no limit - needed for heatmap visualization)
-  const popularStates: PopularItem[] = Object.entries(stateVisits)
-    .map(([id, counts]) => ({ id, timesVisited: counts.visited, timesBucketListed: counts.bucketList }))
-    .sort((a, b) => b.timesVisited - a.timesVisited);
+  // Build popular items for ALL categories (sorted by visits descending)
+  const popularItems: Record<string, PopularItem[]> = {};
+  for (const category of ALL_CATEGORIES) {
+    popularItems[category] = Object.entries(itemVisits[category])
+      .map(([id, counts]) => ({ id, timesVisited: counts.visited, timesBucketListed: counts.bucketList }))
+      .sort((a, b) => b.timesVisited - a.timesVisited);
+  }
 
-  const popularCountries: PopularItem[] = Object.entries(countryVisits)
-    .map(([id, counts]) => ({ id, timesVisited: counts.visited, timesBucketListed: counts.bucketList }))
-    .sort((a, b) => b.timesVisited - a.timesVisited);
+  // Keep backward compatibility with existing dashboard
+  const popularStates = popularItems['states'] || [];
+  const popularCountries = popularItems['countries'] || [];
 
   return {
     overview: {
@@ -207,5 +205,6 @@ function processAnalytics(rows: UserSelectionsRow[]): AnalyticsData {
     categoryStats,
     popularStates,
     popularCountries,
+    popularItems,
   };
 }
