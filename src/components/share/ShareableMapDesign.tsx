@@ -119,7 +119,7 @@ const ShareableMapDesign = forwardRef<HTMLDivElement, ShareableMapDesignProps>(
             {/* Map Snapshot */}
             {includeMap && (
             <div className="mt-4 bg-black/10 rounded-xl overflow-hidden border border-white/10 shadow-inner">
-                <div className="relative px-2 pt-2">
+                <div className="relative p-2 flex items-center justify-center">
                 {usesRegionMap(category) ? (
                     category === 'countries' ? (
                     <StaticWorldMap selections={selections} />
