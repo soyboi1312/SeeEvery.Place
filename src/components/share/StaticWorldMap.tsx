@@ -11,7 +11,7 @@ import { GEO_URL_WORLD, countryNameToISO } from '@/lib/mapUtils';
 
 // Type helper for center coordinates (library uses branded types)
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const CENTER_ORIGIN: any = [0, 0];
+const CENTER_ORIGIN: any = [0, 20]; // Centered on 20°N to focus on major landmasses
 
 interface StaticWorldMapProps {
   selections: UserSelections;
