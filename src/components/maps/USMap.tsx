@@ -20,7 +20,10 @@ const USMap = memo(function USMap({ selections, onToggle, tooltip }: BaseMapProp
     handleMoveEnd,
     canZoomIn,
     canZoomOut,
-  } = useMapZoom({ maxZoom: 8 });
+  } = useMapZoom({
+    maxZoom: 8,
+    initialCenter: [-97, 38] // Center on the US
+  });
 
   // Memoize status lookup for O(1) access instead of O(n) per geography
   const statusMap = useMemo(() => {

@@ -24,7 +24,10 @@ const WorldMap = memo(function WorldMap({ selections, onToggle, tooltip }: BaseM
     handleMoveEnd,
     canZoomIn,
     canZoomOut,
-  } = useMapZoom({ maxZoom: 8 });
+  } = useMapZoom({
+    maxZoom: 8,
+    initialCenter: [0, -20] // Shift center south to move map visually up
+  });
 
   // Memoize status lookup for O(1) access instead of O(n) per geography
   const statusMap = useMemo(() => {

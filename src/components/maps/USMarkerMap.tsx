@@ -59,7 +59,10 @@ const USMarkerMap = memo(function USMarkerMap({
     handleMoveEnd,
     canZoomIn,
     canZoomOut,
-  } = useMapZoom({ maxZoom: 8 });
+  } = useMapZoom({
+    maxZoom: 8,
+    initialCenter: [-97, 38] // Center on the US
+  });
 
   // Determine marker size based on zoom level
   // Less than 2x zoom = small markers to prevent overcrowding
