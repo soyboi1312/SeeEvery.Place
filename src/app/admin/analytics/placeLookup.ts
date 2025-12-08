@@ -23,7 +23,7 @@ import {
   nbaStadiums,
   nhlStadiums,
   soccerStadiums
-} from '@/data/stadiums';
+} from '@/data/stadiums/index';
 
 export interface PlaceDetails {
   id: string;
