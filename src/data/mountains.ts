@@ -111,6 +111,14 @@ export const mountains: Mountain[] = [
   { id: "huron", name: "Huron Peak", elevation: 4270, country: "United States", countryCode: "US", range: "Sawatch Range", lat: 38.9453, lng: -106.4378 },
   { id: "holy-cross", name: "Mount of the Holy Cross", elevation: 4270, country: "United States", countryCode: "US", range: "Sawatch Range", lat: 39.4667, lng: -106.4817 },
   { id: "sunshine", name: "Sunshine Peak", elevation: 4268, country: "United States", countryCode: "US", range: "San Juan Mountains", lat: 37.9225, lng: -107.4256 },
+  { id: "bross", name: "Mount Bross", elevation: 4320, country: "United States", countryCode: "US", range: "Mosquito Range", lat: 39.3353, lng: -106.1075 },
+  { id: "cameron", name: "Mount Cameron", elevation: 4318, country: "United States", countryCode: "US", range: "Mosquito Range", lat: 39.3469, lng: -106.1186 },
+  { id: "humboldt", name: "Humboldt Peak", elevation: 4287, country: "United States", countryCode: "US", range: "Sangre de Cristo", lat: 37.9761, lng: -105.5553 },
+  { id: "culebra", name: "Culebra Peak", elevation: 4282, country: "United States", countryCode: "US", range: "Sangre de Cristo", lat: 37.1222, lng: -105.1856 },
+  { id: "lindsey", name: "Mount Lindsey", elevation: 4280, country: "United States", countryCode: "US", range: "Sangre de Cristo", lat: 37.5836, lng: -105.4450 },
+  { id: "ellingwood", name: "Ellingwood Point", elevation: 4294, country: "United States", countryCode: "US", range: "Sangre de Cristo", lat: 37.5825, lng: -105.4925 },
+  { id: "north-maroon", name: "North Maroon Peak", elevation: 4273, country: "United States", countryCode: "US", range: "Elk Mountains", lat: 39.0761, lng: -106.9875 },
+  { id: "conundrum", name: "Conundrum Peak", elevation: 4272, country: "United States", countryCode: "US", range: "Elk Mountains", lat: 39.0164, lng: -106.8625 },
 
   // US 14ers - California
   { id: "whitney", name: "Mount Whitney", elevation: 4421, country: "United States", countryCode: "US", range: "Sierra Nevada", lat: 36.5785, lng: -118.2923 },
@@ -124,6 +132,9 @@ export const mountains: Mountain[] = [
   { id: "langley", name: "Mount Langley", elevation: 4277, country: "United States", countryCode: "US", range: "Sierra Nevada", lat: 36.5219, lng: -118.2383 },
   { id: "middle-palisade", name: "Middle Palisade", elevation: 4273, country: "United States", countryCode: "US", range: "Sierra Nevada", lat: 37.0706, lng: -118.4694 },
   { id: "muir", name: "Mount Muir", elevation: 4273, country: "United States", countryCode: "US", range: "Sierra Nevada", lat: 36.5639, lng: -118.2886 },
+  { id: "tyndall", name: "Mount Tyndall", elevation: 4275, country: "United States", countryCode: "US", range: "Sierra Nevada", lat: 36.6456, lng: -118.3219 },
+  { id: "thunderbolt", name: "Thunderbolt Peak", elevation: 4268, country: "United States", countryCode: "US", range: "Sierra Nevada", lat: 37.0972, lng: -118.5194 },
+  { id: "starlight", name: "Starlight Peak", elevation: 4267, country: "United States", countryCode: "US", range: "Sierra Nevada", lat: 37.0964, lng: -118.5117 },
 
   // US 14ers - Washington
   { id: "rainier", name: "Mount Rainier", elevation: 4392, country: "United States", countryCode: "US", range: "Cascade Range", lat: 46.8528, lng: -121.7606 },
@@ -165,9 +176,11 @@ export const getTotalMountains = () => mountains.length;
 export const get5000mPeaks = () =>
   mountains.filter(m => m.elevation >= 5000);
 
-// US 14ers (peaks >= 14,000 ft / 4267m in the United States)
+// US 14ers (peaks >= 14,000 ft / 4267m in the contiguous United States)
+// Excludes Alaska peaks which are categorized separately in 5000m+ peaks
+const alaskaRanges = ['Alaska Range', 'Saint Elias'];
 export const getUS14ers = () =>
-  mountains.filter(m => m.elevation >= 4267 && m.countryCode === 'US');
+  mountains.filter(m => m.elevation >= 4267 && m.countryCode === 'US' && !alaskaRanges.includes(m.range));
 
 // Peak subcategory type
 export type PeakSubcategory = "All" | "5000m+" | "US 14ers";

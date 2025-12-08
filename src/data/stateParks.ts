@@ -382,7 +382,7 @@ export const stateParks: StatePark[] = [
   { id: "sp-craters-moon", name: "Craters of the Moon", state: "ID", region: "West", lat: 43.4167, lng: -113.5167 },
   { id: "sp-bruneau-dunes", name: "Bruneau Dunes", state: "ID", region: "West", lat: 42.9011, lng: -115.6944 },
   { id: "sp-heyburn", name: "Heyburn", state: "ID", region: "West", lat: 47.3419, lng: -116.7758 },
-  { id: "sp-harriman", name: "Harriman", state: "ID", region: "West", lat: 44.3653, lng: -111.4403 },
+  { id: "sp-harriman-id", name: "Harriman", state: "ID", region: "West", lat: 44.3653, lng: -111.4403 },
   { id: "sp-ponderosa", name: "Ponderosa", state: "ID", region: "West", lat: 44.9322, lng: -116.0492 },
   { id: "sp-thousand-springs", name: "Thousand Springs", state: "ID", region: "West", lat: 42.6700, lng: -114.8553 },
 
