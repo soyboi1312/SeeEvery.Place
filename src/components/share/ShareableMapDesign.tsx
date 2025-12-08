@@ -29,6 +29,7 @@ export const gradients = [
   // Premium: Nature Collection
   'from-emerald-900 via-green-800 to-teal-900',    // Forest
   'from-cyan-900 via-blue-900 to-indigo-900',      // Oceanic
+  'from-orange-500 via-rose-500 to-violet-600',    // Sunset
 ];
 
 // Check if category uses colored regions (countries/states) vs markers (other categories)
