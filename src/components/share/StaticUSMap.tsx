@@ -17,9 +17,9 @@ export default function StaticUSMap({ selections }: StaticUSMapProps) {
   return (
     <ComposableMap
       projection="geoAlbersUsa"
-      projectionConfig={{ scale: 350 }}
-      width={280}
-      height={160}
+      projectionConfig={{ scale: 1000 }}
+      width={800}
+      height={500}
       style={{ width: '100%', height: 'auto', maxWidth: '100%' }}
     >
       <Geographies geography={GEO_URL_USA}>

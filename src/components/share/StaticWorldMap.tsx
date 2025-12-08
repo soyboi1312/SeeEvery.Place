@@ -21,9 +21,9 @@ export default function StaticWorldMap({ selections }: StaticWorldMapProps) {
   return (
     <ComposableMap
       projection="geoEqualEarth"
-      projectionConfig={{ scale: 55, center: CENTER_ORIGIN }}
-      width={280}
-      height={160}
+      projectionConfig={{ scale: 140, center: CENTER_ORIGIN }}
+      width={800}
+      height={400}
       style={{ width: '100%', height: 'auto', maxWidth: '100%' }}
     >
       <Sphere stroke="#ffffff" strokeWidth={0.5} id="sphere-share" fill="#1e3a5f" />

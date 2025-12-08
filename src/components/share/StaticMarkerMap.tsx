@@ -104,9 +104,9 @@ export default function StaticMarkerMap({
     return (
       <ComposableMap
         projection="geoAlbersUsa"
-        projectionConfig={{ scale: 350 }}
-        width={280}
-        height={160}
+        projectionConfig={{ scale: 1000 }}
+        width={800}
+        height={500}
         style={{ width: '100%', height: 'auto', maxWidth: '100%' }}
       >
         <Geographies geography={GEO_URL_USA}>
@@ -140,9 +140,9 @@ export default function StaticMarkerMap({
   return (
     <ComposableMap
       projection="geoEqualEarth"
-      projectionConfig={{ scale: 55, center: CENTER_ORIGIN }}
-      width={280}
-      height={160}
+      projectionConfig={{ scale: 140, center: CENTER_ORIGIN }}
+      width={800}
+      height={400}
       style={{ width: '100%', height: 'auto', maxWidth: '100%' }}
     >
       <Sphere stroke="#ffffff" strokeWidth={0.5} id="sphere-markers" fill="#1e3a5f" />
