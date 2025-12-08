@@ -21,7 +21,7 @@ export default function StaticWorldMap({ selections }: StaticWorldMapProps) {
   return (
     <ComposableMap
       projection="geoEqualEarth"
-      projectionConfig={{ scale: 140, center: CENTER_ORIGIN, translate: [400, 200] }}
+      projectionConfig={{ scale: 140, center: CENTER_ORIGIN }}
       width={800}
       height={400}
       style={{ width: '100%', height: 'auto', maxWidth: '100%' }}
