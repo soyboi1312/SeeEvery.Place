@@ -105,7 +105,7 @@ export default function StaticMarkerMap({
       <ComposableMap
         projection="geoAlbersUsa"
         projectionConfig={{ scale: 1000 }}
-        viewBox="0 0 800 530"
+        viewBox="0 40 800 530"
         width={800}
         height={530}
         style={{ width: '100%', height: 'auto', maxWidth: '100%' }}
@@ -142,7 +142,7 @@ export default function StaticMarkerMap({
     <ComposableMap
       projection="geoEqualEarth"
       projectionConfig={{ scale: 140, center: CENTER_ORIGIN }}
-      viewBox="0 0 800 400"
+      viewBox="0 40 800 400"
       width={800}
       height={400}
       style={{ width: '100%', height: 'auto', maxWidth: '100%' }}
