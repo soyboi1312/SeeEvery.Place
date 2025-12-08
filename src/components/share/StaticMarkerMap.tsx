@@ -26,7 +26,7 @@ import {
 
 // Type helper for center coordinates (library uses branded types)
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const CENTER_ORIGIN: any = [0, 20]; // Centered on 20°N to focus on major landmasses
+const CENTER_ORIGIN: any = [0, 10]; // Centered on 10°N for balanced view of all continents
 
 // US territories that cannot be displayed on the Albers USA projection
 const unsupportedUSTerritoriesParks = ['american-samoa', 'virgin-islands'];
@@ -104,7 +104,7 @@ export default function StaticMarkerMap({
     return (
       <ComposableMap
         projection="geoAlbersUsa"
-        projectionConfig={{ scale: 1000 }}
+        projectionConfig={{ scale: 900 }}
         viewBox="0 0 800 500"
         width={800}
         height={500}
