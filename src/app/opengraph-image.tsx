@@ -1,18 +1,14 @@
-import { ImageResponse } from 'next/og'
+import { ImageResponse } from 'next/og';
 
-// Image metadata
-export const alt = 'See Every Place - Track Your World Travels'
-export const size = {
-  width: 1200,
-  height: 630,
-}
-
-export const contentType = 'image/png'
+export const runtime = 'edge';
+export const alt = 'SeeEvery.Place - Track your world travels and bucket list.';
+export const size = { width: 1200, height: 630 };
+export const contentType = 'image/png';
 
 export default async function Image() {
   // Brand colors
-  const blue = '#2563EB'   // blue-600
-  const purple = '#9333EA' // purple-600
+  const blue = '#2563EB';   // blue-600
+  const purple = '#9333EA'; // purple-600
 
   return new ImageResponse(
     (
@@ -24,7 +20,6 @@ export default async function Image() {
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          // Brand Gradient Background
           background: `linear-gradient(135deg, ${blue} 0%, ${purple} 100%)`,
           color: 'white',
           fontFamily: 'sans-serif',
@@ -43,55 +38,59 @@ export default async function Image() {
           }}
         />
 
-        {/* Logo Container */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 40 }}>
+        {/* Logo + Title Row */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginBottom: 30,
+          }}
+        >
+          {/* Logo SVG */}
           <svg
-            width="200"
-            height="200"
+            width="120"
+            height="120"
             viewBox="0 0 512 512"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
+            style={{ marginRight: 24 }}
           >
-            {/* Pin Shape - Solid White for contrast on gradient */}
+            {/* Pin Shape */}
             <path
               d="M256 32C158.8 32 80 110.8 80 208c0 40.3 13.7 78.6 38.3 112L256 480l137.7-160C418.3 286.6 432 248.3 432 208 432 110.8 353.2 32 256 32z"
               fill="white"
             />
-
-            {/* Eye/Iris - Using the Brand Blue */}
+            {/* Eye/Iris */}
             <circle cx="256" cy="208" r="96" fill={blue} />
-
-            {/* Inner Detail (Iris lines) */}
+            {/* Inner Detail */}
             <path d="M256 144v128M192 208h128" stroke="white" strokeWidth="8" strokeOpacity="0.4" strokeLinecap="round" />
-
             {/* Pupil Background */}
             <circle cx="256" cy="208" r="56" fill="white" />
-
-            {/* Checkmark (The "Completion" aspect) */}
+            {/* Checkmark */}
             <path
               d="M236 228l-20-20-12 12 32 32 64-64-12-12-52 52z"
               fill={blue}
               transform="scale(1.2) translate(-39, -41)"
             />
           </svg>
-        </div>
 
-        {/* Title */}
-        <div
-          style={{
-            fontSize: 90,
-            fontWeight: 900,
-            letterSpacing: '-0.02em',
-            lineHeight: 1,
-            marginBottom: 20,
-            textShadow: '0 4px 20px rgba(0,0,0,0.2)',
-            display: 'flex',
-            alignItems: 'baseline',
-          }}
-        >
-          <span>SeeEvery</span>
-          <span style={{ color: 'rgba(255,255,255,0.7)', margin: '0 2px' }}>.</span>
-          <span>Place</span>
+          {/* Title */}
+          <div
+            style={{
+              fontSize: 90,
+              fontWeight: 900,
+              letterSpacing: '-0.02em',
+              lineHeight: 1,
+              textShadow: '0 4px 20px rgba(0,0,0,0.2)',
+              display: 'flex',
+              alignItems: 'baseline',
+            }}
+          >
+            <span>SeeEvery</span>
+            <span style={{ color: 'rgba(255,255,255,0.7)', margin: '0 2px' }}>.</span>
+            <span>Place</span>
+          </div>
         </div>
 
         {/* Tagline */}
@@ -111,5 +110,5 @@ export default async function Image() {
     {
       ...size,
     }
-  )
+  );
 }
