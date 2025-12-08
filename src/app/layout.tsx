@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import './globals.css'
 import { QueryProvider } from '@/lib/providers/QueryProvider'
+import SystemBanner from '@/components/SystemBanner'
 
 // PWA Viewport settings (Controls the browser chrome color on mobile)
 export const viewport: Viewport = {
@@ -135,6 +136,7 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
         <QueryProvider>
+          <SystemBanner />
           <main className="min-h-screen">
             {children}
           </main>

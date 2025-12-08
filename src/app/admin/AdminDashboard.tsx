@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useDarkMode } from '@/lib/hooks/useDarkMode';
+import { categoryLabels, Category, Selection } from '@/lib/types';
 
 interface User {
   id: string;
@@ -27,6 +28,24 @@ interface UsersData {
   pagination: Pagination;
 }
 
+interface CategoryStats {
+  category: Category;
+  visited: number;
+  bucketList: number;
+  total: number;
+}
+
+interface UserDetail {
+  id: string;
+  email: string;
+  created_at: string;
+  last_sign_in_at: string | null;
+  selections: Record<string, Selection[]>;
+  categoryStats: CategoryStats[];
+  totalVisited: number;
+  totalBucketList: number;
+}
+
 export default function AdminDashboard() {
   const { isDarkMode, toggleDarkMode } = useDarkMode();
   const [usersData, setUsersData] = useState<UsersData | null>(null);
@@ -36,6 +55,10 @@ export default function AdminDashboard() {
   const [currentPage, setCurrentPage] = useState(1);
   const [userToDelete, setUserToDelete] = useState<User | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [userToView, setUserToView] = useState<User | null>(null);
+  const [userDetail, setUserDetail] = useState<UserDetail | null>(null);
+  const [loadingDetail, setLoadingDetail] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const pageSize = 50;
 
   useEffect(() => {
@@ -57,6 +80,38 @@ export default function AdminDashboard() {
 
     fetchUsers();
   }, [currentPage]);
+
+  // Fetch user detail when userToView changes
+  useEffect(() => {
+    async function fetchUserDetail() {
+      if (!userToView) {
+        setUserDetail(null);
+        setSelectedCategory(null);
+        return;
+      }
+
+      setLoadingDetail(true);
+      try {
+        const response = await fetch(`/api/admin/users/${userToView.id}`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch user details');
+        }
+        const data = await response.json();
+        setUserDetail(data);
+        // Auto-select first category with data
+        if (data.categoryStats.length > 0) {
+          setSelectedCategory(data.categoryStats[0].category);
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load user details');
+        setUserToView(null);
+      } finally {
+        setLoadingDetail(false);
+      }
+    }
+
+    fetchUserDetail();
+  }, [userToView]);
 
   const filteredUsers = usersData?.users.filter(user =>
     user.email.toLowerCase().includes(searchTerm.toLowerCase())
@@ -100,6 +155,46 @@ export default function AdminDashboard() {
     } finally {
       setDeleting(false);
     }
+  };
+
+  // CSV Export function
+  const handleExportCSV = () => {
+    if (!usersData?.users) return;
+
+    const headers = ['ID', 'Email', 'Joined', 'Last Sign In', 'Categories', 'Visited Count', 'Bucket List Count'];
+    const csvContent = [
+      headers.join(','),
+      ...usersData.users.map(u => [
+        u.id,
+        `"${u.email}"`, // Quote email to handle special characters
+        u.created_at,
+        u.last_sign_in_at || '',
+        u.categories_count,
+        u.total_visited,
+        u.total_bucket_list
+      ].join(','))
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', `users_export_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  // Get selections for a category from user detail
+  const getSelectionsForCategory = (category: Category) => {
+    if (!userDetail?.selections) return { visited: [], bucketList: [] };
+    const items = userDetail.selections[category] || [];
+    const activeItems = items.filter(item => !item.deleted);
+    return {
+      visited: activeItems.filter(item => item.status === 'visited'),
+      bucketList: activeItems.filter(item => item.status === 'bucketList'),
+    };
   };
 
   return (
@@ -151,7 +246,7 @@ export default function AdminDashboard() {
         </div>
 
         {/* Quick Links */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           <Link
             href="/admin/analytics"
             className="flex items-center gap-4 p-6 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-black/5 dark:border-white/10 hover:shadow-md transition-shadow group"
@@ -163,7 +258,7 @@ export default function AdminDashboard() {
             </div>
             <div>
               <h2 className="text-lg font-semibold text-primary-900 dark:text-white">Analytics</h2>
-              <p className="text-sm text-primary-600 dark:text-primary-400">View user statistics and heatmaps</p>
+              <p className="text-sm text-primary-600 dark:text-primary-400">View statistics</p>
             </div>
             <svg className="w-5 h-5 text-primary-400 ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -181,7 +276,44 @@ export default function AdminDashboard() {
             </div>
             <div>
               <h2 className="text-lg font-semibold text-primary-900 dark:text-white">Suggestions</h2>
-              <p className="text-sm text-primary-600 dark:text-primary-400">Review user-submitted suggestions</p>
+              <p className="text-sm text-primary-600 dark:text-primary-400">Review ideas</p>
+            </div>
+            <svg className="w-5 h-5 text-primary-400 ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </Link>
+
+          <Link
+            href="/admin/data-health"
+            className="flex items-center gap-4 p-6 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-black/5 dark:border-white/10 hover:shadow-md transition-shadow group"
+          >
+            <div className="w-12 h-12 rounded-xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">
+              <svg className="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <div>
+              <h2 className="text-lg font-semibold text-primary-900 dark:text-white">Data Health</h2>
+              <p className="text-sm text-primary-600 dark:text-primary-400">Validate data</p>
+            </div>
+            <svg className="w-5 h-5 text-primary-400 ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </Link>
+
+          <Link
+            href="/admin/settings"
+            className="flex items-center gap-4 p-6 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-black/5 dark:border-white/10 hover:shadow-md transition-shadow group"
+          >
+            <div className="w-12 h-12 rounded-xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">
+              <svg className="w-6 h-6 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+            </div>
+            <div>
+              <h2 className="text-lg font-semibold text-primary-900 dark:text-white">Settings</h2>
+              <p className="text-sm text-primary-600 dark:text-primary-400">Banners & Logs</p>
             </div>
             <svg className="w-5 h-5 text-primary-400 ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -199,17 +331,30 @@ export default function AdminDashboard() {
                   {usersData ? `Page ${usersData.pagination.page} (${usersData.pagination.count} users)` : 'Loading...'}
                 </p>
               </div>
-              <div className="relative">
-                <svg className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-                <input
-                  type="text"
-                  placeholder="Search by email..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 pr-4 py-2 w-full sm:w-64 bg-primary-50 dark:bg-slate-700 border border-primary-200 dark:border-slate-600 rounded-lg text-primary-900 dark:text-white placeholder-primary-400 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500"
-                />
+              <div className="flex items-center gap-3">
+                <div className="relative">
+                  <svg className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                  <input
+                    type="text"
+                    placeholder="Search by email..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10 pr-4 py-2 w-full sm:w-64 bg-primary-50 dark:bg-slate-700 border border-primary-200 dark:border-slate-600 rounded-lg text-primary-900 dark:text-white placeholder-primary-400 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  />
+                </div>
+                <button
+                  onClick={handleExportCSV}
+                  disabled={!usersData?.users?.length}
+                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+                  title="Export users to CSV"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  </svg>
+                  Export CSV
+                </button>
               </div>
             </div>
           </div>
@@ -286,15 +431,27 @@ export default function AdminDashboard() {
                             <span className="text-sm text-amber-600 dark:text-amber-400 font-medium">{user.total_bucket_list}</span>
                           </td>
                           <td className="px-6 py-4 text-right">
-                            <button
-                              onClick={() => setUserToDelete(user)}
-                              className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 transition-colors"
-                              title="Delete user"
-                            >
-                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                              </svg>
-                            </button>
+                            <div className="flex items-center justify-end gap-2">
+                              <button
+                                onClick={() => setUserToView(user)}
+                                className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors"
+                                title="View user details"
+                              >
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                </svg>
+                              </button>
+                              <button
+                                onClick={() => setUserToDelete(user)}
+                                className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 transition-colors"
+                                title="Delete user"
+                              >
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       ))
@@ -360,6 +517,160 @@ export default function AdminDashboard() {
                   'Delete User'
                 )}
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* User Detail Modal */}
+      {userToView && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+            {/* Modal Header */}
+            <div className="p-6 border-b border-black/5 dark:border-white/10 flex items-center justify-between">
+              <div>
+                <h3 className="text-xl font-bold text-primary-900 dark:text-white">
+                  User Details
+                </h3>
+                <p className="text-sm text-primary-600 dark:text-primary-400 mt-1">
+                  {userToView.email}
+                </p>
+              </div>
+              <button
+                onClick={() => setUserToView(null)}
+                className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 text-gray-500 dark:text-gray-400 transition-colors"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Modal Content */}
+            <div className="flex-1 overflow-y-auto p-6">
+              {loadingDetail ? (
+                <div className="flex items-center justify-center py-12">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 dark:border-primary-400"></div>
+                </div>
+              ) : userDetail ? (
+                <div className="space-y-6">
+                  {/* User Stats */}
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="bg-primary-50 dark:bg-slate-700/50 rounded-xl p-4">
+                      <p className="text-sm text-primary-600 dark:text-primary-400">Joined</p>
+                      <p className="text-lg font-semibold text-primary-900 dark:text-white">{formatDate(userDetail.created_at)}</p>
+                    </div>
+                    <div className="bg-primary-50 dark:bg-slate-700/50 rounded-xl p-4">
+                      <p className="text-sm text-primary-600 dark:text-primary-400">Last Sign In</p>
+                      <p className="text-lg font-semibold text-primary-900 dark:text-white">{formatDate(userDetail.last_sign_in_at)}</p>
+                    </div>
+                    <div className="bg-green-50 dark:bg-green-900/20 rounded-xl p-4">
+                      <p className="text-sm text-green-700 dark:text-green-400">Total Visited</p>
+                      <p className="text-lg font-semibold text-green-800 dark:text-green-300">{userDetail.totalVisited}</p>
+                    </div>
+                    <div className="bg-amber-50 dark:bg-amber-900/20 rounded-xl p-4">
+                      <p className="text-sm text-amber-700 dark:text-amber-400">Total Bucket List</p>
+                      <p className="text-lg font-semibold text-amber-800 dark:text-amber-300">{userDetail.totalBucketList}</p>
+                    </div>
+                  </div>
+
+                  {/* Category Breakdown */}
+                  {userDetail.categoryStats.length > 0 ? (
+                    <div className="space-y-4">
+                      <h4 className="text-lg font-semibold text-primary-900 dark:text-white">Category Breakdown</h4>
+
+                      {/* Category Pills */}
+                      <div className="flex flex-wrap gap-2">
+                        {userDetail.categoryStats.map((stat) => (
+                          <button
+                            key={stat.category}
+                            onClick={() => setSelectedCategory(stat.category)}
+                            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                              selectedCategory === stat.category
+                                ? 'bg-primary-600 text-white'
+                                : 'bg-primary-100 dark:bg-slate-700 text-primary-700 dark:text-primary-300 hover:bg-primary-200 dark:hover:bg-slate-600'
+                            }`}
+                          >
+                            {categoryLabels[stat.category]}
+                            <span className="ml-2 px-1.5 py-0.5 rounded bg-black/10 dark:bg-white/10 text-xs">
+                              {stat.visited + stat.bucketList}
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+
+                      {/* Selected Category Details */}
+                      {selectedCategory && (
+                        <div className="bg-primary-50 dark:bg-slate-700/30 rounded-xl p-4">
+                          <h5 className="font-semibold text-primary-900 dark:text-white mb-3">
+                            {categoryLabels[selectedCategory]}
+                          </h5>
+                          {(() => {
+                            const { visited, bucketList } = getSelectionsForCategory(selectedCategory);
+                            return (
+                              <div className="grid md:grid-cols-2 gap-4">
+                                {/* Visited */}
+                                <div>
+                                  <p className="text-sm font-medium text-green-700 dark:text-green-400 mb-2 flex items-center gap-2">
+                                    <span className="w-2 h-2 rounded-full bg-green-500"></span>
+                                    Visited ({visited.length})
+                                  </p>
+                                  {visited.length > 0 ? (
+                                    <div className="max-h-48 overflow-y-auto space-y-1">
+                                      {visited.map((item) => (
+                                        <div key={item.id} className="text-sm text-primary-700 dark:text-primary-300 bg-white dark:bg-slate-800 rounded px-2 py-1">
+                                          {item.id}
+                                        </div>
+                                      ))}
+                                    </div>
+                                  ) : (
+                                    <p className="text-sm text-primary-500 dark:text-primary-400">None</p>
+                                  )}
+                                </div>
+
+                                {/* Bucket List */}
+                                <div>
+                                  <p className="text-sm font-medium text-amber-700 dark:text-amber-400 mb-2 flex items-center gap-2">
+                                    <span className="w-2 h-2 rounded-full bg-amber-500"></span>
+                                    Bucket List ({bucketList.length})
+                                  </p>
+                                  {bucketList.length > 0 ? (
+                                    <div className="max-h-48 overflow-y-auto space-y-1">
+                                      {bucketList.map((item) => (
+                                        <div key={item.id} className="text-sm text-primary-700 dark:text-primary-300 bg-white dark:bg-slate-800 rounded px-2 py-1">
+                                          {item.id}
+                                        </div>
+                                      ))}
+                                    </div>
+                                  ) : (
+                                    <p className="text-sm text-primary-500 dark:text-primary-400">None</p>
+                                  )}
+                                </div>
+                              </div>
+                            );
+                          })()}
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8 text-primary-500 dark:text-primary-400">
+                      This user has not tracked any places yet.
+                    </div>
+                  )}
+                </div>
+              ) : null}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="p-4 border-t border-black/5 dark:border-white/10 bg-primary-50 dark:bg-slate-700/50">
+              <div className="flex justify-end">
+                <button
+                  onClick={() => setUserToView(null)}
+                  className="px-4 py-2 text-sm font-medium text-primary-700 dark:text-primary-200 bg-white dark:bg-slate-700 border border-primary-200 dark:border-slate-600 rounded-lg hover:bg-primary-100 dark:hover:bg-slate-600 transition-colors"
+                >
+                  Close
+                </button>
+              </div>
             </div>
           </div>
         </div>

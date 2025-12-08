@@ -9,6 +9,39 @@ import { categoryLabels, ALL_CATEGORIES, Category } from '@/lib/types';
 import { AnalyticsUSMap, AnalyticsWorldMap, HeatmapLegend } from './AnalyticsMaps';
 import { lookupPlace, PlaceDetails } from './placeLookup';
 
+// CSV Export utility function
+function exportToCSV(data: Record<string, unknown>[], filename: string) {
+  if (!data || data.length === 0) return;
+
+  // Get headers from first object
+  const headers = Object.keys(data[0]);
+
+  // Create CSV content
+  const csvContent = [
+    headers.join(','),
+    ...data.map(row =>
+      headers.map(header => {
+        const value = row[header];
+        // Handle strings with commas or quotes
+        if (typeof value === 'string' && (value.includes(',') || value.includes('"'))) {
+          return `"${value.replace(/"/g, '""')}"`;
+        }
+        return value ?? '';
+      }).join(',')
+    )
+  ].join('\n');
+
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.setAttribute('href', url);
+  link.setAttribute('download', `${filename}_${new Date().toISOString().split('T')[0]}.csv`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+}
+
 interface CategoryStat {
   category: string;
   usersTracking: number;
@@ -168,8 +201,8 @@ export default function AnalyticsDashboard() {
               Insights into how users are tracking their travels.
             </p>
           </div>
-          {/* Timeframe Selector */}
-          <div className="flex items-center gap-2">
+          {/* Timeframe Selector and Export */}
+          <div className="flex items-center gap-3">
             <label className="text-sm font-medium text-primary-600 dark:text-primary-300">Timeframe:</label>
             <select
               value={timeframe}
@@ -181,6 +214,29 @@ export default function AnalyticsDashboard() {
               <option value="last30Days">Last 30 Days</option>
               <option value="previousMonth">Previous Month</option>
             </select>
+            {data && (
+              <button
+                onClick={() => {
+                  // Export category stats
+                  const categoryData = data.categoryStats.map(stat => ({
+                    Category: getCategoryLabel(stat.category),
+                    'Users Tracking': stat.usersTracking,
+                    'Avg Visited': stat.avgVisited.toFixed(1),
+                    'Avg Bucket List': stat.avgBucketList.toFixed(1),
+                    'Max Visited': stat.maxVisited,
+                    'Total Visits': stat.totalVisited,
+                  }));
+                  exportToCSV(categoryData, `analytics_categories_${timeframe}`);
+                }}
+                className="px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2 text-sm"
+                title="Export analytics to CSV"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+                Export
+              </button>
+            )}
           </div>
         </div>
 

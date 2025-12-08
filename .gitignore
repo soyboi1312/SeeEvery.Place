@@ -33,3 +33,8 @@ Thumbs.db
 
 # TypeScript
 *.tsbuildinfo
+next-env.d.ts
+
+# PWA Service Worker (generated)
+public/sw.js
+public/workbox-*.js
