@@ -2,8 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
-import { useDarkMode } from '@/lib/hooks/useDarkMode';
 import { categoryLabels, Category, Selection } from '@/lib/types';
 
 interface User {
@@ -14,6 +12,15 @@ interface User {
   categories_count: number;
   total_visited: number;
   total_bucket_list: number;
+  status?: 'active' | 'suspended' | 'banned';
+}
+
+interface UserStatus {
+  status: 'active' | 'suspended' | 'banned';
+  suspended_at?: string;
+  suspended_by?: string;
+  suspend_reason?: string;
+  suspended_until?: string;
 }
 
 interface Pagination {
@@ -46,8 +53,10 @@ interface UserDetail {
   totalBucketList: number;
 }
 
+type SortField = 'email' | 'created_at' | 'last_sign_in_at' | 'total_visited' | 'total_bucket_list' | 'categories_count';
+type SortDirection = 'asc' | 'desc';
+
 export default function AdminDashboard() {
-  const { isDarkMode, toggleDarkMode } = useDarkMode();
   const [usersData, setUsersData] = useState<UsersData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -59,6 +68,13 @@ export default function AdminDashboard() {
   const [userDetail, setUserDetail] = useState<UserDetail | null>(null);
   const [loadingDetail, setLoadingDetail] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
+  const [sortField, setSortField] = useState<SortField>('created_at');
+  const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
+  const [userToSuspend, setUserToSuspend] = useState<User | null>(null);
+  const [suspendReason, setSuspendReason] = useState('');
+  const [suspendUntil, setSuspendUntil] = useState('');
+  const [suspending, setSuspending] = useState(false);
+  const [impersonating, setImpersonating] = useState<string | null>(null);
   const pageSize = 50;
 
   useEffect(() => {
@@ -113,9 +129,77 @@ export default function AdminDashboard() {
     fetchUserDetail();
   }, [userToView]);
 
-  const filteredUsers = usersData?.users.filter(user =>
+  // Filter and sort users
+  const filteredUsers = usersData?.users.filter((user: User) =>
     user.email.toLowerCase().includes(searchTerm.toLowerCase())
-  ) || [];
+  ).sort((a: User, b: User) => {
+    let aVal: string | number | null;
+    let bVal: string | number | null;
+
+    switch (sortField) {
+      case 'email':
+        aVal = a.email.toLowerCase();
+        bVal = b.email.toLowerCase();
+        break;
+      case 'created_at':
+        aVal = new Date(a.created_at).getTime();
+        bVal = new Date(b.created_at).getTime();
+        break;
+      case 'last_sign_in_at':
+        aVal = a.last_sign_in_at ? new Date(a.last_sign_in_at).getTime() : 0;
+        bVal = b.last_sign_in_at ? new Date(b.last_sign_in_at).getTime() : 0;
+        break;
+      case 'total_visited':
+        aVal = a.total_visited;
+        bVal = b.total_visited;
+        break;
+      case 'total_bucket_list':
+        aVal = a.total_bucket_list;
+        bVal = b.total_bucket_list;
+        break;
+      case 'categories_count':
+        aVal = a.categories_count;
+        bVal = b.categories_count;
+        break;
+      default:
+        return 0;
+    }
+
+    if (aVal === null || bVal === null) return 0;
+    if (aVal < bVal) return sortDirection === 'asc' ? -1 : 1;
+    if (aVal > bVal) return sortDirection === 'asc' ? 1 : -1;
+    return 0;
+  }) || [];
+
+  // Handle column header click for sorting
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      setSortDirection((prev: SortDirection) => prev === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('desc');
+    }
+  };
+
+  // Sort indicator component
+  const SortIndicator = ({ field }: { field: SortField }) => {
+    if (sortField !== field) {
+      return (
+        <svg className="w-3 h-3 text-gray-400 opacity-0 group-hover:opacity-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+        </svg>
+      );
+    }
+    return sortDirection === 'asc' ? (
+      <svg className="w-3 h-3 text-primary-600 dark:text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+      </svg>
+    ) : (
+      <svg className="w-3 h-3 text-primary-600 dark:text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+      </svg>
+    );
+  };
 
   const formatDate = (dateString: string | null) => {
     if (!dateString) return 'Never';
@@ -143,9 +227,9 @@ export default function AdminDashboard() {
       }
 
       // Remove user from local state
-      setUsersData(prev => prev ? {
+      setUsersData((prev: UsersData | null) => prev ? {
         ...prev,
-        users: prev.users.filter(u => u.id !== userToDelete.id),
+        users: prev.users.filter((u: User) => u.id !== userToDelete.id),
         pagination: { ...prev.pagination, count: prev.pagination.count - 1 },
       } : null);
 
@@ -186,6 +270,105 @@ export default function AdminDashboard() {
     URL.revokeObjectURL(url);
   };
 
+  // Handle user suspension/ban
+  const handleSuspendUser = async (status: 'suspended' | 'banned') => {
+    if (!userToSuspend) return;
+
+    setSuspending(true);
+    setError(null);
+
+    try {
+      const response = await fetch('/api/admin/users/status', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: userToSuspend.id,
+          status,
+          reason: suspendReason || undefined,
+          until: suspendUntil || undefined,
+        }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Failed to update user status');
+      }
+
+      // Update local state
+      setUsersData(prev => prev ? {
+        ...prev,
+        users: prev.users.map(u =>
+          u.id === userToSuspend.id ? { ...u, status } : u
+        ),
+      } : null);
+
+      setUserToSuspend(null);
+      setSuspendReason('');
+      setSuspendUntil('');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to update user status');
+    } finally {
+      setSuspending(false);
+    }
+  };
+
+  // Handle activating a suspended user
+  const handleActivateUser = async (user: User) => {
+    try {
+      const response = await fetch('/api/admin/users/status', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: user.id,
+          status: 'active',
+        }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Failed to activate user');
+      }
+
+      // Update local state
+      setUsersData(prev => prev ? {
+        ...prev,
+        users: prev.users.map(u =>
+          u.id === user.id ? { ...u, status: 'active' } : u
+        ),
+      } : null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to activate user');
+    }
+  };
+
+  // Handle user impersonation
+  const handleImpersonate = async (user: User) => {
+    setImpersonating(user.id);
+    setError(null);
+
+    try {
+      const response = await fetch('/api/admin/users/impersonate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user.id }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Failed to impersonate user');
+      }
+
+      const data = await response.json();
+
+      // Open impersonation link in new tab
+      window.open(data.link, '_blank');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to impersonate user');
+    } finally {
+      setImpersonating(null);
+    }
+  };
+
   // Get selections for a category from user detail
   const getSelectionsForCategory = (category: Category) => {
     if (!userDetail?.selections) return { visited: [], bucketList: [] };
@@ -198,46 +381,7 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-primary-50 to-white dark:from-slate-900 dark:to-slate-800">
-      {/* Header */}
-      <header className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-black/5 dark:border-white/10 sticky top-0 z-40">
-        <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-3 group">
-            <div className="relative w-8 h-8 transition-transform group-hover:scale-110 duration-200">
-              <Image src="/logo.svg" alt="See Every Place Logo" fill className="object-contain" priority />
-            </div>
-            <div className="flex flex-col">
-              <h1 className="text-xl font-bold text-primary-900 dark:text-white leading-none">
-                SeeEvery<span className="text-accent-500">.</span>Place<span className="text-[10px] align-super text-primary-400">TM</span>
-              </h1>
-              <span className="text-[10px] text-primary-500 dark:text-primary-400 font-medium tracking-wider uppercase">
-                Admin Dashboard
-              </span>
-            </div>
-          </Link>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={toggleDarkMode}
-              className="p-2 rounded-lg bg-primary-50 dark:bg-slate-800 text-primary-600 dark:text-primary-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-              title={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
-              aria-label={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
-            >
-              {isDarkMode ? (
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-                </svg>
-              ) : (
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-                </svg>
-              )}
-            </button>
-          </div>
-        </div>
-      </header>
-
-      {/* Content */}
-      <div className="max-w-6xl mx-auto px-4 py-8">
+    <div className="max-w-6xl mx-auto px-4 py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-primary-900 dark:text-white mb-2">Admin Dashboard</h1>
           <p className="text-primary-600 dark:text-primary-300">
@@ -397,23 +541,59 @@ export default function AdminDashboard() {
                 <table className="w-full">
                   <thead className="bg-primary-50 dark:bg-slate-700/50">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-primary-600 dark:text-primary-300 uppercase tracking-wider">
-                        Email
+                      <th
+                        className="px-6 py-3 text-left text-xs font-medium text-primary-600 dark:text-primary-300 uppercase tracking-wider cursor-pointer hover:bg-primary-100 dark:hover:bg-slate-600 transition-colors group"
+                        onClick={() => handleSort('email')}
+                      >
+                        <span className="flex items-center gap-1">
+                          Email
+                          <SortIndicator field="email" />
+                        </span>
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-primary-600 dark:text-primary-300 uppercase tracking-wider">
-                        Joined
+                      <th
+                        className="px-6 py-3 text-left text-xs font-medium text-primary-600 dark:text-primary-300 uppercase tracking-wider cursor-pointer hover:bg-primary-100 dark:hover:bg-slate-600 transition-colors group"
+                        onClick={() => handleSort('created_at')}
+                      >
+                        <span className="flex items-center gap-1">
+                          Joined
+                          <SortIndicator field="created_at" />
+                        </span>
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-primary-600 dark:text-primary-300 uppercase tracking-wider">
-                        Last Sign In
+                      <th
+                        className="px-6 py-3 text-left text-xs font-medium text-primary-600 dark:text-primary-300 uppercase tracking-wider cursor-pointer hover:bg-primary-100 dark:hover:bg-slate-600 transition-colors group"
+                        onClick={() => handleSort('last_sign_in_at')}
+                      >
+                        <span className="flex items-center gap-1">
+                          Last Sign In
+                          <SortIndicator field="last_sign_in_at" />
+                        </span>
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-primary-600 dark:text-primary-300 uppercase tracking-wider">
-                        Categories
+                      <th
+                        className="px-6 py-3 text-left text-xs font-medium text-primary-600 dark:text-primary-300 uppercase tracking-wider cursor-pointer hover:bg-primary-100 dark:hover:bg-slate-600 transition-colors group"
+                        onClick={() => handleSort('categories_count')}
+                      >
+                        <span className="flex items-center gap-1">
+                          Categories
+                          <SortIndicator field="categories_count" />
+                        </span>
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-primary-600 dark:text-primary-300 uppercase tracking-wider">
-                        Visited
+                      <th
+                        className="px-6 py-3 text-left text-xs font-medium text-primary-600 dark:text-primary-300 uppercase tracking-wider cursor-pointer hover:bg-primary-100 dark:hover:bg-slate-600 transition-colors group"
+                        onClick={() => handleSort('total_visited')}
+                      >
+                        <span className="flex items-center gap-1">
+                          Visited
+                          <SortIndicator field="total_visited" />
+                        </span>
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-primary-600 dark:text-primary-300 uppercase tracking-wider">
-                        Bucket List
+                      <th
+                        className="px-6 py-3 text-left text-xs font-medium text-primary-600 dark:text-primary-300 uppercase tracking-wider cursor-pointer hover:bg-primary-100 dark:hover:bg-slate-600 transition-colors group"
+                        onClick={() => handleSort('total_bucket_list')}
+                      >
+                        <span className="flex items-center gap-1">
+                          Bucket List
+                          <SortIndicator field="total_bucket_list" />
+                        </span>
                       </th>
                       <th className="px-6 py-3 text-right text-xs font-medium text-primary-600 dark:text-primary-300 uppercase tracking-wider">
                         Actions
@@ -429,9 +609,21 @@ export default function AdminDashboard() {
                       </tr>
                     ) : (
                       filteredUsers.map((user) => (
-                        <tr key={user.id} className="hover:bg-primary-50 dark:hover:bg-slate-700/30 transition-colors">
+                        <tr key={user.id} className={`hover:bg-primary-50 dark:hover:bg-slate-700/30 transition-colors ${user.status === 'suspended' || user.status === 'banned' ? 'opacity-60' : ''}`}>
                           <td className="px-6 py-4">
-                            <span className="text-sm font-medium text-primary-900 dark:text-white">{user.email}</span>
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm font-medium text-primary-900 dark:text-white">{user.email}</span>
+                              {user.status === 'suspended' && (
+                                <span className="px-1.5 py-0.5 text-xs font-medium rounded bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+                                  Suspended
+                                </span>
+                              )}
+                              {user.status === 'banned' && (
+                                <span className="px-1.5 py-0.5 text-xs font-medium rounded bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400">
+                                  Banned
+                                </span>
+                              )}
+                            </div>
                           </td>
                           <td className="px-6 py-4">
                             <span className="text-sm text-primary-600 dark:text-primary-400">{formatDate(user.created_at)}</span>
@@ -449,23 +641,62 @@ export default function AdminDashboard() {
                             <span className="text-sm text-amber-600 dark:text-amber-400 font-medium">{user.total_bucket_list}</span>
                           </td>
                           <td className="px-6 py-4 text-right">
-                            <div className="flex items-center justify-end gap-2">
+                            <div className="flex items-center justify-end gap-1">
+                              {/* View Details */}
                               <button
                                 onClick={() => setUserToView(user)}
-                                className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors"
+                                className="p-1.5 rounded text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors"
                                 title="View user details"
                               >
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                                 </svg>
                               </button>
+                              {/* Impersonate */}
+                              <button
+                                onClick={() => handleImpersonate(user)}
+                                disabled={impersonating === user.id}
+                                className="p-1.5 rounded text-purple-600 dark:text-purple-400 hover:bg-purple-100 dark:hover:bg-purple-900/30 transition-colors disabled:opacity-50"
+                                title="Login as this user"
+                              >
+                                {impersonating === user.id ? (
+                                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-purple-600 border-t-transparent"></div>
+                                ) : (
+                                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                  </svg>
+                                )}
+                              </button>
+                              {/* Suspend/Activate */}
+                              {user.status === 'suspended' || user.status === 'banned' ? (
+                                <button
+                                  onClick={() => handleActivateUser(user)}
+                                  className="p-1.5 rounded text-green-600 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900/30 transition-colors"
+                                  title="Activate user"
+                                >
+                                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                  </svg>
+                                </button>
+                              ) : (
+                                <button
+                                  onClick={() => setUserToSuspend(user)}
+                                  className="p-1.5 rounded text-amber-600 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors"
+                                  title="Suspend user"
+                                >
+                                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                                  </svg>
+                                </button>
+                              )}
+                              {/* Delete */}
                               <button
                                 onClick={() => setUserToDelete(user)}
-                                className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 transition-colors"
+                                className="p-1.5 rounded text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
                                 title="Delete user"
                               >
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                 </svg>
                               </button>
@@ -501,7 +732,6 @@ export default function AdminDashboard() {
             </>
           )}
         </div>
-      </div>
 
       {/* Delete Confirmation Modal */}
       {userToDelete && (
@@ -689,6 +919,81 @@ export default function AdminDashboard() {
                   Close
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Suspend/Ban Modal */}
+      {userToSuspend && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-md w-full p-6">
+            <h3 className="text-xl font-bold text-primary-900 dark:text-white mb-2">
+              Suspend or Ban User
+            </h3>
+            <p className="text-sm text-primary-600 dark:text-primary-300 mb-4">
+              Taking action on <strong>{userToSuspend.email}</strong>
+            </p>
+
+            <div className="space-y-4 mb-6">
+              <div>
+                <label className="block text-sm font-medium text-primary-700 dark:text-primary-300 mb-1">
+                  Reason (optional)
+                </label>
+                <textarea
+                  value={suspendReason}
+                  onChange={(e) => setSuspendReason(e.target.value)}
+                  className="w-full px-3 py-2 bg-primary-50 dark:bg-slate-700 border border-primary-200 dark:border-slate-600 rounded-lg text-primary-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm"
+                  rows={2}
+                  placeholder="Reason for suspension/ban..."
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-primary-700 dark:text-primary-300 mb-1">
+                  Suspend until (leave empty for indefinite)
+                </label>
+                <input
+                  type="datetime-local"
+                  value={suspendUntil}
+                  onChange={(e) => setSuspendUntil(e.target.value)}
+                  className="w-full px-3 py-2 bg-primary-50 dark:bg-slate-700 border border-primary-200 dark:border-slate-600 rounded-lg text-primary-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => {
+                  setUserToSuspend(null);
+                  setSuspendReason('');
+                  setSuspendUntil('');
+                }}
+                disabled={suspending}
+                className="px-4 py-2 text-sm font-medium text-primary-700 dark:text-primary-200 bg-primary-100 dark:bg-slate-700 rounded-lg hover:bg-primary-200 dark:hover:bg-slate-600 disabled:opacity-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => handleSuspendUser('suspended')}
+                disabled={suspending}
+                className="px-4 py-2 text-sm font-medium text-white bg-amber-600 rounded-lg hover:bg-amber-700 disabled:opacity-50 transition-colors flex items-center gap-2"
+              >
+                {suspending ? (
+                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                ) : null}
+                Suspend
+              </button>
+              <button
+                onClick={() => handleSuspendUser('banned')}
+                disabled={suspending}
+                className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 disabled:opacity-50 transition-colors flex items-center gap-2"
+              >
+                {suspending ? (
+                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                ) : null}
+                Ban
+              </button>
             </div>
           </div>
         </div>

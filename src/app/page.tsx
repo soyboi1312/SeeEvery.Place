@@ -227,15 +227,16 @@ export default function Home() {
         {/* Install PWA Button - New addition */}
         <InstallPWA />
 
-        {/* Floating Share Button */}
+        {/* Floating Share Button - Updated to be more explicit */}
         <button
           onClick={() => setShowShareCard(true)}
-          className="fixed bottom-20 right-6 w-14 h-14 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-full shadow-lg flex items-center justify-center hover:shadow-xl transition-all z-30"
-          aria-label="Share your travel map"
+          className="fixed bottom-20 right-6 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-full shadow-lg flex items-center gap-2 hover:shadow-xl hover:scale-105 transition-all z-30 font-semibold"
+          aria-label="Share or download your travel map"
         >
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
           </svg>
+          <span>Share Map</span>
         </button>
 
         {/* Footer */}
