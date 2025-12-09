@@ -40,8 +40,8 @@ const MemoizedMarker = memo(function MemoizedMarker({
 
   return (
     <Marker
-      // Library uses branded Longitude/Latitude types that require unsafe cast
-      coordinates={coordinates as unknown as [number, number]}
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Library uses branded Longitude/Latitude types
+      coordinates={coordinates as any}
       onClick={() => onToggle?.(id, status)}
       onMouseEnter={(e) => onMouseEnter(name, e)}
       onMouseLeave={onMouseLeave}

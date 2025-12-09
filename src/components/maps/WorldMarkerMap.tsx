@@ -144,8 +144,8 @@ const WorldMarkerMap = memo(function WorldMarkerMap({
       >
         <ZoomableGroup
           zoom={position.zoom}
-          // Library uses branded Longitude/Latitude types that require unsafe cast
-          center={position.coordinates as unknown as [number, number]}
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Library uses branded Longitude/Latitude types
+          center={position.coordinates as any}
           onMoveEnd={handleMoveEnd}
         >
           <StaticWorldBackground />
