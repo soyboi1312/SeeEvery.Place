@@ -9,7 +9,8 @@ import { createClient } from '@/lib/supabase/client';
 import { loadSelections, saveSelections, clearAllSelections } from '@/lib/storage';
 import { calculateTotalXp, calculateLevel, xpToNextLevel } from '@/lib/achievements';
 import type { User } from '@supabase/supabase-js';
-import type { UserSelections } from '@/lib/types';
+import type { UserSelections, Category } from '@/lib/types';
+import { categoryLabels, categoryIcons, ALL_CATEGORIES } from '@/lib/types';
 
 interface Profile {
   id: string;
@@ -21,6 +22,22 @@ interface Profile {
   bio: string | null;
   total_xp: number;
   level: number;
+  // Social links
+  website_url: string | null;
+  instagram_handle: string | null;
+  twitter_handle: string | null;
+  // Home base
+  home_city: string | null;
+  home_state: string | null;
+  home_country: string | null;
+  show_home_base: boolean;
+  // Privacy settings
+  privacy_settings: {
+    hide_categories?: string[];
+    hide_bucket_list?: boolean;
+  } | null;
+  // Preferences
+  default_map_view: 'world' | 'usa';
 }
 
 export default function SettingsPage() {
@@ -51,6 +68,30 @@ export default function SettingsPage() {
   const [isSavingProfile, setIsSavingProfile] = useState(false);
   const [profileSaveSuccess, setProfileSaveSuccess] = useState(false);
 
+  // Social links
+  const [websiteUrl, setWebsiteUrl] = useState('');
+  const [instagramHandle, setInstagramHandle] = useState('');
+  const [twitterHandle, setTwitterHandle] = useState('');
+
+  // Home base
+  const [homeCity, setHomeCity] = useState('');
+  const [homeState, setHomeState] = useState('');
+  const [homeCountry, setHomeCountry] = useState('');
+  const [showHomeBase, setShowHomeBase] = useState(false);
+
+  // Privacy settings
+  const [hiddenCategories, setHiddenCategories] = useState<string[]>([]);
+  const [hideBucketList, setHideBucketList] = useState(false);
+
+  // Preferences
+  const [defaultMapView, setDefaultMapView] = useState<'world' | 'usa'>('world');
+
+  // Reset progress states
+  const [showResetModal, setShowResetModal] = useState(false);
+  const [resetCategory, setResetCategory] = useState<string | null>(null);
+  const [resetConfirmText, setResetConfirmText] = useState('');
+  const [isResetting, setIsResetting] = useState(false);
+
   // XP and Level display
   const [selections, setSelections] = useState<UserSelections | null>(null);
 
@@ -68,6 +109,21 @@ export default function SettingsPage() {
       setUsername(data.username || '');
       setBio(data.bio || '');
       setIsPublic(data.is_public || false);
+      // Social links
+      setWebsiteUrl(data.website_url || '');
+      setInstagramHandle(data.instagram_handle || '');
+      setTwitterHandle(data.twitter_handle || '');
+      // Home base
+      setHomeCity(data.home_city || '');
+      setHomeState(data.home_state || '');
+      setHomeCountry(data.home_country || '');
+      setShowHomeBase(data.show_home_base || false);
+      // Privacy settings
+      const privacySettings = data.privacy_settings || {};
+      setHiddenCategories(privacySettings.hide_categories || []);
+      setHideBucketList(privacySettings.hide_bucket_list || false);
+      // Preferences
+      setDefaultMapView(data.default_map_view || 'world');
     }
   }, []);
 
@@ -276,6 +332,22 @@ export default function SettingsPage() {
           username: username || null,
           bio: bio || null,
           is_public: isPublic,
+          // Social links
+          website_url: websiteUrl || null,
+          instagram_handle: instagramHandle ? instagramHandle.replace(/^@/, '') : null,
+          twitter_handle: twitterHandle ? twitterHandle.replace(/^@/, '') : null,
+          // Home base
+          home_city: homeCity || null,
+          home_state: homeState || null,
+          home_country: homeCountry || null,
+          show_home_base: showHomeBase,
+          // Privacy settings
+          privacy_settings: {
+            hide_categories: hiddenCategories,
+            hide_bucket_list: hideBucketList,
+          },
+          // Preferences
+          default_map_view: defaultMapView,
           updated_at: new Date().toISOString(),
         })
         .eq('id', user!.id);
@@ -319,6 +391,37 @@ export default function SettingsPage() {
       alert('Failed to delete account. Please try again or contact support.');
     } finally {
       setIsDeleting(false);
+    }
+  };
+
+  const handleResetCategory = (category: string) => {
+    if (resetConfirmText !== 'RESET') return;
+
+    setIsResetting(true);
+
+    try {
+      // Load current selections
+      const currentSelections = loadSelections();
+
+      // Clear the specific category
+      const updatedSelections = {
+        ...currentSelections,
+        [category]: [],
+      };
+
+      // Save and update state
+      saveSelections(updatedSelections);
+      setSelections(updatedSelections);
+
+      // Close modal and reset state
+      setShowResetModal(false);
+      setResetCategory(null);
+      setResetConfirmText('');
+    } catch (error) {
+      console.error('Reset category failed:', error);
+      alert('Failed to reset category. Please try again.');
+    } finally {
+      setIsResetting(false);
     }
   };
 
@@ -569,6 +672,189 @@ export default function SettingsPage() {
                 )}
               </div>
 
+              {/* Social Media Links */}
+              <div className="mb-4 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700">
+                <h4 className="font-medium text-primary-900 dark:text-white mb-3">Social Links</h4>
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-sm font-medium text-primary-700 dark:text-primary-300 mb-1">
+                      Website
+                    </label>
+                    <input
+                      type="url"
+                      value={websiteUrl}
+                      onChange={(e) => setWebsiteUrl(e.target.value)}
+                      placeholder="https://yourblog.com"
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-sm font-medium text-primary-700 dark:text-primary-300 mb-1">
+                        Instagram
+                      </label>
+                      <div className="flex items-center">
+                        <span className="text-gray-400 dark:text-gray-500 mr-1">@</span>
+                        <input
+                          type="text"
+                          value={instagramHandle}
+                          onChange={(e) => setInstagramHandle(e.target.value.replace(/^@/, ''))}
+                          placeholder="username"
+                          className="flex-1 px-2 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-primary-700 dark:text-primary-300 mb-1">
+                        Twitter / X
+                      </label>
+                      <div className="flex items-center">
+                        <span className="text-gray-400 dark:text-gray-500 mr-1">@</span>
+                        <input
+                          type="text"
+                          value={twitterHandle}
+                          onChange={(e) => setTwitterHandle(e.target.value.replace(/^@/, ''))}
+                          placeholder="username"
+                          className="flex-1 px-2 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Home Base */}
+              <div className="mb-4 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700">
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="font-medium text-primary-900 dark:text-white">Home Base</h4>
+                  <label className="flex items-center cursor-pointer">
+                    <span className="text-xs text-primary-600 dark:text-primary-400 mr-2">Show on profile</span>
+                    <input
+                      type="checkbox"
+                      checked={showHomeBase}
+                      onChange={(e) => setShowHomeBase(e.target.checked)}
+                      className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                    />
+                  </label>
+                </div>
+                <div className="grid grid-cols-3 gap-3">
+                  <div>
+                    <label className="block text-xs font-medium text-primary-700 dark:text-primary-300 mb-1">
+                      City
+                    </label>
+                    <input
+                      type="text"
+                      value={homeCity}
+                      onChange={(e) => setHomeCity(e.target.value)}
+                      placeholder="Denver"
+                      className="w-full px-2 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-primary-700 dark:text-primary-300 mb-1">
+                      State
+                    </label>
+                    <input
+                      type="text"
+                      value={homeState}
+                      onChange={(e) => setHomeState(e.target.value)}
+                      placeholder="Colorado"
+                      className="w-full px-2 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-primary-700 dark:text-primary-300 mb-1">
+                      Country
+                    </label>
+                    <input
+                      type="text"
+                      value={homeCountry}
+                      onChange={(e) => setHomeCountry(e.target.value)}
+                      placeholder="USA"
+                      className="w-full px-2 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Privacy Settings (only show if public profile is enabled) */}
+              {isPublic && (
+                <div className="mb-4 p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-800">
+                  <h4 className="font-medium text-primary-900 dark:text-white mb-3">Privacy Controls</h4>
+                  <p className="text-xs text-primary-600 dark:text-primary-400 mb-3">
+                    Choose which categories to hide from your public profile
+                  </p>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-4">
+                    {ALL_CATEGORIES.slice(0, 12).map((category) => (
+                      <label
+                        key={category}
+                        className="flex items-center gap-2 p-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={hiddenCategories.includes(category)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setHiddenCategories([...hiddenCategories, category]);
+                            } else {
+                              setHiddenCategories(hiddenCategories.filter(c => c !== category));
+                            }
+                          }}
+                          className="w-4 h-4 text-amber-600 rounded border-gray-300 focus:ring-amber-500"
+                        />
+                        <span className="text-sm">{categoryIcons[category]}</span>
+                        <span className="text-xs text-primary-700 dark:text-primary-300 truncate">
+                          {categoryLabels[category]}
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={hideBucketList}
+                      onChange={(e) => setHideBucketList(e.target.checked)}
+                      className="w-4 h-4 text-amber-600 rounded border-gray-300 focus:ring-amber-500"
+                    />
+                    <span className="text-sm text-primary-700 dark:text-primary-300">Hide bucket list items from public profile</span>
+                  </label>
+                </div>
+              )}
+
+              {/* Preferences */}
+              <div className="mb-4 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700">
+                <h4 className="font-medium text-primary-900 dark:text-white mb-3">Preferences</h4>
+                <div>
+                  <label className="block text-sm font-medium text-primary-700 dark:text-primary-300 mb-2">
+                    Default Map View
+                  </label>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setDefaultMapView('world')}
+                      className={`flex-1 px-4 py-2 rounded-lg font-medium text-sm transition-colors ${
+                        defaultMapView === 'world'
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600'
+                      }`}
+                    >
+                      World Map
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setDefaultMapView('usa')}
+                      className={`flex-1 px-4 py-2 rounded-lg font-medium text-sm transition-colors ${
+                        defaultMapView === 'usa'
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600'
+                      }`}
+                    >
+                      USA Map
+                    </button>
+                  </div>
+                </div>
+              </div>
+
               {/* Save/Cancel buttons */}
               <div className="flex gap-3">
                 <button
@@ -586,6 +872,21 @@ export default function SettingsPage() {
                     setBio(profile?.bio || '');
                     setIsPublic(profile?.is_public || false);
                     setUsernameError(null);
+                    // Reset social links
+                    setWebsiteUrl(profile?.website_url || '');
+                    setInstagramHandle(profile?.instagram_handle || '');
+                    setTwitterHandle(profile?.twitter_handle || '');
+                    // Reset home base
+                    setHomeCity(profile?.home_city || '');
+                    setHomeState(profile?.home_state || '');
+                    setHomeCountry(profile?.home_country || '');
+                    setShowHomeBase(profile?.show_home_base || false);
+                    // Reset privacy settings
+                    const privacySettings = profile?.privacy_settings || {};
+                    setHiddenCategories(privacySettings.hide_categories || []);
+                    setHideBucketList(privacySettings.hide_bucket_list || false);
+                    // Reset preferences
+                    setDefaultMapView(profile?.default_map_view || 'world');
                   }}
                   className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-lg font-medium hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
                 >
@@ -698,6 +999,41 @@ export default function SettingsPage() {
             </button>
           </div>
 
+          {/* Reset Progress */}
+          <div className="mb-6 pb-6 border-b border-gray-200 dark:border-gray-700">
+            <h4 className="font-medium text-primary-900 dark:text-white mb-2">Reset Progress</h4>
+            <p className="text-sm text-primary-600 dark:text-primary-300 mb-3">
+              Clear your progress for a specific category without losing other data. This cannot be undone.
+            </p>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              {ALL_CATEGORIES.slice(0, 12).map((category) => {
+                const categorySelections = selections?.[category as keyof UserSelections] || [];
+                const visitedCount = categorySelections.filter(s => s.status === 'visited').length;
+                if (visitedCount === 0) return null;
+                return (
+                  <button
+                    key={category}
+                    onClick={() => {
+                      setResetCategory(category);
+                      setShowResetModal(true);
+                    }}
+                    className="flex items-center gap-2 p-2 text-left rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors border border-gray-200 dark:border-gray-600"
+                  >
+                    <span className="text-sm">{categoryIcons[category as Category]}</span>
+                    <div className="flex-1 min-w-0">
+                      <span className="text-xs font-medium text-primary-900 dark:text-white truncate block">
+                        {categoryLabels[category as Category]}
+                      </span>
+                      <span className="text-xs text-primary-500 dark:text-primary-400">
+                        {visitedCount} visited
+                      </span>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
           {/* Privacy Policy Link */}
           <div>
             <h4 className="font-medium text-primary-900 dark:text-white mb-2">Privacy Policy</h4>
@@ -787,6 +1123,50 @@ export default function SettingsPage() {
           <p>See Every Place - Free Travel Tracker</p>
         </div>
       </footer>
+
+      {/* Reset Category Modal */}
+      {showResetModal && resetCategory && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-slate-800 rounded-xl p-6 max-w-md w-full shadow-2xl">
+            <h3 className="text-lg font-bold text-primary-900 dark:text-white mb-2">
+              Reset {categoryLabels[resetCategory as Category]}?
+            </h3>
+            <p className="text-sm text-primary-600 dark:text-primary-300 mb-4">
+              This will permanently clear all your progress for {categoryLabels[resetCategory as Category]}.
+              This action cannot be undone.
+            </p>
+            <p className="text-sm text-gray-700 dark:text-gray-300 mb-3">
+              Type <strong>RESET</strong> to confirm:
+            </p>
+            <input
+              type="text"
+              value={resetConfirmText}
+              onChange={(e) => setResetConfirmText(e.target.value)}
+              placeholder="Type RESET"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg mb-4 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+            />
+            <div className="flex gap-3">
+              <button
+                onClick={() => handleResetCategory(resetCategory)}
+                disabled={resetConfirmText !== 'RESET' || isResetting}
+                className="flex-1 px-4 py-2 bg-amber-600 text-white rounded-lg font-medium hover:bg-amber-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isResetting ? 'Resetting...' : 'Reset Progress'}
+              </button>
+              <button
+                onClick={() => {
+                  setShowResetModal(false);
+                  setResetCategory(null);
+                  setResetConfirmText('');
+                }}
+                className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-lg font-medium hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
