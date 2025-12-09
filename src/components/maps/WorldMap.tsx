@@ -54,8 +54,8 @@ const WorldMap = memo(function WorldMap({ selections, onToggle, tooltip }: BaseM
       >
         <ZoomableGroup
           zoom={position.zoom}
-          // Library uses branded Longitude/Latitude types that require unsafe cast
-          center={position.coordinates as unknown as [number, number]}
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Library uses branded Longitude/Latitude types
+          center={position.coordinates as any}
           onMoveEnd={handleMoveEnd}
         >
           <Sphere stroke="#E4E5E6" strokeWidth={0.5} id="sphere" fill="none" />
