@@ -62,45 +62,43 @@ export default function AboutPage() {
             Track your adventures, build your bucket list, and share beautiful maps with friends and family.
           </p>
 
-          {/* The Story Section */}
+          {/* What is it - First so users know what they're reading about */}
+          <section className="mb-12">
+            <h2 className="text-2xl font-bold text-primary-900 dark:text-white mb-4">What is See Every Place?</h2>
+            <p className="text-primary-600 dark:text-primary-300 mb-4">
+              See Every Place is a free travel tracking app that helps you visualize everywhere you&apos;ve been
+              and everywhere you want to go. Whether you&apos;re a seasoned globetrotter or just starting your
+              travel journey, See Every Place makes it easy to keep track of your adventures.
+            </p>
+            <p className="text-primary-600 dark:text-primary-300">
+              Track far more than just countries. From national parks and mountain peaks to stadiums and weird
+              roadside attractions, we help you capture the full detail of your journey.
+            </p>
+          </section>
+
+          {/* The Story Section - Personal "I" voice for authenticity */}
           <section className="mb-12 bg-primary-50/50 dark:bg-primary-900/20 rounded-2xl p-6 md:p-8 border border-black/5 dark:border-white/10">
             <h2 className="text-2xl font-bold text-primary-900 dark:text-white mb-4 flex items-center gap-2">
-              <span className="text-2xl">✨</span> Our Story
+              <span className="text-2xl">✨</span> The Story
             </h2>
             <div className="space-y-4 text-primary-600 dark:text-primary-300">
               <p>
-                It started with the realization that memories fade faster than we&apos;d like. We wanted a way to hold onto the places we&apos;ve seen—not just the countries, but the mountain peaks, the national parks, and those random roadside attractions that made the trip special.
+                Memories fade faster than we&apos;d like. I wanted a way to hold onto the places I&apos;ve seen—not just the countries, but the mountain peaks and the random roadside attractions that made the trip special.
               </p>
               <p>
-                Existing tools felt too generic. They didn&apos;t capture the detail of the journey, or they locked everything behind a login screen.
+                Existing tools felt too generic. They didn&apos;t capture the detail of the journey, or they locked everything behind a login screen and wanted my email, credit card, or to post on my behalf.
               </p>
               <p>
-                We wanted something simple - a visual way to see where we&apos;d been and dream about where we&apos;d go next.
-                Not another app that wanted our email, credit card, or to post on our behalf. Just a beautiful map
-                that showed our journey.
+                I wanted something simple—a visual way to see where I&apos;d been and dream about where I&apos;d go next. Just a beautiful map that showed my journey.
               </p>
               <p>
-                <strong className="text-primary-900 dark:text-white">So we built one.</strong> And now we&apos;re sharing it with you.
+                <strong className="text-primary-900 dark:text-white">So I built one.</strong> And now I&apos;m sharing it with you.
               </p>
               <p className="text-sm text-primary-500 dark:text-primary-400 pt-2 border-t border-black/5 dark:border-white/10">
                 See Every Place is free, works offline, and your data stays on your device.
                 No sign-up required. No tracking. Just you and your adventures.
               </p>
             </div>
-          </section>
-
-          <section className="mb-12">
-            <h2 className="text-2xl font-bold text-primary-900 dark:text-white mb-4">What is See Every Place?</h2>
-            <p className="text-primary-600 dark:text-primary-300 mb-4">
-              See Every Place is a free travel tracking app that helps you visualize everywhere you have been
-              and everywhere you want to go. Whether you are a seasoned globetrotter or just starting your
-              travel journey, See Every Place makes it easy to keep track of your adventures.
-            </p>
-            <p className="text-primary-600 dark:text-primary-300">
-              Track countries, US states, national parks, state parks, mountain peaks,
-              world-class museums, sports stadiums, Formula 1 circuits, marathon races, major airports, ski resorts,
-              theme parks, and legendary surf spots - all in one place.
-            </p>
           </section>
 
           <section className="mb-12">
@@ -230,17 +228,16 @@ export default function AboutPage() {
           <section className="mb-12">
             <h2 className="text-2xl font-bold text-primary-900 dark:text-white mb-4">Privacy</h2>
             <p className="text-primary-600 dark:text-primary-300">
-              Your data is stored locally on your device by default. We respect your privacy and
-              don&apos;t track your travels unless you choose to sign in to sync across devices.
-              When you do sign in, your data is anonymized, encrypted, and never sold to third parties.
-              Read our full <Link href="/privacy" className="text-primary-700 dark:text-primary-400 hover:underline">Privacy Policy</Link>.
+              Your data belongs to you. It lives on your device. I don&apos;t track your travels, and I never sell your data.
+              Sync is optional—if you choose to sign in to access your data across devices, it&apos;s encrypted end-to-end.
+              Read the full <Link href="/privacy" className="text-primary-700 dark:text-primary-400 hover:underline">Privacy Policy</Link>.
             </p>
           </section>
 
           <section className="mb-12">
             <h2 className="text-2xl font-bold text-primary-900 dark:text-white mb-4">Contact</h2>
             <p className="text-primary-600 dark:text-primary-300">
-              Have questions, feedback, or suggestions? Reach out to us at{' '}
+              Have questions, feedback, or suggestions? Reach out at{' '}
               <a href="mailto:hello@seeevery.place" className="text-primary-700 dark:text-primary-400 hover:underline">
                 hello@seeevery.place
               </a>.
@@ -254,14 +251,14 @@ export default function AboutPage() {
             </h2>
             <div className="space-y-4 text-primary-600 dark:text-primary-300">
               <p>
-                We&apos;re constantly adding new maps and markers, and we let the community decide what comes first.
+                I&apos;m constantly adding new maps and markers, and I let the community decide what comes first.
               </p>
               <p>
                 Visit the{' '}
                 <Link href="/suggest" className="text-primary-700 dark:text-primary-400 hover:underline font-medium">
                   Suggestions Page
                 </Link>{' '}
-                to see what we&apos;re working on, vote for your favorite categories, or submit a new idea. If enough people want it, we&apos;ll build it.
+                to see what I&apos;m working on, vote for your favorite categories, or submit a new idea. If enough people want it, I&apos;ll build it.
               </p>
             </div>
           </section>
