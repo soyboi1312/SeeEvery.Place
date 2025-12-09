@@ -116,6 +116,9 @@ export function AnalyticsWorldMap({ data, isDarkMode = false }: HeatmapProps) {
     <ComposableMap
       projection="geoEqualEarth"
       projectionConfig={{ scale: 140, center: CENTER_ORIGIN }}
+      width={800}
+      height={400}
+      viewBox="0 0 800 400"
       className="w-full h-full"
     >
       <Sphere
