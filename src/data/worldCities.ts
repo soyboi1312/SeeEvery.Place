@@ -7,6 +7,7 @@ export interface WorldCity {
   population: number;
   lat: number;
   lng: number;
+  stateCode?: string; // For US cities to enable cross-check with US states
 }
 
 // Major world cities by population and cultural/economic significance
@@ -129,6 +130,23 @@ export const worldCities: WorldCity[] = [
   { id: "wellington", name: "Wellington", country: "New Zealand", countryCode: "NZ", continent: "Oceania", population: 418000, lat: -41.2865, lng: 174.7762 },
   { id: "adelaide", name: "Adelaide", country: "Australia", countryCode: "AU", continent: "Oceania", population: 1359000, lat: -34.9285, lng: 138.6007 },
   { id: "gold-coast", name: "Gold Coast", country: "Australia", countryCode: "AU", continent: "Oceania", population: 679000, lat: -28.0167, lng: 153.4000 },
+
+  // United States (major global cities)
+  { id: "world-new-york", name: "New York City", country: "United States", countryCode: "US", continent: "North America", population: 8336817, lat: 40.7128, lng: -74.0060, stateCode: "NY" },
+  { id: "world-los-angeles", name: "Los Angeles", country: "United States", countryCode: "US", continent: "North America", population: 3898747, lat: 34.0522, lng: -118.2437, stateCode: "CA" },
+  { id: "world-chicago", name: "Chicago", country: "United States", countryCode: "US", continent: "North America", population: 2746388, lat: 41.8781, lng: -87.6298, stateCode: "IL" },
+  { id: "world-san-francisco", name: "San Francisco", country: "United States", countryCode: "US", continent: "North America", population: 873965, lat: 37.7749, lng: -122.4194, stateCode: "CA" },
+  { id: "world-miami", name: "Miami", country: "United States", countryCode: "US", continent: "North America", population: 442241, lat: 25.7617, lng: -80.1918, stateCode: "FL" },
+  { id: "world-las-vegas", name: "Las Vegas", country: "United States", countryCode: "US", continent: "North America", population: 641903, lat: 36.1699, lng: -115.1398, stateCode: "NV" },
+  { id: "world-washington-dc", name: "Washington D.C.", country: "United States", countryCode: "US", continent: "North America", population: 689545, lat: 38.9072, lng: -77.0369, stateCode: "DC" },
+  { id: "world-boston", name: "Boston", country: "United States", countryCode: "US", continent: "North America", population: 692600, lat: 42.3601, lng: -71.0589, stateCode: "MA" },
+  { id: "world-seattle", name: "Seattle", country: "United States", countryCode: "US", continent: "North America", population: 737015, lat: 47.6062, lng: -122.3321, stateCode: "WA" },
+  { id: "world-houston", name: "Houston", country: "United States", countryCode: "US", continent: "North America", population: 2304580, lat: 29.7604, lng: -95.3698, stateCode: "TX" },
+  { id: "world-atlanta", name: "Atlanta", country: "United States", countryCode: "US", continent: "North America", population: 498715, lat: 33.7490, lng: -84.3880, stateCode: "GA" },
+  { id: "world-dallas", name: "Dallas", country: "United States", countryCode: "US", continent: "North America", population: 1304379, lat: 32.7767, lng: -96.7970, stateCode: "TX" },
+  { id: "world-denver", name: "Denver", country: "United States", countryCode: "US", continent: "North America", population: 715522, lat: 39.7392, lng: -104.9903, stateCode: "CO" },
+  { id: "world-phoenix", name: "Phoenix", country: "United States", countryCode: "US", continent: "North America", population: 1608139, lat: 33.4484, lng: -112.0740, stateCode: "AZ" },
+  { id: "world-honolulu", name: "Honolulu", country: "United States", countryCode: "US", continent: "North America", population: 350964, lat: 21.3069, lng: -157.8583, stateCode: "HI" },
 ];
 
 export const worldCityContinents = ["Asia", "Europe", "North America", "South America", "Africa", "Middle East", "Oceania"];

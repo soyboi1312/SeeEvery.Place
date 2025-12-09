@@ -8,6 +8,10 @@ import { countries } from '@/data/countries';
 // Create lookup maps for city -> state/country relationships
 const usCityToState = new Map(usCities.map(c => [c.id, c.stateCode]));
 const worldCityToCountry = new Map(worldCities.map(c => [c.id, c.countryCode]));
+// For US cities in worldCities, also track stateCode for cross-check
+const worldCityToState = new Map(
+  worldCities.filter(c => c.stateCode).map(c => [c.id, c.stateCode!])
+);
 
 const STORAGE_KEY = 'travelmap_selections';
 
@@ -381,6 +385,24 @@ export function applyCityRelatedSelections(
           }
           result = { ...result, countries: countrySelections };
         }
+      }
+    }
+
+    // For US cities in worldCities, also mark the US state
+    const stateCode = worldCityToState.get(cityId);
+    if (stateCode) {
+      const stateSelections = [...(result.states || [])];
+      const existing = stateSelections.find(s => s.id === stateCode);
+
+      // Only add if not already visited (don't override bucketList or existing visited)
+      if (!existing || existing.deleted) {
+        if (existing) {
+          const idx = stateSelections.findIndex(s => s.id === stateCode);
+          stateSelections[idx] = { id: stateCode, status: 'visited', updatedAt: now, deleted: false };
+        } else {
+          stateSelections.push({ id: stateCode, status: 'visited', updatedAt: now, deleted: false });
+        }
+        result = { ...result, states: stateSelections };
       }
     }
   }
