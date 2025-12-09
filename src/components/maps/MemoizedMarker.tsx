@@ -40,8 +40,7 @@ const MemoizedMarker = memo(function MemoizedMarker({
 
   return (
     <Marker
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      coordinates={coordinates as any}
+      coordinates={coordinates as [number, number]}
       onClick={() => onToggle?.(id, status)}
       onMouseEnter={(e) => onMouseEnter(name, e)}
       onMouseLeave={onMouseLeave}

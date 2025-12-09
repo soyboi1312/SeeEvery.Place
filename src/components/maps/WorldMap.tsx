@@ -12,9 +12,8 @@ import { BaseMapProps } from './types';
 import { useMapZoom } from './useMapZoom';
 import ZoomControls from './ZoomControls';
 
-// Type helper for center coordinates (library uses branded types)
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const CENTER_ORIGIN: any = [0, 0];
+// Type helper for center coordinates (library expects [number, number] tuple)
+const CENTER_ORIGIN: [number, number] = [0, 0];
 
 const WorldMap = memo(function WorldMap({ selections, onToggle, tooltip }: BaseMapProps) {
   const {
@@ -55,7 +54,7 @@ const WorldMap = memo(function WorldMap({ selections, onToggle, tooltip }: BaseM
       >
         <ZoomableGroup
           zoom={position.zoom}
-          center={position.coordinates as any}
+          center={position.coordinates as [number, number]}
           onMoveEnd={handleMoveEnd}
         >
           <Sphere stroke="#E4E5E6" strokeWidth={0.5} id="sphere" fill="none" />

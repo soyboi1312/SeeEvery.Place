@@ -121,7 +121,7 @@ const USMarkerMap = memo(function USMarkerMap({
       >
         <ZoomableGroup
           zoom={position.zoom}
-          center={position.coordinates as any}
+          center={position.coordinates as [number, number]}
           onMoveEnd={handleMoveEnd}
         >
           <StaticUSBackground />

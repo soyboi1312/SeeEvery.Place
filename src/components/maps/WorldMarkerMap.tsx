@@ -26,9 +26,8 @@ import { useMapZoom } from './useMapZoom';
 import ZoomControls from './ZoomControls';
 import MemoizedMarker from './MemoizedMarker';
 
-// Type helper for center coordinates (library uses branded types)
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const CENTER_ORIGIN: any = [0, 0];
+// Type helper for center coordinates (library expects [number, number] tuple)
+const CENTER_ORIGIN: [number, number] = [0, 0];
 
 /**
  * Static background map component - memoized to prevent re-renders on zoom/pan
@@ -145,7 +144,7 @@ const WorldMarkerMap = memo(function WorldMarkerMap({
       >
         <ZoomableGroup
           zoom={position.zoom}
-          center={position.coordinates as any}
+          center={position.coordinates as [number, number]}
           onMoveEnd={handleMoveEnd}
         >
           <StaticWorldBackground />
