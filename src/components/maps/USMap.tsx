@@ -12,10 +12,16 @@ import { GEO_URL_USA, fipsToAbbr } from '@/lib/mapUtils';
 import { BaseMapProps } from './types';
 import { useMapZoom } from './useMapZoom';
 import ZoomControls from './ZoomControls';
-import { usTerritories } from '@/data/usTerritories';
 
-// Territory data for the inset - only the main 5 inhabited territories
-const territories = usTerritories.filter(t => ['PR', 'VI', 'GU', 'AS', 'MP'].includes(t.code));
+// Territory marker positions - approximate geographic locations
+// These are positioned to show near their actual locations on the world map
+const territoryMarkers: { code: string; name: string; coordinates: [number, number] }[] = [
+  { code: "PR", name: "Puerto Rico", coordinates: [-66.5, 18.2] },
+  { code: "VI", name: "U.S. Virgin Islands", coordinates: [-64.9, 18.3] },
+  { code: "GU", name: "Guam", coordinates: [144.8, 13.4] },
+  { code: "AS", name: "American Samoa", coordinates: [-170.1, -14.3] },
+  { code: "MP", name: "Northern Mariana Islands", coordinates: [145.7, 15.1] },
+];
 
 const USMap = memo(function USMap({ selections, onToggle, tooltip }: BaseMapProps) {
   const {
@@ -40,9 +46,33 @@ const USMap = memo(function USMap({ selections, onToggle, tooltip }: BaseMapProp
     return map;
   }, [selections.states]);
 
+  // Territory status lookup
+  const territoryStatusMap = useMemo(() => {
+    const map = new Map<string, Status>();
+    const territorySelections = selections.territories || [];
+    for (const sel of territorySelections) {
+      if (!sel.deleted) {
+        map.set(sel.id, sel.status);
+      }
+    }
+    return map;
+  }, [selections.territories]);
+
   const getStatus = useCallback((id: string): Status => {
     return statusMap.get(id) || 'unvisited';
   }, [statusMap]);
+
+  const getTerritoryStatus = useCallback((id: string): Status => {
+    return territoryStatusMap.get(id) || 'unvisited';
+  }, [territoryStatusMap]);
+
+  // Get territories that have been marked (visited or bucket list)
+  const markedTerritories = useMemo(() => {
+    return territoryMarkers.filter(t => {
+      const status = territoryStatusMap.get(t.code);
+      return status === 'visited' || status === 'bucketList';
+    });
+  }, [territoryStatusMap]);
 
   return (
     <div className="relative w-full h-full group">
@@ -56,6 +86,13 @@ const USMap = memo(function USMap({ selections, onToggle, tooltip }: BaseMapProp
           // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Library uses branded Longitude/Latitude types
           center={position.coordinates as any}
           onMoveEnd={handleMoveEnd}
+          filterZoomEvent={(evt: React.TouchEvent | React.MouseEvent | React.WheelEvent) => {
+            // Only allow zoom/pan with ctrl/cmd key or touch events
+            // Regular clicks should pass through to Geography elements
+            if ('touches' in evt) return true; // Allow touch zoom
+            if ('deltaY' in evt) return true; // Allow wheel zoom
+            return (evt as React.MouseEvent).ctrlKey || (evt as React.MouseEvent).metaKey;
+          }}
         >
           <Geographies geography={GEO_URL_USA}>
             {({ geographies }) =>
@@ -109,35 +146,33 @@ const USMap = memo(function USMap({ selections, onToggle, tooltip }: BaseMapProp
         canZoomOut={canZoomOut}
       />
 
-      {/* US Territories Inset - these can't be shown on Albers USA projection */}
-      <div className="absolute bottom-2 left-2 bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm rounded-lg p-2 shadow-lg border border-gray-200 dark:border-gray-700">
-        <div className="text-[10px] font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wider">
-          Territories
-        </div>
-        <div className="flex flex-wrap gap-1.5">
-          {territories.map((territory) => {
-            const status = getStatus(territory.code);
-            const statusClass = status === 'visited'
-              ? 'bg-green-500 text-white'
-              : status === 'bucketList'
-                ? 'bg-blue-500 text-white'
-                : 'bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300';
+      {/* Territory markers - shown as overlay since they're outside Albers USA projection */}
+      {markedTerritories.length > 0 && (
+        <div className="absolute bottom-2 left-2 flex flex-wrap gap-1.5 max-w-[200px]">
+          {markedTerritories.map((territory) => {
+            const status = getTerritoryStatus(territory.code);
+            const isVisited = status === 'visited';
 
             return (
-              <button
+              <div
                 key={territory.code}
-                onClick={() => onToggle?.(territory.code, status)}
+                className="flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium shadow-md backdrop-blur-sm"
+                style={{
+                  backgroundColor: isVisited ? 'rgba(34, 197, 94, 0.9)' : 'rgba(245, 158, 11, 0.9)',
+                  color: 'white',
+                }}
                 onMouseEnter={(e) => tooltip.onMouseEnter(territory.name, e)}
                 onMouseLeave={tooltip.onMouseLeave}
-                className={`px-2 py-1 rounded text-[11px] font-medium transition-colors cursor-pointer hover:opacity-80 ${statusClass}`}
-                aria-label={`${territory.name}, ${status === 'visited' ? 'visited' : status === 'bucketList' ? 'on bucket list' : 'not visited'}`}
               >
+                <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                </svg>
                 {territory.code}
-              </button>
+              </div>
             );
           })}
         </div>
-      </div>
+      )}
     </div>
   );
 });
