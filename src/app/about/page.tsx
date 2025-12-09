@@ -281,13 +281,13 @@ export default function AboutPage() {
       <footer className="border-t border-black/5 dark:border-white/10 bg-white/50 dark:bg-slate-900/50">
         <div className="max-w-4xl mx-auto px-4 py-6 text-center text-sm text-primary-500 dark:text-primary-400">
           <div className="flex justify-center gap-4 mb-2">
-            <Link href="/about" className="hover:text-primary-700 dark:hover:text-primary-200 transition-colors">About</Link>
+            <Link href="/" className="hover:text-primary-700 dark:hover:text-primary-200 transition-colors">Home</Link>
+            <span>•</span>
+            <Link href="/suggest" className="hover:text-primary-700 dark:hover:text-primary-200 transition-colors">Suggest</Link>
             <span>•</span>
             <Link href="/privacy" className="hover:text-primary-700 dark:hover:text-primary-200 transition-colors">Privacy</Link>
             <span>•</span>
             <Link href="/terms" className="hover:text-primary-700 dark:hover:text-primary-200 transition-colors">Terms</Link>
-            <span>•</span>
-            <Link href="/suggest" className="hover:text-primary-700 dark:hover:text-primary-200 transition-colors">Suggest</Link>
           </div>
           <p>See Every Place - Free Travel Tracker</p>
         </div>

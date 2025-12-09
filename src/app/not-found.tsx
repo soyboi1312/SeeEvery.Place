@@ -72,11 +72,11 @@ export default function NotFound() {
           <div className="flex justify-center gap-4 mb-2">
             <Link href="/about" className="hover:text-gray-700 dark:hover:text-gray-200 transition-colors">About</Link>
             <span>•</span>
+            <Link href="/suggest" className="hover:text-gray-700 dark:hover:text-gray-200 transition-colors">Suggest</Link>
+            <span>•</span>
             <Link href="/privacy" className="hover:text-gray-700 dark:hover:text-gray-200 transition-colors">Privacy</Link>
             <span>•</span>
             <Link href="/terms" className="hover:text-gray-700 dark:hover:text-gray-200 transition-colors">Terms</Link>
-            <span>•</span>
-            <Link href="/suggest" className="hover:text-gray-700 dark:hover:text-gray-200 transition-colors">Suggest</Link>
           </div>
           <p>Made by people who really like maps.</p>
         </div>

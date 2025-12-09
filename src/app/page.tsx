@@ -293,16 +293,16 @@ export default function Home() {
                 About
               </Link>
               <span>•</span>
+              <Link href="/suggest" className="text-blue-600 dark:text-blue-400 hover:underline">
+                Suggest
+              </Link>
+              <span>•</span>
               <Link href="/privacy" className="text-blue-600 dark:text-blue-400 hover:underline">
                 Privacy
               </Link>
               <span>•</span>
               <Link href="/terms" className="text-blue-600 dark:text-blue-400 hover:underline">
                 Terms
-              </Link>
-              <span>•</span>
-              <Link href="/suggest" className="text-blue-600 dark:text-blue-400 hover:underline">
-                Suggest
               </Link>
             </div>
           </div>
