@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useDarkMode } from '@/lib/hooks/useDarkMode';
@@ -16,12 +16,12 @@ import {
 } from '@/lib/achievements';
 import {
   UserSelections,
-  Category,
   ALL_CATEGORIES,
   categoryLabels,
   categoryIcons,
   emptySelections,
 } from '@/lib/types';
+import { StaticWorldMap, StaticUSMap } from '@/components/share';
 
 interface PublicProfile {
   id: string;
@@ -68,6 +68,7 @@ export default function PublicProfileClient({
   username,
 }: PublicProfileClientProps) {
   const { isDarkMode, toggleDarkMode } = useDarkMode();
+  const [activeMap, setActiveMap] = useState<'world' | 'usa'>('world');
 
   // Parse selections safely
   const selections: UserSelections = useMemo(() => {
@@ -194,6 +195,57 @@ export default function PublicProfileClient({
             </div>
           </div>
         </div>
+
+        {/* Map Visualization */}
+        {stats.totalVisited > 0 && (
+          <div className="bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow-premium border border-black/5 dark:border-white/10 mb-6">
+            <div className="flex items-center justify-between p-4 border-b border-black/5 dark:border-white/10">
+              <h2 className="font-bold text-primary-900 dark:text-white">Travel Map</h2>
+              <div className="flex gap-1 bg-gray-100 dark:bg-gray-700 p-1 rounded-lg">
+                <button
+                  onClick={() => setActiveMap('world')}
+                  className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
+                    activeMap === 'world'
+                      ? 'bg-white dark:bg-slate-600 text-primary-900 dark:text-white shadow-sm'
+                      : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                  }`}
+                >
+                  World
+                </button>
+                <button
+                  onClick={() => setActiveMap('usa')}
+                  className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
+                    activeMap === 'usa'
+                      ? 'bg-white dark:bg-slate-600 text-primary-900 dark:text-white shadow-sm'
+                      : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                  }`}
+                >
+                  USA
+                </button>
+              </div>
+            </div>
+
+            <div className="relative w-full aspect-[2/1] bg-slate-100 dark:bg-slate-900 flex items-center justify-center p-4">
+              {activeMap === 'world' ? (
+                <StaticWorldMap selections={selections} />
+              ) : (
+                <StaticUSMap selections={selections} />
+              )}
+            </div>
+
+            {/* Map Legend */}
+            <div className="flex justify-center gap-6 py-3 px-4 bg-gray-50 dark:bg-slate-900/50 border-t border-black/5 dark:border-white/10">
+              <div className="flex items-center gap-2">
+                <span className="w-3 h-3 rounded-full bg-green-500 shadow-sm"></span>
+                <span className="text-xs font-medium text-primary-600 dark:text-primary-300">Visited</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="w-3 h-3 rounded-full bg-amber-500 shadow-sm"></span>
+                <span className="text-xs font-medium text-primary-600 dark:text-primary-300">Bucket List</span>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Stats Overview */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">

@@ -709,6 +709,40 @@ export const ACHIEVEMENTS: AchievementDefinition[] = [
     requirement: { type: 'level', level: 50 },
     icon: '🌟',
   },
+
+  // ============================================
+  // SECRET ACHIEVEMENTS (Hidden until unlocked)
+  // ============================================
+  {
+    id: 'secret_42',
+    name: 'The Answer',
+    description: 'Visit exactly 42 countries - the answer to life, the universe, and everything',
+    category: 'countries',
+    tier: 'legendary',
+    xpReward: 420,
+    requirement: { type: 'visited_count', count: 42 },
+    icon: '🌌',
+  },
+  {
+    id: 'secret_perfectionist',
+    name: 'Perfectionist',
+    description: 'Complete 5 different categories at 100%',
+    category: 'global',
+    tier: 'legendary',
+    xpReward: 2000,
+    requirement: { type: 'categories_started', count: 23 }, // Placeholder - would need custom logic
+    icon: '💎',
+  },
+  {
+    id: 'secret_early_bird',
+    name: 'Early Adopter',
+    description: 'Be one of the first 1000 users',
+    category: 'global',
+    tier: 'gold',
+    xpReward: 500,
+    requirement: { type: 'total_visited', count: 1 }, // Awarded manually/via backend
+    icon: '🐦',
+  },
 ];
 
 // ============================================
