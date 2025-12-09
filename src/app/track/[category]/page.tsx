@@ -587,8 +587,10 @@ function getCategoryStats(category: Category, items: CategoryItem[]): CategorySt
     stats.push({ label: 'Continents', value: continents, icon: '🗺️' });
     stats.push({ label: 'UN Members', value: '193', icon: '🏛️' });
   } else if (category === 'states') {
-    const regions = new Set(items.map(i => i.group)).size;
-    stats.push({ label: 'States & DC', value: total, icon: '🇺🇸' });
+    // Count only states + DC (51), not territories which are shown separately on the map
+    const statesOnly = items.filter(i => i.group !== 'Territories').length;
+    const regions = new Set(items.filter(i => i.group !== 'Territories').map(i => i.group)).size;
+    stats.push({ label: 'States & DC', value: statesOnly, icon: '🇺🇸' });
     stats.push({ label: 'Regions', value: regions, icon: '🗺️' });
     stats.push({ label: 'Total Area', value: '3.8M mi²', icon: '📐' });
   } else if (category === 'nationalParks') {
