@@ -7,6 +7,7 @@ import { weirdAmericana } from '@/data/weirdAmericana'
 const categories = [
   'countries',
   'states',
+  'territories',
   'nationalParks',
   'nationalMonuments',
   'stateParks',

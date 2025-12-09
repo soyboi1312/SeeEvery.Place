@@ -202,7 +202,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const description = getStateDescription(category as Category, stateName, items.length);
 
   return {
-    title: `${label} in ${stateName} | Free Checklist & Map | See Every Place`,
+    title: `${label} in ${stateName} | See Every Place`,
     description,
     keywords: [
       `${label.toLowerCase()} in ${stateName}`,
