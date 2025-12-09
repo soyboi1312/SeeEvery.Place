@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import RichTextEditor from './RichTextEditor';
 
 interface Newsletter {
   id: string;
@@ -664,17 +665,15 @@ export default function NewsletterAdminPage() {
 
                 <div>
                   <label className="block text-sm font-medium text-primary-700 dark:text-primary-300 mb-1">
-                    Content (HTML) *
+                    Content *
                   </label>
-                  <textarea
+                  <RichTextEditor
                     value={composeForm.content_html}
-                    onChange={(e) => setComposeForm(prev => ({ ...prev, content_html: e.target.value }))}
-                    className="w-full px-4 py-3 bg-primary-50 dark:bg-slate-700 border border-primary-200 dark:border-slate-600 rounded-lg text-primary-900 dark:text-white font-mono text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-                    rows={15}
-                    placeholder="<h2>Hello!</h2><p>Your newsletter content here...</p>"
+                    onChange={(html) => setComposeForm(prev => ({ ...prev, content_html: html }))}
+                    placeholder="Start writing your newsletter content..."
                   />
                   <p className="text-xs text-primary-500 dark:text-primary-400 mt-1">
-                    Use HTML tags for formatting. The content will be wrapped in our email template.
+                    Use the toolbar to format your content. The content will be wrapped in our email template.
                   </p>
                 </div>
 
