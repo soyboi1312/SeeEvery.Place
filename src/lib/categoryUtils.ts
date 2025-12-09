@@ -83,7 +83,7 @@ const fallbackTotals: Record<Category, number> = {
   states: 51,
   territories: 14,
   usCities: 75,
-  worldCities: 100,
+  worldCities: 115,
   nationalParks: 63,
   nationalMonuments: 138,
   stateParks: 305,
