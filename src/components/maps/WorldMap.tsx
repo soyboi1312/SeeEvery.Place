@@ -12,8 +12,8 @@ import { BaseMapProps } from './types';
 import { useMapZoom } from './useMapZoom';
 import ZoomControls from './ZoomControls';
 
-// Type helper for center coordinates (library expects [number, number] tuple)
-const CENTER_ORIGIN: [number, number] = [0, 0];
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Library uses branded Longitude/Latitude types
+const CENTER_ORIGIN: any = [0, 0];
 
 const WorldMap = memo(function WorldMap({ selections, onToggle, tooltip }: BaseMapProps) {
   const {

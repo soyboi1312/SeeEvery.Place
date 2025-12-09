@@ -26,8 +26,8 @@ import { useMapZoom } from './useMapZoom';
 import ZoomControls from './ZoomControls';
 import MemoizedMarker from './MemoizedMarker';
 
-// Type helper for center coordinates (library expects [number, number] tuple)
-const CENTER_ORIGIN: [number, number] = [0, 0];
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Library uses branded Longitude/Latitude types
+const CENTER_ORIGIN: any = [0, 0];
 
 /**
  * Static background map component - memoized to prevent re-renders on zoom/pan
