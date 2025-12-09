@@ -246,7 +246,7 @@ export default function AdminDashboard() {
         </div>
 
         {/* Quick Links */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mb-8">
           <Link
             href="/admin/analytics"
             className="flex items-center gap-4 p-6 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-black/5 dark:border-white/10 hover:shadow-md transition-shadow group"
@@ -314,6 +314,24 @@ export default function AdminDashboard() {
             <div>
               <h2 className="text-lg font-semibold text-primary-900 dark:text-white">Settings</h2>
               <p className="text-sm text-primary-600 dark:text-primary-400">Banners & Logs</p>
+            </div>
+            <svg className="w-5 h-5 text-primary-400 ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </Link>
+
+          <Link
+            href="/admin/newsletter"
+            className="flex items-center gap-4 p-6 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-black/5 dark:border-white/10 hover:shadow-md transition-shadow group"
+          >
+            <div className="w-12 h-12 rounded-xl bg-pink-100 dark:bg-pink-900/30 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">
+              <svg className="w-6 h-6 text-pink-600 dark:text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <div>
+              <h2 className="text-lg font-semibold text-primary-900 dark:text-white">Newsletter</h2>
+              <p className="text-sm text-primary-600 dark:text-primary-400">Email campaigns</p>
             </div>
             <svg className="w-5 h-5 text-primary-400 ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
