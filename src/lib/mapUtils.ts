@@ -209,8 +209,8 @@ export const countryNameToISO: Record<string, string> = {
   "Solomon Is.": "SB", "Solomon Islands": "SB", "Tonga": "TO", "Tuvalu": "TV", "Vanuatu": "VU",
   "New Caledonia": "NC",
 
-  // Other territories
-  "Greenland": "GL", "Puerto Rico": "PR", "Fr. Polynesia": "PF", "French Polynesia": "PF",
+  // Other territories (excluding US territories like Puerto Rico which are tracked separately)
+  "Greenland": "GL", "Fr. Polynesia": "PF", "French Polynesia": "PF",
 };
 
 // Country centroid coordinates [longitude, latitude]
@@ -369,6 +369,11 @@ export function getCategoryMarkers(
   const sportType = stadiumCategoryToSport[category];
 
   for (const selection of categorySelections) {
+    // Skip soft-deleted selections (items cleared via context menu)
+    if (selection.deleted) {
+      continue;
+    }
+
     // Filter out unsupported Albers USA territories if requested
     if (filterAlbersUsa && UNSUPPORTED_ALBERS_USA_IDS.has(selection.id)) {
       continue;
