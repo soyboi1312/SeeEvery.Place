@@ -65,9 +65,16 @@ export const usStates: USState[] = [
   { code: "UT", name: "Utah", region: "West" },
   { code: "WA", name: "Washington", region: "West" },
   { code: "WY", name: "Wyoming", region: "West" },
+
+  // US Territories
+  { code: "AS", name: "American Samoa", region: "Territories" },
+  { code: "GU", name: "Guam", region: "Territories" },
+  { code: "MP", name: "Northern Mariana Islands", region: "Territories" },
+  { code: "PR", name: "Puerto Rico", region: "Territories" },
+  { code: "VI", name: "U.S. Virgin Islands", region: "Territories" },
 ];
 
-export const regions = ["Northeast", "Southeast", "Midwest", "Southwest", "West"];
+export const regions = ["Northeast", "Southeast", "Midwest", "Southwest", "West", "Territories"];
 
 export const getStatesByRegion = (region: string) =>
   usStates.filter(s => s.region === region);

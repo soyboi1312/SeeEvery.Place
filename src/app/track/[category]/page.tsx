@@ -724,7 +724,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const keywords = categoryKeywords[category as Category] || [`${label} tracker`];
 
   return {
-    title: `Track ${label} Visited | Free Interactive Map | See Every Place`,
+    title: `Track ${label} Visited | See Every Place`,
     description: `${description} Create beautiful shareable maps and bucket lists for free.`,
     keywords: [...keywords, 'travel tracker', 'bucket list', 'free travel app'],
     openGraph: {
