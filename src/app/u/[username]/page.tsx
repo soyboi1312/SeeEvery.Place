@@ -17,6 +17,20 @@ interface PublicProfile {
   total_xp: number;
   level: number;
   created_at: string;
+  // Social links
+  website_url: string | null;
+  instagram_handle: string | null;
+  twitter_handle: string | null;
+  // Home base
+  home_city: string | null;
+  home_state: string | null;
+  home_country: string | null;
+  show_home_base: boolean;
+  // Privacy settings
+  privacy_settings: {
+    hide_categories?: string[];
+    hide_bucket_list?: boolean;
+  } | null;
 }
 
 // Generate metadata for SEO

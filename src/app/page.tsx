@@ -197,13 +197,13 @@ export default function Home() {
         {/* Hero Section */}
         <div className="text-center py-4 sm:py-8">
           <h1 className="text-3xl sm:text-4xl font-bold text-gray-800 dark:text-white mb-2">
-            Track Your Adventures. Earn XP. Level Up.
+            Track Your Adventures.
             <span className="block text-lg sm:text-xl font-normal text-gray-600 dark:text-gray-300 mt-2">
-              The free travel tracker with achievements and shareable profiles.
+              The free travel tracker with shareable profiles.
             </span>
           </h1>
           <p className="text-gray-600 dark:text-gray-300 max-w-xl mx-auto mt-3">
-            Track countries, parks, peaks, and more. Unlock achievements, earn XP, and share your journey with friends.
+            Track countries, parks, peaks, and more. Share your journey with friends.
             No account needed to get started!
           </p>
         </div>

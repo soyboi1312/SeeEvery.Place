@@ -132,16 +132,6 @@ export default function Header({ onSignIn, onSignOut, isSignedIn, userEmail, isD
                     </Link>
                   )}
                   <Link
-                    href="/achievements"
-                    onClick={() => setShowDropdown(false)}
-                    className="w-full text-left px-4 py-2 text-sm text-primary-700 dark:text-primary-200 hover:bg-primary-50 dark:hover:bg-slate-700 flex items-center gap-2"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-                    </svg>
-                    Achievements
-                  </Link>
-                  <Link
                     href="/settings"
                     onClick={() => setShowDropdown(false)}
                     className="w-full text-left px-4 py-2 text-sm text-primary-700 dark:text-primary-200 hover:bg-primary-50 dark:hover:bg-slate-700 flex items-center gap-2"
