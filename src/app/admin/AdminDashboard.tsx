@@ -130,9 +130,9 @@ export default function AdminDashboard() {
   }, [userToView]);
 
   // Filter and sort users
-  const filteredUsers = usersData?.users.filter(user =>
+  const filteredUsers = usersData?.users.filter((user: User) =>
     user.email.toLowerCase().includes(searchTerm.toLowerCase())
-  ).sort((a, b) => {
+  ).sort((a: User, b: User) => {
     let aVal: string | number | null;
     let bVal: string | number | null;
 
@@ -165,6 +165,7 @@ export default function AdminDashboard() {
         return 0;
     }
 
+    if (aVal === null || bVal === null) return 0;
     if (aVal < bVal) return sortDirection === 'asc' ? -1 : 1;
     if (aVal > bVal) return sortDirection === 'asc' ? 1 : -1;
     return 0;
@@ -173,7 +174,7 @@ export default function AdminDashboard() {
   // Handle column header click for sorting
   const handleSort = (field: SortField) => {
     if (sortField === field) {
-      setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc');
+      setSortDirection((prev: SortDirection) => prev === 'asc' ? 'desc' : 'asc');
     } else {
       setSortField(field);
       setSortDirection('desc');
@@ -226,9 +227,9 @@ export default function AdminDashboard() {
       }
 
       // Remove user from local state
-      setUsersData(prev => prev ? {
+      setUsersData((prev: UsersData | null) => prev ? {
         ...prev,
-        users: prev.users.filter(u => u.id !== userToDelete.id),
+        users: prev.users.filter((u: User) => u.id !== userToDelete.id),
         pagination: { ...prev.pagination, count: prev.pagination.count - 1 },
       } : null);
 

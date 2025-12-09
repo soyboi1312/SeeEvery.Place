@@ -25,7 +25,14 @@ interface AdminLog {
   created_at: string;
 }
 
-type Tab = 'banners' | 'logs';
+type Tab = 'banners' | 'logs' | 'admins';
+
+interface AdminUser {
+  id: string;
+  email: string;
+  role: string;
+  created_at: string;
+}
 
 export default function AdminSettingsPage() {
   const [activeTab, setActiveTab] = useState<Tab>('banners');
@@ -50,6 +57,14 @@ export default function AdminSettingsPage() {
   const [loadingLogs, setLoadingLogs] = useState(true);
   const [logsPage, setLogsPage] = useState(1);
   const [hasMoreLogs, setHasMoreLogs] = useState(false);
+
+  // Admins state
+  const [admins, setAdmins] = useState<AdminUser[]>([]);
+  const [loadingAdmins, setLoadingAdmins] = useState(true);
+  const [currentRole, setCurrentRole] = useState<string>('admin');
+  const [showAddAdmin, setShowAddAdmin] = useState(false);
+  const [newAdminEmail, setNewAdminEmail] = useState('');
+  const [addingAdmin, setAddingAdmin] = useState(false);
 
   // Fetch banners
   useEffect(() => {
@@ -89,6 +104,89 @@ export default function AdminSettingsPage() {
     }
     fetchLogs();
   }, [logsPage]);
+
+  // Fetch admins
+  useEffect(() => {
+    async function fetchAdmins() {
+      setLoadingAdmins(true);
+      try {
+        const response = await fetch('/api/admin/roles');
+        if (response.ok) {
+          const data = await response.json();
+          setAdmins(data.admins || []);
+          setCurrentRole(data.currentRole || 'admin');
+        }
+      } catch (error) {
+        console.error('Failed to fetch admins:', error);
+      } finally {
+        setLoadingAdmins(false);
+      }
+    }
+    fetchAdmins();
+  }, []);
+
+  const handleAddAdmin = async () => {
+    if (!newAdminEmail.trim()) return;
+    setAddingAdmin(true);
+    try {
+      const response = await fetch('/api/admin/roles', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: newAdminEmail, role: 'admin' }),
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setAdmins(prev => [...prev, data.admin]);
+        setNewAdminEmail('');
+        setShowAddAdmin(false);
+      } else {
+        const data = await response.json();
+        alert(data.error || 'Failed to add admin');
+      }
+    } catch (error) {
+      console.error('Failed to add admin:', error);
+    } finally {
+      setAddingAdmin(false);
+    }
+  };
+
+  const handleRemoveAdmin = async (adminId: string) => {
+    if (!confirm('Are you sure you want to remove this admin?')) return;
+    try {
+      const response = await fetch('/api/admin/roles', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ adminId }),
+      });
+      if (response.ok) {
+        setAdmins(prev => prev.filter(a => a.id !== adminId));
+      } else {
+        const data = await response.json();
+        alert(data.error || 'Failed to remove admin');
+      }
+    } catch (error) {
+      console.error('Failed to remove admin:', error);
+    }
+  };
+
+  const handleToggleRole = async (admin: AdminUser) => {
+    const newRole = admin.role === 'super_admin' ? 'admin' : 'super_admin';
+    try {
+      const response = await fetch('/api/admin/roles', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ adminId: admin.id, role: newRole }),
+      });
+      if (response.ok) {
+        setAdmins(prev => prev.map(a => a.id === admin.id ? { ...a, role: newRole } : a));
+      } else {
+        const data = await response.json();
+        alert(data.error || 'Failed to update role');
+      }
+    } catch (error) {
+      console.error('Failed to update role:', error);
+    }
+  };
 
   const resetBannerForm = () => {
     setBannerForm({
@@ -247,6 +345,16 @@ export default function AdminSettingsPage() {
             }`}
           >
             Activity Logs
+          </button>
+          <button
+            onClick={() => setActiveTab('admins')}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              activeTab === 'admins'
+                ? 'bg-primary-600 text-white'
+                : 'bg-primary-100 dark:bg-slate-700 text-primary-700 dark:text-primary-300 hover:bg-primary-200 dark:hover:bg-slate-600'
+            }`}
+          >
+            Admin Users
           </button>
         </div>
 
@@ -551,6 +659,165 @@ export default function AdminSettingsPage() {
                 </div>
               </>
             )}
+          </div>
+        )}
+
+        {/* Admin Users Tab */}
+        {activeTab === 'admins' && (
+          <div className="space-y-6">
+            {/* Add Admin Button (Super Admin Only) */}
+            {currentRole === 'super_admin' && (
+              <div className="flex justify-end">
+                <button
+                  onClick={() => setShowAddAdmin(true)}
+                  className="px-4 py-2 bg-primary-600 text-white rounded-lg font-medium hover:bg-primary-700 transition-colors flex items-center gap-2"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                  Add Admin
+                </button>
+              </div>
+            )}
+
+            {/* Add Admin Modal */}
+            {showAddAdmin && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+                <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-md w-full p-6">
+                  <h3 className="text-xl font-bold text-primary-900 dark:text-white mb-4">
+                    Add New Admin
+                  </h3>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-primary-700 dark:text-primary-300 mb-1">
+                        Email Address
+                      </label>
+                      <input
+                        type="email"
+                        value={newAdminEmail}
+                        onChange={(e) => setNewAdminEmail(e.target.value)}
+                        className="w-full px-3 py-2 bg-primary-50 dark:bg-slate-700 border border-primary-200 dark:border-slate-600 rounded-lg text-primary-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        placeholder="admin@example.com"
+                      />
+                    </div>
+                    <p className="text-sm text-primary-500 dark:text-primary-400">
+                      The user will be granted admin access with basic privileges. You can promote them to super admin later.
+                    </p>
+                  </div>
+                  <div className="flex justify-end gap-3 mt-6">
+                    <button
+                      onClick={() => { setShowAddAdmin(false); setNewAdminEmail(''); }}
+                      className="px-4 py-2 text-sm font-medium text-primary-700 dark:text-primary-200 bg-primary-100 dark:bg-slate-700 rounded-lg hover:bg-primary-200 dark:hover:bg-slate-600 transition-colors"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleAddAdmin}
+                      disabled={addingAdmin || !newAdminEmail.trim()}
+                      className="px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 disabled:opacity-50 transition-colors flex items-center gap-2"
+                    >
+                      {addingAdmin ? (
+                        <>
+                          <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                          Adding...
+                        </>
+                      ) : (
+                        'Add Admin'
+                      )}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Admins List */}
+            <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-black/5 dark:border-white/10 overflow-hidden">
+              <div className="p-6 border-b border-black/5 dark:border-white/10">
+                <h2 className="text-xl font-semibold text-primary-900 dark:text-white">Admin Users</h2>
+                <p className="text-sm text-primary-600 dark:text-primary-400">
+                  Manage users who have admin access to this dashboard
+                </p>
+              </div>
+
+              {loadingAdmins ? (
+                <div className="flex items-center justify-center py-12">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 dark:border-primary-400"></div>
+                </div>
+              ) : admins.length === 0 ? (
+                <div className="p-8 text-center text-primary-500 dark:text-primary-400">
+                  No admin users found.
+                </div>
+              ) : (
+                <div className="divide-y divide-primary-100 dark:divide-slate-700">
+                  {admins.map((admin) => (
+                    <div key={admin.id} className="p-4 hover:bg-primary-50 dark:hover:bg-slate-700/30 transition-colors">
+                      <div className="flex items-center justify-between gap-4">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <p className="font-medium text-primary-900 dark:text-white truncate">
+                              {admin.email}
+                            </p>
+                            <span className={`px-2 py-0.5 rounded text-xs font-medium ${
+                              admin.role === 'super_admin'
+                                ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300'
+                                : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
+                            }`}>
+                              {admin.role === 'super_admin' ? 'Super Admin' : 'Admin'}
+                            </span>
+                          </div>
+                          <p className="text-xs text-primary-500 dark:text-primary-400 mt-1">
+                            Added {formatDate(admin.created_at)}
+                          </p>
+                        </div>
+                        {currentRole === 'super_admin' && (
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => handleToggleRole(admin)}
+                              className="px-3 py-1.5 text-sm font-medium text-primary-700 dark:text-primary-200 bg-primary-100 dark:bg-slate-700 rounded-lg hover:bg-primary-200 dark:hover:bg-slate-600 transition-colors"
+                              title={admin.role === 'super_admin' ? 'Demote to Admin' : 'Promote to Super Admin'}
+                            >
+                              {admin.role === 'super_admin' ? 'Demote' : 'Promote'}
+                            </button>
+                            <button
+                              onClick={() => handleRemoveAdmin(admin.id)}
+                              className="p-2 rounded-lg text-red-600 hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
+                              title="Remove Admin"
+                            >
+                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                              </svg>
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Role Explanation */}
+            <div className="bg-primary-50 dark:bg-slate-800/50 rounded-xl p-6 border border-primary-200 dark:border-slate-700">
+              <h3 className="font-semibold text-primary-900 dark:text-white mb-3">Role Permissions</h3>
+              <div className="space-y-3 text-sm">
+                <div className="flex gap-3">
+                  <span className="px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 h-fit">
+                    Admin
+                  </span>
+                  <p className="text-primary-600 dark:text-primary-400">
+                    Can view analytics, manage users, update suggestions, and manage banners.
+                  </p>
+                </div>
+                <div className="flex gap-3">
+                  <span className="px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 h-fit whitespace-nowrap">
+                    Super Admin
+                  </span>
+                  <p className="text-primary-600 dark:text-primary-400">
+                    All Admin permissions plus: add/remove admins, change admin roles, suspend/ban users, and impersonate users.
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
         )}
     </div>
