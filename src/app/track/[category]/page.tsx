@@ -141,7 +141,7 @@ const categoryFAQs: Partial<Record<Category, FAQ[]>> = {
     { question: 'Is my country tracking data saved?', answer: 'Yes! Your data is automatically saved in your browser\'s local storage. No account needed - your progress stays on your device.' },
   ],
   states: [
-    { question: 'How many US states are there to track?', answer: 'We track all 50 US states, Washington D.C., and 5 US territories (Puerto Rico, US Virgin Islands, Guam, American Samoa, and Northern Mariana Islands) - 56 total!' },
+    { question: 'How many US states are there to track?', answer: 'We track all 50 US states plus Washington D.C. for 51 total. US territories are tracked in a separate category.' },
     { question: 'What\'s the best way to visit all 50 states?', answer: 'Road trips are the most popular method. Many travelers use route optimization or themes (like Route 66 or the Pacific Coast Highway) to make their journey memorable.' },
     { question: 'How do I create a state visited map?', answer: 'Simply click on states you\'ve visited to mark them green. Use the Share feature to generate a beautiful map image to share on social media.' },
     { question: 'Can I also track territories?', answer: 'Yes! We include US territories like Puerto Rico, Guam, and the US Virgin Islands. They appear as clickable buttons below the map.' },
