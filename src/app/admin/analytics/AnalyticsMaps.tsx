@@ -68,7 +68,8 @@ export function AnalyticsUSMap({ data, isDarkMode = false }: HeatmapProps) {
       <Geographies geography={GEO_URL_USA}>
         {({ geographies }) =>
           geographies.map((geo) => {
-            const fips = geo.id as string;
+            // Ensure ID is a string and padded to 2 digits (e.g. 1 -> "01")
+            const fips = String(geo.id).padStart(2, '0');
             const stateAbbr = fipsToAbbr[fips];
             const value = stateAbbr ? (valueMap.get(stateAbbr) || 0) : 0;
             const stateName = stateAbbr ? (stateNames[stateAbbr] || stateAbbr) : 'Unknown';
@@ -134,7 +135,7 @@ export function AnalyticsWorldMap({ data, isDarkMode = false }: HeatmapProps) {
             const countryName = geo.properties.name;
             const isoFromName = countryNameToISO[countryName];
             const isoFromProps = geo.properties['ISO_A2'];
-            const countryCode = isoFromName || isoFromProps || geo.id;
+            const countryCode = isoFromName || isoFromProps || String(geo.id);
 
             const value = countryCode ? (valueMap.get(countryCode) || 0) : 0;
 
