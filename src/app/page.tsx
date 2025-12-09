@@ -7,9 +7,19 @@ import Header from '@/components/Header';
 import CategoryTabs from '@/components/CategoryTabs';
 import SelectionList from '@/components/SelectionList';
 import QuickStats from '@/components/QuickStats';
-import ShareCard from '@/components/ShareCard';
-import AuthModal from '@/components/AuthModal';
-import InstallPWA from '@/components/InstallPWA'; // <--- New Import
+import InstallPWA from '@/components/InstallPWA';
+
+// Dynamically import heavy modals to reduce initial bundle size
+// ShareCard imports all category data files (~100KB+ of coordinates/names)
+// AuthModal imports Supabase auth logic
+const ShareCard = dynamic(() => import('@/components/ShareCard'), {
+  loading: () => null,
+  ssr: false,
+});
+const AuthModal = dynamic(() => import('@/components/AuthModal'), {
+  loading: () => null,
+  ssr: false,
+});
 
 const MapVisualization = dynamic(() => import('@/components/MapVisualization'), {
   loading: () => (
