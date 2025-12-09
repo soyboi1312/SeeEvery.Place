@@ -36,6 +36,11 @@ const emptyStateContent: Record<Category, { icon: string; title: string; subtitl
     title: 'Start Your American Adventure',
     subtitle: 'Click a state to mark it visited. Road trip across all 50 states!',
   },
+  territories: {
+    icon: '🏝️',
+    title: 'Explore US Territories',
+    subtitle: 'From Puerto Rico to Guam - discover America beyond the 50 states!',
+  },
   nationalParks: {
     icon: '🏞️',
     title: 'Explore Nature\'s Wonders',
