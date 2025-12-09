@@ -110,6 +110,7 @@ const WorldMarkerMap = memo(function WorldMarkerMap({
   const isThemeParks = category === 'themeParks';
   const isSurfing = category === 'surfingReserves';
   const isWeird = category === 'weirdAmericana';
+  const isTerritories = category === 'territories';
   const isStadiums = ['mlbStadiums', 'nflStadiums', 'nbaStadiums', 'nhlStadiums', 'soccerStadiums'].includes(category);
 
   // Get the appropriate marker icon based on category and sport
@@ -126,6 +127,7 @@ const WorldMarkerMap = memo(function WorldMarkerMap({
     if (isThemeParks) return <ThemeParkMarker fillColor={fillColor} size={size} />;
     if (isSurfing) return <SurfingMarker fillColor={fillColor} size={size} />;
     if (isWeird) return <WeirdMarker fillColor={fillColor} size={size} />;
+    if (isTerritories) return <FlagMarker fillColor={fillColor} size={size} />;
     if (isStadiums) return <SportMarker sport={marker.sport} fillColor={fillColor} size={size} />;
 
     // Default fallback
