@@ -78,7 +78,7 @@ export default function TermsPage() {
             <h2 className="text-2xl font-bold text-primary-900 dark:text-white mb-4">2. Description of Service</h2>
             <p className="text-primary-600 dark:text-primary-300 mb-4">
               See Every Place™ is a free travel tracking application that allows users to track visited locations,
-              create bucket lists, and share their travel progress. The Service includes:
+              create bucket lists, earn achievements, and optionally share their travel progress. The Service includes:
             </p>
             <ul className="text-primary-600 dark:text-primary-300 space-y-2">
               <li className="flex items-start gap-2">
@@ -92,6 +92,14 @@ export default function TermsPage() {
               <li className="flex items-start gap-2">
                 <span className="text-blue-500 mt-1">•</span>
                 <span>Optional cloud sync with account creation</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-blue-500 mt-1">•</span>
+                <span>Achievements and XP gamification system</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-blue-500 mt-1">•</span>
+                <span>Optional public profiles for sharing your travels</span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-blue-500 mt-1">•</span>
@@ -131,7 +139,7 @@ export default function TermsPage() {
           <section className="mb-10">
             <h2 className="text-2xl font-bold text-primary-900 dark:text-white mb-4">4. User-Generated Content</h2>
             <p className="text-primary-600 dark:text-primary-300 mb-4">
-              When you submit public content to See Every Place™ (such as category suggestions, public votes, or general feedback):
+              When you submit public content to See Every Place™ (such as category suggestions, public votes, general feedback, or public profile information):
             </p>
             <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-premium border border-black/5 dark:border-white/10 mb-4">
               <ul className="text-primary-600 dark:text-primary-300 space-y-3">
@@ -149,8 +157,33 @@ export default function TermsPage() {
                 </li>
               </ul>
             </div>
+
+            <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-premium border border-black/5 dark:border-white/10 mb-4">
+              <h3 className="font-bold text-primary-900 dark:text-white mb-3">Public Profile Content</h3>
+              <p className="text-primary-600 dark:text-primary-300 text-sm mb-3">
+                If you create a public profile, the following content guidelines apply:
+              </p>
+              <ul className="text-primary-600 dark:text-primary-300 text-sm space-y-2">
+                <li className="flex items-start gap-2">
+                  <span className="text-blue-500 mt-1">•</span>
+                  <span><strong className="text-primary-900 dark:text-white">Usernames</strong> - Must be 3-20 characters, contain only letters, numbers, and underscores. Must not impersonate others, contain offensive language, or violate trademarks.</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-blue-500 mt-1">•</span>
+                  <span><strong className="text-primary-900 dark:text-white">Display names and bios</strong> - Must not contain offensive, harmful, or misleading content. Must not include personal information of others without consent.</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-blue-500 mt-1">•</span>
+                  <span><strong className="text-primary-900 dark:text-white">Travel data</strong> - When you enable a public profile, your travel statistics and map data become publicly visible.</span>
+                </li>
+              </ul>
+              <p className="text-primary-600 dark:text-primary-300 text-sm mt-3">
+                We reserve the right to remove usernames, bios, or disable public profiles that violate these guidelines.
+              </p>
+            </div>
+
             <p className="text-primary-600 dark:text-primary-300 text-sm">
-              This ensures we can freely implement community suggestions without legal complications.
+              This ensures we can freely implement community suggestions and maintain a safe environment for all users.
             </p>
           </section>
 

@@ -70,7 +70,8 @@ export default function PrivacyPage() {
             </p>
             <p className="text-primary-600 dark:text-primary-300">
               <strong className="text-primary-900 dark:text-white">The short version:</strong> Your travel data is stored locally
-              on your device by default. If you create an account, your data is encrypted and synced securely.
+              on your device by default and is private. If you create an account, your data is encrypted and synced securely.
+              You can optionally enable a public profile to share your travels with others.
               We never sell your data to third parties.
             </p>
           </section>
@@ -98,9 +99,51 @@ export default function PrivacyPage() {
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-blue-500 mt-1">•</span>
-                  <span><strong className="text-primary-900 dark:text-white">Travel selections</strong> - Your visited/bucket list items, encrypted and private to you, synced across devices</span>
+                  <span><strong className="text-primary-900 dark:text-white">Travel selections</strong> - Your visited/bucket list items, synced across devices. Private by default.</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-blue-500 mt-1">•</span>
+                  <span><strong className="text-primary-900 dark:text-white">Profile information</strong> - Optional username, display name, and bio if you choose to provide them</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-blue-500 mt-1">•</span>
+                  <span><strong className="text-primary-900 dark:text-white">Achievements</strong> - Badges and XP earned through your travel progress</span>
                 </li>
               </ul>
+            </div>
+
+            <div className="bg-amber-50 dark:bg-amber-900/20 rounded-xl p-6 border border-amber-200 dark:border-amber-800 mb-4">
+              <h3 className="font-bold text-primary-900 dark:text-white mb-3 flex items-center gap-2">
+                <span className="text-amber-500">⚠️</span> Public Profiles
+              </h3>
+              <p className="text-primary-600 dark:text-primary-300 text-sm mb-3">
+                <strong className="text-primary-900 dark:text-white">Important:</strong> If you enable a public profile, the following information becomes visible to anyone on the internet:
+              </p>
+              <ul className="text-primary-600 dark:text-primary-300 text-sm space-y-2">
+                <li className="flex items-start gap-2">
+                  <span className="text-amber-500 mt-1">•</span>
+                  <span>Your username and profile URL (seeevery.place/u/yourname)</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-amber-500 mt-1">•</span>
+                  <span>Your display name and bio (if provided)</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-amber-500 mt-1">•</span>
+                  <span>Your travel statistics and visited locations</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-amber-500 mt-1">•</span>
+                  <span>Your achievements and XP level</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-amber-500 mt-1">•</span>
+                  <span>Your travel map visualization</span>
+                </li>
+              </ul>
+              <p className="text-primary-600 dark:text-primary-300 text-sm mt-3">
+                Public profiles are <strong className="text-primary-900 dark:text-white">disabled by default</strong>. You must explicitly enable this feature in your profile settings. You can disable it at any time to make your profile private again.
+              </p>
             </div>
 
             <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-premium border border-black/5 dark:border-white/10">
