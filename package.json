@@ -12,7 +12,7 @@
     "test:coverage": "vitest run --coverage",
     "preview": "opennextjs-cloudflare build && wrangler dev",
     "deploy": "opennextjs-cloudflare build && wrangler deploy",
-    "postinstall": "shx mkdir -p public/geo && shx cp node_modules/world-atlas/countries-110m.json public/geo/ && shx cp node_modules/us-atlas/states-10m.json public/geo/"
+    "postinstall": "node -e \"const fs=require('fs');const p=require('path');const d=p.join('public','geo');fs.mkdirSync(d,{recursive:true});fs.copyFileSync(p.join('node_modules','world-atlas','countries-110m.json'),p.join(d,'countries-110m.json'));fs.copyFileSync(p.join('node_modules','us-atlas','states-10m.json'),p.join(d,'states-10m.json'));\""
   },
   "dependencies": {
     "@ducanh2912/next-pwa": "^10.2.9",
@@ -34,7 +34,6 @@
   },
   "devDependencies": {
     "@opennextjs/cloudflare": "^1.14.4",
-    "shx": "^0.3.4",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.0",
     "@types/node": "^20.0.0",
