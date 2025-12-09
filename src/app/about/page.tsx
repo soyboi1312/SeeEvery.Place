@@ -76,23 +76,23 @@ export default function AboutPage() {
             </p>
           </section>
 
-          {/* The Story Section - Personal "I" voice for authenticity */}
+          {/* The Story Section */}
           <section className="mb-12 bg-primary-50/50 dark:bg-primary-900/20 rounded-2xl p-6 md:p-8 border border-black/5 dark:border-white/10">
             <h2 className="text-2xl font-bold text-primary-900 dark:text-white mb-4 flex items-center gap-2">
               <span className="text-2xl">✨</span> The Story
             </h2>
             <div className="space-y-4 text-primary-600 dark:text-primary-300">
               <p>
-                Memories fade faster than we&apos;d like. I wanted a way to hold onto the places I&apos;ve seen, not just the countries, but the mountain peaks and the random roadside attractions that made the trip special.
+                Memories fade faster than we&apos;d like. We wanted a way to hold onto the places we&apos;ve seen, not just the countries, but the mountain peaks and the random roadside attractions that made the trip special.
               </p>
               <p>
-                Existing tools felt too generic. They didn&apos;t capture the detail of the journey, or they locked everything behind a login screen and wanted my email, credit card, or to post on my behalf.
+                Existing tools felt too generic. They didn&apos;t capture the detail of the journey, or they locked everything behind a login screen and wanted our email, credit card, or to post on our behalf.
               </p>
               <p>
-                I wanted something simple, a visual way to see where I&apos;d been and dream about where I&apos;d go next. Just a beautiful map that showed my journey.
+                We wanted something simple, a visual way to see where we&apos;d been and dream about where we&apos;d go next. Just a beautiful map that showed our journey.
               </p>
               <p>
-                <strong className="text-primary-900 dark:text-white">So I built one.</strong> And now I&apos;m sharing it with you.
+                <strong className="text-primary-900 dark:text-white">So we built one.</strong> And now we&apos;re sharing it with you.
               </p>
               <p className="text-sm text-primary-500 dark:text-primary-400 pt-2 border-t border-black/5 dark:border-white/10">
                 See Every Place is free, works offline, and your data stays on your device.
