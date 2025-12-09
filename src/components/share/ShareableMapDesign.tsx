@@ -1,6 +1,7 @@
 /**
  * ShareableMapDesign Component
  * Pure presentational component for the shareable card design
+ * Optimized for social sharing with prominent branding and milestones
  */
 'use client';
 
@@ -10,6 +11,66 @@ import StaticWorldMap from './StaticWorldMap';
 import StaticUSMap from './StaticUSMap';
 import StaticMarkerMap from './StaticMarkerMap';
 import type { MarkerSize } from '@/components/MapMarkers';
+
+// Milestone thresholds for achievement badges
+export interface Milestone {
+  type: 'percentage' | 'count' | 'region' | 'special';
+  label: string;
+  emoji: string;
+}
+
+// Detect milestones based on stats
+export function detectMilestones(
+  visited: number,
+  total: number,
+  percentage: number,
+  category: Category
+): Milestone[] {
+  const milestones: Milestone[] = [];
+
+  // Percentage milestones
+  if (percentage === 100) {
+    milestones.push({ type: 'special', label: 'COMPLETIONIST', emoji: '🏆' });
+  } else if (percentage >= 75) {
+    milestones.push({ type: 'percentage', label: '75% Explorer', emoji: '🌟' });
+  } else if (percentage >= 50) {
+    milestones.push({ type: 'percentage', label: 'Halfway There!', emoji: '⭐' });
+  } else if (percentage >= 25) {
+    milestones.push({ type: 'percentage', label: 'Getting Started', emoji: '✨' });
+  }
+
+  // Count-based milestones
+  if (visited >= 100) {
+    milestones.push({ type: 'count', label: 'Century Club', emoji: '💯' });
+  } else if (visited >= 50) {
+    milestones.push({ type: 'count', label: '50+ Visited', emoji: '🎯' });
+  }
+
+  // Category-specific milestones
+  if (category === 'countries' && visited >= 50) {
+    milestones.push({ type: 'special', label: 'World Traveler', emoji: '🌍' });
+  }
+  if (category === 'states' && visited >= 25) {
+    milestones.push({ type: 'special', label: 'Road Tripper', emoji: '🚗' });
+  }
+  if (category === 'nationalParks' && visited >= 20) {
+    milestones.push({ type: 'special', label: 'Park Ranger', emoji: '🏕️' });
+  }
+  if ((category === 'fiveKPeaks' || category === 'fourteeners') && visited >= 10) {
+    milestones.push({ type: 'special', label: 'Summit Seeker', emoji: '⛰️' });
+  }
+  if (category.includes('Stadium') && visited >= 15) {
+    milestones.push({ type: 'special', label: 'Stadium Hopper', emoji: '🏟️' });
+  }
+  if (category === 'f1Tracks' && visited >= 10) {
+    milestones.push({ type: 'special', label: 'F1 Fanatic', emoji: '🏎️' });
+  }
+  if (category === 'skiResorts' && visited >= 10) {
+    milestones.push({ type: 'special', label: 'Powder Chaser', emoji: '⛷️' });
+  }
+
+  return milestones.slice(0, 2); // Max 2 milestones shown
+}
 
 export const gradients = [
   // Vibrant themes
@@ -51,11 +112,12 @@ interface ShareableMapDesignProps {
   selectedGradient: number;
   includeMap: boolean;
   iconSize: MarkerSize;
+  milestones?: Milestone[];
 }
 
 const ShareableMapDesign = forwardRef<HTMLDivElement, ShareableMapDesignProps>(
   function ShareableMapDesign(
-    { selections, category, subcategory, stats, visitedItems, selectedGradient, includeMap, iconSize },
+    { selections, category, subcategory, stats, visitedItems, selectedGradient, includeMap, iconSize, milestones = [] },
     ref
   ) {
     return (
@@ -64,6 +126,21 @@ const ShareableMapDesign = forwardRef<HTMLDivElement, ShareableMapDesignProps>(
         className={`bg-gradient-to-br ${gradients[selectedGradient]} p-4 sm:p-6 text-white min-h-[280px] flex flex-col border border-white/20 shadow-2xl relative`}
       >
         <div className="relative z-10 flex flex-col h-full">
+            {/* Milestone Badges - Top of card */}
+            {milestones.length > 0 && (
+              <div className="flex justify-center gap-2 mb-2">
+                {milestones.map((milestone, idx) => (
+                  <div
+                    key={idx}
+                    className="bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide border border-white/30 shadow-lg"
+                  >
+                    <span className="mr-1">{milestone.emoji}</span>
+                    {milestone.label}
+                  </div>
+                ))}
+              </div>
+            )}
+
             {/* Icon & Title */}
             <div className={`text-center ${includeMap ? 'mb-2' : 'mb-6'}`}>
             <span className={`flex items-center justify-center drop-shadow-md ${includeMap ? 'text-3xl' : 'text-5xl sm:text-6xl'}`}>
@@ -145,15 +222,22 @@ const ShareableMapDesign = forwardRef<HTMLDivElement, ShareableMapDesignProps>(
             </div>
             )}
 
-            {/* Branding - Fixed CamelCase (Removed uppercase class) */}
-            <div className="mt-5 text-center flex items-center justify-center gap-0.5">
-                <span className="text-base font-bold drop-shadow-md">
+            {/* Enhanced Branding - Prominent URL for social sharing */}
+            <div className="mt-auto pt-4">
+              <div className="bg-black/30 backdrop-blur-sm rounded-lg py-2.5 px-4 border border-white/20">
+                <div className="flex items-center justify-center gap-1">
+                  <span className="text-lg font-bold drop-shadow-md tracking-tight">
                     SeeEvery
-                </span>
-                <span className="text-blue-300 font-black text-lg leading-none drop-shadow-md pb-0.5">.</span>
-                <span className="text-base font-bold drop-shadow-md">
+                  </span>
+                  <span className="text-yellow-300 font-black text-xl leading-none drop-shadow-md">.</span>
+                  <span className="text-lg font-bold drop-shadow-md tracking-tight">
                     Place
-                </span>
+                  </span>
+                </div>
+                <p className="text-center text-[10px] text-white/70 mt-0.5 font-medium">
+                  Track your travel adventures
+                </p>
+              </div>
             </div>
         </div>
       </div>

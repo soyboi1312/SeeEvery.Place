@@ -23,8 +23,76 @@ import { themeParks } from '@/data/themeParks';
 import { surfingReserves } from '@/data/surfingReserves';
 import { weirdAmericana } from '@/data/weirdAmericana';
 import { useShareImage } from '@/lib/hooks/useShareImage';
-import { ShareableMapDesign, gradients, usesRegionMap } from './share';
+import { ShareableMapDesign, gradients, usesRegionMap, detectMilestones, type Milestone } from './share';
 import type { MarkerSize } from './MapMarkers';
+
+// Share caption suggestions based on category and stats
+function getShareSuggestions(category: Category, stats: { visited: number; percentage: number }, milestones: Milestone[]): string[] {
+  const suggestions: string[] = [];
+
+  // Base suggestion with category
+  const categoryName = {
+    countries: 'countries',
+    states: 'US states & territories',
+    nationalParks: 'national parks',
+    nationalMonuments: 'national monuments',
+    stateParks: 'state parks',
+    fiveKPeaks: '5000m+ peaks',
+    fourteeners: '14ers',
+    museums: 'world museums',
+    mlbStadiums: 'MLB stadiums',
+    nflStadiums: 'NFL stadiums',
+    nbaStadiums: 'NBA arenas',
+    nhlStadiums: 'NHL arenas',
+    soccerStadiums: 'soccer stadiums',
+    f1Tracks: 'F1 tracks',
+    marathons: 'marathon majors',
+    airports: 'major airports',
+    skiResorts: 'ski resorts',
+    themeParks: 'theme parks',
+    surfingReserves: 'surfing reserves',
+    weirdAmericana: 'quirky roadside attractions',
+  }[category];
+
+  suggestions.push(`I've visited ${stats.visited} ${categoryName}! Track yours at seeevery.place`);
+
+  // Milestone-based suggestions
+  if (stats.percentage === 100) {
+    suggestions.push(`100% complete! I've visited every ${categoryName.replace(/s$/, '')} - challenge accepted and conquered!`);
+  } else if (stats.percentage >= 50) {
+    suggestions.push(`${stats.percentage}% of the way to visiting all ${categoryName}! Who's joining me?`);
+  }
+
+  // Category-specific hashtag suggestions
+  const hashtags: Record<string, string[]> = {
+    countries: ['#travel #wanderlust #worldtravel'],
+    states: ['#roadtrip #usatravel #exploreamerica'],
+    nationalParks: ['#nationalparks #findyourpark #nps @nationalparkservice'],
+    nationalMonuments: ['#nationalmonument #americanhistory #ustravel'],
+    stateParks: ['#stateparks #hiking #nature'],
+    fiveKPeaks: ['#mountaineering #climbing #mountains'],
+    fourteeners: ['#14ers #colorado #hiking'],
+    museums: ['#museums #art #culture'],
+    mlbStadiums: ['#mlb #baseball #stadiumtour'],
+    nflStadiums: ['#nfl #football #stadiumhopper'],
+    nbaStadiums: ['#nba #basketball #arenas'],
+    nhlStadiums: ['#nhl #hockey #arenas'],
+    soccerStadiums: ['#soccer #football #stadiums'],
+    f1Tracks: ['#f1 #formula1 #racing'],
+    marathons: ['#marathon #running #worldmajors'],
+    airports: ['#aviation #travel #airports'],
+    skiResorts: ['#skiing #snowboarding #ski'],
+    themeParks: ['#themeparks #rollercoasters #disney'],
+    surfingReserves: ['#surfing #waves #surf'],
+    weirdAmericana: ['#roadsideamerica #quirky #americana'],
+  };
+
+  if (hashtags[category]) {
+    suggestions.push(`${stats.visited} ${categoryName} and counting! ${hashtags[category][0]}`);
+  }
+
+  return suggestions;
+}
 
 // =====================
 // O(1) Lookup Maps for fast name lookups
@@ -221,6 +289,33 @@ export default function ShareCard({ selections, category, subcategory, onClose }
     [selections, category]
   );
 
+  // Detect milestones based on current progress
+  const milestones = useMemo(
+    () => detectMilestones(stats.visited, stats.total, stats.percentage, category),
+    [stats.visited, stats.total, stats.percentage, category]
+  );
+
+  // Get share caption suggestions
+  const shareSuggestions = useMemo(
+    () => getShareSuggestions(category, stats, milestones),
+    [category, stats, milestones]
+  );
+
+  // Copy suggestion to clipboard
+  const copySuggestion = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch {
+      // Fallback for older browsers
+      const textarea = document.createElement('textarea');
+      textarea.value = text;
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textarea);
+    }
+  };
+
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
       <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
@@ -319,8 +414,29 @@ export default function ShareCard({ selections, category, subcategory, onClose }
             selectedGradient={selectedGradient}
             includeMap={includeMap}
             iconSize={iconSize}
+            milestones={milestones}
           />
         </div>
+
+        {/* Share Caption Suggestions */}
+        {shareSuggestions.length > 0 && (
+          <div className="px-4 pb-4">
+            <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-wide">
+              Caption ideas (tap to copy)
+            </p>
+            <div className="space-y-2">
+              {shareSuggestions.map((suggestion, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => copySuggestion(suggestion)}
+                  className="w-full text-left p-2 bg-gray-50 dark:bg-gray-700/50 rounded-lg text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors border border-gray-200 dark:border-gray-600"
+                >
+                  <span className="line-clamp-2">{suggestion}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Actions */}
         <div className="p-4 border-t border-gray-200 dark:border-gray-700 flex gap-3">

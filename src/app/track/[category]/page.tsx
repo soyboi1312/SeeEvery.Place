@@ -11,6 +11,68 @@ import { nflStadiums } from '@/data/stadiums/nfl';
 import { nbaStadiums } from '@/data/stadiums/nba';
 import { nhlStadiums } from '@/data/stadiums/nhl';
 import { soccerStadiums } from '@/data/stadiums/soccer';
+import { nationalParks } from '@/data/nationalParks';
+import { nationalMonuments } from '@/data/nationalMonuments';
+import { stateParks } from '@/data/stateParks';
+import { weirdAmericana } from '@/data/weirdAmericana';
+import { usStates } from '@/data/usStates';
+
+// Categories that support state-level filtering for SEO pages
+const stateFilterableCategories: Category[] = [
+  'nationalParks',
+  'nationalMonuments',
+  'stateParks',
+  'weirdAmericana',
+];
+
+// State code to full name mapping
+const stateNames: Record<string, string> = {};
+usStates.forEach(s => {
+  stateNames[s.code] = s.name;
+});
+
+// Get unique states for a category with counts
+function getStatesWithCounts(category: Category): Array<{ code: string; name: string; count: number }> {
+  const stateCounts: Record<string, number> = {};
+
+  let items: { state: string }[] = [];
+  switch (category) {
+    case 'nationalParks':
+      items = nationalParks;
+      break;
+    case 'nationalMonuments':
+      items = nationalMonuments;
+      break;
+    case 'stateParks':
+      items = stateParks;
+      break;
+    case 'weirdAmericana':
+      items = weirdAmericana;
+      break;
+    default:
+      return [];
+  }
+
+  items.forEach(item => {
+    // Handle multi-state items like "WY/MT/ID"
+    if (item.state.includes('/')) {
+      item.state.split('/').forEach(s => {
+        const code = s.trim();
+        stateCounts[code] = (stateCounts[code] || 0) + 1;
+      });
+    } else {
+      stateCounts[item.state] = (stateCounts[item.state] || 0) + 1;
+    }
+  });
+
+  return Object.entries(stateCounts)
+    .map(([code, count]) => ({
+      code,
+      name: stateNames[code] || code,
+      count,
+    }))
+    .sort((a, b) => b.count - a.count);
+}
 
 const categories: Category[] = [
   'countries',
@@ -59,6 +121,97 @@ const categoryKeywords: Record<Category, string[]> = {
   weirdAmericana: ['roadside attractions', 'quirky landmarks', 'weird museums', 'unusual USA sights', 'Americana bucket list'],
 };
 
+// FAQ content for each category
+interface FAQ {
+  question: string;
+  answer: string;
+}
+
+const categoryFAQs: Partial<Record<Category, FAQ[]>> = {
+  countries: [
+    { question: 'How many countries are there in the world?', answer: 'There are 197 recognized countries in the world - 193 UN member states plus 4 observer/partially recognized states (Vatican City, Palestine, Taiwan, and Kosovo). Our tracker includes all 197.' },
+    { question: 'What counts as visiting a country?', answer: 'Most travelers count a country as "visited" if they\'ve spent meaningful time there, not just airport layovers. Mark it visited when you\'ve explored outside the airport!' },
+    { question: 'How can I share my country count?', answer: 'Use the Share button to create a beautiful shareable image with your map and stats. Perfect for social media bragging rights!' },
+    { question: 'Is my country tracking data saved?', answer: 'Yes! Your data is automatically saved in your browser\'s local storage. No account needed - your progress stays on your device.' },
+  ],
+  states: [
+    { question: 'How many US states are there to track?', answer: 'We track all 50 US states, Washington D.C., and 5 US territories (Puerto Rico, US Virgin Islands, Guam, American Samoa, and Northern Mariana Islands) - 56 total!' },
+    { question: 'What\'s the best way to visit all 50 states?', answer: 'Road trips are the most popular method. Many travelers use route optimization or themes (like Route 66 or the Pacific Coast Highway) to make their journey memorable.' },
+    { question: 'How do I create a state visited map?', answer: 'Simply click on states you\'ve visited to mark them green. Use the Share feature to generate a beautiful map image to share on social media.' },
+    { question: 'Can I also track territories?', answer: 'Yes! We include US territories like Puerto Rico, Guam, and the US Virgin Islands. They appear as clickable buttons below the map.' },
+  ],
+  nationalParks: [
+    { question: 'How many US National Parks are there?', answer: 'There are currently 63 designated National Parks in the United States, managed by the National Park Service. We track all of them!' },
+    { question: 'What\'s the difference between a National Park and National Monument?', answer: 'National Parks are designated by Congress and protect large areas of natural beauty. National Monuments can be designated by the President and often protect specific features. Both are worth visiting!' },
+    { question: 'Do I need a park pass?', answer: 'While some parks are free, most charge entrance fees. The America the Beautiful Annual Pass ($80) covers entrance to all National Parks and over 2,000 federal recreation sites.' },
+    { question: 'Which National Park should I visit first?', answer: 'Popular starter parks include Zion (Utah), Grand Canyon (Arizona), and Acadia (Maine). Choose based on your location and interests - each park offers unique experiences!' },
+  ],
+  nationalMonuments: [
+    { question: 'How many National Monuments are in the US?', answer: 'There are over 130 National Monuments in the United States. They protect natural, cultural, and historical features significant to America.' },
+    { question: 'Are National Monuments free to visit?', answer: 'Many National Monuments are free, but some charge entrance fees. The America the Beautiful pass covers monuments managed by NPS, BLM, and other federal agencies.' },
+    { question: 'What\'s the oldest National Monument?', answer: 'Devils Tower in Wyoming was the first National Monument, designated by President Theodore Roosevelt on September 24, 1906.' },
+  ],
+  stateParks: [
+    { question: 'How many state parks are there in the US?', answer: 'There are over 10,000 state park units across America! We track a curated list of the most notable state parks from all 50 states.' },
+    { question: 'Are state parks cheaper than National Parks?', answer: 'Generally yes. State park entrance fees are typically lower, and many states offer annual passes for $30-75 covering all parks in that state.' },
+    { question: 'What amenities do state parks offer?', answer: 'Most state parks offer camping, hiking trails, picnic areas, and nature programs. Many have cabins, lodges, and recreational facilities like swimming areas.' },
+  ],
+  fiveKPeaks: [
+    { question: 'What is a 5000m peak?', answer: 'A 5000m peak is any mountain with a summit elevation of 5,000 meters (16,404 feet) or higher. This includes famous peaks like Mount Everest, K2, and Kilimanjaro.' },
+    { question: 'How many 8000m peaks exist?', answer: 'There are 14 peaks over 8,000 meters, all located in the Himalayas and Karakoram ranges. Climbing all 14 is the ultimate mountaineering achievement.' },
+    { question: 'Can beginners climb 5000m peaks?', answer: 'Some 5000m peaks like Kilimanjaro can be climbed by fit hikers without technical skills. Others require extensive mountaineering experience. Always research and prepare properly.' },
+  ],
+  fourteeners: [
+    { question: 'What is a 14er?', answer: 'A 14er (fourteener) is a mountain peak with an elevation of at least 14,000 feet (4,267 meters). Colorado has 58 fourteeners - more than any other state!' },
+    { question: 'How long does it take to climb a 14er?', answer: 'Most 14ers take 6-12 hours round trip. Some easier peaks like Quandary can be done in 5-6 hours, while technical peaks like Capitol may take 12+ hours.' },
+    { question: 'Do I need special equipment?', answer: 'For Class 1 (hiking) 14ers, you need sturdy hiking boots, layers, water, and food. Class 3+ peaks may require helmets, ropes, and technical climbing gear.' },
+    { question: 'What\'s the best time to climb 14ers?', answer: 'July through September offers the best conditions with less snow and stable weather. Start early to avoid afternoon thunderstorms common above treeline.' },
+  ],
+  mlbStadiums: [
+    { question: 'How many MLB stadiums are there?', answer: 'There are 30 MLB teams with stadiums across the US and Canada. We track all current stadiums plus some historic ones.' },
+    { question: 'Which MLB stadium is the oldest?', answer: 'Fenway Park in Boston (1912) is the oldest MLB stadium still in use, followed by Wrigley Field in Chicago (1914).' },
+    { question: 'How much does it cost to visit all MLB stadiums?', answer: 'Budget travelers can complete the circuit for $5,000-10,000 including budget flights, cheap seats, and basic accommodations. Luxury trips can cost $20,000+.' },
+    { question: 'What\'s the best way to plan an MLB stadium tour?', answer: 'Many fans do regional trips during the season, visiting 3-5 stadiums per trip. Schedule around home games and allow travel time between cities.' },
+  ],
+  f1Tracks: [
+    { question: 'How many F1 tracks are on the calendar?', answer: 'The F1 calendar typically features 20-24 races per season across different circuits worldwide. The exact number varies year to year as new venues are added.' },
+    { question: 'Can I drive on F1 circuits?', answer: 'Yes! Many circuits offer track days or driving experiences when not hosting races. Some offer pace car rides or arrive-and-drive karting on the same layouts.' },
+    { question: 'Which F1 track should I visit?', answer: 'Monaco offers glamour, Silverstone has history, and Spa-Francorchamps features the most dramatic scenery. Austin (COTA) is great for American fans.' },
+    { question: 'How much are F1 race tickets?', answer: 'General admission starts around $100-200, with grandstand seats $300-800+. Monaco and other prestige events can cost $1,000+ for good seats.' },
+  ],
+  marathons: [
+    { question: 'What are the World Marathon Majors?', answer: 'The Abbott World Marathon Majors are the six most prestigious marathons: Tokyo, Boston, London, Berlin, Chicago, and New York City. Running all six earns you a Six Star Medal!' },
+    { question: 'How do I qualify for the Boston Marathon?', answer: 'Boston requires qualifying times based on age and gender. For example, men 18-34 need 3:00:00, women 18-34 need 3:30:00. Times must be achieved at a qualifying race.' },
+    { question: 'Which marathon is the fastest?', answer: 'Berlin is known as the fastest course due to its flat terrain. The current world record was set here. London and Chicago are also fast, flat courses.' },
+    { question: 'Can anyone run a World Major?', answer: 'Most majors have lottery entries for non-qualifiers. You can also enter through charity programs or tour operators, though these typically require fundraising or higher fees.' },
+  ],
+  airports: [
+    { question: 'Which is the world\'s best airport?', answer: 'Singapore Changi has been voted the world\'s best airport for many consecutive years, known for its gardens, entertainment, and amenities.' },
+    { question: 'Do airport lounges count as "visiting"?', answer: 'That\'s up to you! Some collectors count any stopover, while purists only count airports where they\'ve cleared immigration or explored the terminal.' },
+    { question: 'What makes an airport worth tracking?', answer: 'We track major international hubs, architecturally significant airports, and those with unique features or historical importance.' },
+  ],
+  skiResorts: [
+    { question: 'Which ski resort has the most terrain?', answer: 'Les 3 Vallées in France is the world\'s largest ski area with 600km of slopes. In North America, Whistler Blackcomb is the largest with 8,171 acres.' },
+    { question: 'What\'s the best time to ski?', answer: 'January-March offers the best conditions in most of the Northern Hemisphere. Southern Hemisphere resorts (Chile, New Zealand) have their season June-October.' },
+    { question: 'Do I need to track individual runs?', answer: 'Our tracker focuses on resorts rather than runs. Visit once and mark it visited! Advanced skiers often keep separate lists of specific runs or challenges.' },
+  ],
+  themeParks: [
+    { question: 'Which theme park is the most visited?', answer: 'Magic Kingdom at Walt Disney World is the world\'s most visited theme park with over 20 million visitors annually.' },
+    { question: 'What\'s the difference between a theme park and amusement park?', answer: 'Theme parks have cohesive theming and immersive environments (like Disney or Universal), while amusement parks focus primarily on rides without overall themes.' },
+    { question: 'How much should I budget for a theme park visit?', answer: 'Budget $100-200 per person per day for tickets. Add $50-100 for food and souvenirs. Multi-day visits and resort stays can increase costs significantly.' },
+  ],
+  surfingReserves: [
+    { question: 'What is a World Surfing Reserve?', answer: 'World Surfing Reserves are dedicated to protecting the world\'s most outstanding waves, surf zones, and surrounding environments. They\'re recognized for their natural, cultural, and economic value.' },
+    { question: 'Can beginners surf at these spots?', answer: 'Many reserves have beginner-friendly zones, but some famous breaks like Pipeline are for experts only. Research conditions before visiting any new surf spot.' },
+    { question: 'How many World Surfing Reserves exist?', answer: 'There are currently 12 official World Surfing Reserves across 9 countries, with more being designated. We track these plus other legendary surf spots.' },
+  ],
+  weirdAmericana: [
+    { question: 'What counts as weird Americana?', answer: 'Quirky roadside attractions, oversized statues, unusual museums, and bizarre landmarks that celebrate America\'s eccentric creativity and roadside culture.' },
+    { question: 'Are these attractions free to visit?', answer: 'Many roadside attractions are free to view (like Cadillac Ranch). Some museums and indoor attractions charge admission, typically $5-20.' },
+    { question: 'Where can I find the most weird attractions?', answer: 'Route 66 has the highest concentration, but every state has hidden gems. The Southwest, Midwest, and California are particularly rich in quirky stops.' },
+  ],
+};
+
 // Generate JSON-LD structured data for SEO
 function generateJsonLd(category: Category, label: string, description: string) {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://seeevery.place';
@@ -82,6 +235,22 @@ function generateJsonLd(category: Category, label: string, description: string) 
       url: baseUrl,
     },
     keywords: categoryKeywords[category]?.join(', ') || `${label} tracker`,
+  };
+}
+
+// Generate FAQ JSON-LD schema
+function generateFaqJsonLd(faqs: FAQ[]) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faqs.map(faq => ({
+      '@type': 'Question',
+      name: faq.question,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: faq.answer,
+      },
+    })),
   };
 }
 
@@ -539,6 +708,8 @@ export default async function CategoryLandingPage({ params }: Props) {
   const icon = categoryIcons[category as Category];
   const description = categoryDescriptions[category as Category];
   const jsonLd = generateJsonLd(category as Category, label, description);
+  const faqs = categoryFAQs[category as Category] || [];
+  const faqJsonLd = faqs.length > 0 ? generateFaqJsonLd(faqs) : null;
 
   // Get category group and theme
   const group = getGroupForCategory(category as Category);
@@ -560,6 +731,14 @@ export default async function CategoryLandingPage({ params }: Props) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
+      {/* FAQ JSON-LD Schema for SEO */}
+      {faqJsonLd && (
+        <Script
+          id={`faq-json-ld-${category}`}
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+        />
+      )}
     <div className={`min-h-screen bg-gradient-to-b ${gradientClass}`}>
       <header className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-black/5 dark:border-white/10 sticky top-0 z-40">
         <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
@@ -642,6 +821,34 @@ export default async function CategoryLandingPage({ params }: Props) {
           </div>
         </section>
 
+        {/* Browse by State - for state-filterable categories */}
+        {stateFilterableCategories.includes(category as Category) && (
+          <section className="my-12">
+            <h3 className="font-bold text-center text-primary-900 dark:text-white mb-2">
+              Browse {label} by State
+            </h3>
+            <p className="text-center text-primary-500 dark:text-primary-400 text-sm mb-6">
+              Click a state to see all {label.toLowerCase()} in that state
+            </p>
+            <div className="flex flex-wrap justify-center gap-2">
+              {getStatesWithCounts(category as Category).slice(0, 20).map(({ code, name, count }) => (
+                <Link
+                  key={code}
+                  href={`/track/${category}/${code.toLowerCase()}`}
+                  className="bg-white/70 dark:bg-slate-800/70 px-3 py-1.5 rounded-full text-sm font-medium border border-black/5 dark:border-white/10 hover:bg-white dark:hover:bg-slate-700 hover:shadow-md transition-all"
+                >
+                  {name} <span className="text-primary-500 dark:text-primary-400">({count})</span>
+                </Link>
+              ))}
+            </div>
+            {getStatesWithCounts(category as Category).length > 20 && (
+              <p className="text-center mt-4 text-sm text-primary-500 dark:text-primary-400">
+                + {getStatesWithCounts(category as Category).length - 20} more states
+              </p>
+            )}
+          </section>
+        )}
+
         {/* Featured Challenge */}
         {biggestRegion && challengeDesc && (
           <section className="my-12">
@@ -692,6 +899,41 @@ export default async function CategoryLandingPage({ params }: Props) {
             ))}
           </div>
         </section>
+
+        {/* FAQ Section */}
+        {faqs.length > 0 && (
+          <section className="mt-16">
+            <h2 className="text-2xl font-bold text-primary-900 dark:text-white mb-2 text-center">
+              Frequently Asked Questions
+            </h2>
+            <p className="text-primary-600 dark:text-primary-300 text-center mb-8">
+              Common questions about tracking {label.toLowerCase()}
+            </p>
+            <div className="space-y-4">
+              {faqs.map((faq, index) => (
+                <details
+                  key={index}
+                  className="bg-white dark:bg-slate-800 rounded-xl shadow-premium border border-black/5 dark:border-white/10 group"
+                >
+                  <summary className="px-6 py-4 cursor-pointer list-none flex items-center justify-between font-semibold text-primary-900 dark:text-white hover:bg-primary-50 dark:hover:bg-slate-700 rounded-xl transition-colors">
+                    {faq.question}
+                    <svg
+                      className="w-5 h-5 text-primary-500 group-open:rotate-180 transition-transform"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </summary>
+                  <div className="px-6 pb-4 text-primary-600 dark:text-primary-300">
+                    {faq.answer}
+                  </div>
+                </details>
+              ))}
+            </div>
+          </section>
+        )}
 
         <section className="mt-16">
           <h2 className="text-2xl font-bold text-primary-900 dark:text-white mb-6 text-center">
