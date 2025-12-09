@@ -8,6 +8,8 @@ const categories = [
   'countries',
   'states',
   'territories',
+  'usCities',
+  'worldCities',
   'nationalParks',
   'nationalMonuments',
   'stateParks',
