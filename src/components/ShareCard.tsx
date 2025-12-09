@@ -32,7 +32,7 @@ function getShareSuggestions(category: Category, stats: { visited: number; perce
   const suggestions: string[] = [];
 
   // Base suggestion with category
-  const categoryName = {
+  const categoryName: Partial<Record<Category, string>> = {
     countries: 'countries',
     states: 'US states & territories',
     nationalParks: 'national parks',
@@ -53,15 +53,16 @@ function getShareSuggestions(category: Category, stats: { visited: number; perce
     themeParks: 'theme parks',
     surfingReserves: 'surfing reserves',
     weirdAmericana: 'quirky roadside attractions',
-  }[category];
+  };
+  const categoryDisplayName = categoryName[category] || category;
 
-  suggestions.push(`I've visited ${stats.visited} ${categoryName}! Track yours at seeevery.place`);
+  suggestions.push(`I've visited ${stats.visited} ${categoryDisplayName}! Track yours at seeevery.place`);
 
   // Milestone-based suggestions
   if (stats.percentage === 100) {
-    suggestions.push(`100% complete! I've visited every ${categoryName.replace(/s$/, '')} - challenge accepted and conquered!`);
+    suggestions.push(`100% complete! I've visited every ${categoryDisplayName.replace(/s$/, '')} - challenge accepted and conquered!`);
   } else if (stats.percentage >= 50) {
-    suggestions.push(`${stats.percentage}% of the way to visiting all ${categoryName}! Who's joining me?`);
+    suggestions.push(`${stats.percentage}% of the way to visiting all ${categoryDisplayName}! Who's joining me?`);
   }
 
   // Category-specific hashtag suggestions
@@ -89,7 +90,7 @@ function getShareSuggestions(category: Category, stats: { visited: number; perce
   };
 
   if (hashtags[category]) {
-    suggestions.push(`${stats.visited} ${categoryName} and counting! ${hashtags[category][0]}`);
+    suggestions.push(`${stats.visited} ${categoryDisplayName} and counting! ${hashtags[category][0]}`);
   }
 
   return suggestions;
