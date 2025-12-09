@@ -2,8 +2,15 @@ import { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import Image from 'next/image';
 import Script from 'next/script';
-import { Category, categoryLabels, categoryIcons } from '@/lib/types';
+import { Category, categoryLabels, categoryIcons, CategoryGroup, getGroupForCategory } from '@/lib/types';
 import Link from 'next/link';
+import { getCategoryItemsAsync, CategoryItem } from '@/lib/categoryUtils';
+import { mountains } from '@/data/mountains';
+import { mlbStadiums } from '@/data/stadiums/mlb';
+import { nflStadiums } from '@/data/stadiums/nfl';
+import { nbaStadiums } from '@/data/stadiums/nba';
+import { nhlStadiums } from '@/data/stadiums/nhl';
+import { soccerStadiums } from '@/data/stadiums/soccer';
 
 const categories: Category[] = [
   'countries',
@@ -305,6 +312,196 @@ const categoryExamples: Record<Category, PlaceExample[]> = {
   ],
 };
 
+// Theme colors by category group
+const themeColors: Record<CategoryGroup, string> = {
+  nature: 'from-emerald-50 to-stone-100 dark:from-emerald-950 dark:to-stone-900',
+  sports: 'from-blue-50 to-indigo-100 dark:from-blue-950 dark:to-indigo-900',
+  culture: 'from-amber-50 to-orange-50 dark:from-amber-950 dark:to-orange-900',
+  destinations: 'from-sky-50 to-white dark:from-slate-900 dark:to-slate-800',
+};
+
+// Accent colors for buttons and highlights by group
+const accentColors: Record<CategoryGroup, { bg: string; hover: string; challenge: string }> = {
+  nature: { bg: 'bg-emerald-600', hover: 'hover:bg-emerald-700', challenge: 'bg-emerald-800' },
+  sports: { bg: 'bg-indigo-600', hover: 'hover:bg-indigo-700', challenge: 'bg-indigo-800' },
+  culture: { bg: 'bg-amber-600', hover: 'hover:bg-amber-700', challenge: 'bg-amber-800' },
+  destinations: { bg: 'bg-primary-700', hover: 'hover:bg-primary-800', challenge: 'bg-primary-900' },
+};
+
+// Stat type for dynamic stats
+interface CategoryStat {
+  label: string;
+  value: string | number;
+  icon: string;
+}
+
+// Helper to generate dynamic stats based on category
+function getCategoryStats(category: Category, items: CategoryItem[]): CategoryStat[] {
+  const total = items.length;
+  const stats: CategoryStat[] = [];
+
+  // Category-specific stats
+  if (category === 'fiveKPeaks') {
+    const peaks = mountains.filter(m => m.elevation >= 5000);
+    const totalElevation = peaks.reduce((acc, curr) => acc + curr.elevation, 0);
+    const highest = Math.max(...peaks.map(m => m.elevation));
+
+    stats.push({ label: 'Total Peaks', value: total, icon: '🏔️' });
+    stats.push({ label: 'Combined Elevation', value: `${(totalElevation / 1000).toFixed(0)}km`, icon: '📐' });
+    stats.push({ label: 'Highest Peak', value: `${highest.toLocaleString()}m`, icon: '⬆️' });
+  } else if (category === 'fourteeners') {
+    const peaks = mountains.filter(m => m.elevation >= 4267 && m.elevation < 5000 && m.countryCode === 'US');
+    const totalElevation = peaks.reduce((acc, curr) => acc + curr.elevation, 0);
+    const avgElevation = Math.round(totalElevation / peaks.length);
+
+    stats.push({ label: 'Total 14ers', value: total, icon: '⛰️' });
+    stats.push({ label: 'Avg Elevation', value: `${avgElevation.toLocaleString()}m`, icon: '📊' });
+    stats.push({ label: 'Total Vertical', value: `${(totalElevation / 1000).toFixed(0)}km`, icon: '📐' });
+  } else if (category === 'mlbStadiums') {
+    const totalCapacity = mlbStadiums.reduce((acc, curr) => acc + curr.capacity, 0);
+    const oldest = 'Fenway Park (1912)';
+
+    stats.push({ label: 'Stadiums', value: total, icon: '⚾' });
+    stats.push({ label: 'Total Capacity', value: `${(totalCapacity / 1000000).toFixed(1)}M`, icon: '👥' });
+    stats.push({ label: 'Oldest Stadium', value: oldest, icon: '🏛️' });
+  } else if (category === 'nflStadiums') {
+    const totalCapacity = nflStadiums.reduce((acc, curr) => acc + curr.capacity, 0);
+
+    stats.push({ label: 'Stadiums', value: total, icon: '🏈' });
+    stats.push({ label: 'Total Capacity', value: `${(totalCapacity / 1000000).toFixed(1)}M`, icon: '👥' });
+    stats.push({ label: 'Largest', value: 'AT&T Stadium', icon: '🏟️' });
+  } else if (category === 'nbaStadiums') {
+    const totalCapacity = nbaStadiums.reduce((acc, curr) => acc + curr.capacity, 0);
+
+    stats.push({ label: 'Arenas', value: total, icon: '🏀' });
+    stats.push({ label: 'Total Capacity', value: `${(totalCapacity / 1000).toFixed(0)}K`, icon: '👥' });
+    stats.push({ label: 'Iconic Venue', value: 'MSG', icon: '🏟️' });
+  } else if (category === 'nhlStadiums') {
+    const totalCapacity = nhlStadiums.reduce((acc, curr) => acc + curr.capacity, 0);
+
+    stats.push({ label: 'Arenas', value: total, icon: '🏒' });
+    stats.push({ label: 'Total Capacity', value: `${(totalCapacity / 1000).toFixed(0)}K`, icon: '👥' });
+    stats.push({ label: 'Most Cups', value: 'Bell Centre', icon: '🏆' });
+  } else if (category === 'soccerStadiums') {
+    const totalCapacity = soccerStadiums.reduce((acc, curr) => acc + curr.capacity, 0);
+
+    stats.push({ label: 'Stadiums', value: total, icon: '⚽' });
+    stats.push({ label: 'Total Capacity', value: `${(totalCapacity / 1000000).toFixed(1)}M`, icon: '👥' });
+    stats.push({ label: 'Largest', value: 'Camp Nou', icon: '🏟️' });
+  } else if (category === 'countries') {
+    const continents = new Set(items.map(i => i.group)).size;
+    stats.push({ label: 'Countries', value: total, icon: '🌍' });
+    stats.push({ label: 'Continents', value: continents, icon: '🗺️' });
+    stats.push({ label: 'UN Members', value: '193', icon: '🏛️' });
+  } else if (category === 'states') {
+    const regions = new Set(items.map(i => i.group)).size;
+    stats.push({ label: 'States & DC', value: total, icon: '🇺🇸' });
+    stats.push({ label: 'Regions', value: regions, icon: '🗺️' });
+    stats.push({ label: 'Total Area', value: '3.8M mi²', icon: '📐' });
+  } else if (category === 'nationalParks') {
+    const regions = new Set(items.map(i => i.group)).size;
+    stats.push({ label: 'Parks', value: total, icon: '🏞️' });
+    stats.push({ label: 'Regions', value: regions, icon: '🗺️' });
+    stats.push({ label: 'Annual Visitors', value: '312M+', icon: '👥' });
+  } else if (category === 'nationalMonuments') {
+    const regions = new Set(items.map(i => i.group)).size;
+    stats.push({ label: 'Monuments', value: total, icon: '🗽' });
+    stats.push({ label: 'Regions', value: regions, icon: '🗺️' });
+    stats.push({ label: 'First (1906)', value: 'Devils Tower', icon: '🏛️' });
+  } else if (category === 'stateParks') {
+    const regions = new Set(items.map(i => i.group)).size;
+    stats.push({ label: 'State Parks', value: total, icon: '🌲' });
+    stats.push({ label: 'Regions', value: regions, icon: '🗺️' });
+    stats.push({ label: 'All 50 States', value: '✓', icon: '✅' });
+  } else if (category === 'museums') {
+    const countries = new Set(items.map(i => i.group)).size;
+    stats.push({ label: 'Museums', value: total, icon: '🎨' });
+    stats.push({ label: 'Countries', value: countries, icon: '🌍' });
+    stats.push({ label: 'Most Visited', value: 'Louvre', icon: '🏆' });
+  } else if (category === 'f1Tracks') {
+    const countries = new Set(items.map(i => i.group)).size;
+    stats.push({ label: 'Circuits', value: total, icon: '🏎️' });
+    stats.push({ label: 'Countries', value: countries, icon: '🌍' });
+    stats.push({ label: 'Oldest', value: 'Monza (1922)', icon: '🏛️' });
+  } else if (category === 'marathons') {
+    const countries = new Set(items.map(i => i.group)).size;
+    stats.push({ label: 'Majors', value: total, icon: '🏃' });
+    stats.push({ label: 'Countries', value: countries, icon: '🌍' });
+    stats.push({ label: 'Oldest', value: 'Boston (1897)', icon: '🏛️' });
+  } else if (category === 'airports') {
+    const regions = new Set(items.map(i => i.group)).size;
+    stats.push({ label: 'Airports', value: total, icon: '✈️' });
+    stats.push({ label: 'Regions', value: regions, icon: '🌍' });
+    stats.push({ label: 'Best Rated', value: 'Changi', icon: '🏆' });
+  } else if (category === 'skiResorts') {
+    const regions = new Set(items.map(i => i.group)).size;
+    stats.push({ label: 'Resorts', value: total, icon: '⛷️' });
+    stats.push({ label: 'Regions', value: regions, icon: '🌍' });
+    stats.push({ label: 'Largest', value: 'Whistler', icon: '🏔️' });
+  } else if (category === 'themeParks') {
+    const regions = new Set(items.map(i => i.group)).size;
+    stats.push({ label: 'Theme Parks', value: total, icon: '🎢' });
+    stats.push({ label: 'Regions', value: regions, icon: '🌍' });
+    stats.push({ label: 'Most Visited', value: 'Magic Kingdom', icon: '🏆' });
+  } else if (category === 'surfingReserves') {
+    const regions = new Set(items.map(i => i.group)).size;
+    stats.push({ label: 'Reserves', value: total, icon: '🌊' });
+    stats.push({ label: 'Regions', value: regions, icon: '🌍' });
+    stats.push({ label: 'Most Famous', value: 'Pipeline', icon: '🏆' });
+  } else if (category === 'weirdAmericana') {
+    const regions = new Set(items.map(i => i.group)).size;
+    stats.push({ label: 'Attractions', value: total, icon: '🗿' });
+    stats.push({ label: 'Regions', value: regions, icon: '🗺️' });
+    stats.push({ label: 'Most Iconic', value: 'Cadillac Ranch', icon: '🚗' });
+  } else {
+    // Default stats
+    stats.push({ label: 'Total Locations', value: total, icon: '📍' });
+    const regions = new Set(items.map(i => i.group)).size;
+    stats.push({ label: 'Regions', value: regions, icon: '🗺️' });
+  }
+
+  return stats;
+}
+
+// Helper to get distribution by region/group
+function getDistribution(items: CategoryItem[]): Record<string, number> {
+  return items.reduce((acc, item) => {
+    acc[item.group] = (acc[item.group] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
+}
+
+// Helper to get the biggest region for challenge
+function getBiggestRegion(distribution: Record<string, number>): [string, number] | null {
+  const entries = Object.entries(distribution);
+  if (entries.length === 0) return null;
+  return entries.sort(([, a], [, b]) => b - a)[0];
+}
+
+// Challenge descriptions by category
+const challengeDescriptions: Partial<Record<Category, (region: string, count: number) => string>> = {
+  countries: (region, count) => `There are ${count} countries in ${region}. Can you visit them all?`,
+  states: (region, count) => `The ${region} region has ${count} states. Complete the regional tour!`,
+  nationalParks: (region, count) => `${region} has ${count} national parks to explore. Start your adventure!`,
+  nationalMonuments: (region, count) => `Discover all ${count} national monuments in the ${region} region!`,
+  stateParks: (region, count) => `The ${region} has ${count} state parks waiting for you!`,
+  fiveKPeaks: (region, count) => `The ${region} has ${count} peaks over 5000m. Summit them all!`,
+  fourteeners: (region, count) => `The ${region} has ${count} fourteeners. Bag them all!`,
+  museums: (region, count) => `${region} has ${count} world-class museums to explore!`,
+  mlbStadiums: (region, count) => `Visit all ${count} stadiums with ${region} teams!`,
+  nflStadiums: (region, count) => `Catch a game at all ${count} ${region} venues!`,
+  nbaStadiums: (region, count) => `Watch games at all ${count} ${region} arenas!`,
+  nhlStadiums: (region, count) => `See hockey at all ${count} ${region} rinks!`,
+  soccerStadiums: (region, count) => `${region} has ${count} legendary pitches to visit!`,
+  f1Tracks: (region, count) => `${region} hosts ${count} Formula 1 races. See them all!`,
+  marathons: (region, count) => `Run all ${count} majors in ${region}!`,
+  airports: (region, count) => `${region} has ${count} major airports to travel through!`,
+  skiResorts: (region, count) => `Conquer all ${count} ski resorts in ${region}!`,
+  themeParks: (region, count) => `Experience all ${count} theme parks in ${region}!`,
+  surfingReserves: (region, count) => `Ride the waves at all ${count} spots in ${region}!`,
+  weirdAmericana: (region, count) => `Discover all ${count} quirky attractions in the ${region}!`,
+};
+
 export function generateStaticParams() {
   return categories.map((category) => ({ category }));
 }
@@ -343,6 +540,18 @@ export default async function CategoryLandingPage({ params }: Props) {
   const description = categoryDescriptions[category as Category];
   const jsonLd = generateJsonLd(category as Category, label, description);
 
+  // Get category group and theme
+  const group = getGroupForCategory(category as Category);
+  const gradientClass = themeColors[group];
+  const accent = accentColors[group];
+
+  // Fetch items for dynamic stats
+  const items = await getCategoryItemsAsync(category as Category);
+  const stats = getCategoryStats(category as Category, items);
+  const distribution = getDistribution(items);
+  const biggestRegion = getBiggestRegion(distribution);
+  const challengeDesc = challengeDescriptions[category as Category];
+
   return (
     <>
       {/* JSON-LD Structured Data for SEO */}
@@ -351,7 +560,7 @@ export default async function CategoryLandingPage({ params }: Props) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-    <div className="min-h-screen bg-gradient-to-b from-primary-50 to-white dark:from-slate-900 dark:to-slate-800">
+    <div className={`min-h-screen bg-gradient-to-b ${gradientClass}`}>
       <header className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-black/5 dark:border-white/10 sticky top-0 z-40">
         <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3 group">
@@ -369,7 +578,7 @@ export default async function CategoryLandingPage({ params }: Props) {
           </Link>
           <Link
             href={`/?category=${category}`}
-            className="px-4 py-2 bg-primary-700 hover:bg-primary-800 text-white rounded-lg font-medium hover:shadow-lg transition-all text-sm"
+            className={`px-4 py-2 ${accent.bg} ${accent.hover} text-white rounded-lg font-medium hover:shadow-lg transition-all text-sm`}
           >
             Start Tracking
           </Link>
@@ -387,34 +596,24 @@ export default async function CategoryLandingPage({ params }: Props) {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-6 mb-12">
-          <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-premium border border-black/5 dark:border-white/10 text-center">
-            <div className="text-3xl mb-3">🗺️</div>
-            <h3 className="font-bold text-primary-900 dark:text-white mb-2">Interactive Map</h3>
-            <p className="text-primary-600 dark:text-primary-400 text-sm">
-              Visual map showing your visited {label.toLowerCase()} in green
-            </p>
+        {/* By the Numbers Section */}
+        <section className="mb-12">
+          <h2 className="text-lg font-semibold text-primary-700 dark:text-primary-300 text-center mb-6">By the Numbers</h2>
+          <div className="grid md:grid-cols-3 gap-6">
+            {stats.map((stat, index) => (
+              <div key={index} className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-premium border border-black/5 dark:border-white/10 text-center">
+                <div className="text-3xl mb-3">{stat.icon}</div>
+                <div className="text-2xl font-bold text-primary-900 dark:text-white mb-1">{stat.value}</div>
+                <p className="text-primary-600 dark:text-primary-400 text-sm">{stat.label}</p>
+              </div>
+            ))}
           </div>
-          <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-premium border border-black/5 dark:border-white/10 text-center">
-            <div className="text-3xl mb-3">⭐</div>
-            <h3 className="font-bold text-primary-900 dark:text-white mb-2">Bucket List</h3>
-            <p className="text-primary-600 dark:text-primary-400 text-sm">
-              Mark {label.toLowerCase()} you want to visit next
-            </p>
-          </div>
-          <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-premium border border-black/5 dark:border-white/10 text-center">
-            <div className="text-3xl mb-3">📤</div>
-            <h3 className="font-bold text-primary-900 dark:text-white mb-2">Share Stats</h3>
-            <p className="text-primary-600 dark:text-primary-400 text-sm">
-              Create beautiful shareable graphics
-            </p>
-          </div>
-        </div>
+        </section>
 
         <div className="text-center">
           <Link
             href={`/?category=${category}`}
-            className="inline-flex items-center gap-2 px-8 py-4 bg-primary-700 hover:bg-primary-800 text-white rounded-xl font-bold text-lg hover:shadow-xl transition-all"
+            className={`inline-flex items-center gap-2 px-8 py-4 ${accent.bg} ${accent.hover} text-white rounded-xl font-bold text-lg hover:shadow-xl transition-all`}
           >
             Start Tracking {label}
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -425,6 +624,44 @@ export default async function CategoryLandingPage({ params }: Props) {
             Free to use, no account required
           </p>
         </div>
+
+        {/* Distribution Visualizer */}
+        <section className="my-12">
+          <h3 className="font-bold text-center text-primary-900 dark:text-white mb-6">Breakdown by Region</h3>
+          <div className="flex flex-wrap justify-center gap-3">
+            {Object.entries(distribution)
+              .sort(([, a], [, b]) => b - a)
+              .map(([region, count]) => (
+                <div
+                  key={region}
+                  className="bg-white/70 dark:bg-slate-800/70 px-4 py-2 rounded-full text-sm font-medium border border-black/5 dark:border-white/10 hover:bg-white dark:hover:bg-slate-700 transition-colors"
+                >
+                  {region}: <span className="font-bold text-primary-700 dark:text-primary-300">{count}</span>
+                </div>
+              ))}
+          </div>
+        </section>
+
+        {/* Featured Challenge */}
+        {biggestRegion && challengeDesc && (
+          <section className="my-12">
+            <div className={`${accent.challenge} text-white rounded-xl p-8 text-center`}>
+              <h3 className="font-bold text-2xl mb-3">The {biggestRegion[0]} Challenge</h3>
+              <p className="opacity-90 mb-6 text-lg">
+                {challengeDesc(biggestRegion[0], biggestRegion[1])}
+              </p>
+              <Link
+                href={`/?category=${category}`}
+                className="inline-flex items-center gap-2 px-6 py-3 bg-white/20 hover:bg-white/30 rounded-lg font-semibold transition-colors"
+              >
+                View Checklist
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </Link>
+            </div>
+          </section>
+        )}
 
         {/* Examples Section */}
         <section className="mt-16">
