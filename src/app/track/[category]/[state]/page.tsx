@@ -100,27 +100,11 @@ const accentColors: Record<CategoryGroup, { bg: string; hover: string; challenge
 
 // State-specific descriptions
 function getStateDescription(category: Category, stateName: string, count: number): string {
-  const descriptions: Record<Category, string> = {
+  const descriptions: Partial<Record<Category, string>> = {
     nationalParks: `Discover all ${count} National Parks in ${stateName}. Track your visits, build your bucket list, and explore the natural wonders of ${stateName}.`,
     nationalMonuments: `Explore ${count} National Monuments in ${stateName}. From historic landmarks to natural wonders, track your journey through ${stateName}'s protected treasures.`,
     stateParks: `${stateName} has ${count} incredible state parks waiting for you. Track your adventures and discover hidden gems across the state.`,
     weirdAmericana: `${stateName} is home to ${count} quirky roadside attractions. From giant sculptures to mystery spots, track the weird and wonderful!`,
-    countries: '',
-    states: '',
-    fiveKPeaks: '',
-    fourteeners: '',
-    museums: '',
-    mlbStadiums: '',
-    nflStadiums: '',
-    nbaStadiums: '',
-    nhlStadiums: '',
-    soccerStadiums: '',
-    f1Tracks: '',
-    marathons: '',
-    airports: '',
-    skiResorts: '',
-    themeParks: '',
-    surfingReserves: '',
   };
   return descriptions[category] || `Track ${count} locations in ${stateName}.`;
 }
@@ -150,6 +134,36 @@ function generateJsonLd(category: Category, stateName: string, stateCode: string
         addressCountry: 'US',
       },
     },
+  };
+}
+
+// Generate Breadcrumb JSON-LD schema for SEO
+function generateBreadcrumbJsonLd(category: Category, label: string, stateName: string, stateCode: string) {
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://seeevery.place';
+
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: 'Home',
+        item: baseUrl,
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: label,
+        item: `${baseUrl}/track/${category}`,
+      },
+      {
+        '@type': 'ListItem',
+        position: 3,
+        name: stateName,
+        item: `${baseUrl}/track/${category}/${stateCode.toLowerCase()}`,
+      },
+    ],
   };
 }
 
@@ -231,6 +245,7 @@ export default async function StateCategoryPage({ params }: Props) {
   const icon = categoryIcons[category as Category];
   const description = getStateDescription(category as Category, stateName, items.length);
   const jsonLd = generateJsonLd(category as Category, stateName, stateCode, items.length);
+  const breadcrumbJsonLd = generateBreadcrumbJsonLd(category as Category, label, stateName, stateCode);
 
   // Get category group and theme
   const group = getGroupForCategory(category as Category);
@@ -249,6 +264,12 @@ export default async function StateCategoryPage({ params }: Props) {
         id={`json-ld-${category}-${state}`}
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      {/* Breadcrumb JSON-LD Schema for SEO */}
+      <Script
+        id={`breadcrumb-json-ld-${category}-${state}`}
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
       <div className={`min-h-screen bg-gradient-to-b ${gradientClass}`}>
         <header className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-black/5 dark:border-white/10 sticky top-0 z-40">
@@ -276,19 +297,19 @@ export default async function StateCategoryPage({ params }: Props) {
         </header>
 
         <main className="max-w-4xl mx-auto px-4 py-12">
-          {/* Breadcrumb */}
-          <nav className="mb-6 text-sm">
+          {/* Visual Breadcrumb Navigation */}
+          <nav className="mb-6 text-sm" aria-label="Breadcrumb">
             <ol className="flex items-center gap-2 text-primary-500 dark:text-primary-400">
               <li>
-                <Link href="/" className="hover:text-primary-700 dark:hover:text-primary-200">Home</Link>
+                <Link href="/" className="hover:text-primary-700 dark:hover:text-primary-200 transition-colors">Home</Link>
               </li>
-              <li>/</li>
+              <li className="text-primary-400 dark:text-primary-500">/</li>
               <li>
-                <Link href={`/track/${category}`} className="hover:text-primary-700 dark:hover:text-primary-200">
+                <Link href={`/track/${category}`} className="hover:text-primary-700 dark:hover:text-primary-200 transition-colors">
                   {label}
                 </Link>
               </li>
-              <li>/</li>
+              <li className="text-primary-400 dark:text-primary-500">/</li>
               <li className="text-primary-900 dark:text-white font-medium">{stateName}</li>
             </ol>
           </nav>
