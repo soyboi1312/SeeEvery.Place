@@ -6,6 +6,7 @@ import { getStats } from '@/lib/storage';
 // Data imports for totals
 import { countries, continents, getCountriesByContinent } from '@/data/countries';
 import { usStates } from '@/data/usStates';
+import { usTerritories } from '@/data/usTerritories';
 import { nationalParks } from '@/data/nationalParks';
 import { nationalMonuments } from '@/data/nationalMonuments';
 import { stateParks } from '@/data/stateParks';
@@ -34,6 +35,7 @@ const markerCategories: Category[] = Object.values(categoryGroups)
 const categoryTotals: Record<Category, number> = {
   countries: countries.length,
   states: usStates.length,
+  territories: usTerritories.length,
   nationalParks: nationalParks.length,
   nationalMonuments: nationalMonuments.length,
   stateParks: stateParks.length,
