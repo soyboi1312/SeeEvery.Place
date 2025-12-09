@@ -1,38 +1,99 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useDarkMode } from '@/lib/hooks/useDarkMode';
 import { createClient } from '@/lib/supabase/client';
-import { loadSelections, clearAllSelections } from '@/lib/storage';
+import { loadSelections, saveSelections, clearAllSelections } from '@/lib/storage';
+import { calculateTotalXp, calculateLevel, xpToNextLevel } from '@/lib/achievements';
 import type { User } from '@supabase/supabase-js';
+import type { UserSelections } from '@/lib/types';
+
+interface Profile {
+  id: string;
+  email: string;
+  full_name: string | null;
+  avatar_url: string | null;
+  username: string | null;
+  is_public: boolean;
+  bio: string | null;
+  total_xp: number;
+  level: number;
+}
 
 export default function SettingsPage() {
   const { isDarkMode, toggleDarkMode } = useDarkMode();
   const router = useRouter();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const [user, setUser] = useState<User | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleteConfirmText, setDeleteConfirmText] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);
   const [exportStatus, setExportStatus] = useState<'idle' | 'exporting' | 'done'>('idle');
 
+  // Import states
+  const [importStatus, setImportStatus] = useState<'idle' | 'importing' | 'success' | 'error'>('idle');
+  const [importError, setImportError] = useState<string | null>(null);
+  const [importStats, setImportStats] = useState<{ added: number; updated: number } | null>(null);
+
+  // Profile editing states
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [displayName, setDisplayName] = useState('');
+  const [username, setUsername] = useState('');
+  const [bio, setBio] = useState('');
+  const [isPublic, setIsPublic] = useState(false);
+  const [usernameError, setUsernameError] = useState<string | null>(null);
+  const [isSavingProfile, setIsSavingProfile] = useState(false);
+  const [profileSaveSuccess, setProfileSaveSuccess] = useState(false);
+
+  // XP and Level display
+  const [selections, setSelections] = useState<UserSelections | null>(null);
+
+  const loadProfile = useCallback(async (userId: string) => {
+    const supabase = createClient();
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', userId)
+      .single();
+
+    if (!error && data) {
+      setProfile(data);
+      setDisplayName(data.full_name || '');
+      setUsername(data.username || '');
+      setBio(data.bio || '');
+      setIsPublic(data.is_public || false);
+    }
+  }, []);
+
   useEffect(() => {
     const supabase = createClient();
 
     supabase.auth.getUser().then(({ data: { user } }) => {
       setUser(user);
+      if (user) {
+        loadProfile(user.id);
+        // Load selections for XP calculation
+        const sel = loadSelections();
+        setSelections(sel);
+      }
       setIsLoading(false);
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
       setUser(session?.user ?? null);
+      if (session?.user) {
+        loadProfile(session.user.id);
+      }
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [loadProfile]);
 
   const handleExportData = () => {
     setExportStatus('exporting');
@@ -45,6 +106,7 @@ export default function SettingsPage() {
       const exportData = {
         exportedAt: new Date().toISOString(),
         email: user?.email,
+        version: '1.0',
         selections,
       };
 
@@ -62,13 +124,175 @@ export default function SettingsPage() {
       console.error('Export failed:', error);
       setExportStatus('idle');
     } finally {
-      // Always clean up blob URL and DOM element to prevent memory leaks
       if (a && document.body.contains(a)) {
         document.body.removeChild(a);
       }
       if (url) {
         URL.revokeObjectURL(url);
       }
+    }
+  };
+
+  const handleImportData = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setImportStatus('importing');
+    setImportError(null);
+    setImportStats(null);
+
+    try {
+      const text = await file.text();
+      const importData = JSON.parse(text);
+
+      // Validate the import data structure
+      if (!importData.selections || typeof importData.selections !== 'object') {
+        throw new Error('Invalid file format: missing selections data');
+      }
+
+      // Load current selections
+      const currentSelections = loadSelections();
+      let added = 0;
+      let updated = 0;
+
+      // Merge imported selections with current selections
+      const mergedSelections = { ...currentSelections };
+
+      for (const [category, selections] of Object.entries(importData.selections)) {
+        if (!Array.isArray(selections)) continue;
+
+        // Type assertion for the selections array
+        const importedSelections = selections as Array<{
+          id: string;
+          status: string;
+          updatedAt?: number;
+          deleted?: boolean;
+        }>;
+
+        const existingMap = new Map(
+          (mergedSelections[category as keyof UserSelections] || []).map(s => [s.id, s])
+        );
+
+        for (const importedSelection of importedSelections) {
+          if (!importedSelection.id || !importedSelection.status) continue;
+
+          const existing = existingMap.get(importedSelection.id);
+
+          if (!existing) {
+            // New selection - add it
+            existingMap.set(importedSelection.id, {
+              id: importedSelection.id,
+              status: importedSelection.status as 'visited' | 'bucketList' | 'unvisited',
+              updatedAt: importedSelection.updatedAt || Date.now(),
+              deleted: importedSelection.deleted || false,
+            });
+            added++;
+          } else {
+            // Existing selection - use newer timestamp if available
+            const importTime = importedSelection.updatedAt || 0;
+            const existingTime = existing.updatedAt || 0;
+
+            if (importTime > existingTime) {
+              existingMap.set(importedSelection.id, {
+                id: importedSelection.id,
+                status: importedSelection.status as 'visited' | 'bucketList' | 'unvisited',
+                updatedAt: importTime,
+                deleted: importedSelection.deleted || false,
+              });
+              updated++;
+            }
+          }
+        }
+
+        mergedSelections[category as keyof UserSelections] = Array.from(existingMap.values());
+      }
+
+      // Save merged selections
+      saveSelections(mergedSelections);
+      setSelections(mergedSelections);
+
+      setImportStats({ added, updated });
+      setImportStatus('success');
+
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+
+      // Auto-reset after 5 seconds
+      setTimeout(() => {
+        setImportStatus('idle');
+        setImportStats(null);
+      }, 5000);
+    } catch (error) {
+      console.error('Import failed:', error);
+      setImportError(error instanceof Error ? error.message : 'Failed to import data');
+      setImportStatus('error');
+
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
+  const validateUsername = (value: string): string | null => {
+    if (value.length === 0) return null; // Empty is ok (means no username set)
+    if (value.length < 3) return 'Username must be at least 3 characters';
+    if (value.length > 20) return 'Username must be 20 characters or less';
+    if (!/^[a-zA-Z0-9_]+$/.test(value)) return 'Only letters, numbers, and underscores allowed';
+    return null;
+  };
+
+  const handleUsernameChange = (value: string) => {
+    setUsername(value);
+    setUsernameError(validateUsername(value));
+  };
+
+  const handleSaveProfile = async () => {
+    if (usernameError) return;
+
+    setIsSavingProfile(true);
+    setProfileSaveSuccess(false);
+
+    try {
+      const supabase = createClient();
+
+      // Check username availability if changed
+      if (username && username !== profile?.username) {
+        const { data: available } = await supabase
+          .rpc('is_username_available', { check_username: username });
+
+        if (!available) {
+          setUsernameError('Username is already taken');
+          setIsSavingProfile(false);
+          return;
+        }
+      }
+
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          full_name: displayName || null,
+          username: username || null,
+          bio: bio || null,
+          is_public: isPublic,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', user!.id);
+
+      if (error) throw error;
+
+      // Reload profile
+      await loadProfile(user!.id);
+      setIsEditingProfile(false);
+      setProfileSaveSuccess(true);
+
+      setTimeout(() => setProfileSaveSuccess(false), 3000);
+    } catch (error) {
+      console.error('Failed to save profile:', error);
+      alert('Failed to save profile. Please try again.');
+    } finally {
+      setIsSavingProfile(false);
     }
   };
 
@@ -86,13 +310,9 @@ export default function SettingsPage() {
         throw new Error('Failed to delete account');
       }
 
-      // Clear local data
       clearAllSelections();
-
-      // Sign out and redirect
       const supabase = createClient();
       await supabase.auth.signOut();
-
       router.push('/?deleted=true');
     } catch (error) {
       console.error('Delete account failed:', error);
@@ -101,6 +321,11 @@ export default function SettingsPage() {
       setIsDeleting(false);
     }
   };
+
+  // Calculate XP and level from selections
+  const totalXp = selections ? calculateTotalXp(selections) : 0;
+  const currentLevel = calculateLevel(totalXp);
+  const levelProgress = xpToNextLevel(totalXp);
 
   if (isLoading) {
     return (
@@ -121,7 +346,7 @@ export default function SettingsPage() {
               </div>
               <div className="flex flex-col">
                 <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent leading-none">
-                  SeeEvery<span className="text-purple-500">.</span>Place<span className="text-[10px] align-super">™</span>
+                  SeeEvery<span className="text-purple-500">.</span>Place<span className="text-[10px] align-super">TM</span>
                 </h1>
               </div>
             </Link>
@@ -153,7 +378,7 @@ export default function SettingsPage() {
             </div>
             <div className="flex flex-col">
               <h1 className="text-xl font-bold text-primary-900 dark:text-white leading-none">
-                SeeEvery<span className="text-accent-500">.</span>Place<span className="text-[10px] align-super">™</span>
+                SeeEvery<span className="text-accent-500">.</span>Place<span className="text-[10px] align-super">TM</span>
               </h1>
               <span className="text-[10px] text-primary-500 dark:text-primary-400 font-medium tracking-wider uppercase hidden sm:block">
                 Free Travel Tracker
@@ -190,22 +415,196 @@ export default function SettingsPage() {
       {/* Content */}
       <main className="max-w-2xl mx-auto px-4 py-8">
         <h2 className="text-3xl font-bold text-primary-900 dark:text-white mb-2">Settings</h2>
-        <p className="text-primary-600 dark:text-primary-300 mb-8">Manage your account and data</p>
+        <p className="text-primary-600 dark:text-primary-300 mb-8">Manage your profile, account, and data</p>
 
-        {/* Account Info */}
+        {/* Profile Card with XP */}
         <section className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-premium border border-black/5 dark:border-white/10 mb-6">
-          <h3 className="text-lg font-semibold text-primary-900 dark:text-white mb-4">Account</h3>
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold text-xl">
-              {user.email?.[0].toUpperCase()}
+          <div className="flex items-start justify-between mb-4">
+            <h3 className="text-lg font-semibold text-primary-900 dark:text-white">Profile</h3>
+            {!isEditingProfile && (
+              <button
+                onClick={() => setIsEditingProfile(true)}
+                className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
+              >
+                Edit
+              </button>
+            )}
+          </div>
+
+          {profileSaveSuccess && (
+            <div className="mb-4 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg text-green-700 dark:text-green-300 text-sm">
+              Profile saved successfully!
             </div>
-            <div>
-              <p className="font-medium text-primary-900 dark:text-white">{user.email}</p>
-              <p className="text-sm text-primary-500 dark:text-primary-400">
+          )}
+
+          <div className="flex items-center gap-4 mb-4">
+            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold text-2xl shadow-lg">
+              {profile?.full_name?.[0]?.toUpperCase() || user.email?.[0].toUpperCase()}
+            </div>
+            <div className="flex-1">
+              {isEditingProfile ? (
+                <input
+                  type="text"
+                  value={displayName}
+                  onChange={(e) => setDisplayName(e.target.value)}
+                  placeholder="Display Name"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white mb-2"
+                />
+              ) : (
+                <p className="font-medium text-primary-900 dark:text-white text-lg">
+                  {profile?.full_name || 'Set your display name'}
+                </p>
+              )}
+              <p className="text-sm text-primary-500 dark:text-primary-400">{user.email}</p>
+              <p className="text-xs text-primary-400 dark:text-primary-500">
                 Member since {new Date(user.created_at).toLocaleDateString()}
               </p>
             </div>
           </div>
+
+          {/* XP and Level Display */}
+          <div className="bg-gradient-to-r from-purple-500/10 to-blue-500/10 dark:from-purple-500/20 dark:to-blue-500/20 rounded-lg p-4 mb-4">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2">
+                <span className="text-2xl">🎖️</span>
+                <span className="font-bold text-primary-900 dark:text-white">Level {currentLevel}</span>
+              </div>
+              <span className="text-sm text-primary-600 dark:text-primary-300">{totalXp.toLocaleString()} XP</span>
+            </div>
+            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+              <div
+                className="bg-gradient-to-r from-purple-500 to-blue-500 h-2 rounded-full transition-all duration-500"
+                style={{ width: `${levelProgress.progress}%` }}
+              />
+            </div>
+            <p className="text-xs text-primary-500 dark:text-primary-400 mt-1">
+              {levelProgress.current.toLocaleString()} / {levelProgress.needed.toLocaleString()} XP to Level {currentLevel + 1}
+            </p>
+            <Link
+              href="/achievements"
+              className="inline-flex items-center gap-1 text-sm text-blue-600 dark:text-blue-400 hover:underline mt-2"
+            >
+              View Achievements
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </Link>
+          </div>
+
+          {isEditingProfile && (
+            <>
+              {/* Username */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-primary-700 dark:text-primary-300 mb-1">
+                  Username
+                </label>
+                <div className="flex items-center gap-2">
+                  <span className="text-primary-500 dark:text-primary-400">seeevery.place/u/</span>
+                  <input
+                    type="text"
+                    value={username}
+                    onChange={(e) => handleUsernameChange(e.target.value.toLowerCase())}
+                    placeholder="username"
+                    className={`flex-1 px-3 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white ${
+                      usernameError ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
+                    }`}
+                  />
+                </div>
+                {usernameError && (
+                  <p className="text-sm text-red-500 mt-1">{usernameError}</p>
+                )}
+                <p className="text-xs text-primary-500 dark:text-primary-400 mt-1">
+                  This will be your public profile URL (if enabled)
+                </p>
+              </div>
+
+              {/* Bio */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-primary-700 dark:text-primary-300 mb-1">
+                  Bio
+                </label>
+                <textarea
+                  value={bio}
+                  onChange={(e) => setBio(e.target.value)}
+                  placeholder="Tell us about your travels..."
+                  maxLength={160}
+                  rows={2}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                />
+                <p className="text-xs text-primary-500 dark:text-primary-400 mt-1">
+                  {bio.length}/160 characters
+                </p>
+              </div>
+
+              {/* Public Profile Toggle */}
+              <div className="mb-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                <label className="flex items-center justify-between cursor-pointer">
+                  <div>
+                    <span className="font-medium text-primary-900 dark:text-white">Public Profile</span>
+                    <p className="text-sm text-primary-600 dark:text-primary-400">
+                      Allow others to view your travel map and achievements
+                    </p>
+                  </div>
+                  <div className="relative">
+                    <input
+                      type="checkbox"
+                      checked={isPublic}
+                      onChange={(e) => setIsPublic(e.target.checked)}
+                      className="sr-only"
+                    />
+                    <div className={`w-11 h-6 rounded-full transition-colors ${isPublic ? 'bg-blue-600' : 'bg-gray-300 dark:bg-gray-600'}`}>
+                      <div className={`w-5 h-5 bg-white rounded-full shadow-md transform transition-transform absolute top-0.5 ${isPublic ? 'translate-x-5.5 right-0.5' : 'left-0.5'}`} />
+                    </div>
+                  </div>
+                </label>
+                {isPublic && username && (
+                  <p className="text-sm text-blue-600 dark:text-blue-400 mt-2">
+                    Your profile will be visible at: seeevery.place/u/{username}
+                  </p>
+                )}
+                {isPublic && !username && (
+                  <p className="text-sm text-amber-600 dark:text-amber-400 mt-2">
+                    Set a username above to enable your public profile URL
+                  </p>
+                )}
+              </div>
+
+              {/* Save/Cancel buttons */}
+              <div className="flex gap-3">
+                <button
+                  onClick={handleSaveProfile}
+                  disabled={!!usernameError || isSavingProfile}
+                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isSavingProfile ? 'Saving...' : 'Save Profile'}
+                </button>
+                <button
+                  onClick={() => {
+                    setIsEditingProfile(false);
+                    setDisplayName(profile?.full_name || '');
+                    setUsername(profile?.username || '');
+                    setBio(profile?.bio || '');
+                    setIsPublic(profile?.is_public || false);
+                    setUsernameError(null);
+                  }}
+                  className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-lg font-medium hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
+            </>
+          )}
+
+          {!isEditingProfile && profile?.is_public && profile?.username && (
+            <div className="mt-4 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+              <p className="text-sm text-green-700 dark:text-green-300">
+                Your public profile is live at:{' '}
+                <Link href={`/u/${profile.username}`} className="font-medium hover:underline">
+                  seeevery.place/u/{profile.username}
+                </Link>
+              </p>
+            </div>
+          )}
         </section>
 
         {/* Data & Privacy */}
@@ -213,7 +612,7 @@ export default function SettingsPage() {
           <h3 className="text-lg font-semibold text-primary-900 dark:text-white mb-4">Data & Privacy</h3>
 
           {/* Export Data */}
-          <div className="mb-6">
+          <div className="mb-6 pb-6 border-b border-gray-200 dark:border-gray-700">
             <h4 className="font-medium text-primary-900 dark:text-white mb-2">Export Your Data</h4>
             <p className="text-sm text-primary-600 dark:text-primary-300 mb-3">
               Download all your travel selections as a JSON file. This includes all countries, states, parks, and other locations you&apos;ve marked.
@@ -249,6 +648,56 @@ export default function SettingsPage() {
             </button>
           </div>
 
+          {/* Import Data */}
+          <div className="mb-6 pb-6 border-b border-gray-200 dark:border-gray-700">
+            <h4 className="font-medium text-primary-900 dark:text-white mb-2">Import Data</h4>
+            <p className="text-sm text-primary-600 dark:text-primary-300 mb-3">
+              Restore your data from a previously exported JSON file. New entries will be added, and existing entries will be updated if the import has newer data.
+            </p>
+
+            {importStatus === 'success' && importStats && (
+              <div className="mb-3 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg text-green-700 dark:text-green-300 text-sm">
+                Import successful! Added {importStats.added} new entries, updated {importStats.updated} existing entries.
+              </div>
+            )}
+
+            {importStatus === 'error' && importError && (
+              <div className="mb-3 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-700 dark:text-red-300 text-sm">
+                {importError}
+              </div>
+            )}
+
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".json"
+              onChange={handleImportData}
+              className="hidden"
+            />
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={importStatus === 'importing'}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-600 rounded-lg font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {importStatus === 'importing' ? (
+                <>
+                  <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                  </svg>
+                  Importing...
+                </>
+              ) : (
+                <>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m4-8l-4-4m0 0L16 8m4-4v12" />
+                  </svg>
+                  Import Data
+                </>
+              )}
+            </button>
+          </div>
+
           {/* Privacy Policy Link */}
           <div>
             <h4 className="font-medium text-primary-900 dark:text-white mb-2">Privacy Policy</h4>
@@ -259,7 +708,7 @@ export default function SettingsPage() {
               href="/privacy"
               className="text-primary-700 dark:text-primary-400 hover:underline text-sm font-medium"
             >
-              Read Privacy Policy →
+              Read Privacy Policy
             </Link>
           </div>
         </section>
@@ -272,7 +721,7 @@ export default function SettingsPage() {
             <h4 className="font-medium text-red-900 dark:text-red-300 mb-2">Delete Account</h4>
             <p className="text-sm text-red-700 dark:text-red-400 mb-4">
               Permanently delete your account and all associated data. This action cannot be undone.
-              Your local data will also be cleared.
+              Your local data will also be cleared. Consider exporting your data first.
             </p>
 
             {!showDeleteConfirm ? (
@@ -326,11 +775,13 @@ export default function SettingsPage() {
         <div className="max-w-4xl mx-auto px-4 py-6 text-center text-sm text-primary-500 dark:text-primary-400">
           <div className="flex justify-center gap-4 mb-2">
             <Link href="/about" className="hover:text-primary-700 dark:hover:text-primary-200 transition-colors">About</Link>
-            <span>•</span>
+            <span>|</span>
+            <Link href="/achievements" className="hover:text-primary-700 dark:hover:text-primary-200 transition-colors">Achievements</Link>
+            <span>|</span>
             <Link href="/suggest" className="hover:text-primary-700 dark:hover:text-primary-200 transition-colors">Suggest</Link>
-            <span>•</span>
+            <span>|</span>
             <Link href="/privacy" className="hover:text-primary-700 dark:hover:text-primary-200 transition-colors">Privacy</Link>
-            <span>•</span>
+            <span>|</span>
             <Link href="/terms" className="hover:text-primary-700 dark:hover:text-primary-200 transition-colors">Terms</Link>
           </div>
           <p>See Every Place - Free Travel Tracker</p>
