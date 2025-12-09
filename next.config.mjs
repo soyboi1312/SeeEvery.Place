@@ -14,17 +14,18 @@ const withPWA = withPWAInit({
     // Force new service worker to activate immediately
     skipWaiting: true,
     clientsClaim: true,
-    // Use NetworkFirst for Next.js chunks to ensure fresh content
     runtimeCaching: [
       {
         // Match Next.js static chunks (JS files)
+        // These files have content hashes in filenames, so they're immutable
+        // CacheFirst is correct - new deployments generate new filenames
         urlPattern: /\/_next\/static\/chunks\/.*/i,
-        handler: "NetworkFirst",
+        handler: "CacheFirst",
         options: {
           cacheName: "next-chunks",
           expiration: {
-            maxEntries: 100,
-            maxAgeSeconds: 24 * 60 * 60, // 24 hours
+            maxEntries: 200,
+            maxAgeSeconds: 365 * 24 * 60 * 60, // 1 year (immutable)
           },
           cacheableResponse: {
             statuses: [0, 200],
