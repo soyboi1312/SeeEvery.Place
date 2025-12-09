@@ -283,11 +283,11 @@ export default function AboutPage() {
           <div className="flex justify-center gap-4 mb-2">
             <Link href="/about" className="hover:text-primary-700 dark:hover:text-primary-200 transition-colors">About</Link>
             <span>•</span>
+            <Link href="/suggest" className="hover:text-primary-700 dark:hover:text-primary-200 transition-colors">Suggest</Link>
+            <span>•</span>
             <Link href="/privacy" className="hover:text-primary-700 dark:hover:text-primary-200 transition-colors">Privacy</Link>
             <span>•</span>
             <Link href="/terms" className="hover:text-primary-700 dark:hover:text-primary-200 transition-colors">Terms</Link>
-            <span>•</span>
-            <Link href="/suggest" className="hover:text-primary-700 dark:hover:text-primary-200 transition-colors">Suggest</Link>
           </div>
           <p>See Every Place - Free Travel Tracker</p>
         </div>
