@@ -121,7 +121,8 @@ const USMarkerMap = memo(function USMarkerMap({
       >
         <ZoomableGroup
           zoom={position.zoom}
-          center={position.coordinates as [number, number]}
+          // Library uses branded Longitude/Latitude types that require unsafe cast
+          center={position.coordinates as unknown as [number, number]}
           onMoveEnd={handleMoveEnd}
         >
           <StaticUSBackground />

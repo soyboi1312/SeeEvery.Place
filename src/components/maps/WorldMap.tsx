@@ -54,7 +54,8 @@ const WorldMap = memo(function WorldMap({ selections, onToggle, tooltip }: BaseM
       >
         <ZoomableGroup
           zoom={position.zoom}
-          center={position.coordinates as [number, number]}
+          // Library uses branded Longitude/Latitude types that require unsafe cast
+          center={position.coordinates as unknown as [number, number]}
           onMoveEnd={handleMoveEnd}
         >
           <Sphere stroke="#E4E5E6" strokeWidth={0.5} id="sphere" fill="none" />

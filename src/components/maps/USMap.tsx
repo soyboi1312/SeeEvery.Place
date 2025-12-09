@@ -48,7 +48,8 @@ const USMap = memo(function USMap({ selections, onToggle, tooltip }: BaseMapProp
       >
         <ZoomableGroup
           zoom={position.zoom}
-          center={position.coordinates as [number, number]}
+          // Library uses branded Longitude/Latitude types that require unsafe cast
+          center={position.coordinates as unknown as [number, number]}
           onMoveEnd={handleMoveEnd}
         >
           <Geographies geography={GEO_URL_USA}>
