@@ -15,6 +15,7 @@ import { soccerStadiums } from '@/data/stadiums/soccer';
 const categories: Category[] = [
   'countries',
   'states',
+  'territories',
   'nationalParks',
   'nationalMonuments',
   'stateParks',
@@ -39,6 +40,7 @@ const categories: Category[] = [
 const categoryKeywords: Record<Category, string[]> = {
   countries: ['country tracker', 'countries visited map', 'travel map', 'world travel tracker'],
   states: ['US states tracker', 'states visited map', 'road trip tracker', 'USA travel map'],
+  territories: ['US territories tracker', 'Puerto Rico visited', 'Guam travel', 'American territories', 'US islands'],
   nationalParks: ['national parks tracker', 'NPS checklist', 'park passport', 'national park visited'],
   nationalMonuments: ['national monuments tracker', 'US monuments checklist', 'NPS monuments', 'monument bucket list'],
   stateParks: ['state parks tracker', 'state park checklist', 'hiking tracker'],
@@ -88,6 +90,7 @@ function generateJsonLd(category: Category, label: string, description: string) 
 const categoryDescriptions: Record<Category, string> = {
   countries: 'Track all 197 countries around the world. Mark countries as visited or add them to your bucket list.',
   states: 'Track all 50 US states plus Washington DC. Perfect for road trippers and domestic travelers.',
+  territories: 'Track US territories and islands. From Puerto Rico to Guam, explore America beyond the 50 states.',
   nationalParks: 'Track National Parks. From Yellowstone to Yosemite, never lose track of your park adventures.',
   nationalMonuments: 'Track US National Monuments. From Devils Tower to the Statue of Liberty, explore 129 protected landmarks.',
   stateParks: 'Track State Parks. Discover hidden gems and scenic wonders across all 50 states.',
@@ -134,6 +137,15 @@ const categoryExamples: Record<Category, PlaceExample[]> = {
     { name: 'Maine', fact: 'Is the closest US state to Africa', reason: 'Feast on fresh lobster and watch sunrise first in the continental US' },
     { name: 'Louisiana', fact: 'Has parishes instead of counties, the only US state to do so', reason: 'Experience Mardi Gras and authentic Cajun cuisine in New Orleans' },
     { name: 'Wyoming', fact: 'Has the lowest population of any US state with under 600,000 people', reason: 'Visit Yellowstone, the world\'s first national park' },
+  ],
+  territories: [
+    { name: 'Puerto Rico', fact: 'Has bioluminescent bays that glow at night due to microscopic organisms', reason: 'Explore Old San Juan, rainforests, and glowing waters' },
+    { name: 'U.S. Virgin Islands', fact: 'Drive on the left side of the road despite being a US territory', reason: 'Relax on pristine Caribbean beaches and snorkel coral reefs' },
+    { name: 'Guam', fact: 'Where America\'s day begins - first US territory to see the sunrise', reason: 'Dive WWII wrecks and experience Chamorro culture' },
+    { name: 'American Samoa', fact: 'Only US territory south of the equator', reason: 'Visit one of the least-visited national parks in the system' },
+    { name: 'Northern Mariana Islands', fact: 'Home to the deepest point on Earth, the Mariana Trench', reason: 'Experience untouched Pacific island beauty and WWII history' },
+    { name: 'Midway Atoll', fact: 'Site of the pivotal WWII Battle of Midway in 1942', reason: 'See millions of albatrosses and endangered Hawaiian monk seals' },
+    { name: 'Wake Island', fact: 'A coral atoll where it\'s always a day ahead of the US mainland', reason: 'Step foot on one of the most remote US territories' },
   ],
   nationalParks: [
     { name: 'Yellowstone', fact: 'Sits atop one of the world\'s largest active volcanic systems', reason: 'See Old Faithful and half the world\'s geothermal features' },
