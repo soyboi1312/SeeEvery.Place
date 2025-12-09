@@ -38,6 +38,7 @@ import {
   toggleSelection,
   setSelectionStatus,
   getStats,
+  applyCityRelatedSelections,
 } from '@/lib/storage';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { useDarkMode } from '@/lib/hooks/useDarkMode';
@@ -109,11 +110,21 @@ export default function Home() {
   }, []);
 
   const handleToggle = useCallback((id: string, currentStatus: Status) => {
-    setSelections(prev => toggleSelection(prev, activeCategory, id, currentStatus));
+    setSelections(prev => {
+      const updated = toggleSelection(prev, activeCategory, id, currentStatus);
+      // Apply cross-category relationships for city categories
+      // When a city becomes visited, also mark the corresponding state/country
+      const nextStatus = currentStatus === 'unvisited' ? 'visited' : currentStatus === 'visited' ? 'bucketList' : null;
+      return applyCityRelatedSelections(updated, activeCategory, id, nextStatus);
+    });
   }, [activeCategory]);
 
   const handleSetStatus = useCallback((id: string, status: Status | null) => {
-    setSelections(prev => setSelectionStatus(prev, activeCategory, id, status));
+    setSelections(prev => {
+      const updated = setSelectionStatus(prev, activeCategory, id, status);
+      // Apply cross-category relationships for city categories
+      return applyCityRelatedSelections(updated, activeCategory, id, status);
+    });
   }, [activeCategory]);
 
   const getStatus = useCallback((id: string): Status => {

@@ -18,6 +18,8 @@ import { themeParks, ThemePark } from '@/data/themeParks';
 import { surfingReserves, SurfingReserve } from '@/data/surfingReserves';
 import { weirdAmericana, WeirdAmericana } from '@/data/weirdAmericana';
 import { usTerritories, USTerritory } from '@/data/usTerritories';
+import { usCities, USCity } from '@/data/usCities';
+import { worldCities, WorldCity } from '@/data/worldCities';
 
 // =====================
 // O(1) Lookup Maps - Created once at module load for fast coordinate lookups
@@ -40,6 +42,8 @@ const skiResortsMap = createLookupMap(skiResorts);
 const themeParksMap = createLookupMap(themeParks);
 const surfingReservesMap = createLookupMap(surfingReserves);
 const weirdAmericanaMap = createLookupMap(weirdAmericana);
+const usCitiesMap = createLookupMap(usCities);
+const worldCitiesMap = createLookupMap(worldCities);
 
 // Territories use 'code' as ID, so we need a custom map
 type TerritoryCoordItem = { id: string; lat: number; lng: number; name: string };
@@ -114,6 +118,8 @@ function getLookupMapForCategory(category: Category): Map<string, any> | null {
     case 'surfingReserves': return surfingReservesMap;
     case 'weirdAmericana': return weirdAmericanaMap;
     case 'territories': return territoriesMap;
+    case 'usCities': return usCitiesMap;
+    case 'worldCities': return worldCitiesMap;
     default: return null;
   }
 }

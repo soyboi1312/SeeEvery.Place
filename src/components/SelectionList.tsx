@@ -41,6 +41,16 @@ const emptyStateContent: Record<Category, { icon: string; title: string; subtitl
     title: 'Explore US Territories',
     subtitle: 'From Puerto Rico to Guam - discover America beyond the 50 states!',
   },
+  usCities: {
+    icon: '🏙️',
+    title: 'Explore American Cities',
+    subtitle: 'From New York to Los Angeles - track the major cities you\'ve visited!',
+  },
+  worldCities: {
+    icon: '🌆',
+    title: 'Discover World Cities',
+    subtitle: 'From Tokyo to Paris - build your global city bucket list!',
+  },
   nationalParks: {
     icon: '🏞️',
     title: 'Explore Nature\'s Wonders',
