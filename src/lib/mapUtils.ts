@@ -17,6 +17,7 @@ import { skiResorts, SkiResort } from '@/data/skiResorts';
 import { themeParks, ThemePark } from '@/data/themeParks';
 import { surfingReserves, SurfingReserve } from '@/data/surfingReserves';
 import { weirdAmericana, WeirdAmericana } from '@/data/weirdAmericana';
+import { usTerritories, USTerritory } from '@/data/usTerritories';
 
 // =====================
 // O(1) Lookup Maps - Created once at module load for fast coordinate lookups
@@ -39,6 +40,12 @@ const skiResortsMap = createLookupMap(skiResorts);
 const themeParksMap = createLookupMap(themeParks);
 const surfingReservesMap = createLookupMap(surfingReserves);
 const weirdAmericanaMap = createLookupMap(weirdAmericana);
+
+// Territories use 'code' as ID, so we need a custom map
+type TerritoryCoordItem = { id: string; lat: number; lng: number; name: string };
+const territoriesMap = new Map<string, TerritoryCoordItem>(
+  usTerritories.map(t => [t.code, { id: t.code, lat: t.lat, lng: t.lng, name: t.name }])
+);
 
 // Lazy-initialized maps for function-generated data
 let fiveKPeaksMap: Map<string, Mountain> | null = null;
@@ -106,6 +113,7 @@ function getLookupMapForCategory(category: Category): Map<string, any> | null {
     case 'themeParks': return themeParksMap;
     case 'surfingReserves': return surfingReservesMap;
     case 'weirdAmericana': return weirdAmericanaMap;
+    case 'territories': return territoriesMap;
     default: return null;
   }
 }
