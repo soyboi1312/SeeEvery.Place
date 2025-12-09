@@ -95,8 +95,8 @@ export default function AboutPage() {
                 <strong className="text-primary-900 dark:text-white">So we built one.</strong> And now we&apos;re sharing it with you.
               </p>
               <p className="text-sm text-primary-500 dark:text-primary-400 pt-2 border-t border-black/5 dark:border-white/10">
-                See Every Place is free, works offline, and your data stays on your device.
-                No sign-up required. No tracking. Just you and your adventures.
+                See Every Place is free and works offline. Your data stays private by default.
+                Sign up to unlock achievements, earn XP, and create a shareable public profile.
               </p>
             </div>
           </section>
@@ -118,6 +118,22 @@ export default function AboutPage() {
                 <p className="text-primary-600 dark:text-primary-300 text-sm">
                   Go beyond countries - track parks, mountains, museums,
                   stadiums, airports, ski resorts, theme parks, and surf spots.
+                </p>
+              </div>
+              <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-premium border border-black/5 dark:border-white/10">
+                <div className="text-3xl mb-3">🏆</div>
+                <h3 className="font-bold text-primary-900 dark:text-white mb-2">Achievements & XP</h3>
+                <p className="text-primary-600 dark:text-primary-300 text-sm">
+                  Unlock achievements as you explore. Earn XP, level up, and collect badges from bronze
+                  to legendary tier. Discover secret achievements along the way.
+                </p>
+              </div>
+              <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-premium border border-black/5 dark:border-white/10">
+                <div className="text-3xl mb-3">👤</div>
+                <h3 className="font-bold text-primary-900 dark:text-white mb-2">Public Profiles</h3>
+                <p className="text-primary-600 dark:text-primary-300 text-sm">
+                  Create a unique shareable profile at seeevery.place/u/yourname. Show off your travels,
+                  achievements, and stats. Privacy controls let you choose what to share.
                 </p>
               </div>
               <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-premium border border-black/5 dark:border-white/10">
@@ -228,9 +244,9 @@ export default function AboutPage() {
           <section className="mb-12">
             <h2 className="text-2xl font-bold text-primary-900 dark:text-white mb-4">Privacy</h2>
             <p className="text-primary-600 dark:text-primary-300">
-              Your data belongs to you. It lives on your device. I don&apos;t track your travels, and I never sell your data.
-              Sync is optional. If you choose to sign in to access your data across devices, it&apos;s encrypted end-to-end.
-              Read the full <Link href="/privacy" className="text-primary-700 dark:text-primary-400 hover:underline">Privacy Policy</Link>.
+              Your data belongs to you. By default, it lives on your device and is private. We don&apos;t track your travels, and we never sell your data.
+              If you choose to create a public profile, only the information you explicitly choose to share will be visible.
+              Sync is optional and encrypted. Read the full <Link href="/privacy" className="text-primary-700 dark:text-primary-400 hover:underline">Privacy Policy</Link>.
             </p>
           </section>
 
