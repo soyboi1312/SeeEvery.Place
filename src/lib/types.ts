@@ -7,6 +7,8 @@ export const ALL_CATEGORIES = [
   "countries",
   "states",
   "territories",
+  "usCities",
+  "worldCities",
   "nationalParks",
   "nationalMonuments",
   "stateParks",
@@ -46,7 +48,7 @@ export const categoryGroups: Record<CategoryGroup, GroupConfig> = {
   destinations: {
     label: 'Destinations',
     icon: '🌍',
-    categories: ['countries', 'states', 'territories', 'airports'],
+    categories: ['countries', 'states', 'territories', 'usCities', 'worldCities', 'airports'],
   },
   nature: {
     label: 'Nature',
@@ -96,6 +98,8 @@ export interface UserSelections {
   countries: Selection[];
   states: Selection[];
   territories: Selection[];
+  usCities: Selection[];
+  worldCities: Selection[];
   nationalParks: Selection[];
   nationalMonuments: Selection[];
   stateParks: Selection[];
@@ -139,6 +143,8 @@ export const categoryLabels: Record<Category, string> = {
   countries: "Countries",
   states: "US States",
   territories: "US Territories",
+  usCities: "US Cities",
+  worldCities: "World Cities",
   nationalParks: "National Parks",
   nationalMonuments: "National Monuments",
   stateParks: "State Parks",
@@ -163,6 +169,8 @@ export const categoryIcons: Record<Category, ReactNode> = {
   countries: "🌍",
   states: "🇺🇸",
   territories: "🏝️",
+  usCities: "🏙️",
+  worldCities: "🌆",
   nationalParks: "🏞️",
   nationalMonuments: "🗽",
   stateParks: "🌲",
@@ -187,6 +195,8 @@ export const emptySelections: UserSelections = {
   countries: [],
   states: [],
   territories: [],
+  usCities: [],
+  worldCities: [],
   nationalParks: [],
   nationalMonuments: [],
   stateParks: [],

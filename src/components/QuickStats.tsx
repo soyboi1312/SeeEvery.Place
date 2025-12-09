@@ -20,6 +20,8 @@ import { skiResorts } from '@/data/skiResorts';
 import { themeParks } from '@/data/themeParks';
 import { surfingReserves } from '@/data/surfingReserves';
 import { weirdAmericana } from '@/data/weirdAmericana';
+import { usCities } from '@/data/usCities';
+import { worldCities } from '@/data/worldCities';
 
 interface QuickStatsProps {
   selections: UserSelections;
@@ -36,6 +38,8 @@ const categoryTotals: Record<Category, number> = {
   countries: countries.length,
   states: usStates.length,
   territories: usTerritories.length,
+  usCities: usCities.length,
+  worldCities: worldCities.length,
   nationalParks: nationalParks.length,
   nationalMonuments: nationalMonuments.length,
   stateParks: stateParks.length,

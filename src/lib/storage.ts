@@ -1,6 +1,13 @@
 import { UserSelections, emptySelections, Selection, Status, Category } from './types';
 import { mountains } from '@/data/mountains';
 import { stadiums } from '@/data/stadiums';
+import { usCities } from '@/data/usCities';
+import { worldCities } from '@/data/worldCities';
+import { countries } from '@/data/countries';
+
+// Create lookup maps for city -> state/country relationships
+const usCityToState = new Map(usCities.map(c => [c.id, c.stateCode]));
+const worldCityToCountry = new Map(worldCities.map(c => [c.id, c.countryCode]));
 
 const STORAGE_KEY = 'travelmap_selections';
 
@@ -312,4 +319,71 @@ export function getStats(selections: UserSelections, category: Category, total: 
 export function clearAllSelections(): void {
   if (typeof window === 'undefined') return;
   localStorage.removeItem(STORAGE_KEY);
+}
+
+/**
+ * Apply cross-category relationships when a city is marked as visited.
+ * - US cities: also marks the corresponding US state as visited
+ * - World cities: also marks the corresponding country as visited
+ *
+ * Only applies when status is 'visited' (not for bucketList or unvisited).
+ * Does not override existing selections - only adds if not already set.
+ */
+export function applyCityRelatedSelections(
+  selections: UserSelections,
+  category: Category,
+  cityId: string,
+  status: Status | null
+): UserSelections {
+  // Only apply cross-checks for visited status
+  if (status !== 'visited') return selections;
+
+  let result = { ...selections };
+  const now = Date.now();
+
+  if (category === 'usCities') {
+    // Get the state code for this US city
+    const stateCode = usCityToState.get(cityId);
+    if (stateCode) {
+      const stateSelections = [...(result.states || [])];
+      const existing = stateSelections.find(s => s.id === stateCode);
+
+      // Only add if not already visited (don't override bucketList or existing visited)
+      if (!existing || existing.deleted) {
+        if (existing) {
+          // Update existing deleted selection
+          const idx = stateSelections.findIndex(s => s.id === stateCode);
+          stateSelections[idx] = { id: stateCode, status: 'visited', updatedAt: now, deleted: false };
+        } else {
+          stateSelections.push({ id: stateCode, status: 'visited', updatedAt: now, deleted: false });
+        }
+        result = { ...result, states: stateSelections };
+      }
+    }
+  } else if (category === 'worldCities') {
+    // Get the country code for this world city
+    const countryCode = worldCityToCountry.get(cityId);
+    if (countryCode) {
+      // Verify this country exists in our countries list
+      const countryExists = countries.some(c => c.code === countryCode);
+      if (countryExists) {
+        const countrySelections = [...(result.countries || [])];
+        const existing = countrySelections.find(s => s.id === countryCode);
+
+        // Only add if not already visited (don't override bucketList or existing visited)
+        if (!existing || existing.deleted) {
+          if (existing) {
+            // Update existing deleted selection
+            const idx = countrySelections.findIndex(s => s.id === countryCode);
+            countrySelections[idx] = { id: countryCode, status: 'visited', updatedAt: now, deleted: false };
+          } else {
+            countrySelections.push({ id: countryCode, status: 'visited', updatedAt: now, deleted: false });
+          }
+          result = { ...result, countries: countrySelections };
+        }
+      }
+    }
+  }
+
+  return result;
 }

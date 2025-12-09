@@ -15,12 +15,16 @@ import type { SkiResort } from '@/data/skiResorts';
 import type { ThemePark } from '@/data/themeParks';
 import type { SurfingReserve } from '@/data/surfingReserves';
 import type { WeirdAmericana } from '@/data/weirdAmericana';
+import type { USCity } from '@/data/usCities';
+import type { WorldCity } from '@/data/worldCities';
 
 // Union type for all category data items
 type CategoryDataItem =
   | Country
   | USState
   | USTerritory
+  | USCity
+  | WorldCity
   | NationalPark
   | NationalMonument
   | StatePark
@@ -78,6 +82,8 @@ const fallbackTotals: Record<Category, number> = {
   countries: 197,
   states: 51,
   territories: 14,
+  usCities: 75,
+  worldCities: 100,
   nationalParks: 63,
   nationalMonuments: 138,
   stateParks: 305,
@@ -122,6 +128,8 @@ export const categoryTitles: Record<Category, string> = {
   countries: 'Countries of the World',
   states: 'US States',
   territories: 'US Territories & Islands',
+  usCities: 'Major US Cities',
+  worldCities: 'Major World Cities',
   nationalParks: 'National Parks',
   nationalMonuments: 'National Monuments',
   stateParks: 'State Parks',
@@ -168,6 +176,16 @@ const transforms: Record<Category, TransformFn> = {
     name: t.name,
     group: t.region,
     code: t.code,
+  }),
+  usCities: (c) => ({
+    id: c.id,
+    name: `${c.name}, ${c.stateCode}`,
+    group: c.region,
+  }),
+  worldCities: (c) => ({
+    id: c.id,
+    name: `${c.name}, ${c.country}`,
+    group: c.continent,
   }),
   nationalParks: (p) => ({
     id: p.id,
@@ -280,6 +298,12 @@ async function loadCategoryData(category: Category): Promise<CategoryDataItem[]>
       break;
     case 'territories':
       data = (await import('@/data/usTerritories')).usTerritories;
+      break;
+    case 'usCities':
+      data = (await import('@/data/usCities')).usCities;
+      break;
+    case 'worldCities':
+      data = (await import('@/data/worldCities')).worldCities;
       break;
     case 'nationalParks':
       data = (await import('@/data/nationalParks')).nationalParks;

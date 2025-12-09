@@ -23,6 +23,8 @@ import { skiResorts } from '@/data/skiResorts';
 import { themeParks } from '@/data/themeParks';
 import { surfingReserves } from '@/data/surfingReserves';
 import { weirdAmericana } from '@/data/weirdAmericana';
+import { usCities } from '@/data/usCities';
+import { worldCities } from '@/data/worldCities';
 import { useShareImage } from '@/lib/hooks/useShareImage';
 import { ShareableMapDesign, gradients, usesRegionMap, detectMilestones, type Milestone } from './share';
 import type { MarkerSize } from './MapMarkers';
@@ -35,6 +37,8 @@ function getShareSuggestions(category: Category, stats: { visited: number; perce
   const categoryName: Partial<Record<Category, string>> = {
     countries: 'countries',
     states: 'US states & territories',
+    usCities: 'US cities',
+    worldCities: 'world cities',
     nationalParks: 'national parks',
     nationalMonuments: 'national monuments',
     stateParks: 'state parks',
@@ -176,6 +180,8 @@ const categoryTotals: Record<Category, number> = {
   countries: countries.length,
   states: usStates.length,
   territories: usTerritories.length,
+  usCities: usCities.length,
+  worldCities: worldCities.length,
   nationalParks: nationalParks.length,
   nationalMonuments: nationalMonuments.length,
   stateParks: stateParks.length,
