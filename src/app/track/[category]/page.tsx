@@ -254,6 +254,30 @@ function generateFaqJsonLd(faqs: FAQ[]) {
   };
 }
 
+// Generate Breadcrumb JSON-LD schema for SEO
+function generateBreadcrumbJsonLd(category: Category, label: string) {
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://seeevery.place';
+
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: 'Home',
+        item: baseUrl,
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: label,
+        item: `${baseUrl}/track/${category}`,
+      },
+    ],
+  };
+}
+
 const categoryDescriptions: Record<Category, string> = {
   countries: 'Track all 197 countries around the world. Mark countries as visited or add them to your bucket list.',
   states: 'Track all 50 US states plus Washington DC. Perfect for road trippers and domestic travelers.',
@@ -710,6 +734,7 @@ export default async function CategoryLandingPage({ params }: Props) {
   const jsonLd = generateJsonLd(category as Category, label, description);
   const faqs = categoryFAQs[category as Category] || [];
   const faqJsonLd = faqs.length > 0 ? generateFaqJsonLd(faqs) : null;
+  const breadcrumbJsonLd = generateBreadcrumbJsonLd(category as Category, label);
 
   // Get category group and theme
   const group = getGroupForCategory(category as Category);
@@ -739,6 +764,12 @@ export default async function CategoryLandingPage({ params }: Props) {
           dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
         />
       )}
+      {/* Breadcrumb JSON-LD Schema for SEO */}
+      <Script
+        id={`breadcrumb-json-ld-${category}`}
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
     <div className={`min-h-screen bg-gradient-to-b ${gradientClass}`}>
       <header className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-black/5 dark:border-white/10 sticky top-0 z-40">
         <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
@@ -765,6 +796,17 @@ export default async function CategoryLandingPage({ params }: Props) {
       </header>
 
       <main className="max-w-4xl mx-auto px-4 py-12">
+        {/* Visual Breadcrumb Navigation */}
+        <nav className="mb-6 text-sm" aria-label="Breadcrumb">
+          <ol className="flex items-center gap-2 text-primary-500 dark:text-primary-400">
+            <li>
+              <Link href="/" className="hover:text-primary-700 dark:hover:text-primary-200 transition-colors">Home</Link>
+            </li>
+            <li className="text-primary-400 dark:text-primary-500">/</li>
+            <li className="text-primary-900 dark:text-white font-medium">{label}</li>
+          </ol>
+        </nav>
+
         <div className="text-center mb-12">
           <span className="text-6xl mb-4 block">{icon}</span>
           <h1 className="text-4xl font-bold text-primary-900 dark:text-white mb-4">
