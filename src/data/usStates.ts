@@ -2,7 +2,6 @@ export interface USState {
   code: string;
   name: string;
   region: string;
-  coordinates?: [number, number]; // [lng, lat] - only needed for territories that can't be rendered as shapes
 }
 
 export const usStates: USState[] = [
@@ -66,19 +65,9 @@ export const usStates: USState[] = [
   { code: "UT", name: "Utah", region: "West" },
   { code: "WA", name: "Washington", region: "West" },
   { code: "WY", name: "Wyoming", region: "West" },
-
-  // US Territories (rendered as markers since they're not in the Albers USA projection)
-  { code: "PR", name: "Puerto Rico", region: "Territories", coordinates: [-66.5901, 18.2208] },
-  { code: "VI", name: "U.S. Virgin Islands", region: "Territories", coordinates: [-64.8963, 18.3358] },
-  { code: "GU", name: "Guam", region: "Territories", coordinates: [144.7937, 13.4443] },
-  { code: "AS", name: "American Samoa", region: "Territories", coordinates: [-170.1322, -14.2710] },
-  { code: "MP", name: "Northern Mariana Islands", region: "Territories", coordinates: [145.6739, 15.0979] },
 ];
 
-export const regions = ["Northeast", "Southeast", "Midwest", "Southwest", "West", "Territories"];
-
-// Helper to get territories (items with coordinates that need to be rendered as markers)
-export const getTerritories = () => usStates.filter(s => s.coordinates !== undefined);
+export const regions = ["Northeast", "Southeast", "Midwest", "Southwest", "West"];
 
 export const getStatesByRegion = (region: string) =>
   usStates.filter(s => s.region === region);

@@ -12,10 +12,10 @@ import { GEO_URL_USA, fipsToAbbr } from '@/lib/mapUtils';
 import { BaseMapProps } from './types';
 import { useMapZoom } from './useMapZoom';
 import ZoomControls from './ZoomControls';
-import { getTerritories } from '@/data/usStates';
+import { usTerritories } from '@/data/usTerritories';
 
-// Territory data for the inset
-const territories = getTerritories();
+// Territory data for the inset - only the main 5 inhabited territories
+const territories = usTerritories.filter(t => ['PR', 'VI', 'GU', 'AS', 'MP'].includes(t.code));
 
 const USMap = memo(function USMap({ selections, onToggle, tooltip }: BaseMapProps) {
   const {
