@@ -40,7 +40,8 @@ const MemoizedMarker = memo(function MemoizedMarker({
 
   return (
     <Marker
-      coordinates={coordinates as [number, number]}
+      // Library uses branded Longitude/Latitude types that require unsafe cast
+      coordinates={coordinates as unknown as [number, number]}
       onClick={() => onToggle?.(id, status)}
       onMouseEnter={(e) => onMouseEnter(name, e)}
       onMouseLeave={onMouseLeave}
