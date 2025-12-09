@@ -6,6 +6,7 @@ import { ReactNode } from "react";
 export const ALL_CATEGORIES = [
   "countries",
   "states",
+  "territories",
   "nationalParks",
   "nationalMonuments",
   "stateParks",
@@ -45,7 +46,7 @@ export const categoryGroups: Record<CategoryGroup, GroupConfig> = {
   destinations: {
     label: 'Destinations',
     icon: '🌍',
-    categories: ['countries', 'states', 'airports'],
+    categories: ['countries', 'states', 'territories', 'airports'],
   },
   nature: {
     label: 'Nature',
@@ -94,6 +95,7 @@ export interface Selection {
 export interface UserSelections {
   countries: Selection[];
   states: Selection[];
+  territories: Selection[];
   nationalParks: Selection[];
   nationalMonuments: Selection[];
   stateParks: Selection[];
@@ -136,6 +138,7 @@ export interface UserProfile {
 export const categoryLabels: Record<Category, string> = {
   countries: "Countries",
   states: "US States",
+  territories: "US Territories",
   nationalParks: "National Parks",
   nationalMonuments: "National Monuments",
   stateParks: "State Parks",
@@ -159,6 +162,7 @@ export const categoryLabels: Record<Category, string> = {
 export const categoryIcons: Record<Category, ReactNode> = {
   countries: "🌍",
   states: "🇺🇸",
+  territories: "🏝️",
   nationalParks: "🏞️",
   nationalMonuments: "🗽",
   stateParks: "🌲",
@@ -182,6 +186,7 @@ export const categoryIcons: Record<Category, ReactNode> = {
 export const emptySelections: UserSelections = {
   countries: [],
   states: [],
+  territories: [],
   nationalParks: [],
   nationalMonuments: [],
   stateParks: [],

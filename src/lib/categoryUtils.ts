@@ -1,6 +1,7 @@
 import { Category } from '@/lib/types';
 import type { Country } from '@/data/countries';
 import type { USState } from '@/data/usStates';
+import type { USTerritory } from '@/data/usTerritories';
 import type { NationalPark } from '@/data/nationalParks';
 import type { NationalMonument } from '@/data/nationalMonuments';
 import type { StatePark } from '@/data/stateParks';
@@ -19,6 +20,7 @@ import type { WeirdAmericana } from '@/data/weirdAmericana';
 type CategoryDataItem =
   | Country
   | USState
+  | USTerritory
   | NationalPark
   | NationalMonument
   | StatePark
@@ -75,6 +77,7 @@ const dataCache: Partial<Record<Category, CategoryDataItem[]>> = {};
 const fallbackTotals: Record<Category, number> = {
   countries: 197,
   states: 51,
+  territories: 14,
   nationalParks: 63,
   nationalMonuments: 138,
   stateParks: 305,
@@ -117,7 +120,8 @@ export const categoryTotals: Record<Category, number> = new Proxy(fallbackTotals
 // Category display titles
 export const categoryTitles: Record<Category, string> = {
   countries: 'Countries of the World',
-  states: 'US States & Territories',
+  states: 'US States',
+  territories: 'US Territories & Islands',
   nationalParks: 'National Parks',
   nationalMonuments: 'National Monuments',
   stateParks: 'State Parks',
@@ -158,6 +162,12 @@ const transforms: Record<Category, TransformFn> = {
     group: s.region,
     code: s.code,
     aliases: stateAliases[s.code] || [],
+  }),
+  territories: (t) => ({
+    id: t.code,
+    name: t.name,
+    group: t.region,
+    code: t.code,
   }),
   nationalParks: (p) => ({
     id: p.id,
@@ -267,6 +277,9 @@ async function loadCategoryData(category: Category): Promise<CategoryDataItem[]>
       break;
     case 'states':
       data = (await import('@/data/usStates')).usStates;
+      break;
+    case 'territories':
+      data = (await import('@/data/usTerritories')).usTerritories;
       break;
     case 'nationalParks':
       data = (await import('@/data/nationalParks')).nationalParks;
