@@ -9,6 +9,7 @@ import { Category, UserSelections } from '@/lib/types';
 import { getStats } from '@/lib/storage';
 import { countries } from '@/data/countries';
 import { usStates } from '@/data/usStates';
+import { usTerritories } from '@/data/usTerritories';
 import { nationalParks } from '@/data/nationalParks';
 import { nationalMonuments } from '@/data/nationalMonuments';
 import { stateParks } from '@/data/stateParks';
@@ -38,6 +39,7 @@ function createNameMap<T extends NamedItem>(items: T[], keyField: 'id' | 'code' 
 // Static data maps (created once at module load)
 const countriesNameMap = createNameMap(countries, 'code');
 const usStatesNameMap = createNameMap(usStates, 'code');
+const usTerritoriesNameMap = createNameMap(usTerritories, 'code');
 const nationalParksNameMap = createNameMap(nationalParks);
 const nationalMonumentsNameMap = createNameMap(nationalMonuments);
 const stateParksNameMap = createNameMap(stateParks);
@@ -104,6 +106,7 @@ interface ShareCardProps {
 const categoryTotals: Record<Category, number> = {
   countries: countries.length,
   states: usStates.length,
+  territories: usTerritories.length,
   nationalParks: nationalParks.length,
   nationalMonuments: nationalMonuments.length,
   stateParks: stateParks.length,
@@ -135,6 +138,9 @@ function getVisitedItemNames(selections: UserSelections, category: Category): st
       break;
     case 'states':
       nameMap = usStatesNameMap;
+      break;
+    case 'territories':
+      nameMap = usTerritoriesNameMap;
       break;
     case 'nationalParks':
       nameMap = nationalParksNameMap;
