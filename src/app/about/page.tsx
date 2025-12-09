@@ -83,13 +83,13 @@ export default function AboutPage() {
             </h2>
             <div className="space-y-4 text-primary-600 dark:text-primary-300">
               <p>
-                Memories fade faster than we&apos;d like. I wanted a way to hold onto the places I&apos;ve seen—not just the countries, but the mountain peaks and the random roadside attractions that made the trip special.
+                Memories fade faster than we&apos;d like. I wanted a way to hold onto the places I&apos;ve seen, not just the countries, but the mountain peaks and the random roadside attractions that made the trip special.
               </p>
               <p>
                 Existing tools felt too generic. They didn&apos;t capture the detail of the journey, or they locked everything behind a login screen and wanted my email, credit card, or to post on my behalf.
               </p>
               <p>
-                I wanted something simple—a visual way to see where I&apos;d been and dream about where I&apos;d go next. Just a beautiful map that showed my journey.
+                I wanted something simple, a visual way to see where I&apos;d been and dream about where I&apos;d go next. Just a beautiful map that showed my journey.
               </p>
               <p>
                 <strong className="text-primary-900 dark:text-white">So I built one.</strong> And now I&apos;m sharing it with you.
