@@ -56,6 +56,13 @@ const USMap = memo(function USMap({ selections, onToggle, tooltip }: BaseMapProp
           // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Library uses branded Longitude/Latitude types
           center={position.coordinates as any}
           onMoveEnd={handleMoveEnd}
+          filterZoomEvent={(evt: React.TouchEvent | React.MouseEvent | React.WheelEvent) => {
+            // Only allow zoom/pan with ctrl/cmd key or touch events
+            // Regular clicks should pass through to Geography elements
+            if ('touches' in evt) return true; // Allow touch zoom
+            if ('deltaY' in evt) return true; // Allow wheel zoom
+            return (evt as React.MouseEvent).ctrlKey || (evt as React.MouseEvent).metaKey;
+          }}
         >
           <Geographies geography={GEO_URL_USA}>
             {({ geographies }) =>
