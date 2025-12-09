@@ -60,7 +60,8 @@ const USMap = memo(function USMap({ selections, onToggle, tooltip }: BaseMapProp
           <Geographies geography={GEO_URL_USA}>
             {({ geographies }) =>
               geographies.map((geo) => {
-                const fips = geo.id as string;
+                // Ensure ID is a string and padded to 2 digits (e.g. 1 -> "01")
+                const fips = String(geo.id).padStart(2, '0');
                 const id = fipsToAbbr[fips];
                 const name = geo.properties.name;
                 const status = id ? getStatus(id) : 'unvisited';

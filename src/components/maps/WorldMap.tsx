@@ -64,7 +64,7 @@ const WorldMap = memo(function WorldMap({ selections, onToggle, tooltip }: BaseM
             {({ geographies }) =>
               geographies.map((geo) => {
                 const countryName = geo.properties.name;
-                const id = countryNameToISO[countryName] || geo.properties["ISO_A2"] || geo.id;
+                const id = countryNameToISO[countryName] || geo.properties["ISO_A2"] || String(geo.id);
                 const status = id ? getStatus(id) : 'unvisited';
                 const statusClass = status === 'bucketList' ? 'bucket-list' : status;
 

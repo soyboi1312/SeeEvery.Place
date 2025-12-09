@@ -33,7 +33,7 @@ export default function StaticWorldMap({ selections }: StaticWorldMapProps) {
         {({ geographies }) =>
           geographies.map((geo) => {
             const countryName = geo.properties.name;
-            const id = countryNameToISO[countryName] || geo.properties["ISO_A2"] || geo.id;
+            const id = countryNameToISO[countryName] || geo.properties["ISO_A2"] || String(geo.id);
             const status = id ? getSelectionStatus(selections, 'countries', id) : 'unvisited';
 
             let fill = '#94a3b8'; // unvisited - slate gray
