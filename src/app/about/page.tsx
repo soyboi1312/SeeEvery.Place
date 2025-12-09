@@ -229,7 +229,7 @@ export default function AboutPage() {
             <h2 className="text-2xl font-bold text-primary-900 dark:text-white mb-4">Privacy</h2>
             <p className="text-primary-600 dark:text-primary-300">
               Your data belongs to you. It lives on your device. I don&apos;t track your travels, and I never sell your data.
-              Sync is optional—if you choose to sign in to access your data across devices, it&apos;s encrypted end-to-end.
+              Sync is optional. If you choose to sign in to access your data across devices, it&apos;s encrypted end-to-end.
               Read the full <Link href="/privacy" className="text-primary-700 dark:text-primary-400 hover:underline">Privacy Policy</Link>.
             </p>
           </section>
