@@ -74,7 +74,7 @@ const dataCache: Partial<Record<Category, CategoryDataItem[]>> = {};
 // These are kept in sync via getCategoryTotal() which uses actual data when cached
 const fallbackTotals: Record<Category, number> = {
   countries: 197,
-  states: 51,
+  states: 56,
   nationalParks: 63,
   nationalMonuments: 138,
   stateParks: 305,

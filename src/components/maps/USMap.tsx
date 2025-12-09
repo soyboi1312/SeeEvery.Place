@@ -1,6 +1,7 @@
 /**
  * USMap Component
  * Interactive US map with state region coloring based on visit status
+ * Includes territory indicators for PR, VI, GU, AS, MP which can't be shown on Albers USA projection
  */
 'use client';
 
@@ -11,6 +12,10 @@ import { GEO_URL_USA, fipsToAbbr } from '@/lib/mapUtils';
 import { BaseMapProps } from './types';
 import { useMapZoom } from './useMapZoom';
 import ZoomControls from './ZoomControls';
+import { getTerritories } from '@/data/usStates';
+
+// Territory data for the inset
+const territories = getTerritories();
 
 const USMap = memo(function USMap({ selections, onToggle, tooltip }: BaseMapProps) {
   const {
@@ -102,6 +107,36 @@ const USMap = memo(function USMap({ selections, onToggle, tooltip }: BaseMapProp
         canZoomIn={canZoomIn}
         canZoomOut={canZoomOut}
       />
+
+      {/* US Territories Inset - these can't be shown on Albers USA projection */}
+      <div className="absolute bottom-2 left-2 bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm rounded-lg p-2 shadow-lg border border-gray-200 dark:border-gray-700">
+        <div className="text-[10px] font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wider">
+          Territories
+        </div>
+        <div className="flex flex-wrap gap-1.5">
+          {territories.map((territory) => {
+            const status = getStatus(territory.code);
+            const statusClass = status === 'visited'
+              ? 'bg-green-500 text-white'
+              : status === 'bucketList'
+                ? 'bg-blue-500 text-white'
+                : 'bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300';
+
+            return (
+              <button
+                key={territory.code}
+                onClick={() => onToggle?.(territory.code, status)}
+                onMouseEnter={(e) => tooltip.onMouseEnter(territory.name, e)}
+                onMouseLeave={tooltip.onMouseLeave}
+                className={`px-2 py-1 rounded text-[11px] font-medium transition-colors cursor-pointer hover:opacity-80 ${statusClass}`}
+                aria-label={`${territory.name}, ${status === 'visited' ? 'visited' : status === 'bucketList' ? 'on bucket list' : 'not visited'}`}
+              >
+                {territory.code}
+              </button>
+            );
+          })}
+        </div>
+      </div>
     </div>
   );
 });
