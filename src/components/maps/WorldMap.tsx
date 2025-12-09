@@ -33,6 +33,8 @@ const WorldMap = memo(function WorldMap({ selections, onToggle, tooltip }: BaseM
     const map = new Map<string, Status>();
     const countrySelections = selections.countries || [];
     for (const sel of countrySelections) {
+      // Skip soft-deleted selections
+      if (sel.deleted) continue;
       map.set(sel.id, sel.status);
     }
     return map;

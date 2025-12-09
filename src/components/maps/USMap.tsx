@@ -31,6 +31,8 @@ const USMap = memo(function USMap({ selections, onToggle, tooltip }: BaseMapProp
     const map = new Map<string, Status>();
     const stateSelections = selections.states || [];
     for (const sel of stateSelections) {
+      // Skip soft-deleted selections
+      if (sel.deleted) continue;
       map.set(sel.id, sel.status);
     }
     return map;
