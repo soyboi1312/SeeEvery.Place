@@ -5,6 +5,7 @@
 'use client';
 
 import { useRef, useState, useMemo } from 'react';
+import Link from 'next/link';
 import { Category, UserSelections } from '@/lib/types';
 import { getStats } from '@/lib/storage';
 import { countries } from '@/data/countries';
@@ -174,6 +175,9 @@ interface ShareCardProps {
   category: Category;
   subcategory?: string;
   onClose: () => void;
+  // Profile info for public link sharing
+  isPublicProfile?: boolean;
+  username?: string | null;
 }
 
 const categoryTotals: Record<Category, number> = {
@@ -281,11 +285,12 @@ function getVisitedItemNames(selections: UserSelections, category: Category): st
     .filter((name): name is string => name !== undefined);
 }
 
-export default function ShareCard({ selections, category, subcategory, onClose }: ShareCardProps) {
+export default function ShareCard({ selections, category, subcategory, onClose, isPublicProfile, username }: ShareCardProps) {
   const cardRef = useRef<HTMLDivElement>(null);
   const [selectedGradient, setSelectedGradient] = useState(0);
   const [includeMap, setIncludeMap] = useState(true);
   const [iconSize, setIconSize] = useState<MarkerSize>('small');
+  const [linkCopied, setLinkCopied] = useState(false);
 
   const { isDownloading, downloadImage, shareOrCopyImage } = useShareImage({
     cardRef,
@@ -450,6 +455,76 @@ export default function ShareCard({ selections, category, subcategory, onClose }
             </div>
           </div>
         )}
+
+        {/* Public Profile Link Section */}
+        <div className="px-4 pb-4">
+          {isPublicProfile && username ? (
+            <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-medium text-green-700 dark:text-green-300 mb-1">Your Public Map</p>
+                  <p className="text-sm text-green-800 dark:text-green-200 truncate">
+                    seeevery.place/u/{username}
+                  </p>
+                </div>
+                <button
+                  onClick={async () => {
+                    try {
+                      await navigator.clipboard.writeText(`https://seeevery.place/u/${username}`);
+                      setLinkCopied(true);
+                      setTimeout(() => setLinkCopied(false), 2000);
+                    } catch {
+                      // Fallback
+                      const textarea = document.createElement('textarea');
+                      textarea.value = `https://seeevery.place/u/${username}`;
+                      document.body.appendChild(textarea);
+                      textarea.select();
+                      document.execCommand('copy');
+                      document.body.removeChild(textarea);
+                      setLinkCopied(true);
+                      setTimeout(() => setLinkCopied(false), 2000);
+                    }
+                  }}
+                  className="px-3 py-1.5 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors flex items-center gap-1.5 shrink-0"
+                >
+                  {linkCopied ? (
+                    <>
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                      Copied!
+                    </>
+                  ) : (
+                    <>
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                      </svg>
+                      Copy
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          ) : (
+            <Link
+              href="/settings"
+              className="block p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800 hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors"
+            >
+              <div className="flex items-center gap-2">
+                <svg className="w-5 h-5 text-blue-600 dark:text-blue-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                </svg>
+                <div>
+                  <p className="text-sm font-medium text-blue-700 dark:text-blue-300">Want a live link to share?</p>
+                  <p className="text-xs text-blue-600 dark:text-blue-400">Enable Public Profile in Settings</p>
+                </div>
+                <svg className="w-4 h-4 text-blue-500 dark:text-blue-400 ml-auto shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </div>
+            </Link>
+          )}
+        </div>
 
         {/* Actions */}
         <div className="p-4 border-t border-gray-200 dark:border-gray-700 flex gap-3">

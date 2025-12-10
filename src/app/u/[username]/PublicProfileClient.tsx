@@ -23,6 +23,7 @@ import {
   emptySelections,
 } from '@/lib/types';
 import { StaticWorldMap, StaticUSMap } from '@/components/share';
+import { PROFILE_ICONS } from '@/components/ProfileIcons';
 
 interface PublicProfile {
   id: string;
@@ -190,8 +191,25 @@ export default function PublicProfileClient({
         <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 md:p-8 shadow-premium border border-black/5 dark:border-white/10 mb-6">
           <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
             {/* Avatar */}
-            <div className="w-24 h-24 md:w-32 md:h-32 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold text-4xl md:text-5xl shadow-xl">
-              {displayName[0].toUpperCase()}
+            <div className="w-24 h-24 md:w-32 md:h-32 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white shadow-xl">
+              {(() => {
+                // Check if avatar_url matches a known icon, otherwise fallback to compass
+                const iconName = profile.avatar_url;
+                const IconComponent = iconName && PROFILE_ICONS[iconName]
+                  ? PROFILE_ICONS[iconName]
+                  : null;
+
+                if (IconComponent) {
+                  return <IconComponent className="w-12 h-12 md:w-16 md:h-16" />;
+                }
+
+                // Fallback to initial if no icon set (legacy)
+                return (
+                  <span className="font-bold text-4xl md:text-5xl">
+                    {displayName[0].toUpperCase()}
+                  </span>
+                );
+              })()}
             </div>
 
             {/* Info */}
