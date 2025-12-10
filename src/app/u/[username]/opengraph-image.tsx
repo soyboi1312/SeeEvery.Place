@@ -1,16 +1,13 @@
 import { ImageResponse } from 'next/og';
 import { createClient } from '@supabase/supabase-js';
 
-// Route segment config
-export const runtime = 'edge';
-
 // Image metadata
 export const alt = 'User Travel Profile | SeeEvery.Place';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
-// Initialize Supabase client directly for Edge runtime compatibility
-// We don't use the server helper here to avoid cookie/header complexity in OG generation
+// Initialize Supabase client directly for OG image generation
+// We don't use the server helper here to avoid cookie/header complexity
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
