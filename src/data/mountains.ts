@@ -58,7 +58,7 @@ export const mountains: Mountain[] = [
 
   // Asia (non-Himalayan)
   { id: "damavand", name: "Mount Damavand", elevation: 5610, country: "Iran", countryCode: "IR", range: "Alborz", lat: 35.9516, lng: 52.1095 },
-  { id: "ararat", name: "Mount Ararat", elevation: 5137, country: "Turkey", countryCode: "TR", range: "Armenian Highlands", lat: 39.7019, lng: 44.2986 },
+  { id: "ararat", name: "Mount Ararat", elevation: 5137, country: "Türkiye", countryCode: "TR", range: "Armenian Highlands", lat: 39.7019, lng: 44.2986 },
 
   // Antarctica
   { id: "vinson", name: "Vinson Massif", elevation: 4892, country: "Antarctica", countryCode: "AQ", range: "Ellsworth", lat: -78.5254, lng: -85.6172 },
@@ -77,7 +77,7 @@ export const mountains: Mountain[] = [
   { id: "torreys", name: "Torreys Peak", elevation: 4351, country: "United States", countryCode: "US", range: "Front Range", lat: 39.6428, lng: -105.8214 },
   { id: "castle", name: "Castle Peak", elevation: 4353, country: "United States", countryCode: "US", range: "Elk Mountains", lat: 39.0097, lng: -106.8614 },
   { id: "quandary", name: "Quandary Peak", elevation: 4350, country: "United States", countryCode: "US", range: "Tenmile Range", lat: 39.3972, lng: -106.1064 },
-  { id: "evans", name: "Mount Evans", elevation: 4350, country: "United States", countryCode: "US", range: "Front Range", lat: 39.5883, lng: -105.6433 },
+  { id: "evans", name: "Mount Blue Sky", elevation: 4350, country: "United States", countryCode: "US", range: "Front Range", lat: 39.5883, lng: -105.6433 },
   { id: "longs", name: "Longs Peak", elevation: 4346, country: "United States", countryCode: "US", range: "Front Range", lat: 40.2550, lng: -105.6156 },
   { id: "wilson-mt", name: "Mount Wilson", elevation: 4345, country: "United States", countryCode: "US", range: "San Juan Mountains", lat: 37.8392, lng: -107.9917 },
   { id: "shavano", name: "Mount Shavano", elevation: 4338, country: "United States", countryCode: "US", range: "Sawatch Range", lat: 38.6192, lng: -106.2394 },
