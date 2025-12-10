@@ -163,7 +163,7 @@ export const countryNameToISO: Record<string, string> = {
   "Afghanistan": "AF", "Armenia": "AM", "Azerbaijan": "AZ", "Bahrain": "BH", "Bangladesh": "BD",
   "Bhutan": "BT", "Brunei": "BN", "Brunei Darussalam": "BN", "Cambodia": "KH", "China": "CN",
   "Cyprus": "CY", "N. Cyprus": "CY", "Georgia": "GE", "India": "IN", "Indonesia": "ID",
-  "Iran": "IR", "Iraq": "IQ", "Israel": "IL", "Japan": "JP", "Jordan": "JO", "Kazakhstan": "KZ",
+  "Iran": "IR", "Iraq": "IQ", "Israel (Occupied Palestine)": "IL", "Japan": "JP", "Jordan": "JO", "Kazakhstan": "KZ",
   "Kuwait": "KW", "Kyrgyzstan": "KG", "Laos": "LA", "Lao PDR": "LA", "Lebanon": "LB",
   "Malaysia": "MY", "Maldives": "MV", "Mongolia": "MN", "Myanmar": "MM", "Burma": "MM",
   "Nepal": "NP", "North Korea": "KP", "Dem. Rep. Korea": "KP", "Oman": "OM", "Pakistan": "PK",

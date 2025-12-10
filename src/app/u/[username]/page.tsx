@@ -1,10 +1,17 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { createClient, createAdminClient } from '@/lib/supabase/server';
+import { createClient } from '@/lib/supabase/server';
 import PublicProfileClient from './PublicProfileClient';
 
 interface PageProps {
   params: Promise<{ username: string }>;
+}
+
+interface UnlockedAchievement {
+  id: string;
+  achievement_id: string;
+  unlocked_at: string;
+  category: string | null;
 }
 
 interface PublicProfile {
@@ -31,6 +38,8 @@ interface PublicProfile {
     hide_categories?: string[];
     hide_bucket_list?: boolean;
   } | null;
+  // Achievements (included from get_public_profile function)
+  achievements: UnlockedAchievement[] | null;
 }
 
 // Generate metadata for SEO
@@ -93,18 +102,14 @@ export default async function PublicProfilePage({ params }: PageProps) {
     .eq('user_id', profile.id)
     .single();
 
-  // Get the user's achievements using admin client to bypass RLS
-  const { data: achievements } = await adminClient
-    .from('user_achievements')
-    .select('id, achievement_id, unlocked_at, category')
-    .eq('user_id', profile.id)
-    .order('unlocked_at', { ascending: false });
+  // Achievements are now included in the profile from get_public_profile function
+  const achievements = profile.achievements || [];
 
   return (
     <PublicProfileClient
       profile={profile}
       selections={selectionsData?.selections || {}}
-      achievements={achievements || []}
+      achievements={achievements}
       username={username}
     />
   );
