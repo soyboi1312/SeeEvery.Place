@@ -11,21 +11,21 @@ export interface F1Track {
 
 // Formula 1 Race Tracks - Current calendar and notable historic circuits
 export const f1Tracks: F1Track[] = [
-  // Current F1 Calendar (2024-2025)
+  // 2025 F1 Calendar (24 races)
+  { id: "australia", name: "Australian Grand Prix", circuit: "Albert Park Circuit", city: "Melbourne", country: "Australia", lat: -37.8497, lng: 144.9680, active: true },
+  { id: "china", name: "Chinese Grand Prix", circuit: "Shanghai International Circuit", city: "Shanghai", country: "China", lat: 31.3389, lng: 121.2197, active: true },
+  { id: "japan", name: "Japanese Grand Prix", circuit: "Suzuka International Racing Course", city: "Suzuka", country: "Japan", lat: 34.8431, lng: 136.5340, active: true },
   { id: "bahrain", name: "Bahrain Grand Prix", circuit: "Bahrain International Circuit", city: "Sakhir", country: "Bahrain", lat: 26.0325, lng: 50.5106, active: true },
   { id: "saudi-arabia", name: "Saudi Arabian Grand Prix", circuit: "Jeddah Corniche Circuit", city: "Jeddah", country: "Saudi Arabia", lat: 21.6319, lng: 39.1044, active: true },
-  { id: "australia", name: "Australian Grand Prix", circuit: "Albert Park Circuit", city: "Melbourne", country: "Australia", lat: -37.8497, lng: 144.9680, active: true },
-  { id: "japan", name: "Japanese Grand Prix", circuit: "Suzuka International Racing Course", city: "Suzuka", country: "Japan", lat: 34.8431, lng: 136.5340, active: true },
-  { id: "china", name: "Chinese Grand Prix", circuit: "Shanghai International Circuit", city: "Shanghai", country: "China", lat: 31.3389, lng: 121.2197, active: true },
   { id: "miami", name: "Miami Grand Prix", circuit: "Miami International Autodrome", city: "Miami", country: "USA", lat: 25.9581, lng: -80.2389, active: true },
   { id: "emilia-romagna", name: "Emilia Romagna Grand Prix", circuit: "Autodromo Enzo e Dino Ferrari", city: "Imola", country: "Italy", lat: 44.3439, lng: 11.7167, active: true },
   { id: "monaco", name: "Monaco Grand Prix", circuit: "Circuit de Monaco", city: "Monte Carlo", country: "Monaco", lat: 43.7347, lng: 7.4206, active: true },
-  { id: "canada", name: "Canadian Grand Prix", circuit: "Circuit Gilles Villeneuve", city: "Montreal", country: "Canada", lat: 45.5000, lng: -73.5228, active: true },
   { id: "spain", name: "Spanish Grand Prix", circuit: "Circuit de Barcelona-Catalunya", city: "Barcelona", country: "Spain", lat: 41.5700, lng: 2.2611, active: true },
+  { id: "canada", name: "Canadian Grand Prix", circuit: "Circuit Gilles Villeneuve", city: "Montreal", country: "Canada", lat: 45.5000, lng: -73.5228, active: true },
   { id: "austria", name: "Austrian Grand Prix", circuit: "Red Bull Ring", city: "Spielberg", country: "Austria", lat: 47.2197, lng: 14.7647, active: true },
   { id: "great-britain", name: "British Grand Prix", circuit: "Silverstone Circuit", city: "Silverstone", country: "UK", lat: 52.0786, lng: -1.0169, active: true },
-  { id: "hungary", name: "Hungarian Grand Prix", circuit: "Hungaroring", city: "Budapest", country: "Hungary", lat: 47.5789, lng: 19.2486, active: true },
   { id: "belgium", name: "Belgian Grand Prix", circuit: "Circuit de Spa-Francorchamps", city: "Spa", country: "Belgium", lat: 50.4372, lng: 5.9714, active: true },
+  { id: "hungary", name: "Hungarian Grand Prix", circuit: "Hungaroring", city: "Budapest", country: "Hungary", lat: 47.5789, lng: 19.2486, active: true },
   { id: "netherlands", name: "Dutch Grand Prix", circuit: "Circuit Zandvoort", city: "Zandvoort", country: "Netherlands", lat: 52.3888, lng: 4.5409, active: true },
   { id: "italy", name: "Italian Grand Prix", circuit: "Autodromo Nazionale Monza", city: "Monza", country: "Italy", lat: 45.6156, lng: 9.2811, active: true },
   { id: "azerbaijan", name: "Azerbaijan Grand Prix", circuit: "Baku City Circuit", city: "Baku", country: "Azerbaijan", lat: 40.3725, lng: 49.8533, active: true },

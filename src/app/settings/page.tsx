@@ -11,6 +11,8 @@ import { calculateTotalXp, calculateLevel, xpToNextLevel } from '@/lib/achieveme
 import type { User } from '@supabase/supabase-js';
 import type { UserSelections, Category } from '@/lib/types';
 import { categoryLabels, categoryIcons, ALL_CATEGORIES } from '@/lib/types';
+import ProfileIconSelector from '@/components/ProfileIconSelector';
+import { PROFILE_ICONS } from '@/components/ProfileIcons';
 
 interface Profile {
   id: string;
@@ -67,6 +69,7 @@ export default function SettingsPage() {
   const [usernameError, setUsernameError] = useState<string | null>(null);
   const [isSavingProfile, setIsSavingProfile] = useState(false);
   const [profileSaveSuccess, setProfileSaveSuccess] = useState(false);
+  const [selectedIcon, setSelectedIcon] = useState<string>('compass');
 
   // Social links
   const [websiteUrl, setWebsiteUrl] = useState('');
@@ -109,6 +112,9 @@ export default function SettingsPage() {
       setUsername(data.username || '');
       setBio(data.bio || '');
       setIsPublic(data.is_public || false);
+      // If avatar_url exists and matches one of our icons, use it. Otherwise default.
+      const savedIcon = data.avatar_url && PROFILE_ICONS[data.avatar_url] ? data.avatar_url : 'compass';
+      setSelectedIcon(savedIcon);
       // Social links
       setWebsiteUrl(data.website_url || '');
       setInstagramHandle(data.instagram_handle || '');
@@ -332,6 +338,7 @@ export default function SettingsPage() {
           username: username || null,
           bio: bio || null,
           is_public: isPublic,
+          avatar_url: selectedIcon, // Save the icon name here
           // Social links
           website_url: websiteUrl || null,
           instagram_handle: instagramHandle ? instagramHandle.replace(/^@/, '') : null,
@@ -541,8 +548,12 @@ export default function SettingsPage() {
           )}
 
           <div className="flex items-center gap-4 mb-4">
-            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold text-2xl shadow-lg">
-              {profile?.full_name?.[0]?.toUpperCase() || user.email?.[0].toUpperCase()}
+            {/* Travel Badge Avatar */}
+            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white shadow-lg">
+              {(() => {
+                const Icon = PROFILE_ICONS[selectedIcon] || PROFILE_ICONS['compass'];
+                return <Icon className="w-8 h-8" />;
+              })()}
             </div>
             <div className="flex-1">
               {isEditingProfile ? (
@@ -596,6 +607,17 @@ export default function SettingsPage() {
 
           {isEditingProfile && (
             <>
+              {/* Travel Badge Selection */}
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-primary-700 dark:text-primary-300 mb-3">
+                  Choose your Travel Badge
+                </label>
+                <ProfileIconSelector
+                  selectedIcon={selectedIcon}
+                  onSelect={setSelectedIcon}
+                />
+              </div>
+
               {/* Username */}
               <div className="mb-4">
                 <label className="block text-sm font-medium text-primary-700 dark:text-primary-300 mb-1">
@@ -887,6 +909,9 @@ export default function SettingsPage() {
                     setHideBucketList(privacySettings.hide_bucket_list || false);
                     // Reset preferences
                     setDefaultMapView(profile?.default_map_view || 'world');
+                    // Reset travel badge
+                    const savedIcon = profile?.avatar_url && PROFILE_ICONS[profile.avatar_url] ? profile.avatar_url : 'compass';
+                    setSelectedIcon(savedIcon);
                   }}
                   className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-lg font-medium hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
                 >

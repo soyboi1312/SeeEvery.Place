@@ -64,6 +64,9 @@ export const weirdAmericana: WeirdAmericana[] = [
   { id: "foamhenge", name: "Foamhenge", city: "Natural Bridge", state: "Virginia", region: "South", lat: 37.6283, lng: -79.5433, year: 2004 },
   { id: "dinosaur-world-ky", name: "Dinosaur World", city: "Cave City", state: "Kentucky", region: "South", lat: 37.1292, lng: -85.9350, year: 2004 },
   { id: "leaning-tower-niles", name: "Leaning Tower of Niles", city: "Niles", state: "Illinois", region: "Midwest", lat: 42.0122, lng: -87.8003, year: 1934 },
+  { id: "london-bridge-az", name: "London Bridge", city: "Lake Havasu City", state: "Arizona", region: "Southwest", lat: 34.4717, lng: -114.3472, year: 1971 },
+  { id: "gum-wall", name: "The Gum Wall", city: "Seattle", state: "Washington", region: "West", lat: 47.6083, lng: -122.3403, year: 1993 },
+  { id: "area-51-mailbox", name: "The Black Mailbox (Area 51)", city: "Alamo", state: "Nevada", region: "West", lat: 37.4538, lng: -115.4827, year: 1996 },
 
   // Desert & Nature Oddities
   { id: "elmer-bottle-tree", name: "Elmer's Bottle Tree Ranch", city: "Oro Grande", state: "California", region: "West", lat: 34.6094, lng: -117.3306, year: 2000 },
