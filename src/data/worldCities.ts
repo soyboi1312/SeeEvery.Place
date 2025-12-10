@@ -27,6 +27,7 @@ export const worldCities: WorldCity[] = [
   { id: "jakarta", name: "Jakarta", country: "Indonesia", countryCode: "ID", continent: "Asia", population: 10770000, lat: -6.2088, lng: 106.8456 },
   { id: "singapore", name: "Singapore", country: "Singapore", countryCode: "SG", continent: "Asia", population: 5850000, lat: 1.3521, lng: 103.8198 },
   { id: "hong-kong", name: "Hong Kong", country: "Hong Kong", countryCode: "HK", continent: "Asia", population: 7482000, lat: 22.3193, lng: 114.1694 },
+  { id: "macao", name: "Macao", country: "Macao", countryCode: "MO", continent: "Asia", population: 695168, lat: 22.1987, lng: 113.5439 },
   { id: "ho-chi-minh-city", name: "Ho Chi Minh City", country: "Vietnam", countryCode: "VN", continent: "Asia", population: 8993000, lat: 10.8231, lng: 106.6297 },
   { id: "manila", name: "Manila", country: "Philippines", countryCode: "PH", continent: "Asia", population: 13482000, lat: 14.5995, lng: 120.9842 },
   { id: "taipei", name: "Taipei", country: "Taiwan", countryCode: "TW", continent: "Asia", population: 2646000, lat: 25.0330, lng: 121.5654 },
