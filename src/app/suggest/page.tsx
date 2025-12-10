@@ -106,25 +106,34 @@ export default function SuggestPage() {
   }, [supabaseReady, loadSuggestions, loadVotes]);
 
   const onSubmit = async (data: SuggestionFormData) => {
-  if (!supabase) return;
-  setSubmitError(null);
+    setSubmitError(null);
 
-  try {
-    const { error } = await supabase
-      .from('suggestions')
-      .insert(toDbFormat(data));
+    try {
+      // Use the API route instead of direct Supabase insert
+      // This ensures rate limiting and IP hashing logic runs
+      const response = await fetch('/api/suggestions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(toDbFormat(data)),
+      });
 
-    if (error) throw error;
+      const result = await response.json();
 
-    setSubmitted(true);
-    reset();
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to submit suggestion');
+      }
 
-    // Reload suggestions to show the new one
-    loadSuggestions();
-  } catch (err) {
-    setSubmitError(err instanceof Error ? err.message : 'Failed to submit suggestion');
-  }
-};
+      setSubmitted(true);
+      reset();
+
+      // Reload suggestions to show the new one
+      loadSuggestions();
+    } catch (err) {
+      setSubmitError(err instanceof Error ? err.message : 'Failed to submit suggestion');
+    }
+  };
 
   const handleVote = async (suggestionId: string) => {
     if (!supabase) return;
