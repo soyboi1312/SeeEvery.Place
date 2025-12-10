@@ -543,18 +543,38 @@ const categoryExamples: Record<Category, PlaceExample[]> = {
 
 // Theme colors by category group
 const themeColors: Record<CategoryGroup, string> = {
-  nature: 'from-emerald-50 to-stone-100 dark:from-emerald-950 dark:to-stone-900',
-  sports: 'from-blue-50 to-indigo-100 dark:from-blue-950 dark:to-indigo-900',
-  culture: 'from-amber-50 to-orange-50 dark:from-amber-950 dark:to-orange-900',
-  destinations: 'from-sky-50 to-white dark:from-slate-900 dark:to-slate-800',
+  // Fresh & Organic: Teal mixed with Emerald (richer than just green)
+  nature: 'from-teal-50 to-emerald-100 dark:from-teal-950 dark:to-emerald-900',
+  // Energetic & Cool: Sky mixed with Blue
+  sports: 'from-sky-50 to-blue-100 dark:from-sky-950 dark:to-blue-900',
+  // Creative & Premium: Violet mixed with Fuchsia (replaces the "muddy" Amber)
+  culture: 'from-violet-50 to-fuchsia-50 dark:from-violet-950 dark:to-fuchsia-900',
+  // Sophisticated & Clean: Slate mixed with Gray (matches your "Passport" brand)
+  destinations: 'from-slate-50 to-gray-100 dark:from-slate-900 dark:to-gray-800',
 };
 
 // Accent colors for buttons and highlights by group
 const accentColors: Record<CategoryGroup, { bg: string; hover: string; challenge: string }> = {
-  nature: { bg: 'bg-emerald-600', hover: 'hover:bg-emerald-700', challenge: 'bg-emerald-800' },
-  sports: { bg: 'bg-indigo-600', hover: 'hover:bg-indigo-700', challenge: 'bg-indigo-800' },
-  culture: { bg: 'bg-amber-600', hover: 'hover:bg-amber-700', challenge: 'bg-amber-800' },
-  destinations: { bg: 'bg-primary-700', hover: 'hover:bg-primary-800', challenge: 'bg-primary-900' },
+  nature: {
+    bg: 'bg-teal-600',
+    hover: 'hover:bg-teal-700',
+    challenge: 'bg-teal-800',
+  },
+  sports: {
+    bg: 'bg-blue-600',
+    hover: 'hover:bg-blue-700',
+    challenge: 'bg-blue-800',
+  },
+  culture: {
+    bg: 'bg-violet-600',
+    hover: 'hover:bg-violet-700',
+    challenge: 'bg-violet-800',
+  },
+  destinations: {
+    bg: 'bg-slate-700',
+    hover: 'hover:bg-slate-800',
+    challenge: 'bg-slate-900',
+  },
 };
 
 // Stat type for dynamic stats
@@ -808,7 +828,13 @@ export default async function CategoryLandingPage({ params }: Props) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
-    <div className={`min-h-screen bg-gradient-to-b ${gradientClass}`}>
+    <div className={`min-h-screen bg-gradient-to-b ${gradientClass} relative overflow-hidden`}>
+      {/* Subtle background pattern */}
+      <div
+        className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05] pointer-events-none"
+        style={{ backgroundImage: 'radial-gradient(currentColor 1px, transparent 1px)', backgroundSize: '24px 24px' }}
+      />
+
       <header className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-black/5 dark:border-white/10 sticky top-0 z-40">
         <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3 group">
@@ -858,12 +884,15 @@ export default async function CategoryLandingPage({ params }: Props) {
         {/* By the Numbers Section */}
         <section className="mb-12">
           <h2 className="text-lg font-semibold text-primary-700 dark:text-primary-300 text-center mb-6">By the Numbers</h2>
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-6">
             {stats.map((stat, index) => (
-              <div key={index} className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-premium border border-black/5 dark:border-white/10 text-center">
-                <div className="text-3xl mb-3">{stat.icon}</div>
-                <div className="text-2xl font-bold text-primary-900 dark:text-white mb-1">{stat.value}</div>
-                <p className="text-primary-600 dark:text-primary-400 text-sm">{stat.label}</p>
+              <div
+                key={index}
+                className={`bg-white dark:bg-slate-800 rounded-xl p-4 md:p-6 shadow-premium border border-black/5 dark:border-white/10 text-center ${index === stats.length - 1 ? 'col-span-2 md:col-span-1' : ''}`}
+              >
+                <div className="text-2xl md:text-3xl mb-2 md:mb-3">{stat.icon}</div>
+                <div className="text-xl md:text-2xl font-bold text-primary-900 dark:text-white mb-1">{stat.value}</div>
+                <p className="text-primary-600 dark:text-primary-400 text-xs md:text-sm">{stat.label}</p>
               </div>
             ))}
           </div>
@@ -910,14 +939,14 @@ export default async function CategoryLandingPage({ params }: Props) {
             <p className="text-center text-primary-500 dark:text-primary-400 text-sm mb-6">
               Click a state to see all {label.toLowerCase()} in that state
             </p>
-            <div className="flex flex-wrap justify-center gap-2">
+            <div className="flex flex-wrap justify-center gap-1.5">
               {getStatesWithCounts(category as Category).slice(0, 20).map(({ code, name, count }) => (
                 <Link
                   key={code}
                   href={`/track/${category}/${code.toLowerCase()}`}
-                  className="bg-white/70 dark:bg-slate-800/70 px-3 py-1.5 rounded-full text-sm font-medium border border-black/5 dark:border-white/10 hover:bg-white dark:hover:bg-slate-700 hover:shadow-md transition-all"
+                  className="bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm px-2.5 py-1 rounded-md text-xs font-bold border border-black/5 dark:border-white/10 hover:bg-white dark:hover:bg-slate-700 hover:scale-105 transition-all"
                 >
-                  {name} <span className="text-primary-500 dark:text-primary-400">({count})</span>
+                  {name} <span className="text-primary-500 dark:text-primary-400 font-normal ml-1">{count}</span>
                 </Link>
               ))}
             </div>
@@ -962,7 +991,7 @@ export default async function CategoryLandingPage({ params }: Props) {
             {categoryExamples[category as Category]?.map((example, index) => (
               <div
                 key={index}
-                className="bg-white dark:bg-slate-800 rounded-xl p-5 shadow-premium border border-black/5 dark:border-white/10 hover:shadow-premium-lg transition-shadow"
+                className={`bg-white dark:bg-slate-800 rounded-xl p-5 shadow-premium border border-black/5 dark:border-white/10 hover:shadow-premium-lg transition-all hover:-translate-y-1 border-l-4 ${accent.bg.replace('bg-', 'border-')}`}
               >
                 <h3 className="font-bold text-primary-900 dark:text-white text-lg mb-2">{example.name}</h3>
                 <div className="space-y-2">
