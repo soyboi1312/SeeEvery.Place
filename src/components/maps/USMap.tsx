@@ -54,6 +54,7 @@ const USMap = memo(function USMap({ selections, onToggle, tooltip }: BaseMapProp
           // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Library uses branded Longitude/Latitude types
           center={position.coordinates as any}
           onMoveEnd={handleMoveEnd}
+{/* Drag-to-pan enabled: D3 distinguishes clicks from drags automatically */}
         >
           <Geographies geography={GEO_URL_USA}>
             {({ geographies }) =>
