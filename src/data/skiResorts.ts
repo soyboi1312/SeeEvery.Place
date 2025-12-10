@@ -22,6 +22,8 @@ export const skiResorts: SkiResort[] = [
   { id: "big-sky", name: "Big Sky", location: "Montana", country: "USA", region: "North America", lat: 45.2856, lng: -111.4019, verticalDrop: 1330 },
   { id: "deer-valley", name: "Deer Valley", location: "Utah", country: "USA", region: "North America", lat: 40.6375, lng: -111.4786, verticalDrop: 914 },
   { id: "steamboat", name: "Steamboat", location: "Colorado", country: "USA", region: "North America", lat: 40.4572, lng: -106.8045, verticalDrop: 1108 },
+  { id: "breckenridge", name: "Breckenridge", location: "Colorado", country: "USA", region: "North America", lat: 39.4817, lng: -106.0384, verticalDrop: 1036 },
+  { id: "alta-snowbird", name: "Alta / Snowbird", location: "Utah", country: "USA", region: "North America", lat: 40.5883, lng: -111.6372, verticalDrop: 988 },
 
   // North America - Canada
   { id: "whistler", name: "Whistler Blackcomb", location: "British Columbia", country: "Canada", region: "North America", lat: 50.1163, lng: -122.9574, verticalDrop: 1609 },
@@ -40,6 +42,9 @@ export const skiResorts: SkiResort[] = [
   { id: "cortina", name: "Cortina d'Ampezzo", location: "Veneto", country: "Italy", region: "Europe", lat: 46.5369, lng: 12.1357, verticalDrop: 1024 },
   { id: "st-moritz", name: "St. Moritz", location: "Graubünden", country: "Switzerland", region: "Europe", lat: 46.4908, lng: 9.8355, verticalDrop: 1556 },
   { id: "lech", name: "Lech Zürs", location: "Vorarlberg", country: "Austria", region: "Europe", lat: 47.2075, lng: 10.1378, verticalDrop: 1100 },
+  { id: "val-thorens", name: "Val Thorens", location: "Savoie", country: "France", region: "Europe", lat: 45.2983, lng: 6.5824, verticalDrop: 1230 },
+  { id: "alpe-dhuez", name: "Alpe d'Huez", location: "Isère", country: "France", region: "Europe", lat: 45.0931, lng: 6.0698, verticalDrop: 2205 },
+  { id: "ischgl", name: "Ischgl", location: "Tyrol", country: "Austria", region: "Europe", lat: 47.0105, lng: 10.2933, verticalDrop: 1512 },
 
   // Europe - Scandinavia
   { id: "are", name: "Åre", location: "Jämtland", country: "Sweden", region: "Europe", lat: 63.3988, lng: 13.0741, verticalDrop: 890 },
