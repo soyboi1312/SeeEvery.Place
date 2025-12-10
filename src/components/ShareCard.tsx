@@ -30,77 +30,6 @@ import { useShareImage } from '@/lib/hooks/useShareImage';
 import { ShareableMapDesign, gradients, usesRegionMap, detectMilestones, type Milestone } from './share';
 import type { MarkerSize } from './MapMarkers';
 
-// Share caption suggestions based on category and stats
-function getShareSuggestions(category: Category, stats: { visited: number; percentage: number }, milestones: Milestone[]): string[] {
-  const suggestions: string[] = [];
-
-  // Base suggestion with category
-  const categoryName: Partial<Record<Category, string>> = {
-    countries: 'countries',
-    states: 'US states & territories',
-    usCities: 'US cities',
-    worldCities: 'world cities',
-    nationalParks: 'national parks',
-    nationalMonuments: 'national monuments',
-    stateParks: 'state parks',
-    fiveKPeaks: '5000m+ peaks',
-    fourteeners: '14ers',
-    museums: 'world museums',
-    mlbStadiums: 'MLB stadiums',
-    nflStadiums: 'NFL stadiums',
-    nbaStadiums: 'NBA arenas',
-    nhlStadiums: 'NHL arenas',
-    soccerStadiums: 'soccer stadiums',
-    f1Tracks: 'F1 tracks',
-    marathons: 'marathon majors',
-    airports: 'major airports',
-    skiResorts: 'ski resorts',
-    themeParks: 'theme parks',
-    surfingReserves: 'surfing reserves',
-    weirdAmericana: 'quirky roadside attractions',
-  };
-  const categoryDisplayName = categoryName[category] || category;
-
-  suggestions.push(`I've visited ${stats.visited} ${categoryDisplayName}! Track yours at seeevery.place`);
-
-  // Milestone-based suggestions
-  if (stats.percentage === 100) {
-    suggestions.push(`100% complete! I've visited every ${categoryDisplayName.replace(/s$/, '')} - challenge accepted and conquered!`);
-  } else if (stats.percentage >= 50) {
-    suggestions.push(`${stats.percentage}% of the way to visiting all ${categoryDisplayName}! Who's joining me?`);
-  }
-
-  // Category-specific hashtag suggestions
-  const hashtags: Record<string, string[]> = {
-    countries: ['#travel #wanderlust #worldtravel'],
-    states: ['#roadtrip #usatravel #exploreamerica'],
-    nationalParks: ['#nationalparks #findyourpark #nps @nationalparkservice'],
-    nationalMonuments: ['#nationalmonument #americanhistory #ustravel'],
-    stateParks: ['#stateparks #hiking #nature'],
-    fiveKPeaks: ['#mountaineering #climbing #mountains'],
-    fourteeners: ['#14ers #colorado #hiking'],
-    museums: ['#museums #art #culture'],
-    mlbStadiums: ['#mlb #baseball #stadiumtour'],
-    nflStadiums: ['#nfl #football #stadiumhopper'],
-    nbaStadiums: ['#nba #basketball #arenas'],
-    nhlStadiums: ['#nhl #hockey #arenas'],
-    soccerStadiums: ['#soccer #football #stadiums'],
-    f1Tracks: ['#f1 #formula1 #racing'],
-    marathons: ['#marathon #running #worldmajors'],
-    airports: ['#aviation #travel #airports'],
-    skiResorts: ['#skiing #snowboarding #ski'],
-    themeParks: ['#themeparks #rollercoasters #disney'],
-    surfingReserves: ['#surfing #waves #surf'],
-    weirdAmericana: ['#roadsideamerica #quirky #americana'],
-  };
-
-  if (hashtags[category]) {
-    suggestions.push(`${stats.visited} ${categoryDisplayName} and counting! ${hashtags[category][0]}`);
-  }
-
-  return suggestions;
-}
-
 // =====================
 // O(1) Lookup Maps for fast name lookups
 // =====================
@@ -312,27 +241,6 @@ export default function ShareCard({ selections, category, subcategory, onClose, 
     () => detectMilestones(stats.visited, stats.total, stats.percentage, category),
     [stats.visited, stats.total, stats.percentage, category]
   );
-
-  // Get share caption suggestions
-  const shareSuggestions = useMemo(
-    () => getShareSuggestions(category, stats, milestones),
-    [category, stats, milestones]
-  );
-
-  // Copy suggestion to clipboard
-  const copySuggestion = async (text: string) => {
-    try {
-      await navigator.clipboard.writeText(text);
-    } catch {
-      // Fallback for older browsers
-      const textarea = document.createElement('textarea');
-      textarea.value = text;
-      document.body.appendChild(textarea);
-      textarea.select();
-      document.execCommand('copy');
-      document.body.removeChild(textarea);
-    }
-  };
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
