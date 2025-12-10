@@ -6,12 +6,13 @@ export const alt = 'User Travel Profile | SeeEvery.Place';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
-// Initialize Supabase client directly for OG image generation
-// We don't use the server helper here to avoid cookie/header complexity
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+// Helper to create Supabase client at request time (not build time)
+function getSupabaseClient() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
+}
 
 interface ProfileData {
   full_name?: string;
@@ -24,6 +25,9 @@ interface Props {
 
 export default async function Image({ params }: Props) {
   const { username } = await params;
+
+  // Initialize Supabase client at request time (not build time)
+  const supabase = getSupabaseClient();
 
   // Fetch the public profile data
   const { data } = await supabase

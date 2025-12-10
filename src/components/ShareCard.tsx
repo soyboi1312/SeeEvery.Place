@@ -344,26 +344,6 @@ export default function ShareCard({ selections, category, subcategory, onClose, 
           />
         </div>
 
-        {/* Share Caption Suggestions */}
-        {shareSuggestions.length > 0 && (
-          <div className="px-4 pb-4">
-            <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-wide">
-              Caption ideas (tap to copy)
-            </p>
-            <div className="space-y-2">
-              {shareSuggestions.map((suggestion, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => copySuggestion(suggestion)}
-                  className="w-full text-left p-2 bg-gray-50 dark:bg-gray-700/50 rounded-lg text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors border border-gray-200 dark:border-gray-600"
-                >
-                  <span className="line-clamp-2">{suggestion}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
         {/* Public Profile Link Section */}
         <div className="px-4 pb-4">
           {isPublicProfile && username ? (
