@@ -107,7 +107,7 @@ export const countries: Country[] = [
   { code: "TJ", name: "Tajikistan", continent: "Asia" },
   { code: "TH", name: "Thailand", continent: "Asia" },
   { code: "TL", name: "Timor-Leste", continent: "Asia" },
-  { code: "TR", name: "Turkey", continent: "Asia" },
+  { code: "TR", name: "Türkiye", continent: "Asia" },
   { code: "TM", name: "Turkmenistan", continent: "Asia" },
   { code: "AE", name: "United Arab Emirates", continent: "Asia" },
   { code: "UZ", name: "Uzbekistan", continent: "Asia" },
