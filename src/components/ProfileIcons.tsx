@@ -29,12 +29,26 @@ export const BackpackIcon = ({ className = "w-6 h-6", strokeWidth = 1.5 }: IconP
   </svg>
 );
 
-// 4. The "Jetsetter" (Suitcase)
+// 4. The "Jetsetter" (Suitcase) - Updated
 export const SuitcaseIcon = ({ className = "w-6 h-6", strokeWidth = 1.5 }: IconProps) => (
-  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={strokeWidth} stroke="currentColor" className={className}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 14.15v4.25c0 1.094-.787 2.036-1.872 2.18-2.087.277-4.816.42-7.628.42-2.812 0-5.541-.143-7.628-.42-1.085-.144-1.872-1.086-1.872-2.18v-4.25m16.5 0a2.18 2.18 0 00.75-1.661V8.706c0-1.081-.768-2.015-1.837-2.175a48.111 48.111 0 00-3.413-.387m4.5 8.006c-.194.165-.42.295-.67.38m-4.5-8.393c-2.555 0-4.79.43-4.79 1.446 0 1.017 2.235 1.446 4.79 1.446 2.555 0 4.79-.43 4.79-1.446 0-1.016-2.235-1.446-4.79-1.446zm4.5 8.393V14.15m-16.5 0V8.706c0-1.081.768-2.015 1.837-2.175a48.11 48.11 0 013.413-.387m-4.5 8.006c.194.165.42.295.67.38" />
+  <svg 
+    xmlns="http://www.w3.org/2000/svg" 
+    fill="none" 
+    viewBox="0 0 24 24" 
+    strokeWidth={strokeWidth} 
+    stroke="currentColor" 
+    className={className}
+  >
+    {/* Handle */}
+    <path strokeLinecap="round" strokeLinejoin="round" d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2" />
+    {/* Body */}
+    <rect width="18" height="15" x="3" y="6" rx="2" ry="2" />
+    {/* Straps/Details */}
+    <path strokeLinecap="round" strokeLinejoin="round" d="M6 6v15" />
+    <path strokeLinecap="round" strokeLinejoin="round" d="M18 6v15" />
   </svg>
 );
+
 
 // 5. The "Road Tripper" (Van)
 export const VanIcon = ({ className = "w-6 h-6", strokeWidth = 1.5 }: IconProps) => (
