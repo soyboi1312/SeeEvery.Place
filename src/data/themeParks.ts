@@ -27,7 +27,7 @@ export const themeParks: ThemePark[] = [
   // North America - Other Major Parks
   { id: "six-flags-magic-mountain", name: "Six Flags Magic Mountain", location: "Valencia, California", country: "USA", region: "North America", lat: 34.4252, lng: -118.5972, opened: 1971 },
   { id: "cedar-point", name: "Cedar Point", location: "Sandusky, Ohio", country: "USA", region: "North America", lat: 41.4781, lng: -82.6807, opened: 1870 },
-  { id: "busch-gardens-tampa", name: "Busch Gardens Tampa Bay", location: "Tampa, Florida", country: "USA", region: "North America", lat: 28.0372, lng: -82.4214, opened: },
+  { id: "busch-gardens-tampa", name: "Busch Gardens Tampa Bay", location: "Tampa, Florida", country: "USA", region: "North America", lat: 28.0372, lng: -82.4214, opened: 1989 },
   { id: "legoland-california", name: "Legoland California", location: "Carlsbad, California", country: "USA", region: "North America", lat: 33.1267, lng: -117.3114, opened: 1999 },
   { id: "wonderland", name: "Canada's Wonderland", location: "Vaughan, Ontario", country: "Canada", region: "North America", lat: 43.8430, lng: -79.5393, opened: 1981 },
   { id: "hersheypark", name: "Hersheypark", location: "Hershey, Pennsylvania", country: "USA", region: "North America", lat: 40.2887, lng: -76.6549, opened: 1906 },
