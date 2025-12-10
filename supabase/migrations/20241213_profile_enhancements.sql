@@ -26,7 +26,10 @@ ADD COLUMN IF NOT EXISTS default_map_view text DEFAULT 'world' CHECK (default_ma
 
 -- ============================================
 -- Update get_public_profile function to include new fields
+-- Must drop first because return type is changing
 -- ============================================
+DROP FUNCTION IF EXISTS public.get_public_profile(text);
+
 CREATE OR REPLACE FUNCTION public.get_public_profile(profile_username text)
 RETURNS TABLE (
   id uuid,
