@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { createClient } from '@/lib/supabase/server';
+import { createClient, createAdminClient } from '@/lib/supabase/server';
 import PublicProfileClient from './PublicProfileClient';
 
 interface PageProps {
@@ -91,10 +91,14 @@ export default async function PublicProfilePage({ params }: PageProps) {
     .eq('user_id', profile.id)
     .single();
 
-  // Get the user's achievements using SECURITY DEFINER function
-  // This bypasses RLS to properly fetch achievements for public profiles
-  const { data: achievements } = await supabase
-    .rpc('get_public_user_achievements', { target_user_id: profile.id });
+  // Get the user's achievements using admin client to bypass RLS
+  // This is safe because we've already verified the profile is public
+  const adminClient = createAdminClient();
+  const { data: achievements } = await adminClient
+    .from('user_achievements')
+    .select('id, achievement_id, unlocked_at, category')
+    .eq('user_id', profile.id)
+    .order('unlocked_at', { ascending: false });
 
   return (
     <PublicProfileClient
