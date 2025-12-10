@@ -543,18 +543,38 @@ const categoryExamples: Record<Category, PlaceExample[]> = {
 
 // Theme colors by category group
 const themeColors: Record<CategoryGroup, string> = {
-  nature: 'from-emerald-50 to-stone-100 dark:from-emerald-950 dark:to-stone-900',
-  sports: 'from-blue-50 to-indigo-100 dark:from-blue-950 dark:to-indigo-900',
-  culture: 'from-amber-50 to-orange-50 dark:from-amber-950 dark:to-orange-900',
-  destinations: 'from-sky-50 to-white dark:from-slate-900 dark:to-slate-800',
+  // Fresh & Organic: Teal mixed with Emerald (richer than just green)
+  nature: 'from-teal-50 to-emerald-100 dark:from-teal-950 dark:to-emerald-900',
+  // Energetic & Cool: Sky mixed with Blue
+  sports: 'from-sky-50 to-blue-100 dark:from-sky-950 dark:to-blue-900',
+  // Creative & Premium: Violet mixed with Fuchsia (replaces the "muddy" Amber)
+  culture: 'from-violet-50 to-fuchsia-50 dark:from-violet-950 dark:to-fuchsia-900',
+  // Sophisticated & Clean: Slate mixed with Gray (matches your "Passport" brand)
+  destinations: 'from-slate-50 to-gray-100 dark:from-slate-900 dark:to-gray-800',
 };
 
 // Accent colors for buttons and highlights by group
 const accentColors: Record<CategoryGroup, { bg: string; hover: string; challenge: string }> = {
-  nature: { bg: 'bg-emerald-600', hover: 'hover:bg-emerald-700', challenge: 'bg-emerald-800' },
-  sports: { bg: 'bg-indigo-600', hover: 'hover:bg-indigo-700', challenge: 'bg-indigo-800' },
-  culture: { bg: 'bg-amber-600', hover: 'hover:bg-amber-700', challenge: 'bg-amber-800' },
-  destinations: { bg: 'bg-primary-700', hover: 'hover:bg-primary-800', challenge: 'bg-primary-900' },
+  nature: {
+    bg: 'bg-teal-600',
+    hover: 'hover:bg-teal-700',
+    challenge: 'bg-teal-800',
+  },
+  sports: {
+    bg: 'bg-blue-600',
+    hover: 'hover:bg-blue-700',
+    challenge: 'bg-blue-800',
+  },
+  culture: {
+    bg: 'bg-violet-600',
+    hover: 'hover:bg-violet-700',
+    challenge: 'bg-violet-800',
+  },
+  destinations: {
+    bg: 'bg-slate-700',
+    hover: 'hover:bg-slate-800',
+    challenge: 'bg-slate-900',
+  },
 };
 
 // Stat type for dynamic stats
