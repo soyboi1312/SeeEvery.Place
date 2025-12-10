@@ -84,16 +84,16 @@ export default async function PublicProfilePage({ params }: PageProps) {
     notFound();
   }
 
-  // Get the user's selections
-  const { data: selectionsData } = await supabase
+  // Get the user's selections using admin client to bypass RLS
+  // This is safe because we've already verified the profile is public
+  const adminClient = createAdminClient();
+  const { data: selectionsData } = await adminClient
     .from('user_selections')
     .select('selections')
     .eq('user_id', profile.id)
     .single();
 
   // Get the user's achievements using admin client to bypass RLS
-  // This is safe because we've already verified the profile is public
-  const adminClient = createAdminClient();
   const { data: achievements } = await adminClient
     .from('user_achievements')
     .select('id, achievement_id, unlocked_at, category')
