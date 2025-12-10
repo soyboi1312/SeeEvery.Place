@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { UserSelections } from '@/lib/types';
-import { loadFromCloud, mergeSelectionsFromCloud, syncToCloud } from '@/lib/sync';
+import { loadFromCloud, mergeSelectionsFromCloud, syncToCloud, syncAchievementsToCloud } from '@/lib/sync';
 import type { User } from '@supabase/supabase-js';
 
 interface UseCloudSyncOptions {
@@ -84,6 +84,10 @@ export function useCloudSync({
           console.error('Cloud sync aborted: failed to write to cloud');
           return;
         }
+
+        // Explicitly sync achievements on initial login to ensure existing users get their achievements stored
+        // This is important for users who had selections before achievement persistence was added
+        await syncAchievementsToCloud(merged);
 
         // Only mark as synced if both read and write succeeded
         lastSyncedData.current = JSON.stringify(merged);

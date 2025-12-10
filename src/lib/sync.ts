@@ -1,5 +1,12 @@
 import { createClient } from '@/lib/supabase/client';
 import { UserSelections, emptySelections, Selection } from '@/lib/types';
+import {
+  ACHIEVEMENTS,
+  calculateTotalXp,
+  calculateLevel,
+  isAchievementUnlocked,
+  getCategoryStats,
+} from '@/lib/achievements';
 
 // Retention period for deleted items (365 days in milliseconds)
 // Using a long retention prevents "zombie items" from being revived when a device
@@ -33,6 +40,12 @@ export async function syncToCloud(selections: UserSelections): Promise<boolean> 
     console.error('Failed to sync to cloud:', error);
     return false;
   }
+
+  // Sync achievements based on current selections
+  // This runs in the background and doesn't block the main sync
+  syncAchievementsToCloud(selections).catch(err => {
+    console.error('Failed to sync achievements:', err);
+  });
 
   return true;
 }
@@ -141,4 +154,88 @@ export async function deleteCloudData(): Promise<boolean> {
   }
 
   return true;
+}
+
+/**
+ * Syncs unlocked achievements to the database.
+ * Calculates which achievements are unlocked based on current selections
+ * and inserts any new ones that aren't already stored.
+ */
+export async function syncAchievementsToCloud(selections: UserSelections): Promise<boolean> {
+  const supabase = createClient();
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return false;
+
+  try {
+    // Calculate current level for level-based achievements
+    const totalXp = calculateTotalXp(selections);
+    const currentLevel = calculateLevel(totalXp);
+
+    // Get all achievements that should be unlocked
+    const unlockedAchievements = ACHIEVEMENTS.filter(achievement =>
+      isAchievementUnlocked(achievement, selections, currentLevel)
+    );
+
+    if (unlockedAchievements.length === 0) {
+      return true; // Nothing to sync
+    }
+
+    // Get existing achievements from database
+    const { data: existingAchievements, error: fetchError } = await supabase
+      .from('user_achievements')
+      .select('achievement_id')
+      .eq('user_id', user.id);
+
+    if (fetchError) {
+      console.error('Failed to fetch existing achievements:', fetchError);
+      return false;
+    }
+
+    const existingIds = new Set((existingAchievements || []).map(a => a.achievement_id));
+
+    // Filter to only new achievements
+    const newAchievements = unlockedAchievements.filter(a => !existingIds.has(a.id));
+
+    if (newAchievements.length === 0) {
+      return true; // All achievements already synced
+    }
+
+    // Prepare achievement records for insertion
+    const achievementRecords = newAchievements.map(achievement => {
+      // Get progress snapshot for category-specific achievements
+      let progressSnapshot = null;
+      if (achievement.category !== 'global') {
+        const stats = getCategoryStats(selections, achievement.category);
+        progressSnapshot = {
+          visited: stats.visited,
+          total: stats.total,
+          percentage: stats.percentage,
+        };
+      }
+
+      return {
+        user_id: user.id,
+        achievement_id: achievement.id,
+        category: achievement.category === 'global' ? null : achievement.category,
+        progress_snapshot: progressSnapshot,
+        unlocked_at: new Date().toISOString(),
+      };
+    });
+
+    // Insert new achievements
+    const { error: insertError } = await supabase
+      .from('user_achievements')
+      .insert(achievementRecords);
+
+    if (insertError) {
+      console.error('Failed to insert achievements:', insertError);
+      return false;
+    }
+
+    return true;
+  } catch (error) {
+    console.error('Failed to sync achievements:', error);
+    return false;
+  }
 }
