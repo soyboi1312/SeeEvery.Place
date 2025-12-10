@@ -9,6 +9,9 @@ export interface USTerritory {
 }
 
 export const usTerritories: USTerritory[] = [
+  // Federal District
+  { code: "DC", name: "District of Columbia", region: "Federal District", capital: "Washington", population: 689545, lat: 38.9072, lng: -77.0369 },
+
   // Caribbean Territories
   { code: "PR", name: "Puerto Rico", region: "Caribbean", capital: "San Juan", population: 3221000, lat: 18.2208, lng: -66.5901 },
   { code: "VI", name: "U.S. Virgin Islands", region: "Caribbean", capital: "Charlotte Amalie", population: 87146, lat: 18.3358, lng: -64.8963 },
@@ -30,7 +33,7 @@ export const usTerritories: USTerritory[] = [
   { code: "UM-NAV", name: "Navassa Island", region: "Caribbean", capital: "N/A", population: 0, lat: 18.4100, lng: -75.0115 },
 ];
 
-export const regions = ["Caribbean", "Pacific", "Pacific Islands"];
+export const regions = ["Federal District", "Caribbean", "Pacific", "Pacific Islands"];
 
 export const getTerritoriesByRegion = (region: string) =>
   usTerritories.filter(t => t.region === region);
