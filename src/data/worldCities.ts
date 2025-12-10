@@ -68,6 +68,8 @@ export const worldCities: WorldCity[] = [
   { id: "venice", name: "Venice", country: "Italy", countryCode: "IT", continent: "Europe", population: 261000, lat: 45.4408, lng: 12.3155 },
   { id: "edinburgh", name: "Edinburgh", country: "United Kingdom", countryCode: "GB", continent: "Europe", population: 527000, lat: 55.9533, lng: -3.1883 },
   { id: "manchester", name: "Manchester", country: "United Kingdom", countryCode: "GB", continent: "Europe", population: 2770000, lat: 53.4808, lng: -2.2426 },
+  { id: "monaco", name: "Monaco", country: "Monaco", countryCode: "MC", continent: "Europe", population: 39242, lat: 43.7384, lng: 7.4246 },
+  { id: "vatican-city", name: "Vatican City", country: "Vatican City", countryCode: "VA", continent: "Europe", population: 825, lat: 41.9029, lng: 12.4534 },
 
   // North America (excluding US - those are in usCities)
   { id: "mexico-city", name: "Mexico City", country: "Mexico", countryCode: "MX", continent: "North America", population: 21782000, lat: 19.4326, lng: -99.1332 },

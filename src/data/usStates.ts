@@ -31,7 +31,6 @@ export const usStates: USState[] = [
   { code: "TN", name: "Tennessee", region: "Southeast" },
   { code: "VA", name: "Virginia", region: "Southeast" },
   { code: "WV", name: "West Virginia", region: "Southeast" },
-  { code: "DC", name: "Washington D.C.", region: "Southeast" },
 
   // Midwest
   { code: "IL", name: "Illinois", region: "Midwest" },
