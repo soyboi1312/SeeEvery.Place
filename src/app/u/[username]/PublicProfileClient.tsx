@@ -12,6 +12,7 @@ import {
   getCategoriesStarted,
   getCategoryStats,
   getTierColor,
+  getUnlockedAchievements,
   AchievementDefinition,
 } from '@/lib/achievements';
 import {
@@ -127,11 +128,11 @@ export default function PublicProfileClient({
     }).filter((s): s is NonNullable<typeof s> => s !== null && (s.visited > 0 || s.bucketList > 0));
   }, [selections, profile.privacy_settings]);
 
-  // Get unlocked achievement details
+  // Get unlocked achievements by calculating from selections
+  // This ensures consistency with the displayed XP/Level which are also derived from selections
   const unlockedAchievements = useMemo(() => {
-    const achievementIds = new Set(achievements.map((a) => a.achievement_id));
-    return ACHIEVEMENTS.filter((a) => achievementIds.has(a.id));
-  }, [achievements]);
+    return getUnlockedAchievements(selections, []);
+  }, [selections]);
 
   const displayName = profile.full_name || username;
   const memberSince = new Date(profile.created_at).toLocaleDateString('en-US', {
