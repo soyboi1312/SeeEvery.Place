@@ -16,6 +16,11 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 
+interface ProfileData {
+  full_name?: string;
+  level?: number;
+}
+
 interface Props {
   params: Promise<{ username: string }>;
 }
@@ -28,7 +33,7 @@ export default async function Image({ params }: Props) {
     .rpc('get_public_profile', { profile_username: username })
     .single();
 
-  const profile = data;
+  const profile = data as ProfileData | null;
   const displayName = profile?.full_name || username;
   const level = profile?.level || 1;
 
