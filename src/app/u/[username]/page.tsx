@@ -91,12 +91,10 @@ export default async function PublicProfilePage({ params }: PageProps) {
     .eq('user_id', profile.id)
     .single();
 
-  // Get the user's achievements
+  // Get the user's achievements using SECURITY DEFINER function
+  // This bypasses RLS to properly fetch achievements for public profiles
   const { data: achievements } = await supabase
-    .from('user_achievements')
-    .select('*')
-    .eq('user_id', profile.id)
-    .order('unlocked_at', { ascending: false });
+    .rpc('get_public_user_achievements', { target_user_id: profile.id });
 
   return (
     <PublicProfileClient
