@@ -31,6 +31,10 @@ export const themeParks: ThemePark[] = [
   { id: "seaworld-orlando", name: "SeaWorld Orlando", location: "Orlando, Florida", country: "USA", region: "North America", lat: 28.4111, lng: -81.4612, opened: 1973 },
   { id: "legoland-california", name: "Legoland California", location: "Carlsbad, California", country: "USA", region: "North America", lat: 33.1267, lng: -117.3114, opened: 1999 },
   { id: "wonderland", name: "Canada's Wonderland", location: "Vaughan, Ontario", country: "Canada", region: "North America", lat: 43.8430, lng: -79.5393, opened: 1981 },
+  { id: "hersheypark", name: "Hersheypark", location: "Hershey, Pennsylvania", country: "USA", region: "North America", lat: 40.2887, lng: -76.6549, opened: 1906 },
+  { id: "dollywood", name: "Dollywood", location: "Pigeon Forge, Tennessee", country: "USA", region: "North America", lat: 35.7953, lng: -83.5306, opened: 1961 },
+  { id: "knotts", name: "Knott's Berry Farm", location: "Buena Park, California", country: "USA", region: "North America", lat: 33.8442, lng: -117.9986, opened: 1920 },
+  { id: "kings-island", name: "Kings Island", location: "Mason, Ohio", country: "USA", region: "North America", lat: 39.3447, lng: -84.2686, opened: 1972 },
 
   // Asia - Japan
   { id: "tokyo-disneyland", name: "Tokyo Disneyland", location: "Urayasu, Chiba", country: "Japan", region: "Asia", lat: 35.6329, lng: 139.8804, opened: 1983 },
@@ -46,6 +50,8 @@ export const themeParks: ThemePark[] = [
   { id: "everland", name: "Everland", location: "Yongin, Gyeonggi", country: "South Korea", region: "Asia", lat: 37.2933, lng: 127.2022, opened: 1976 },
   { id: "lotte-world", name: "Lotte World", location: "Seoul", country: "South Korea", region: "Asia", lat: 37.5111, lng: 127.0980, opened: 1989 },
   { id: "ocean-park", name: "Ocean Park Hong Kong", location: "Hong Kong", country: "Hong Kong", region: "Asia", lat: 22.2467, lng: 114.1749, opened: 1977 },
+  { id: "universal-singapore", name: "Universal Studios Singapore", location: "Sentosa", country: "Singapore", region: "Asia", lat: 1.2540, lng: 103.8238, opened: 2010 },
+  { id: "fuji-q", name: "Fuji-Q Highland", location: "Fujiyoshida", country: "Japan", region: "Asia", lat: 35.4869, lng: 138.7806, opened: 1968 },
 
   // Europe
   { id: "disneyland-paris", name: "Disneyland Paris", location: "Marne-la-Vallée", country: "France", region: "Europe", lat: 48.8722, lng: 2.7758, opened: 1992 },
@@ -57,6 +63,9 @@ export const themeParks: ThemePark[] = [
   { id: "alton-towers", name: "Alton Towers", location: "Staffordshire", country: "UK", region: "Europe", lat: 52.9880, lng: -1.8910, opened: 1980 },
   { id: "phantasialand", name: "Phantasialand", location: "Brühl", country: "Germany", region: "Europe", lat: 50.7989, lng: 6.8792, opened: 1967 },
   { id: "legoland-billund", name: "Legoland Billund", location: "Billund", country: "Denmark", region: "Europe", lat: 55.7352, lng: 9.1267, opened: 1968 },
+  { id: "gardaland", name: "Gardaland", location: "Castelnuovo del Garda", country: "Italy", region: "Europe", lat: 45.4550, lng: 10.7137, opened: 1975 },
+  { id: "parc-asterix", name: "Parc Astérix", location: "Plailly", country: "France", region: "Europe", lat: 49.1342, lng: 2.5711, opened: 1989 },
+  { id: "liseberg", name: "Liseberg", location: "Gothenburg", country: "Sweden", region: "Europe", lat: 57.6963, lng: 11.9905, opened: 1923 },
 
   // Oceania
   { id: "dreamworld", name: "Dreamworld", location: "Gold Coast, Queensland", country: "Australia", region: "Oceania", lat: -27.8609, lng: 153.3134, opened: 1981 },
@@ -65,6 +74,7 @@ export const themeParks: ThemePark[] = [
   // Middle East
   { id: "ferrari-world", name: "Ferrari World Abu Dhabi", location: "Yas Island", country: "UAE", region: "Middle East", lat: 24.4838, lng: 54.6073, opened: 2010 },
   { id: "img-worlds", name: "IMG Worlds of Adventure", location: "Dubai", country: "UAE", region: "Middle East", lat: 25.0467, lng: 55.2200, opened: 2016 },
+  { id: "wb-abudhabi", name: "Warner Bros. World", location: "Abu Dhabi", country: "UAE", region: "Middle East", lat: 24.4911, lng: 54.5965, opened: 2018 },
 ];
 
 export const themeParkRegions = ["North America", "Asia", "Europe", "Oceania", "Middle East"];

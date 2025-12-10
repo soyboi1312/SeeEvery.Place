@@ -20,11 +20,20 @@ export const museums: Museum[] = [
   { id: "met", name: "The Metropolitan Museum of Art", city: "New York", country: "USA", type: "Art", lat: 40.7794, lng: -73.9632 },
   { id: "moma", name: "Museum of Modern Art (MoMA)", city: "New York", country: "USA", type: "Modern Art", lat: 40.7614, lng: -73.9776 },
   { id: "guggenheim-nyc", name: "Solomon R. Guggenheim Museum", city: "New York", country: "USA", type: "Modern Art", lat: 40.7830, lng: -73.9590 },
-  { id: "smithsonian", name: "Smithsonian National Museum", city: "Washington D.C.", country: "USA", type: "Natural History", lat: 38.8913, lng: -77.0261 },
+  { id: "nmnh-dc", name: "Smithsonian National Museum of Natural History", city: "Washington D.C.", country: "USA", type: "Natural History", lat: 38.8913, lng: -77.0261 },
   { id: "air-space", name: "National Air and Space Museum", city: "Washington D.C.", country: "USA", type: "Science", lat: 38.8882, lng: -77.0199 },
   { id: "getty", name: "The Getty Center", city: "Los Angeles", country: "USA", type: "Art", lat: 34.0780, lng: -118.4741 },
   { id: "art-institute-chicago", name: "Art Institute of Chicago", city: "Chicago", country: "USA", type: "Art", lat: 41.8796, lng: -87.6237 },
   { id: "mfa-boston", name: "Museum of Fine Arts", city: "Boston", country: "USA", type: "Art", lat: 42.3394, lng: -71.0940 },
+  { id: "amnh-nyc", name: "American Museum of Natural History", city: "New York", country: "USA", type: "Natural History", lat: 40.7813, lng: -73.9740 },
+  { id: "whitney-nyc", name: "Whitney Museum of American Art", city: "New York", country: "USA", type: "Art", lat: 40.7396, lng: -74.0089 },
+  { id: "nga-dc", name: "National Gallery of Art", city: "Washington D.C.", country: "USA", type: "Art", lat: 38.8915, lng: -77.0193 },
+  { id: "nmaahc-dc", name: "National Museum of African American History and Culture", city: "Washington D.C.", country: "USA", type: "History", lat: 38.8911, lng: -77.0326 },
+  { id: "field-museum", name: "Field Museum", city: "Chicago", country: "USA", type: "Natural History", lat: 41.8663, lng: -87.6170 },
+  { id: "msi-chicago", name: "Museum of Science and Industry", city: "Chicago", country: "USA", type: "Science", lat: 41.7919, lng: -87.5833 },
+  { id: "lacma", name: "Los Angeles County Museum of Art (LACMA)", city: "Los Angeles", country: "USA", type: "Art", lat: 34.0639, lng: -118.3592 },
+  { id: "the-broad", name: "The Broad", city: "Los Angeles", country: "USA", type: "Modern Art", lat: 34.0545, lng: -118.2502 },
+  { id: "academy-museum", name: "Academy Museum of Motion Pictures", city: "Los Angeles", country: "USA", type: "Film", lat: 34.0633, lng: -118.3608 },
 
   // UK
   { id: "british-museum", name: "British Museum", city: "London", country: "UK", type: "History", lat: 51.5194, lng: -0.1270 },
@@ -38,6 +47,10 @@ export const museums: Museum[] = [
   { id: "van-gogh", name: "Van Gogh Museum", city: "Amsterdam", country: "Netherlands", type: "Art", lat: 52.3584, lng: 4.8811 },
   { id: "anne-frank", name: "Anne Frank House", city: "Amsterdam", country: "Netherlands", type: "History", lat: 52.3752, lng: 4.8840 },
 
+  // Greece
+  { id: "acropolis-museum", name: "Acropolis Museum", city: "Athens", country: "Greece", type: "History", lat: 37.9685, lng: 23.7285 },
+  { id: "nam-athens", name: "National Archaeological Museum", city: "Athens", country: "Greece", type: "History", lat: 37.9893, lng: 23.7327 },
+
   // Spain
   { id: "prado", name: "Museo del Prado", city: "Madrid", country: "Spain", type: "Art", lat: 40.4138, lng: -3.6921 },
   { id: "reina-sofia", name: "Museo Reina Sofía", city: "Madrid", country: "Spain", type: "Modern Art", lat: 40.4086, lng: -3.6944 },
@@ -48,11 +61,16 @@ export const museums: Museum[] = [
   { id: "vatican-museums", name: "Vatican Museums", city: "Vatican City", country: "Italy", type: "Art", lat: 41.9065, lng: 12.4536 },
   { id: "accademia", name: "Galleria dell'Accademia", city: "Florence", country: "Italy", type: "Art", lat: 43.7769, lng: 11.2587 },
   { id: "borghese", name: "Galleria Borghese", city: "Rome", country: "Italy", type: "Art", lat: 41.9142, lng: 12.4922 },
+  { id: "capitoline-museums", name: "Capitoline Museums", city: "Rome", country: "Italy", type: "History", lat: 41.8931, lng: 12.4827 },
 
   // Germany
   { id: "pergamon", name: "Pergamon Museum", city: "Berlin", country: "Germany", type: "History", lat: 52.5212, lng: 13.3969 },
   { id: "neues-museum", name: "Neues Museum", city: "Berlin", country: "Germany", type: "History", lat: 52.5206, lng: 13.3979 },
   { id: "alte-pinakothek", name: "Alte Pinakothek", city: "Munich", country: "Germany", type: "Art", lat: 48.1482, lng: 11.5700 },
+  { id: "deutsches-museum", name: "Deutsches Museum", city: "Munich", country: "Germany", type: "Science", lat: 48.1299, lng: 11.5834 },
+
+  // Sweden
+  { id: "vasa-museum", name: "Vasa Museum", city: "Stockholm", country: "Sweden", type: "History", lat: 59.3280, lng: 18.0914 },
 
   // Austria
   { id: "kunsthistorisches", name: "Kunsthistorisches Museum", city: "Vienna", country: "Austria", type: "Art", lat: 48.2039, lng: 16.3616 },
@@ -65,12 +83,15 @@ export const museums: Museum[] = [
   // Asia
   { id: "national-palace-taipei", name: "National Palace Museum", city: "Taipei", country: "Taiwan", type: "Art", lat: 25.1024, lng: 121.5485 },
   { id: "tokyo-national", name: "Tokyo National Museum", city: "Tokyo", country: "Japan", type: "Art", lat: 35.7189, lng: 139.7765 },
+  { id: "mori-art", name: "Mori Art Museum", city: "Tokyo", country: "Japan", type: "Modern Art", lat: 35.6604, lng: 139.7292 },
+  { id: "teamlab-planets", name: "teamLab Planets", city: "Tokyo", country: "Japan", type: "Digital Art", lat: 35.6476, lng: 139.7953 },
   { id: "national-museum-korea", name: "National Museum of Korea", city: "Seoul", country: "South Korea", type: "History", lat: 37.5209, lng: 126.9803 },
   { id: "shanghai-museum", name: "Shanghai Museum", city: "Shanghai", country: "China", type: "Art", lat: 31.2290, lng: 121.4731 },
   { id: "forbidden-city", name: "Palace Museum (Forbidden City)", city: "Beijing", country: "China", type: "History", lat: 39.9163, lng: 116.3972 },
 
   // Middle East
   { id: "egyptian-museum", name: "Egyptian Museum", city: "Cairo", country: "Egypt", type: "History", lat: 30.0478, lng: 31.2336 },
+  { id: "gem-cairo", name: "Grand Egyptian Museum", city: "Giza", country: "Egypt", type: "History", lat: 29.9947, lng: 31.1196 },
   { id: "louvre-abu-dhabi", name: "Louvre Abu Dhabi", city: "Abu Dhabi", country: "UAE", type: "Art", lat: 24.5336, lng: 54.3984 },
   { id: "israel-museum", name: "Israel Museum", city: "Jerusalem", country: "Israel", type: "Art & History", lat: 31.7741, lng: 35.2042 },
 
@@ -80,6 +101,7 @@ export const museums: Museum[] = [
 
   // Latin America
   { id: "museo-nacional-antropologia", name: "Museo Nacional de Antropología", city: "Mexico City", country: "Mexico", type: "History", lat: 19.4260, lng: -99.1863 },
+  { id: "frida-kahlo", name: "Frida Kahlo Museum (Casa Azul)", city: "Mexico City", country: "Mexico", type: "Art", lat: 19.3551, lng: -99.1624 },
   { id: "masp", name: "MASP", city: "São Paulo", country: "Brazil", type: "Art", lat: -23.5614, lng: -46.6558 },
 ];
 
