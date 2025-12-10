@@ -43,6 +43,7 @@ import {
 import { useAuth } from '@/lib/hooks/useAuth';
 import { useDarkMode } from '@/lib/hooks/useDarkMode';
 import { useCloudSync } from '@/lib/hooks/useCloudSync';
+import { createClient } from '@/lib/supabase/client';
 import { categoryTotals, categoryTitles, getCategoryItemsAsync, type CategoryItem } from '@/lib/categoryUtils';
 
 export default function Home() {
@@ -52,6 +53,7 @@ export default function Home() {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const [currentItems, setCurrentItems] = useState<CategoryItem[]>([]);
+  const [profileData, setProfileData] = useState<{ isPublic: boolean; username: string | null }>({ isPublic: false, username: null });
   const { user, signOut, isAdmin } = useAuth();
   const { isDarkMode, toggleDarkMode } = useDarkMode();
 
@@ -73,6 +75,29 @@ export default function Home() {
     setSelections(saved);
     setIsLoaded(true);
   }, []);
+
+  // Fetch profile data for share modal (public profile link)
+  useEffect(() => {
+    if (!user) {
+      setProfileData({ isPublic: false, username: null });
+      return;
+    }
+
+    const fetchProfile = async () => {
+      const supabase = createClient();
+      const { data } = await supabase
+        .from('profiles')
+        .select('is_public, username')
+        .eq('id', user.id)
+        .single();
+
+      if (data) {
+        setProfileData({ isPublic: data.is_public || false, username: data.username });
+      }
+    };
+
+    fetchProfile();
+  }, [user]);
 
   // Track pending save for beforeunload handler
   const pendingSaveRef = useRef<NodeJS.Timeout | null>(null);
@@ -326,6 +351,8 @@ export default function Home() {
           selections={selections}
           category={activeCategory}
           onClose={() => setShowShareCard(false)}
+          isPublicProfile={profileData.isPublic}
+          username={profileData.username}
         />
       )}
 
