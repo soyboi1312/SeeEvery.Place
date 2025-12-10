@@ -77,7 +77,7 @@ export const countries: Country[] = [
   { code: "ID", name: "Indonesia", continent: "Asia" },
   { code: "IR", name: "Iran", continent: "Asia" },
   { code: "IQ", name: "Iraq", continent: "Asia" },
-  { code: "IL", name: "Israel", continent: "Asia" },
+  { code: "IL", name: "Israel (Occupied Palestine)", continent: "Asia" },
   { code: "JP", name: "Japan", continent: "Asia" },
   { code: "JO", name: "Jordan", continent: "Asia" },
   { code: "KZ", name: "Kazakhstan", continent: "Asia" },
