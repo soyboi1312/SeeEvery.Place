@@ -22,6 +22,8 @@ interface Suggestion {
   created_at: string;
 }
 
+type SortOption = 'popular' | 'newest';
+
 export default function SuggestPage() {
   const { isDarkMode, toggleDarkMode } = useDarkMode();
   const { user } = useAuth();
@@ -32,6 +34,8 @@ export default function SuggestPage() {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [supabaseReady, setSupabaseReady] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [sortBy, setSortBy] = useState<SortOption>('popular');
+  const [searchQuery, setSearchQuery] = useState('');
 
   // React Hook Form setup with Zod validation
   const {
@@ -66,11 +70,11 @@ export default function SuggestPage() {
     if (!supabase) return;
     try {
       // Limit to top 100 suggestions to prevent performance issues at scale
-      // Sorted by vote_count so users always see the most popular first
+      const orderColumn = sortBy === 'popular' ? 'vote_count' : 'created_at';
       const { data, error } = await supabase
         .from('suggestions')
         .select('*')
-        .order('vote_count', { ascending: false })
+        .order(orderColumn, { ascending: false })
         .limit(100);
 
       if (error) throw error;
@@ -80,7 +84,7 @@ export default function SuggestPage() {
     } finally {
       setLoading(false);
     }
-  }, [supabase]);
+  }, [supabase, sortBy]);
 
   const loadVotes = useCallback(async () => {
     if (!supabase || !user) return;
@@ -104,6 +108,17 @@ export default function SuggestPage() {
       loadVotes();
     }
   }, [supabaseReady, loadSuggestions, loadVotes]);
+
+  // Filter suggestions by search query
+  const filteredSuggestions = useMemo(() => {
+    if (!searchQuery.trim()) return suggestions;
+    const query = searchQuery.toLowerCase();
+    return suggestions.filter(s =>
+      s.title.toLowerCase().includes(query) ||
+      s.description?.toLowerCase().includes(query) ||
+      s.example_places?.toLowerCase().includes(query)
+    );
+  }, [suggestions, searchQuery]);
 
   const onSubmit = async (data: SuggestionFormData) => {
     setSubmitError(null);
@@ -146,15 +161,51 @@ export default function SuggestPage() {
 
     const hasVoted = votedIds.has(suggestionId);
 
+    // Optimistic update
+    if (hasVoted) {
+      setVotedIds(prev => {
+        const next = new Set(prev);
+        next.delete(suggestionId);
+        return next;
+      });
+      setSuggestions(prev =>
+        prev.map(s => s.id === suggestionId ? { ...s, vote_count: s.vote_count - 1 } : s)
+      );
+    } else {
+      setVotedIds(prev => new Set(prev).add(suggestionId));
+      setSuggestions(prev =>
+        prev.map(s => s.id === suggestionId ? { ...s, vote_count: s.vote_count + 1 } : s)
+      );
+    }
+
     try {
       if (hasVoted) {
         // Remove vote
-        await supabase
+        const { error } = await supabase
           .from('suggestion_votes')
           .delete()
           .eq('suggestion_id', suggestionId)
           .eq('voter_id', user.id);
 
+        if (error) throw error;
+      } else {
+        // Add vote
+        const { error } = await supabase
+          .from('suggestion_votes')
+          .insert({ suggestion_id: suggestionId, voter_id: user.id });
+
+        if (error) throw error;
+      }
+    } catch {
+      // Rollback on error
+      if (hasVoted) {
+        // Restore the vote
+        setVotedIds(prev => new Set(prev).add(suggestionId));
+        setSuggestions(prev =>
+          prev.map(s => s.id === suggestionId ? { ...s, vote_count: s.vote_count + 1 } : s)
+        );
+      } else {
+        // Remove the vote
         setVotedIds(prev => {
           const next = new Set(prev);
           next.delete(suggestionId);
@@ -163,19 +214,7 @@ export default function SuggestPage() {
         setSuggestions(prev =>
           prev.map(s => s.id === suggestionId ? { ...s, vote_count: s.vote_count - 1 } : s)
         );
-      } else {
-        // Add vote
-        await supabase
-          .from('suggestion_votes')
-          .insert({ suggestion_id: suggestionId, voter_id: user.id });
-
-        setVotedIds(prev => new Set(prev).add(suggestionId));
-        setSuggestions(prev =>
-          prev.map(s => s.id === suggestionId ? { ...s, vote_count: s.vote_count + 1 } : s)
-        );
       }
-    } catch {
-      // Ignore vote errors (likely duplicate)
     }
   };
 
@@ -401,24 +440,73 @@ export default function SuggestPage() {
 
           {/* Suggestions List */}
           <div>
-            <h2 className="text-xl font-bold text-primary-900 dark:text-white mb-6 flex items-center gap-2">
+            <h2 className="text-xl font-bold text-primary-900 dark:text-white mb-4 flex items-center gap-2">
               <span className="text-2xl">🗳️</span> Vote for Categories
             </h2>
+
+            {/* Search and Sort Controls */}
+            <div className="mb-4 space-y-3">
+              {/* Search Bar */}
+              <div className="relative">
+                <svg
+                  className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+                <input
+                  type="text"
+                  placeholder="Search suggestions..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                />
+              </div>
+
+              {/* Sort Toggle */}
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setSortBy('popular')}
+                  className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                    sortBy === 'popular'
+                      ? 'bg-primary-700 text-white'
+                      : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'
+                  }`}
+                >
+                  Popular
+                </button>
+                <button
+                  onClick={() => setSortBy('newest')}
+                  className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                    sortBy === 'newest'
+                      ? 'bg-primary-700 text-white'
+                      : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'
+                  }`}
+                >
+                  Newest
+                </button>
+              </div>
+            </div>
 
             {loading ? (
               <div className="text-center py-12 text-gray-500 dark:text-gray-400">
                 Loading suggestions...
               </div>
-            ) : suggestions.length === 0 ? (
+            ) : filteredSuggestions.length === 0 ? (
               <div className="bg-white dark:bg-slate-800 rounded-2xl p-8 shadow-premium border border-black/5 dark:border-white/10 text-center">
-                <div className="text-5xl mb-4">📭</div>
+                <div className="text-5xl mb-4">{searchQuery ? '🔍' : '📭'}</div>
                 <p className="text-primary-600 dark:text-primary-300">
-                  No suggestions yet. Be the first to suggest a category!
+                  {searchQuery
+                    ? `No suggestions matching "${searchQuery}"`
+                    : 'No suggestions yet. Be the first to suggest a category!'
+                  }
                 </p>
               </div>
             ) : (
               <div className="space-y-3">
-                {suggestions.map((suggestion) => (
+                {filteredSuggestions.map((suggestion) => (
                   <div
                     key={suggestion.id}
                     className="bg-white dark:bg-slate-800 rounded-xl p-4 shadow-premium border border-black/5 dark:border-white/10 flex gap-4"
