@@ -6,12 +6,13 @@
 'use client';
 
 import { useCallback, useMemo, memo } from 'react';
-import { ComposableMap, Geographies, Geography, ZoomableGroup } from '@vnedyalk0v/react19-simple-maps';
+import { ComposableMap, Geographies, ZoomableGroup } from '@vnedyalk0v/react19-simple-maps';
 import { Status } from '@/lib/types';
 import { GEO_URL_USA, fipsToAbbr } from '@/lib/mapUtils';
 import { BaseMapProps } from './types';
 import { useMapZoom } from './useMapZoom';
 import ZoomControls from './ZoomControls';
+import { TappableGeography } from './TappableGeography';
 
 const USMap = memo(function USMap({ selections, onToggle, tooltip }: BaseMapProps) {
   const {
@@ -64,34 +65,16 @@ const USMap = memo(function USMap({ selections, onToggle, tooltip }: BaseMapProp
                 const id = fipsToAbbr[fips];
                 const name = geo.properties.name;
                 const status = id ? getStatus(id) : 'unvisited';
-                const statusClass = status === 'bucketList' ? 'bucket-list' : status;
 
                 return (
-                  <Geography
+                  <TappableGeography
                     key={geo.rsmKey}
-                    geography={geo}
-                    className={`region-path ${statusClass} outline-none focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500`}
-                    style={{
-                      default: { outline: "none" },
-                      hover: { outline: "none", filter: "brightness(0.9)" },
-                      pressed: { outline: "none" },
-                    }}
-                    data-tip={name}
-                    tabIndex={0}
-                    role="button"
-                    aria-label={`${name}, ${status === 'visited' ? 'visited' : status === 'bucketList' ? 'on bucket list' : 'not visited'}`}
-                    onClick={() => {
-                      if (id && onToggle) {
-                        onToggle(id, status);
-                      }
-                    }}
-                    onKeyDown={(e) => {
-                      if ((e.key === 'Enter' || e.key === ' ') && id && onToggle) {
-                        e.preventDefault();
-                        onToggle(id, status);
-                      }
-                    }}
-                    onMouseEnter={(e) => tooltip.onMouseEnter(name, e)}
+                    geo={geo}
+                    id={id}
+                    status={status}
+                    name={name}
+                    onToggle={onToggle}
+                    onMouseEnter={tooltip.onMouseEnter}
                     onMouseLeave={tooltip.onMouseLeave}
                     onMouseMove={tooltip.onMouseMove}
                   />
