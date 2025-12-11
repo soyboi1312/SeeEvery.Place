@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next'
 import './globals.css'
 import { QueryProvider } from '@/lib/providers/QueryProvider'
 import SystemBanner from '@/components/SystemBanner'
+import AchievementToast from '@/components/AchievementToast'
 
 // PWA Viewport settings (Controls the browser chrome color on mobile)
 export const viewport: Viewport = {
@@ -137,6 +138,7 @@ export default function RootLayout({
         />
         <QueryProvider>
           <SystemBanner />
+          <AchievementToast />
           <main className="min-h-screen">
             {children}
           </main>

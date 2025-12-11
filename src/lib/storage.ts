@@ -210,6 +210,8 @@ export function saveSelections(selections: UserSelections): void {
 
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(selections));
+    // Dispatch event so components can react to changes (e.g., achievement toasts)
+    window.dispatchEvent(new Event('selections-updated'));
   } catch (e) {
     console.error('Failed to save selections:', e);
   }
