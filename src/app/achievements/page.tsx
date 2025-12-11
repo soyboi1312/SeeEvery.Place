@@ -24,6 +24,14 @@ import { categoryLabels, categoryIcons, Category } from '@/lib/types';
 import type { User } from '@supabase/supabase-js';
 import type { UserSelections } from '@/lib/types';
 
+// Type for processed achievement items
+interface ProcessedAchievement {
+  achievement: AchievementDefinition;
+  isUnlocked: boolean;
+  progress: { current: number; target: number; percentage: number };
+  unlockedAt?: string;
+}
+
 // Achievement Badge SVG Component
 function AchievementBadge({
   achievement,
@@ -280,6 +288,7 @@ export default function AchievementsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'unlocked' | 'locked'>('all');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
+  const [newUnlocks, setNewUnlocks] = useState<ProcessedAchievement[]>([]);
 
   useEffect(() => {
     const supabase = createClient();
@@ -331,6 +340,32 @@ export default function AchievementsPage() {
       };
     });
   }, [selections, stats.level]);
+
+  // Effect to identify and manage new unlocks for highlighting
+  useEffect(() => {
+    if (processedAchievements.length === 0) return;
+
+    // Get list of known IDs (this key must match the one in AchievementToast)
+    const KNOWN_KEY = 'seeeveryplace_known_achievements';
+    const stored = localStorage.getItem(KNOWN_KEY);
+    const knownIds: string[] = stored ? JSON.parse(stored) : [];
+
+    // Filter for unlocked items that aren't in the known list
+    const brandNew = processedAchievements.filter(item =>
+      item.isUnlocked && !knownIds.includes(item.achievement.id)
+    );
+
+    if (brandNew.length > 0) {
+      setNewUnlocks(brandNew);
+
+      // Mark them as known after viewing
+      const allUnlockedIds = processedAchievements
+        .filter(a => a.isUnlocked)
+        .map(a => a.achievement.id);
+
+      localStorage.setItem(KNOWN_KEY, JSON.stringify(allUnlockedIds));
+    }
+  }, [processedAchievements]);
 
   // Filter achievements
   const filteredAchievements = useMemo(() => {
@@ -464,6 +499,29 @@ export default function AchievementsPage() {
             <div className="text-sm text-primary-600 dark:text-primary-300">Places Visited</div>
           </div>
         </div>
+
+        {/* New Achievements Alert */}
+        {newUnlocks.length > 0 && (
+          <div className="mb-8 p-6 bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border border-yellow-500/30 rounded-xl relative overflow-hidden">
+            <div className="absolute top-0 right-0 p-4 opacity-10 text-6xl">
+              <span role="img" aria-label="trophy">&#127942;</span>
+            </div>
+            <h3 className="text-xl font-bold text-yellow-700 dark:text-yellow-400 mb-4 flex items-center gap-2">
+              <span className="animate-pulse" role="img" aria-label="sparkles">&#10024;</span> New Unlocks!
+            </h3>
+            <div className="space-y-4">
+              {newUnlocks.map((item) => (
+                <AchievementCard
+                  key={item.achievement.id}
+                  achievement={item.achievement}
+                  isUnlocked={true}
+                  progress={item.progress}
+                  unlockedAt={new Date().toISOString()}
+                />
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Level Progress */}
         <div className="bg-gradient-to-r from-purple-500/10 to-blue-500/10 dark:from-purple-500/20 dark:to-blue-500/20 rounded-xl p-6 mb-8 border border-purple-500/20 dark:border-purple-500/30">
