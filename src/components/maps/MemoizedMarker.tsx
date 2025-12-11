@@ -43,14 +43,19 @@ const MemoizedMarker = memo(function MemoizedMarker({
     onToggle?.(id, status);
   }, [id, status, onToggle]);
 
-  const { onTouchStart, onTouchEnd } = useMobileTap(handleTap);
+  // Use the unified pointer hook for both desktop and mobile
+  const { onPointerDown, onPointerUp, onPointerLeave } = useMobileTap(handleTap);
 
   return (
     <Marker
       // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Library uses branded Longitude/Latitude types
       coordinates={coordinates as any}
-      onClick={handleTap}
-      onMouseEnter={(e) => onMouseEnter(name, e)}
+      onMouseEnter={(e) => {
+        // Prevent sticky tooltips on touch devices by checking pointerType
+        const nativeEvent = e.nativeEvent as PointerEvent;
+        if (nativeEvent.pointerType === 'touch') return;
+        onMouseEnter(name, e);
+      }}
       onMouseLeave={onMouseLeave}
       onMouseMove={onMouseMove}
     >
@@ -59,8 +64,9 @@ const MemoizedMarker = memo(function MemoizedMarker({
         tabIndex={0}
         role="button"
         aria-label={`${name}, ${statusLabel}`}
-        onTouchStart={onTouchStart}
-        onTouchEnd={onTouchEnd}
+        onPointerDown={onPointerDown}
+        onPointerUp={onPointerUp}
+        onPointerLeave={onPointerLeave}
         onKeyDown={(e) => {
           if ((e.key === 'Enter' || e.key === ' ') && onToggle) {
             e.preventDefault();
