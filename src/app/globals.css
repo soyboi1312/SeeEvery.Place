@@ -169,3 +169,21 @@ input[type="text"] {
 .bg-warm {
   background-color: rgb(var(--background-start-rgb));
 }
+
+/* Zoom controls visibility - only hide on devices that support hover */
+/* On touch devices (tablets, phones), controls are always visible */
+.zoom-controls-hover {
+  opacity: 1;
+  transition: opacity 200ms ease;
+}
+
+@media (hover: hover) {
+  /* Device supports hover (mouse/trackpad) - hide by default, show on hover */
+  .zoom-controls-hover {
+    opacity: 0;
+  }
+  .group:hover .zoom-controls-hover,
+  .zoom-controls-hover:focus-within {
+    opacity: 1;
+  }
+}
