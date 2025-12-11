@@ -17,7 +17,8 @@ interface PointerState {
 // Maximum duration (ms) for a touch/click to be considered a tap
 const MAX_TAP_DURATION = 500;
 // Maximum movement (px) for a touch/click to be considered a tap
-const MAX_TAP_DISTANCE = 15;
+// 30px accounts for "fat finger" wobble on high-DPI tablet screens
+const MAX_TAP_DISTANCE = 30;
 
 export function useMobileTap(onTap: () => void) {
   const state = useRef<PointerState>({

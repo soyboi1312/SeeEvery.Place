@@ -24,7 +24,7 @@ const ZoomControls = memo(function ZoomControls({
   showReset = false,
 }: ZoomControlsProps) {
   return (
-    <div className="absolute bottom-4 right-4 flex flex-col gap-1 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity duration-200 hidden sm:flex z-10">
+    <div className="absolute bottom-4 right-4 flex flex-col gap-1 zoom-controls-hover hidden sm:flex z-10">
       <button
         onClick={onZoomIn}
         disabled={!canZoomIn}
