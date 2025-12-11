@@ -5,10 +5,11 @@
  */
 'use client';
 
-import { memo, ReactNode } from 'react';
+import { memo, ReactNode, useCallback } from 'react';
 import { Marker } from '@vnedyalk0v/react19-simple-maps';
 import { Status } from '@/lib/types';
 import { MarkerSize } from '@/components/MapMarkers';
+import { useMobileTap } from './useMobileTap';
 
 interface MemoizedMarkerProps {
   id: string;
@@ -38,11 +39,17 @@ const MemoizedMarker = memo(function MemoizedMarker({
   // size prop is used for comparison only; actual rendering uses children
   const statusLabel = status === 'visited' ? 'visited' : status === 'bucketList' ? 'on bucket list' : 'not visited';
 
+  const handleTap = useCallback(() => {
+    onToggle?.(id, status);
+  }, [id, status, onToggle]);
+
+  const { onTouchStart, onTouchEnd } = useMobileTap(handleTap);
+
   return (
     <Marker
       // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Library uses branded Longitude/Latitude types
       coordinates={coordinates as any}
-      onClick={() => onToggle?.(id, status)}
+      onClick={handleTap}
       onMouseEnter={(e) => onMouseEnter(name, e)}
       onMouseLeave={onMouseLeave}
       onMouseMove={onMouseMove}
@@ -52,6 +59,8 @@ const MemoizedMarker = memo(function MemoizedMarker({
         tabIndex={0}
         role="button"
         aria-label={`${name}, ${statusLabel}`}
+        onTouchStart={onTouchStart}
+        onTouchEnd={onTouchEnd}
         onKeyDown={(e) => {
           if ((e.key === 'Enter' || e.key === ' ') && onToggle) {
             e.preventDefault();
