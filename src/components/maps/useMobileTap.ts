@@ -15,9 +15,11 @@ interface TouchState {
 }
 
 // Maximum duration (ms) for a touch to be considered a tap
-const MAX_TAP_DURATION = 300;
+// Increased to 500ms to be more forgiving
+const MAX_TAP_DURATION = 500;
 // Maximum movement (px) for a touch to be considered a tap
-const MAX_TAP_DISTANCE = 10;
+// Increased to 30px to account for "fat finger" wobble on high-DPI screens
+const MAX_TAP_DISTANCE = 30;
 
 export function useMobileTap(onTap: () => void) {
   const touchState = useRef<TouchState | null>(null);
@@ -37,6 +39,7 @@ export function useMobileTap(onTap: () => void) {
     if (!touchState.current) return;
 
     const state = touchState.current;
+    // We don't nullify immediately if we want to debug, but strictly logic-wise:
     touchState.current = null;
 
     // Only process single-touch gestures
@@ -50,7 +53,13 @@ export function useMobileTap(onTap: () => void) {
 
     // If it was a quick tap without much movement, trigger the callback
     if (duration < MAX_TAP_DURATION && distance < MAX_TAP_DISTANCE) {
-      e.preventDefault();
+      // Prevent default to stop the browser from firing simulated mouse events
+      // (mouseenter, click) which causes double-tap issues and sticky tooltips.
+      if (e.cancelable) e.preventDefault();
+
+      // Stop propagation to prevent parent zoom handlers from reacting if needed
+      e.stopPropagation();
+
       onTap();
     }
   }, [onTap]);
