@@ -56,11 +56,12 @@ export function useMobileTap(onTap: () => void) {
 
     // If it was a quick tap without much movement
     if (duration < MAX_TAP_DURATION && dist < MAX_TAP_DISTANCE) {
-      // Prevent default to avoid double-firing or synthetic clicks
+      // Prevent default to avoid double-firing synthetic clicks or browser zooming
       if (e.cancelable) e.preventDefault();
 
-      // Stop propagation to ensure the map doesn't try to pan/zoom slightly
-      e.stopPropagation();
+      // NOTE: We intentionally do NOT call e.stopPropagation() here.
+      // The event must bubble up so the map container (ZoomableGroup/D3)
+      // receives pointerup and correctly ends its drag state.
 
       onTap();
     }
