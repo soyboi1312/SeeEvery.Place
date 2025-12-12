@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import Header from '@/components/Header';
@@ -49,6 +50,7 @@ import { createClient } from '@/lib/supabase/client';
 import { categoryTotals, categoryTitles, getCategoryItemsAsync, type CategoryItem } from '@/lib/categoryUtils';
 
 export default function Home() {
+  const searchParams = useSearchParams();
   const [selections, setSelections] = useState<UserSelections>(emptySelections);
   const [activeCategory, setActiveCategory] = useState<Category>('countries');
   const [showShareCard, setShowShareCard] = useState(false);
@@ -70,6 +72,14 @@ export default function Home() {
   const handleCategoryChange = useCallback((category: Category) => {
     setActiveCategory(category);
   }, []);
+
+  // Sync activeCategory with URL search params (for Explore dropdown navigation)
+  useEffect(() => {
+    const category = searchParams.get('category');
+    if (category && category in categoryLabels) {
+      setActiveCategory(category as Category);
+    }
+  }, [searchParams]);
 
   // Load selections from localStorage on mount (async for lazy-loaded migrations)
   useEffect(() => {
