@@ -20,6 +20,8 @@ const AuthModal = dynamic(() => import('@/components/AuthModal'), {
   ssr: false,
 });
 
+import MapErrorBoundary from '@/components/MapErrorBoundary';
+
 const MapVisualization = dynamic(() => import('@/components/MapVisualization'), {
   loading: () => (
     <div className="w-full bg-blue-50/50 dark:bg-slate-800/50 rounded-2xl overflow-hidden border border-blue-100 dark:border-slate-700 shadow-inner mb-6">
@@ -198,11 +200,70 @@ export default function Home() {
   }, [selections]);
 
   if (!isLoaded) {
+    // Page Skeleton - matches the actual layout for smooth transition
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="text-4xl mb-4 animate-bounce">🗺️</div>
-          <p className="text-gray-500">Loading your travels...</p>
+      <div className="min-h-screen bg-white dark:bg-gray-900">
+        {/* Header Skeleton */}
+        <header className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-gray-200/60 dark:border-slate-700/60 sticky top-0 z-40">
+          <div className="max-w-6xl mx-auto px-4 py-2 sm:py-3 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 bg-gray-200 dark:bg-slate-700 rounded animate-pulse" />
+              <div className="flex flex-col gap-1">
+                <div className="w-32 h-5 bg-gray-200 dark:bg-slate-700 rounded animate-pulse" />
+                <div className="w-20 h-2 bg-gray-200 dark:bg-slate-700 rounded animate-pulse hidden sm:block" />
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gray-200 dark:bg-slate-700 rounded-lg animate-pulse" />
+              <div className="w-20 h-10 bg-gray-200 dark:bg-slate-700 rounded-lg animate-pulse" />
+            </div>
+          </div>
+        </header>
+
+        <div className="max-w-6xl mx-auto px-4 py-6 space-y-6">
+          {/* Hero Skeleton */}
+          <div className="text-center py-4 sm:py-8">
+            <div className="w-80 h-8 bg-gray-200 dark:bg-slate-700 rounded mx-auto mb-4 animate-pulse" />
+            <div className="w-64 h-5 bg-gray-200 dark:bg-slate-700 rounded mx-auto mb-2 animate-pulse" />
+            <div className="w-96 h-4 bg-gray-200 dark:bg-slate-700 rounded mx-auto animate-pulse" />
+          </div>
+
+          {/* Quick Stats Skeleton */}
+          <div className="flex flex-wrap justify-center gap-3">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="w-24 h-16 bg-gray-200 dark:bg-slate-700 rounded-xl animate-pulse" />
+            ))}
+          </div>
+
+          {/* Map Skeleton */}
+          <div className="w-full bg-blue-50/50 dark:bg-slate-800/50 rounded-2xl overflow-hidden border border-blue-100 dark:border-slate-700 shadow-inner">
+            <div className="aspect-[16/9] w-full max-h-[500px] bg-gray-200 dark:bg-slate-700 animate-pulse" />
+            <div className="flex justify-center gap-6 py-4">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-gray-300 dark:bg-slate-600 animate-pulse" />
+                  <div className="w-12 h-3 bg-gray-200 dark:bg-slate-700 rounded animate-pulse" />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Category Tabs Skeleton */}
+          <div className="flex flex-wrap justify-center gap-2">
+            {[...Array(8)].map((_, i) => (
+              <div key={i} className="w-24 h-10 bg-gray-200 dark:bg-slate-700 rounded-lg animate-pulse" />
+            ))}
+          </div>
+
+          {/* List Skeleton */}
+          <div className="space-y-3">
+            <div className="w-48 h-6 bg-gray-200 dark:bg-slate-700 rounded animate-pulse mx-auto" />
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+              {[...Array(12)].map((_, i) => (
+                <div key={i} className="h-10 bg-gray-200 dark:bg-slate-700 rounded-lg animate-pulse" />
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -220,20 +281,8 @@ export default function Home() {
         isDarkMode={isDarkMode}
         onToggleDarkMode={toggleDarkMode}
         isAdmin={isAdmin}
+        syncStatus={isSyncing ? 'syncing' : 'idle'}
       />
-
-      {/* Cloud Sync Indicator - positioned near user menu */}
-      {isSyncing && (
-        <div className="fixed top-16 right-4 z-50 animate-fade-in">
-          <div className="bg-blue-600 text-white px-4 py-2 rounded-full shadow-lg flex items-center gap-2 text-sm">
-            <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-            </svg>
-            Syncing...
-          </div>
-        </div>
-      )}
 
       <div className="max-w-6xl mx-auto px-4 py-6 space-y-6">
         {/* Hero Section */}
@@ -258,14 +307,16 @@ export default function Home() {
           onCategoryClick={handleCategoryChange}
         />
 
-        {/* Map Visualization */}
+        {/* Map Visualization - wrapped in error boundary for graceful fallback */}
         <div className="animate-fade-in">
-          <MapVisualization
-            category={activeCategory}
-            selections={selections}
-            onToggle={handleToggle}
-            items={currentItems}
-          />
+          <MapErrorBoundary>
+            <MapVisualization
+              category={activeCategory}
+              selections={selections}
+              onToggle={handleToggle}
+              items={currentItems}
+            />
+          </MapErrorBoundary>
         </div>
 
         {/* Category Tabs - below map */}
@@ -301,8 +352,8 @@ export default function Home() {
           <span>Share Map</span>
         </button>
 
-        {/* Footer */}
-        <footer className="py-8 text-gray-500 dark:text-gray-400 text-sm">
+        {/* Footer - pb-24 adds clearance for the floating Share Map button on mobile */}
+        <footer className="py-8 pb-24 text-gray-500 dark:text-gray-400 text-sm">
           {/* Category Directory - Internal Links for SEO */}
           <div className="border-t border-gray-200 dark:border-gray-700 pt-8 mb-8">
             <h2 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-4 text-center">
