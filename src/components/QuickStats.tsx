@@ -93,7 +93,7 @@ export default function QuickStats({ selections, onCategoryClick }: QuickStatsPr
               {countryStats.percentage}%
             </span>
           </div>
-          <h3 className="text-gray-500 dark:text-gray-400 font-medium text-sm">Countries Visited</h3>
+          <p className="text-gray-500 dark:text-gray-400 font-medium text-sm">Countries Visited</p>
           <div className="text-3xl font-bold text-gray-800 dark:text-white mt-1">
             {countryStats.visited}
             <span className="text-lg text-gray-300 dark:text-gray-600 font-normal">/{countryStats.total}</span>
@@ -161,7 +161,7 @@ export default function QuickStats({ selections, onCategoryClick }: QuickStatsPr
             {stateStats.percentage}%
           </span>
         </div>
-        <h3 className="text-gray-500 dark:text-gray-400 font-medium text-sm">States Visited</h3>
+        <p className="text-gray-500 dark:text-gray-400 font-medium text-sm">States Visited</p>
         <div className="text-3xl font-bold text-gray-800 dark:text-white mt-1">
           {stateStats.visited}
           <span className="text-lg text-gray-300 dark:text-gray-600 font-normal">/{stateStats.total}</span>
@@ -179,7 +179,7 @@ export default function QuickStats({ selections, onCategoryClick }: QuickStatsPr
             {markersPercentage}%
           </span>
         </div>
-        <h3 className="text-gray-500 dark:text-gray-400 font-medium text-sm">Points of Interest</h3>
+        <p className="text-gray-500 dark:text-gray-400 font-medium text-sm">Points of Interest</p>
         <div className="text-3xl font-bold text-gray-800 dark:text-white mt-1">
           {markersStats.visited}
           <span className="text-lg text-gray-300 dark:text-gray-600 font-normal">/{markersStats.total}</span>
