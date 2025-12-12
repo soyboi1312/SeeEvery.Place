@@ -241,11 +241,13 @@ export default function Home() {
           <h1 className="text-3xl sm:text-4xl font-bold text-gray-800 dark:text-white mb-2">
             Track Your Adventures.
             <span className="block text-lg sm:text-xl font-normal text-gray-600 dark:text-gray-300 mt-2">
-              The free travel tracker with shareable profiles.
+              The free travel tracker with shareable maps and profiles.
             </span>
           </h1>
           <p className="text-gray-600 dark:text-gray-300 max-w-xl mx-auto mt-3">
             Track countries, parks, peaks, and more. Share your journey with friends.
+          </p>
+          <p className="text-gray-600 dark:text-gray-300 max-w-xl mx-auto mt-2">
             No account needed to get started!
           </p>
         </div>
