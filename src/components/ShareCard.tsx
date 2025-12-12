@@ -1,13 +1,12 @@
-/**
- * ShareCard Component
- * Modal for generating and sharing travel stats images
- */
 'use client';
 
 import { useRef, useState, useMemo } from 'react';
 import Link from 'next/link';
 import { Category, UserSelections } from '@/lib/types';
 import { getStats } from '@/lib/storage';
+import { Download, Share2, Copy, Check, Loader2, ExternalLink } from 'lucide-react';
+
+// Data Imports (Keep existing data logic)
 import { countries } from '@/data/countries';
 import { usStates } from '@/data/usStates';
 import { usTerritories } from '@/data/usTerritories';
@@ -16,7 +15,7 @@ import { nationalMonuments } from '@/data/nationalMonuments';
 import { stateParks } from '@/data/stateParks';
 import { get5000mPeaks, getUS14ers } from '@/data/mountains';
 import { museums } from '@/data/museums';
-import { getMlbStadiums, getNflStadiums, getNbaStadiums, getNhlStadiums, getSoccerStadiums, type Stadium } from '@/data/stadiums';
+import { getMlbStadiums, getNflStadiums, getNbaStadiums, getNhlStadiums, getSoccerStadiums } from '@/data/stadiums';
 import { f1Tracks } from '@/data/f1Tracks';
 import { marathons } from '@/data/marathons';
 import { airports } from '@/data/airports';
@@ -26,12 +25,30 @@ import { surfingReserves } from '@/data/surfingReserves';
 import { weirdAmericana } from '@/data/weirdAmericana';
 import { usCities } from '@/data/usCities';
 import { worldCities } from '@/data/worldCities';
+
+// Hooks & Utils
 import { useShareImage } from '@/lib/hooks/useShareImage';
-import { ShareableMapDesign, gradients, usesRegionMap, detectMilestones, type Milestone } from './share';
+import { ShareableMapDesign, gradients, usesRegionMap, detectMilestones } from './share';
 import type { MarkerSize } from './MapMarkers';
 
+// Shadcn UI Components
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogDescription,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Separator } from '@/components/ui/separator';
+
 // =====================
-// O(1) Lookup Maps for fast name lookups
+// O(1) Lookup Maps Logic (Preserved)
 // =====================
 type NamedItem = { id?: string; code?: string; name: string };
 
@@ -39,7 +56,6 @@ function createNameMap<T extends NamedItem>(items: T[], keyField: 'id' | 'code' 
   return new Map(items.map(item => [item[keyField] as string, item.name]));
 }
 
-// Static data maps (created once at module load)
 const countriesNameMap = createNameMap(countries, 'code');
 const usStatesNameMap = createNameMap(usStates, 'code');
 const usTerritoriesNameMap = createNameMap(usTerritories, 'code');
@@ -55,7 +71,6 @@ const themeParksNameMap = createNameMap(themeParks);
 const surfingReservesNameMap = createNameMap(surfingReserves);
 const weirdAmericanaNameMap = createNameMap(weirdAmericana);
 
-// Lazy-initialized maps for function-generated data
 let fiveKPeaksNameMap: Map<string, string> | null = null;
 let fourteenersNameMap: Map<string, string> | null = null;
 let mlbStadiumsNameMap: Map<string, string> | null = null;
@@ -64,50 +79,13 @@ let nbaStadiumsNameMap: Map<string, string> | null = null;
 let nhlStadiumsNameMap: Map<string, string> | null = null;
 let soccerStadiumsNameMap: Map<string, string> | null = null;
 
-function getFiveKPeaksNameMap(): Map<string, string> {
-  if (!fiveKPeaksNameMap) fiveKPeaksNameMap = createNameMap(get5000mPeaks());
-  return fiveKPeaksNameMap;
-}
-
-function getFourteenersNameMap(): Map<string, string> {
-  if (!fourteenersNameMap) fourteenersNameMap = createNameMap(getUS14ers());
-  return fourteenersNameMap;
-}
-
-function getMlbStadiumsNameMap(): Map<string, string> {
-  if (!mlbStadiumsNameMap) mlbStadiumsNameMap = createNameMap(getMlbStadiums());
-  return mlbStadiumsNameMap;
-}
-
-function getNflStadiumsNameMap(): Map<string, string> {
-  if (!nflStadiumsNameMap) nflStadiumsNameMap = createNameMap(getNflStadiums());
-  return nflStadiumsNameMap;
-}
-
-function getNbaStadiumsNameMap(): Map<string, string> {
-  if (!nbaStadiumsNameMap) nbaStadiumsNameMap = createNameMap(getNbaStadiums());
-  return nbaStadiumsNameMap;
-}
-
-function getNhlStadiumsNameMap(): Map<string, string> {
-  if (!nhlStadiumsNameMap) nhlStadiumsNameMap = createNameMap(getNhlStadiums());
-  return nhlStadiumsNameMap;
-}
-
-function getSoccerStadiumsNameMap(): Map<string, string> {
-  if (!soccerStadiumsNameMap) soccerStadiumsNameMap = createNameMap(getSoccerStadiums());
-  return soccerStadiumsNameMap;
-}
-
-interface ShareCardProps {
-  selections: UserSelections;
-  category: Category;
-  subcategory?: string;
-  onClose: () => void;
-  // Profile info for public link sharing
-  isPublicProfile?: boolean;
-  username?: string | null;
-}
+function getFiveKPeaksNameMap() { if (!fiveKPeaksNameMap) fiveKPeaksNameMap = createNameMap(get5000mPeaks()); return fiveKPeaksNameMap; }
+function getFourteenersNameMap() { if (!fourteenersNameMap) fourteenersNameMap = createNameMap(getUS14ers()); return fourteenersNameMap; }
+function getMlbStadiumsNameMap() { if (!mlbStadiumsNameMap) mlbStadiumsNameMap = createNameMap(getMlbStadiums()); return mlbStadiumsNameMap; }
+function getNflStadiumsNameMap() { if (!nflStadiumsNameMap) nflStadiumsNameMap = createNameMap(getNflStadiums()); return nflStadiumsNameMap; }
+function getNbaStadiumsNameMap() { if (!nbaStadiumsNameMap) nbaStadiumsNameMap = createNameMap(getNbaStadiums()); return nbaStadiumsNameMap; }
+function getNhlStadiumsNameMap() { if (!nhlStadiumsNameMap) nhlStadiumsNameMap = createNameMap(getNhlStadiums()); return nhlStadiumsNameMap; }
+function getSoccerStadiumsNameMap() { if (!soccerStadiumsNameMap) soccerStadiumsNameMap = createNameMap(getSoccerStadiums()); return soccerStadiumsNameMap; }
 
 const categoryTotals: Record<Category, number> = {
   countries: countries.length,
@@ -135,83 +113,46 @@ const categoryTotals: Record<Category, number> = {
   weirdAmericana: weirdAmericana.length,
 };
 
-// Get visited item names for a category - O(1) Map lookups
 function getVisitedItemNames(selections: UserSelections, category: Category): string[] {
-  // Get the appropriate name map for this category
   let nameMap: Map<string, string>;
-
   switch (category) {
-    case 'countries':
-      nameMap = countriesNameMap;
-      break;
-    case 'states':
-      nameMap = usStatesNameMap;
-      break;
-    case 'territories':
-      nameMap = usTerritoriesNameMap;
-      break;
-    case 'nationalParks':
-      nameMap = nationalParksNameMap;
-      break;
-    case 'nationalMonuments':
-      nameMap = nationalMonumentsNameMap;
-      break;
-    case 'stateParks':
-      nameMap = stateParksNameMap;
-      break;
-    case 'fiveKPeaks':
-      nameMap = getFiveKPeaksNameMap();
-      break;
-    case 'fourteeners':
-      nameMap = getFourteenersNameMap();
-      break;
-    case 'museums':
-      nameMap = museumsNameMap;
-      break;
-    case 'mlbStadiums':
-      nameMap = getMlbStadiumsNameMap();
-      break;
-    case 'nflStadiums':
-      nameMap = getNflStadiumsNameMap();
-      break;
-    case 'nbaStadiums':
-      nameMap = getNbaStadiumsNameMap();
-      break;
-    case 'nhlStadiums':
-      nameMap = getNhlStadiumsNameMap();
-      break;
-    case 'soccerStadiums':
-      nameMap = getSoccerStadiumsNameMap();
-      break;
-    case 'f1Tracks':
-      nameMap = f1TracksNameMap;
-      break;
-    case 'marathons':
-      nameMap = marathonsNameMap;
-      break;
-    case 'airports':
-      nameMap = airportsNameMap;
-      break;
-    case 'skiResorts':
-      nameMap = skiResortsNameMap;
-      break;
-    case 'themeParks':
-      nameMap = themeParksNameMap;
-      break;
-    case 'surfingReserves':
-      nameMap = surfingReservesNameMap;
-      break;
-    case 'weirdAmericana':
-      nameMap = weirdAmericanaNameMap;
-      break;
-    default:
-      return [];
+    case 'countries': nameMap = countriesNameMap; break;
+    case 'states': nameMap = usStatesNameMap; break;
+    case 'territories': nameMap = usTerritoriesNameMap; break;
+    case 'nationalParks': nameMap = nationalParksNameMap; break;
+    case 'nationalMonuments': nameMap = nationalMonumentsNameMap; break;
+    case 'stateParks': nameMap = stateParksNameMap; break;
+    case 'fiveKPeaks': nameMap = getFiveKPeaksNameMap(); break;
+    case 'fourteeners': nameMap = getFourteenersNameMap(); break;
+    case 'museums': nameMap = museumsNameMap; break;
+    case 'mlbStadiums': nameMap = getMlbStadiumsNameMap(); break;
+    case 'nflStadiums': nameMap = getNflStadiumsNameMap(); break;
+    case 'nbaStadiums': nameMap = getNbaStadiumsNameMap(); break;
+    case 'nhlStadiums': nameMap = getNhlStadiumsNameMap(); break;
+    case 'soccerStadiums': nameMap = getSoccerStadiumsNameMap(); break;
+    case 'f1Tracks': nameMap = f1TracksNameMap; break;
+    case 'marathons': nameMap = marathonsNameMap; break;
+    case 'airports': nameMap = airportsNameMap; break;
+    case 'skiResorts': nameMap = skiResortsNameMap; break;
+    case 'themeParks': nameMap = themeParksNameMap; break;
+    case 'surfingReserves': nameMap = surfingReservesNameMap; break;
+    case 'weirdAmericana': nameMap = weirdAmericanaNameMap; break;
+    default: return [];
   }
 
   return selections[category]
     .filter(s => s.status === 'visited')
     .map(s => nameMap.get(s.id))
     .filter((name): name is string => name !== undefined);
+}
+
+interface ShareCardProps {
+  selections: UserSelections;
+  category: Category;
+  subcategory?: string;
+  onClose: () => void;
+  isPublicProfile?: boolean;
+  username?: string | null;
 }
 
 export default function ShareCard({ selections, category, subcategory, onClose, isPublicProfile, username }: ShareCardProps) {
@@ -236,224 +177,174 @@ export default function ShareCard({ selections, category, subcategory, onClose, 
     [selections, category]
   );
 
-  // Detect milestones based on current progress
   const milestones = useMemo(
     () => detectMilestones(stats.visited, stats.total, stats.percentage, category),
     [stats.visited, stats.total, stats.percentage, category]
   );
 
-  return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
-        {/* Header */}
-        <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
-          <h3 className="text-lg font-bold text-gray-900 dark:text-white">Share Your Map</h3>
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
-            aria-label="Close"
-          >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
+  const handleCopyLink = async () => {
+    const link = `https://seeevery.place/u/${username}`;
+    try {
+      await navigator.clipboard.writeText(link);
+      setLinkCopied(true);
+      setTimeout(() => setLinkCopied(false), 2000);
+    } catch {
+      // Fallback mostly for mobile if clipboard api fails
+      const textarea = document.createElement('textarea');
+      textarea.value = link;
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textarea);
+      setLinkCopied(true);
+      setTimeout(() => setLinkCopied(false), 2000);
+    }
+  };
 
-        {/* Color Picker */}
-        <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-          <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">Choose a style:</p>
-          <div className="flex flex-wrap gap-2">
-            {gradients.map((gradient, index) => {
-              const styleName = index < 5 ? 'Vibrant' : index < 8 ? 'Midnight' : index < 11 ? 'Metallic' : 'Nature';
-              return (
-                <button
-                  key={index}
-                  onClick={() => setSelectedGradient(index)}
-                  className={`w-9 h-9 rounded-lg bg-gradient-to-br ${gradient} transition-transform hover:scale-105 ${
-                    selectedGradient === index ? 'ring-2 ring-offset-2 ring-blue-500 dark:ring-offset-gray-800' : ''
-                  }`}
-                  title={styleName}
-                  aria-label={`Select ${styleName} style ${index + 1}${selectedGradient === index ? ' (selected)' : ''}`}
-                  aria-pressed={selectedGradient === index}
+  return (
+    <Dialog open={true} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto sm:max-h-[85vh]">
+        <DialogHeader>
+          <DialogTitle>Share Your Map</DialogTitle>
+          <DialogDescription>
+            Customize and download your travel stats card.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-6 py-2">
+          {/* Controls Section */}
+          <div className="space-y-4">
+            {/* Color Picker */}
+            <div className="space-y-2">
+              <Label>Choose a style</Label>
+              <div className="flex flex-wrap gap-2">
+                {gradients.map((gradient, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setSelectedGradient(index)}
+                    className={`w-8 h-8 rounded-full bg-gradient-to-br ${gradient} transition-all ${
+                      selectedGradient === index
+                        ? 'ring-2 ring-offset-2 ring-primary scale-110'
+                        : 'hover:scale-105 opacity-80 hover:opacity-100'
+                    }`}
+                    aria-label={`Select gradient ${index + 1}`}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Map Options Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="flex items-center justify-between space-x-2 border p-3 rounded-lg">
+                <Label htmlFor="map-toggle" className="flex flex-col gap-1 cursor-pointer">
+                  <span>Include Map</span>
+                  <span className="font-normal text-xs text-muted-foreground">Show map snapshot</span>
+                </Label>
+                <Switch
+                  id="map-toggle"
+                  checked={includeMap}
+                  onCheckedChange={setIncludeMap}
                 />
-              );
-            })}
+              </div>
+
+              {includeMap && !usesRegionMap(category) && (
+                <div className="flex items-center justify-between space-x-2 border p-3 rounded-lg">
+                  <Label className="flex flex-col gap-1">
+                    <span>Icon Size</span>
+                    <span className="font-normal text-xs text-muted-foreground">Adjust marker scale</span>
+                  </Label>
+                  <Tabs value={iconSize} onValueChange={(v) => setIconSize(v as MarkerSize)} className="h-8">
+                    <TabsList className="h-8">
+                      <TabsTrigger value="small" className="text-xs px-2 h-6">Small</TabsTrigger>
+                      <TabsTrigger value="default" className="text-xs px-2 h-6">Large</TabsTrigger>
+                    </TabsList>
+                  </Tabs>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Card Preview */}
+          <div className="relative rounded-lg overflow-hidden border shadow-sm bg-muted/20 flex justify-center">
+            <div className="scale-[0.85] sm:scale-100 origin-center transition-transform duration-200">
+              <ShareableMapDesign
+                ref={cardRef}
+                selections={selections}
+                category={category}
+                subcategory={subcategory}
+                stats={stats}
+                visitedItems={visitedItems}
+                selectedGradient={selectedGradient}
+                includeMap={includeMap}
+                iconSize={iconSize}
+                milestones={milestones}
+              />
+            </div>
+          </div>
+
+          {/* Public Link Section */}
+          <Separator />
+
+          <div className="space-y-3">
+            {isPublicProfile && username ? (
+              <div className="space-y-2">
+                <Label className="text-green-600 dark:text-green-400 flex items-center gap-1.5">
+                   <ExternalLink className="w-3.5 h-3.5" /> Your Public Link
+                </Label>
+                <div className="flex gap-2">
+                  <Input
+                    readOnly
+                    value={`https://seeevery.place/u/${username}`}
+                    className="bg-muted font-mono text-xs"
+                  />
+                  <Button
+                    onClick={handleCopyLink}
+                    variant="outline"
+                    size="icon"
+                    className={linkCopied ? "text-green-600 border-green-600" : ""}
+                  >
+                    {linkCopied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg flex items-center justify-between gap-4">
+                <div className="space-y-1">
+                  <h4 className="text-sm font-semibold text-blue-900 dark:text-blue-100">Want a live link?</h4>
+                  <p className="text-xs text-blue-700 dark:text-blue-300">Enable your public profile to share a live version of this map.</p>
+                </div>
+                <Button variant="secondary" size="sm" asChild className="shrink-0">
+                  <Link href="/settings">Enable</Link>
+                </Button>
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Map Toggle */}
-        <div className="p-4 border-b border-gray-200 dark:border-gray-700 space-y-3">
-          <label className="flex items-center justify-between cursor-pointer">
-            <span className="text-sm text-gray-600 dark:text-gray-300">Include map snapshot</span>
-            <div className="relative">
-              <input
-                type="checkbox"
-                checked={includeMap}
-                onChange={(e) => setIncludeMap(e.target.checked)}
-                className="sr-only"
-              />
-              <div className={`w-11 h-6 rounded-full transition-colors ${includeMap ? 'bg-blue-600' : 'bg-gray-300 dark:bg-gray-600'}`}>
-                <div className={`w-5 h-5 bg-white rounded-full shadow-md transform transition-transform absolute top-0.5 ${includeMap ? 'translate-x-5.5 right-0.5' : 'left-0.5'}`} />
-              </div>
-            </div>
-          </label>
-
-          {/* Icon Size Toggle - only show for marker-based maps when map is included */}
-          {includeMap && !usesRegionMap(category) && (
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-600 dark:text-gray-300">Icon size</span>
-              <div className="flex gap-1 bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
-                <button
-                  onClick={() => setIconSize('small')}
-                  className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${
-                    iconSize === 'small'
-                      ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm'
-                      : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
-                  }`}
-                >
-                  Small
-                </button>
-                <button
-                  onClick={() => setIconSize('default')}
-                  className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${
-                    iconSize === 'default'
-                      ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm'
-                      : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
-                  }`}
-                >
-                  Large
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Card Preview */}
-        <div className="p-4">
-          <ShareableMapDesign
-            ref={cardRef}
-            selections={selections}
-            category={category}
-            subcategory={subcategory}
-            stats={stats}
-            visitedItems={visitedItems}
-            selectedGradient={selectedGradient}
-            includeMap={includeMap}
-            iconSize={iconSize}
-            milestones={milestones}
-          />
-        </div>
-
-        {/* Public Profile Link Section */}
-        <div className="px-4 pb-4">
-          {isPublicProfile && username ? (
-            <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
-              <div className="flex items-center justify-between gap-2">
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs font-medium text-green-700 dark:text-green-300 mb-1">Your Public Map</p>
-                  <p className="text-sm text-green-800 dark:text-green-200 truncate">
-                    seeevery.place/u/{username}
-                  </p>
-                </div>
-                <button
-                  onClick={async () => {
-                    try {
-                      await navigator.clipboard.writeText(`https://seeevery.place/u/${username}`);
-                      setLinkCopied(true);
-                      setTimeout(() => setLinkCopied(false), 2000);
-                    } catch {
-                      // Fallback
-                      const textarea = document.createElement('textarea');
-                      textarea.value = `https://seeevery.place/u/${username}`;
-                      document.body.appendChild(textarea);
-                      textarea.select();
-                      document.execCommand('copy');
-                      document.body.removeChild(textarea);
-                      setLinkCopied(true);
-                      setTimeout(() => setLinkCopied(false), 2000);
-                    }
-                  }}
-                  className="px-3 py-1.5 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors flex items-center gap-1.5 shrink-0"
-                >
-                  {linkCopied ? (
-                    <>
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                      Copied!
-                    </>
-                  ) : (
-                    <>
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
-                      </svg>
-                      Copy
-                    </>
-                  )}
-                </button>
-              </div>
-            </div>
-          ) : (
-            <Link
-              href="/settings"
-              className="block p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800 hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors"
-            >
-              <div className="flex items-center gap-2">
-                <svg className="w-5 h-5 text-blue-600 dark:text-blue-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-                </svg>
-                <div>
-                  <p className="text-sm font-medium text-blue-700 dark:text-blue-300">Want a live link to share?</p>
-                  <p className="text-xs text-blue-600 dark:text-blue-400">Enable Public Profile in Settings</p>
-                </div>
-                <svg className="w-4 h-4 text-blue-500 dark:text-blue-400 ml-auto shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </div>
-            </Link>
-          )}
-        </div>
-
-        {/* Actions */}
-        <div className="p-4 border-t border-gray-200 dark:border-gray-700 flex gap-3">
-          <button
-            onClick={downloadImage}
-            disabled={isDownloading}
-            className="flex-1 py-3 px-4 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
-          >
-            {isDownloading ? (
-              <>
-                <svg className="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                </svg>
-                Generating...
-              </>
-            ) : (
-              <>
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                </svg>
-                Download
-              </>
-            )}
-          </button>
-          <button
+        <DialogFooter className="gap-2 sm:gap-0">
+          <Button
+            variant="outline"
             onClick={shareOrCopyImage}
             disabled={isDownloading}
-            className="py-3 px-4 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 border-2 border-gray-300 dark:border-gray-600 rounded-xl font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+            className="w-full sm:w-auto"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-            </svg>
+            <Share2 className="w-4 h-4 mr-2" />
             Share
-          </button>
-        </div>
-
-        <div className="p-4 pt-0 text-center text-sm text-gray-500 dark:text-gray-400">
-          Tip: Right-click items to quickly set visited or bucket list
-        </div>
-      </div>
-    </div>
+          </Button>
+          <Button
+            onClick={downloadImage}
+            disabled={isDownloading}
+            className="w-full sm:w-auto"
+          >
+            {isDownloading ? (
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            ) : (
+              <Download className="w-4 h-4 mr-2" />
+            )}
+            {isDownloading ? 'Generating...' : 'Download Image'}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
