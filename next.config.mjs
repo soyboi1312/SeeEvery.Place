@@ -88,7 +88,23 @@ const nextConfig = {
   reactStrictMode: true,
   // Optimize package imports for better tree-shaking
   experimental: {
-    optimizePackageImports: ['zod', '@supabase/supabase-js', 'react-tooltip', 'lucide-react'],
+    optimizePackageImports: [
+      'zod',
+      '@supabase/supabase-js',
+      'react-tooltip',
+      'lucide-react',
+      '@radix-ui/react-alert-dialog',
+      '@radix-ui/react-context-menu',
+      '@radix-ui/react-dialog',
+      '@radix-ui/react-dropdown-menu',
+      '@radix-ui/react-select',
+      '@radix-ui/react-tabs',
+      '@radix-ui/react-tooltip',
+      '@tanstack/react-query',
+      'class-variance-authority',
+      'clsx',
+      'tailwind-merge',
+    ],
   },
   async headers() {
     return [
