@@ -52,5 +52,12 @@
     "typescript": "^5.0.0",
     "vitest": "^4.0.15",
     "wrangler": "^4.51.0"
-  }
+  },
+  "browserslist": [
+    "Chrome >= 92",
+    "Firefox >= 91",
+    "Safari >= 15.4",
+    "Edge >= 92",
+    "not dead"
+  ]
 }

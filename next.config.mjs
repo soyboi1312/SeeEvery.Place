@@ -86,6 +86,10 @@ const withPWA = withPWAInit({
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  // Optimize package imports for better tree-shaking
+  experimental: {
+    optimizePackageImports: ['zod', '@supabase/supabase-js', 'react-tooltip'],
+  },
   async headers() {
     return [
       {
