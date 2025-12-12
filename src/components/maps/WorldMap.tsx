@@ -13,10 +13,10 @@ import { useMapZoom } from './useMapZoom';
 import ZoomControls from './ZoomControls';
 import { TappableGeography } from './TappableGeography';
 
-// Coordinate type for map center: [longitude, latitude]
-// The library internally uses D3 geo projections which expect this format
-type Coordinates = [number, number];
-const CENTER_ORIGIN: Coordinates = [0, 0];
+// Map center coordinates [longitude, latitude]
+// The library uses branded Longitude/Latitude types that can't be satisfied with plain numbers,
+// so we use a type assertion at the usage site
+const CENTER_ORIGIN = [0, 0] as const;
 
 const WorldMap = memo(function WorldMap({ selections, onToggle, tooltip }: BaseMapProps) {
   const {
@@ -51,7 +51,8 @@ const WorldMap = memo(function WorldMap({ selections, onToggle, tooltip }: BaseM
     <div className="relative w-full h-full group">
       <ComposableMap
         projection="geoEqualEarth"
-        projectionConfig={{ scale: 140, center: CENTER_ORIGIN }}
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Library uses branded Longitude/Latitude types
+        projectionConfig={{ scale: 140, center: CENTER_ORIGIN as any }}
         width={800}
         height={400}
         viewBox="0 0 800 400"
