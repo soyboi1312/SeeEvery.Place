@@ -62,7 +62,10 @@ export function AnalyticsUSMap({ data, isDarkMode = false }: HeatmapProps) {
   return (
     <ComposableMap
       projection="geoAlbersUsa"
-      projectionConfig={{ scale: 1000 }}
+      projectionConfig={{ scale: 900 }}
+      width={800}
+      height={500}
+      viewBox="0 50 800 450"
       className="w-full h-full"
     >
       <Geographies geography={GEO_URL_USA}>

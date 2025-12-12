@@ -170,6 +170,7 @@ export default function AdminDashboard() {
   const [suspendUntil, setSuspendUntil] = useState('');
   const [suspending, setSuspending] = useState(false);
   const [impersonating, setImpersonating] = useState<string | null>(null);
+  const [impersonationLink, setImpersonationLink] = useState<{ link: string; email: string } | null>(null);
   const pageSize = 50;
 
   useEffect(() => {
@@ -434,7 +435,7 @@ export default function AdminDashboard() {
       }
 
       const data = await response.json();
-      window.open(data.link, '_blank');
+      setImpersonationLink({ link: data.link, email: data.email });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to impersonate user');
     } finally {
@@ -947,6 +948,58 @@ export default function AdminDashboard() {
             >
               {suspending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Ban
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Impersonation Link Dialog */}
+      <Dialog open={!!impersonationLink} onOpenChange={(open) => !open && setImpersonationLink(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Impersonate User</DialogTitle>
+            <DialogDescription>
+              Login link for <strong>{impersonationLink?.email}</strong>
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <p className="text-sm text-muted-foreground">
+              Click the button below to open a new tab and log in as this user.
+              The link is a one-time magic link that will expire shortly.
+            </p>
+            <div className="flex gap-2">
+              <Input
+                readOnly
+                value={impersonationLink?.link || ''}
+                className="font-mono text-xs"
+              />
+              <Button
+                variant="outline"
+                onClick={() => {
+                  if (impersonationLink?.link) {
+                    navigator.clipboard.writeText(impersonationLink.link);
+                  }
+                }}
+              >
+                Copy
+              </Button>
+            </div>
+          </div>
+
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button variant="outline" onClick={() => setImpersonationLink(null)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={() => {
+                if (impersonationLink?.link) {
+                  window.open(impersonationLink.link, '_blank');
+                  setImpersonationLink(null);
+                }
+              }}
+            >
+              Open Login Link
             </Button>
           </DialogFooter>
         </DialogContent>
