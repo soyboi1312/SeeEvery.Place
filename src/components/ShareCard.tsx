@@ -1,32 +1,13 @@
 'use client';
 
-import { useRef, useState, useMemo } from 'react';
+import { useRef, useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
 import { Category, UserSelections } from '@/lib/types';
 import { getStats } from '@/lib/storage';
 import { Download, Share2, Copy, Check, Loader2, ExternalLink } from 'lucide-react';
 
-// Data Imports (Keep existing data logic)
-import { countries } from '@/data/countries';
-import { usStates } from '@/data/usStates';
-import { usTerritories } from '@/data/usTerritories';
-import { nationalParks } from '@/data/nationalParks';
-import { nationalMonuments } from '@/data/nationalMonuments';
-import { stateParks } from '@/data/stateParks';
-import { get5000mPeaks, getUS14ers } from '@/data/mountains';
-import { museums } from '@/data/museums';
-import { getMlbStadiums, getNflStadiums, getNbaStadiums, getNhlStadiums, getSoccerStadiums } from '@/data/stadiums';
-import { f1Tracks } from '@/data/f1Tracks';
-import { marathons } from '@/data/marathons';
-import { airports } from '@/data/airports';
-import { skiResorts } from '@/data/skiResorts';
-import { themeParks } from '@/data/themeParks';
-import { surfingReserves } from '@/data/surfingReserves';
-import { weirdAmericana } from '@/data/weirdAmericana';
-import { usCities } from '@/data/usCities';
-import { worldCities } from '@/data/worldCities';
-
-// Hooks & Utils
+// Optimized Imports
+import { categoryTotals, getCategoryItemsAsync, type CategoryItem } from '@/lib/categoryUtils';
 import { useShareImage } from '@/lib/hooks/useShareImage';
 import { ShareableMapDesign, gradients, usesRegionMap, detectMilestones } from './share';
 import type { MarkerSize } from './MapMarkers';
@@ -47,105 +28,6 @@ import { Input } from '@/components/ui/input';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 
-// =====================
-// O(1) Lookup Maps Logic (Preserved)
-// =====================
-type NamedItem = { id?: string; code?: string; name: string };
-
-function createNameMap<T extends NamedItem>(items: T[], keyField: 'id' | 'code' = 'id'): Map<string, string> {
-  return new Map(items.map(item => [item[keyField] as string, item.name]));
-}
-
-const countriesNameMap = createNameMap(countries, 'code');
-const usStatesNameMap = createNameMap(usStates, 'code');
-const usTerritoriesNameMap = createNameMap(usTerritories, 'code');
-const nationalParksNameMap = createNameMap(nationalParks);
-const nationalMonumentsNameMap = createNameMap(nationalMonuments);
-const stateParksNameMap = createNameMap(stateParks);
-const museumsNameMap = createNameMap(museums);
-const f1TracksNameMap = createNameMap(f1Tracks);
-const marathonsNameMap = createNameMap(marathons);
-const airportsNameMap = createNameMap(airports);
-const skiResortsNameMap = createNameMap(skiResorts);
-const themeParksNameMap = createNameMap(themeParks);
-const surfingReservesNameMap = createNameMap(surfingReserves);
-const weirdAmericanaNameMap = createNameMap(weirdAmericana);
-
-let fiveKPeaksNameMap: Map<string, string> | null = null;
-let fourteenersNameMap: Map<string, string> | null = null;
-let mlbStadiumsNameMap: Map<string, string> | null = null;
-let nflStadiumsNameMap: Map<string, string> | null = null;
-let nbaStadiumsNameMap: Map<string, string> | null = null;
-let nhlStadiumsNameMap: Map<string, string> | null = null;
-let soccerStadiumsNameMap: Map<string, string> | null = null;
-
-function getFiveKPeaksNameMap() { if (!fiveKPeaksNameMap) fiveKPeaksNameMap = createNameMap(get5000mPeaks()); return fiveKPeaksNameMap; }
-function getFourteenersNameMap() { if (!fourteenersNameMap) fourteenersNameMap = createNameMap(getUS14ers()); return fourteenersNameMap; }
-function getMlbStadiumsNameMap() { if (!mlbStadiumsNameMap) mlbStadiumsNameMap = createNameMap(getMlbStadiums()); return mlbStadiumsNameMap; }
-function getNflStadiumsNameMap() { if (!nflStadiumsNameMap) nflStadiumsNameMap = createNameMap(getNflStadiums()); return nflStadiumsNameMap; }
-function getNbaStadiumsNameMap() { if (!nbaStadiumsNameMap) nbaStadiumsNameMap = createNameMap(getNbaStadiums()); return nbaStadiumsNameMap; }
-function getNhlStadiumsNameMap() { if (!nhlStadiumsNameMap) nhlStadiumsNameMap = createNameMap(getNhlStadiums()); return nhlStadiumsNameMap; }
-function getSoccerStadiumsNameMap() { if (!soccerStadiumsNameMap) soccerStadiumsNameMap = createNameMap(getSoccerStadiums()); return soccerStadiumsNameMap; }
-
-const categoryTotals: Record<Category, number> = {
-  countries: countries.length,
-  states: usStates.length,
-  territories: usTerritories.length,
-  usCities: usCities.length,
-  worldCities: worldCities.length,
-  nationalParks: nationalParks.length,
-  nationalMonuments: nationalMonuments.length,
-  stateParks: stateParks.length,
-  fiveKPeaks: get5000mPeaks().length,
-  fourteeners: getUS14ers().length,
-  museums: museums.length,
-  mlbStadiums: getMlbStadiums().length,
-  nflStadiums: getNflStadiums().length,
-  nbaStadiums: getNbaStadiums().length,
-  nhlStadiums: getNhlStadiums().length,
-  soccerStadiums: getSoccerStadiums().length,
-  f1Tracks: f1Tracks.length,
-  marathons: marathons.length,
-  airports: airports.length,
-  skiResorts: skiResorts.length,
-  themeParks: themeParks.length,
-  surfingReserves: surfingReserves.length,
-  weirdAmericana: weirdAmericana.length,
-};
-
-function getVisitedItemNames(selections: UserSelections, category: Category): string[] {
-  let nameMap: Map<string, string>;
-  switch (category) {
-    case 'countries': nameMap = countriesNameMap; break;
-    case 'states': nameMap = usStatesNameMap; break;
-    case 'territories': nameMap = usTerritoriesNameMap; break;
-    case 'nationalParks': nameMap = nationalParksNameMap; break;
-    case 'nationalMonuments': nameMap = nationalMonumentsNameMap; break;
-    case 'stateParks': nameMap = stateParksNameMap; break;
-    case 'fiveKPeaks': nameMap = getFiveKPeaksNameMap(); break;
-    case 'fourteeners': nameMap = getFourteenersNameMap(); break;
-    case 'museums': nameMap = museumsNameMap; break;
-    case 'mlbStadiums': nameMap = getMlbStadiumsNameMap(); break;
-    case 'nflStadiums': nameMap = getNflStadiumsNameMap(); break;
-    case 'nbaStadiums': nameMap = getNbaStadiumsNameMap(); break;
-    case 'nhlStadiums': nameMap = getNhlStadiumsNameMap(); break;
-    case 'soccerStadiums': nameMap = getSoccerStadiumsNameMap(); break;
-    case 'f1Tracks': nameMap = f1TracksNameMap; break;
-    case 'marathons': nameMap = marathonsNameMap; break;
-    case 'airports': nameMap = airportsNameMap; break;
-    case 'skiResorts': nameMap = skiResortsNameMap; break;
-    case 'themeParks': nameMap = themeParksNameMap; break;
-    case 'surfingReserves': nameMap = surfingReservesNameMap; break;
-    case 'weirdAmericana': nameMap = weirdAmericanaNameMap; break;
-    default: return [];
-  }
-
-  return selections[category]
-    .filter(s => s.status === 'visited')
-    .map(s => nameMap.get(s.id))
-    .filter((name): name is string => name !== undefined);
-}
-
 interface ShareCardProps {
   selections: UserSelections;
   category: Category;
@@ -162,20 +44,49 @@ export default function ShareCard({ selections, category, subcategory, onClose, 
   const [iconSize, setIconSize] = useState<MarkerSize>('small');
   const [linkCopied, setLinkCopied] = useState(false);
 
+  // State for dynamically loaded items
+  const [categoryItems, setCategoryItems] = useState<CategoryItem[]>([]);
+  const [isDataLoaded, setIsDataLoaded] = useState(false);
+
   const { isDownloading, downloadImage, shareOrCopyImage } = useShareImage({
     cardRef,
     category,
   });
+
+  // Load category data on mount to get item names
+  useEffect(() => {
+    let isMounted = true;
+    setIsDataLoaded(false);
+
+    getCategoryItemsAsync(category).then((items) => {
+      if (isMounted) {
+        setCategoryItems(items);
+        setIsDataLoaded(true);
+      }
+    });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [category]);
 
   const stats = useMemo(
     () => getStats(selections, category, categoryTotals[category]),
     [selections, category]
   );
 
-  const visitedItems = useMemo(
-    () => getVisitedItemNames(selections, category),
-    [selections, category]
-  );
+  // Compute visited items names from loaded data
+  const visitedItems = useMemo(() => {
+    if (!isDataLoaded) return [];
+
+    // Create a local O(1) map for the current category
+    const nameMap = new Map(categoryItems.map(item => [item.id, item.name]));
+
+    return selections[category]
+      .filter(s => s.status === 'visited')
+      .map(s => nameMap.get(s.id))
+      .filter((name): name is string => name !== undefined);
+  }, [selections, category, categoryItems, isDataLoaded]);
 
   const milestones = useMemo(
     () => detectMilestones(stats.visited, stats.total, stats.percentage, category),
@@ -265,21 +176,29 @@ export default function ShareCard({ selections, category, subcategory, onClose, 
           </div>
 
           {/* Card Preview */}
-          <div className="relative rounded-lg overflow-hidden border shadow-sm bg-muted/20 flex justify-center">
-            <div className="scale-[0.85] sm:scale-100 origin-center transition-transform duration-200">
-              <ShareableMapDesign
-                ref={cardRef}
-                selections={selections}
-                category={category}
-                subcategory={subcategory}
-                stats={stats}
-                visitedItems={visitedItems}
-                selectedGradient={selectedGradient}
-                includeMap={includeMap}
-                iconSize={iconSize}
-                milestones={milestones}
-              />
-            </div>
+          <div className="relative rounded-lg overflow-hidden border shadow-sm bg-muted/20 flex justify-center min-h-[300px] items-center">
+            {/* Show loading spinner while data names are being fetched */}
+            {!isDataLoaded ? (
+              <div className="flex flex-col items-center gap-2 text-muted-foreground">
+                <Loader2 className="w-8 h-8 animate-spin" />
+                <span className="text-sm">Preparing data...</span>
+              </div>
+            ) : (
+              <div className="scale-[0.85] sm:scale-100 origin-center transition-transform duration-200">
+                <ShareableMapDesign
+                  ref={cardRef}
+                  selections={selections}
+                  category={category}
+                  subcategory={subcategory}
+                  stats={stats}
+                  visitedItems={visitedItems}
+                  selectedGradient={selectedGradient}
+                  includeMap={includeMap}
+                  iconSize={iconSize}
+                  milestones={milestones}
+                />
+              </div>
+            )}
           </div>
 
           {/* Public Link Section */}
@@ -325,7 +244,7 @@ export default function ShareCard({ selections, category, subcategory, onClose, 
           <Button
             variant="outline"
             onClick={shareOrCopyImage}
-            disabled={isDownloading}
+            disabled={isDownloading || !isDataLoaded}
             className="w-full sm:w-auto"
           >
             <Share2 className="w-4 h-4 mr-2" />
@@ -333,7 +252,7 @@ export default function ShareCard({ selections, category, subcategory, onClose, 
           </Button>
           <Button
             onClick={downloadImage}
-            disabled={isDownloading}
+            disabled={isDownloading || !isDataLoaded}
             className="w-full sm:w-auto"
           >
             {isDownloading ? (

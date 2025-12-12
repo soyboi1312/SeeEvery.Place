@@ -7,7 +7,7 @@
 import { ComposableMap, Geographies, Geography, Sphere, Graticule } from '@vnedyalk0v/react19-simple-maps';
 import { UserSelections } from '@/lib/types';
 import { getSelectionStatus } from '@/lib/storage';
-import { GEO_URL_WORLD, countryNameToISO } from '@/lib/mapUtils';
+import { GEO_URL_WORLD, countryNameToISO } from '@/lib/mapConstants';
 
 // Type helper for center coordinates (library uses branded types)
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

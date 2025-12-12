@@ -4,9 +4,11 @@
  */
 'use client';
 
-import { useCallback, useMemo, memo } from 'react';
+import { useCallback, useMemo, memo, useState, useEffect } from 'react';
 import { ComposableMap, Geographies, Geography, ZoomableGroup } from '@vnedyalk0v/react19-simple-maps';
-import { GEO_URL_USA, getCategoryMarkers, MarkerData } from '@/lib/mapUtils';
+import { GEO_URL_USA } from '@/lib/mapConstants';
+import { MarkerData, getMarkersFromData } from '@/lib/markerUtils';
+import { loadCategoryData } from '@/lib/categoryUtils';
 import {
   MountainMarker,
   FlagMarker,
@@ -64,15 +66,37 @@ const USMarkerMap = memo(function USMarkerMap({
     initialCenter: [-97, 38] // Center on the US
   });
 
+  const [markers, setMarkers] = useState<MarkerData[]>([]);
+
+  // Asynchronously load data and generate markers
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadMarkers = async () => {
+      // Re-use the existing async data loader (code-split)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const data = await loadCategoryData(category) as any[];
+
+      if (isMounted) {
+        const generatedMarkers = getMarkersFromData(
+          category,
+          data,
+          selections,
+          true, // filterAlbersUsa
+          subcategory
+        );
+        setMarkers(generatedMarkers);
+      }
+    };
+
+    loadMarkers();
+
+    return () => { isMounted = false; };
+  }, [category, selections, subcategory]);
+
   // Determine marker size based on zoom level
   // Less than 2x zoom = small markers to prevent overcrowding
   const markerSize: MarkerSize = position.zoom < 2 ? 'small' : 'default';
-
-  // Memoize markers computation
-  const markers = useMemo(
-    () => getCategoryMarkers(category, selections, subcategory, true),
-    [category, selections, subcategory]
-  );
 
   // Memoize name lookup map for O(1) access
   const nameMap = useMemo(() => {

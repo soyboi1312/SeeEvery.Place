@@ -7,7 +7,7 @@
 import { ComposableMap, Geographies, Geography } from '@vnedyalk0v/react19-simple-maps';
 import { UserSelections } from '@/lib/types';
 import { getSelectionStatus } from '@/lib/storage';
-import { GEO_URL_USA, fipsToAbbr } from '@/lib/mapUtils';
+import { GEO_URL_USA, fipsToAbbr } from '@/lib/mapConstants';
 
 interface StaticUSMapProps {
   selections: UserSelections;

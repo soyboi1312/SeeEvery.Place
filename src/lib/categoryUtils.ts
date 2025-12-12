@@ -282,7 +282,8 @@ const transforms: Record<Category, TransformFn> = {
 };
 
 // Dynamic data loaders - only load when needed
-async function loadCategoryData(category: Category): Promise<CategoryDataItem[]> {
+// Exported for use by marker maps and other components that need raw data
+export async function loadCategoryData(category: Category): Promise<CategoryDataItem[]> {
   // Return cached data if available
   if (dataCache[category]) {
     return dataCache[category]!;

@@ -6,7 +6,8 @@
 
 import { ComposableMap, Geographies, Geography, Sphere, Graticule, Marker } from '@vnedyalk0v/react19-simple-maps';
 import { Category, UserSelections } from '@/lib/types';
-import { GEO_URL_WORLD, GEO_URL_USA, getCategoryMarkers, MarkerData } from '@/lib/mapUtils';
+import { GEO_URL_WORLD, GEO_URL_USA } from '@/lib/mapConstants';
+import { getCategoryMarkers, MarkerData } from '@/lib/mapUtils';
 import {
   LogoMarker, // New import
   SportMarker,
