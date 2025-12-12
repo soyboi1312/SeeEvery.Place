@@ -43,6 +43,7 @@ interface HeaderProps {
   onToggleDarkMode?: () => void;
   isAdmin?: boolean;
   syncStatus?: SyncStatus;
+  onPreloadAuth?: () => void;
 }
 
 function SyncStatusIcon({ status }: { status: SyncStatus }) {
@@ -75,7 +76,8 @@ export default function Header({
   isDarkMode,
   onToggleDarkMode,
   isAdmin,
-  syncStatus
+  syncStatus,
+  onPreloadAuth
 }: HeaderProps) {
   const [isScrolled, setIsScrolled] = useState(false);
   const router = useRouter();
@@ -165,7 +167,13 @@ export default function Header({
 
           {/* User Auth */}
           {!isSignedIn ? (
-            <Button onClick={onSignIn} size="sm" className="gap-2">
+            <Button
+              onClick={onSignIn}
+              onMouseEnter={onPreloadAuth}
+              onFocus={onPreloadAuth}
+              size="sm"
+              className="gap-2"
+            >
               <User className="w-4 h-4" />
               Sign In
             </Button>
