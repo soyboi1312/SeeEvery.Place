@@ -2,9 +2,14 @@
 
 import { useState, useMemo } from 'react';
 import { Status, Category } from '@/lib/types';
-import { Input } from '@/components/ui/input';
+import { Search, Check, Star, Circle, Trash2, X, AlertCircle } from 'lucide-react';
+
+// Shadcn Imports
+import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -14,14 +19,15 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
+  AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Search, Trash2, Check, Star, Circle } from 'lucide-react';
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuTrigger,
+  ContextMenuSeparator,
+} from '@/components/ui/context-menu';
 
 interface Item {
   id: string;
@@ -177,7 +183,6 @@ export default function SelectionList({
 }: SelectionListProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterMode, setFilterMode] = useState<'all' | 'visited' | 'bucketList' | 'unvisited'>('all');
-  const [showClearConfirm, setShowClearConfirm] = useState(false);
 
   const hasSelections = stats.visited > 0 || stats.bucketList > 0;
 
@@ -209,234 +214,238 @@ export default function SelectionList({
   }, [filteredItems, groupBy]);
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden">
-      {/* Header */}
-      <div className="p-4 sm:p-6 bg-gradient-to-r from-blue-600 to-purple-600 text-white">
-        <h2 className="text-xl sm:text-2xl font-bold mb-2">{title}</h2>
-        <div className="flex flex-wrap gap-4 text-sm">
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-green-400"></div>
-            <span>{stats.visited} visited ({stats.percentage}%)</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-amber-400"></div>
-            <span>{stats.bucketList} bucket list</span>
-          </div>
-          <div className="text-white/70">
+    <Card className="border-0 shadow-lg overflow-hidden flex flex-col h-full bg-background">
+      {/* Header with Gradient */}
+      <div className="px-6 py-5 bg-gradient-to-r from-blue-600 to-purple-600 text-white shrink-0">
+        <div className="flex justify-between items-start">
+          <h2 className="text-2xl font-bold mb-3 tracking-tight">{title}</h2>
+        </div>
+
+        <div className="flex flex-wrap gap-3 text-sm font-medium">
+          <Badge variant="secondary" className="bg-white/20 hover:bg-white/30 text-white border-0 gap-1.5 backdrop-blur-sm">
+            <Check className="w-3.5 h-3.5" />
+            {stats.visited} visited ({stats.percentage}%)
+          </Badge>
+          <Badge variant="secondary" className="bg-white/20 hover:bg-white/30 text-white border-0 gap-1.5 backdrop-blur-sm">
+            <Star className="w-3.5 h-3.5" />
+            {stats.bucketList} bucket list
+          </Badge>
+          <span className="text-white/80 self-center text-xs ml-1">
             {stats.total} total
-          </div>
+          </span>
         </div>
       </div>
 
-      {/* Search and Filter */}
-      <div className="p-4 border-b border-border bg-muted/50 space-y-3">
+      {/* Controls Area */}
+      <div className="p-4 border-b bg-muted/30 space-y-4 shrink-0">
         {showSearch && (
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
-              type="text"
-              placeholder="Search by name or abbreviation (e.g., UK, CA)..."
+              placeholder="Search by name or abbreviation..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
+              className="pl-9 bg-background"
             />
           </div>
         )}
 
-        <div className="flex gap-2 flex-wrap items-center justify-between">
-          <Tabs value={filterMode} onValueChange={(v) => setFilterMode(v as typeof filterMode)}>
-            <TabsList>
-              <TabsTrigger value="all">All</TabsTrigger>
-              <TabsTrigger value="visited">✓ Visited</TabsTrigger>
-              <TabsTrigger value="bucketList">★ Bucket List</TabsTrigger>
-              <TabsTrigger value="unvisited">○ Not Yet</TabsTrigger>
-            </TabsList>
-          </Tabs>
+        <div className="flex flex-col sm:flex-row gap-3 justify-between items-center">
+          {/* Filters */}
+          <div className="flex gap-1.5 p-1 bg-muted rounded-lg w-full sm:w-auto overflow-x-auto no-scrollbar">
+            {(['all', 'visited', 'bucketList', 'unvisited'] as const).map((mode) => (
+              <Button
+                key={mode}
+                variant={filterMode === mode ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setFilterMode(mode)}
+                className={`rounded-md px-3 h-8 text-xs font-medium whitespace-nowrap ${
+                  filterMode === mode ? 'shadow-sm' : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                {mode === 'all' && 'All'}
+                {mode === 'visited' && <><Check className="w-3 h-3 mr-1" /> Visited</>}
+                {mode === 'bucketList' && <><Star className="w-3 h-3 mr-1" /> Bucket List</>}
+                {mode === 'unvisited' && 'Not Yet'}
+              </Button>
+            ))}
+          </div>
+
+          {/* Clear All Button */}
           {onClearAll && hasSelections && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShowClearConfirm(true)}
-              className="text-destructive hover:text-destructive hover:bg-destructive/10"
-            >
-              <Trash2 className="w-4 h-4 mr-1" />
-              Clear All
-            </Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 h-8">
+                  <Trash2 className="w-3.5 h-3.5 mr-1.5" />
+                  Clear
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Clear all selections?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This will remove all {stats.visited} visited and {stats.bucketList} bucket list items from {title}.
+                    This action cannot be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={onClearAll} className="bg-red-600 hover:bg-red-700">
+                    Clear All
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           )}
         </div>
       </div>
 
-      {/* List */}
-      <div className="max-h-[60vh] overflow-y-auto p-4 bg-white dark:bg-gray-800">
-        {Object.entries(groupedItems).map(([group, groupItems]) => (
-          <div key={group} className="mb-6 last:mb-0">
-            {groupBy !== 'none' && (
-              <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2 sticky top-0 bg-white dark:bg-gray-800 py-1">
-                {group} ({groupItems.length})
-              </h3>
-            )}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-              {groupItems.map(item => {
-                const status = getStatus(item.id);
-                return (
+      {/* Main List Area */}
+      <ScrollArea className="flex-1 max-h-[60vh] sm:max-h-[500px]">
+        <div className="p-4">
+          {Object.entries(groupedItems).map(([group, groupItems]) => (
+            <div key={group} className="mb-6 last:mb-0">
+              {groupBy !== 'none' && (
+                <div className="flex items-center gap-2 mb-3">
+                  <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                    {group}
+                  </h3>
+                  <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-muted text-muted-foreground font-medium">
+                    {groupItems.length}
+                  </span>
+                </div>
+              )}
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                {groupItems.map(item => (
                   <ItemCard
                     key={item.id}
                     item={item}
-                    status={status}
-                    onToggle={() => onToggle(item.id, status)}
-                    onSetStatus={(newStatus) => onSetStatus(item.id, newStatus)}
+                    status={getStatus(item.id)}
+                    onToggle={onToggle}
+                    onSetStatus={onSetStatus}
                   />
-                );
-              })}
-            </div>
-          </div>
-        ))}
-
-        {/* Empty state when no items match search */}
-        {filteredItems.length === 0 && searchQuery && (
-          <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-            No items found matching &quot;{searchQuery}&quot;
-          </div>
-        )}
-
-        {/* Compelling empty state when no selections at all */}
-        {filteredItems.length === 0 && !searchQuery && filterMode !== 'all' && (
-          <div className="text-center py-12">
-            <div className="text-5xl mb-4">
-              {filterMode === 'visited' ? '✓' : filterMode === 'bucketList' ? '★' : '○'}
-            </div>
-            <p className="text-gray-500 dark:text-gray-400">
-              {filterMode === 'visited' && 'No visited items yet. Start exploring!'}
-              {filterMode === 'bucketList' && 'No bucket list items yet. Dream big!'}
-              {filterMode === 'unvisited' && 'All items have been visited or added!'}
-            </p>
-          </div>
-        )}
-
-        {/* Welcome empty state when user has no selections */}
-        {stats.visited === 0 && stats.bucketList === 0 && filterMode === 'all' && !searchQuery && category && (
-          <div className="text-center py-12 px-4">
-            <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/30 dark:to-purple-900/30 mb-4">
-              <span className="text-4xl">{emptyStateContent[category].icon}</span>
-            </div>
-            <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-2">
-              {emptyStateContent[category].title}
-            </h3>
-            <p className="text-gray-500 dark:text-gray-400 max-w-sm mx-auto mb-6">
-              {emptyStateContent[category].subtitle}
-            </p>
-            <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
-              <div className="flex items-center gap-2 text-sm text-gray-400 dark:text-gray-500">
-                <span className="w-6 h-6 rounded-full bg-green-500 text-white flex items-center justify-center text-xs font-bold">✓</span>
-                <span>Tap to mark visited</span>
-              </div>
-              <div className="hidden sm:block text-gray-300 dark:text-gray-600">|</div>
-              <div className="flex items-center gap-2 text-sm text-gray-400 dark:text-gray-500">
-                <span className="w-6 h-6 rounded-full bg-amber-500 text-white flex items-center justify-center text-xs font-bold">★</span>
-                <span>Long-press for bucket list</span>
+                ))}
               </div>
             </div>
-          </div>
-        )}
-      </div>
+          ))}
 
-      {/* Clear All Confirmation Modal */}
-      <AlertDialog open={showClearConfirm} onOpenChange={setShowClearConfirm}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Clear All Selections?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This will remove all {stats.visited} visited and {stats.bucketList} bucket list items from {title}. This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => onClearAll?.()}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              Clear All
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </div>
+          {/* Empty States */}
+          {filteredItems.length === 0 && (
+            <div className="py-12 flex flex-col items-center text-center px-4 animate-in fade-in duration-300">
+              {searchQuery ? (
+                <>
+                  <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center mb-3">
+                    <Search className="w-6 h-6 text-muted-foreground" />
+                  </div>
+                  <p className="text-muted-foreground">No items found matching &quot;{searchQuery}&quot;</p>
+                </>
+              ) : filterMode !== 'all' ? (
+                <>
+                  <div className="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center mb-4 text-3xl">
+                    {filterMode === 'visited' ? '✓' : filterMode === 'bucketList' ? '★' : '○'}
+                  </div>
+                  <h3 className="font-semibold text-lg mb-1">It's quiet here...</h3>
+                  <p className="text-sm text-muted-foreground">
+                    {filterMode === 'visited' && 'No visited items yet. Start checking things off!'}
+                    {filterMode === 'bucketList' && 'Your bucket list is empty. Time to dream big!'}
+                    {filterMode === 'unvisited' && 'Wow! You\'ve tracked everything in this list!'}
+                  </p>
+                </>
+              ) : category && emptyStateContent[category] ? (
+                <>
+                  <div className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/20 dark:to-purple-900/20 flex items-center justify-center mb-4 text-4xl shadow-sm">
+                    {emptyStateContent[category].icon}
+                  </div>
+                  <h3 className="text-xl font-bold mb-2">{emptyStateContent[category].title}</h3>
+                  <p className="text-muted-foreground max-w-sm mb-6">
+                    {emptyStateContent[category].subtitle}
+                  </p>
+                  <div className="flex gap-4 text-xs font-medium text-muted-foreground">
+                    <div className="flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-green-500" />
+                      Tap to Visit
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-amber-500" />
+                      Right-click to Bucket List
+                    </div>
+                  </div>
+                </>
+              ) : null}
+            </div>
+          )}
+        </div>
+      </ScrollArea>
+    </Card>
   );
 }
 
 interface ItemCardProps {
   item: Item;
   status: Status;
-  onToggle: () => void;
-  onSetStatus: (status: Status | null) => void;
+  onToggle: (id: string, currentStatus: Status) => void;
+  onSetStatus: (id: string, status: Status | null) => void;
 }
 
 function ItemCard({ item, status, onToggle, onSetStatus }: ItemCardProps) {
-  const statusStyles = {
-    visited: 'bg-green-100 dark:bg-green-900/40 border-green-400 dark:border-green-600 text-green-800 dark:text-green-200',
-    bucketList: 'bg-amber-50 dark:bg-amber-900/40 border-amber-400 dark:border-amber-600 text-amber-800 dark:text-amber-200',
-    unvisited: 'bg-card border-border text-card-foreground hover:bg-muted/50',
+  // Styles based on status
+  const getStyles = (s: Status) => {
+    switch (s) {
+      case 'visited':
+        return 'bg-green-100 dark:bg-green-900/30 border-green-500/30 text-green-900 dark:text-green-100 hover:bg-green-200 dark:hover:bg-green-900/50';
+      case 'bucketList':
+        return 'bg-amber-100 dark:bg-amber-900/30 border-amber-500/30 text-amber-900 dark:text-amber-100 hover:bg-amber-200 dark:hover:bg-amber-900/50';
+      default:
+        return 'bg-card hover:bg-accent/50 border-transparent hover:border-border text-foreground';
+    }
   };
 
-  const statusIcons = {
-    visited: '✓',
-    bucketList: '★',
-    unvisited: '',
+  const getIcon = (s: Status) => {
+    switch (s) {
+      case 'visited': return <Check className="w-4 h-4 text-green-600 dark:text-green-400" />;
+      case 'bucketList': return <Star className="w-4 h-4 text-amber-600 dark:text-amber-400 fill-current" />;
+      default: return <Circle className="w-4 h-4 text-muted-foreground/30" />;
+    }
   };
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <button
-          onClick={(e) => {
-            // Only toggle on left click without modifier keys
-            if (!e.ctrlKey && !e.metaKey && !e.shiftKey) {
-              e.preventDefault();
-              onToggle();
-            }
-          }}
-          onContextMenu={(e) => e.preventDefault()}
-          className={`
-            w-full text-left px-3 py-2.5 rounded-lg border-2 transition-all duration-200
-            flex items-center gap-2 group
-            ${statusStyles[status]}
-          `}
-          aria-label={`${item.name}: ${status === 'visited' ? 'Visited' : status === 'bucketList' ? 'On bucket list' : 'Not visited'}. Click to change status, right-click for options.`}
+    <ContextMenu>
+      <ContextMenuTrigger>
+        <Button
+          variant="outline"
+          className={`w-full justify-start h-11 px-3 transition-all duration-200 border relative group ${getStyles(status)}`}
+          onClick={() => onToggle(item.id, status)}
         >
-          <span className={`
-            w-6 h-6 rounded-full flex items-center justify-center text-sm font-bold shrink-0
-            ${status === 'visited' ? 'bg-green-500 text-white' : ''}
-            ${status === 'bucketList' ? 'bg-amber-500 text-white' : ''}
-            ${status === 'unvisited' ? 'bg-muted text-muted-foreground group-hover:bg-muted/80' : ''}
-          `}>
-            {statusIcons[status]}
-          </span>
-          <span className="truncate font-medium">{item.name}</span>
-        </button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-40">
-        <DropdownMenuItem
-          onClick={() => onSetStatus('visited')}
-          className="text-green-600 dark:text-green-400 focus:text-green-600 dark:focus:text-green-400"
-        >
-          <Check className="w-4 h-4 mr-2" />
-          Visited
-        </DropdownMenuItem>
-        <DropdownMenuItem
-          onClick={() => onSetStatus('bucketList')}
-          className="text-amber-500 dark:text-amber-400 focus:text-amber-500 dark:focus:text-amber-400"
-        >
-          <Star className="w-4 h-4 mr-2" />
-          Bucket List
-        </DropdownMenuItem>
-        <DropdownMenuItem
-          onClick={() => onSetStatus(null)}
-          className="text-muted-foreground"
-        >
-          <Circle className="w-4 h-4 mr-2" />
-          Clear
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+          <div className="flex items-center gap-3 w-full overflow-hidden">
+            <span className="shrink-0 flex items-center justify-center">
+              {getIcon(status)}
+            </span>
+            <span className="truncate font-medium">{item.name}</span>
+            {item.code && (
+              <span className="ml-auto text-xs opacity-50 font-mono hidden sm:inline-block">
+                {item.code}
+              </span>
+            )}
+          </div>
+        </Button>
+      </ContextMenuTrigger>
+
+      <ContextMenuContent className="w-48">
+        <ContextMenuItem onClick={() => onSetStatus(item.id, 'visited')}>
+          <Check className="w-4 h-4 mr-2 text-green-500" />
+          Mark Visited
+        </ContextMenuItem>
+        <ContextMenuItem onClick={() => onSetStatus(item.id, 'bucketList')}>
+          <Star className="w-4 h-4 mr-2 text-amber-500" />
+          Add to Bucket List
+        </ContextMenuItem>
+        <ContextMenuSeparator />
+        <ContextMenuItem onClick={() => onSetStatus(item.id, null)}>
+          <X className="w-4 h-4 mr-2" />
+          Clear Status
+        </ContextMenuItem>
+      </ContextMenuContent>
+    </ContextMenu>
   );
 }
