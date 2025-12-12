@@ -47,6 +47,18 @@ export function useMobileTap(onTap: () => void) {
     // Reset state
     state.current.isDown = false;
 
+    // Force release pointer capture to fix "sticky cursor" on iPad Magic Keyboard
+    // The trackpad on iPad behaves as a hybrid pointer type, and d3-zoom may
+    // capture the pointer without properly releasing it
+    try {
+      const target = e.target as Element;
+      if (target.hasPointerCapture?.(e.pointerId)) {
+        target.releasePointerCapture(e.pointerId);
+      }
+    } catch {
+      // Ignore errors - some browsers don't support this
+    }
+
     const { startX, startY, startTime } = state.current;
     const duration = Date.now() - startTime;
     const dist = Math.sqrt(
@@ -56,21 +68,23 @@ export function useMobileTap(onTap: () => void) {
 
     // If it was a quick tap without much movement
     if (duration < MAX_TAP_DURATION && dist < MAX_TAP_DISTANCE) {
-      // REMOVED: e.preventDefault()
-      // We must allow the event to bubble so d3-zoom receives the 'up' signal
-      // and terminates the drag gesture. This fixes "sticky cursor" on iPad
-      // Magic Keyboard where the map gets stuck to the cursor after a click.
-      // We rely on 'touch-action: none' in CSS to prevent browser gestures.
-
       onTap();
     }
   }, [onTap]);
 
-  // We also need to handle cases where the pointer leaves or is cancelled
-  // to prevent "stuck" down states
-  const onPointerLeave = useCallback(() => {
+  // Handle cases where the pointer leaves or is cancelled to prevent "stuck" states
+  const onPointerLeave = useCallback((e: React.PointerEvent) => {
     if (state.current.isDown) {
       state.current.isDown = false;
+    }
+    // Also release pointer capture on leave/cancel
+    try {
+      const target = e.target as Element;
+      if (target.hasPointerCapture?.(e.pointerId)) {
+        target.releasePointerCapture(e.pointerId);
+      }
+    } catch {
+      // Ignore errors
     }
   }, []);
 
@@ -78,7 +92,6 @@ export function useMobileTap(onTap: () => void) {
     onPointerDown,
     onPointerUp,
     onPointerLeave,
-    // Map pointercancel to leave to handle interruptions (e.g. system gestures)
     onPointerCancel: onPointerLeave
   };
 }
