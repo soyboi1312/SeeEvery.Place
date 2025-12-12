@@ -88,6 +88,8 @@ const nextConfig = {
   reactStrictMode: true,
   // Optimize package imports for better tree-shaking
   experimental: {
+    // Inline critical CSS and defer non-critical to reduce render-blocking
+    optimizeCss: true,
     optimizePackageImports: [
       'zod',
       '@supabase/supabase-js',
