@@ -4,7 +4,7 @@
  */
 'use client';
 
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import dynamic from 'next/dynamic';
 import { Category, Status } from '@/lib/types';
@@ -81,6 +81,31 @@ function getMapComponent(
 export default function MapVisualization({ category, selections, onToggle, subcategory, items }: MapVisualizationProps) {
   const isRegionMap = usesRegionMap(category);
   const [tooltip, setTooltip] = useState<TooltipState | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Fix sticky pointer on iPad Magic Keyboard by releasing pointer capture on pointerup
+  // This handles cases where d3-zoom captures the pointer but doesn't release it
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const handlePointerUp = (e: PointerEvent) => {
+      // Release pointer capture from any element that has it
+      const target = e.target as Element;
+      if (target?.hasPointerCapture?.(e.pointerId)) {
+        target.releasePointerCapture(e.pointerId);
+      }
+    };
+
+    // Listen on the container for all pointerup events (capture phase)
+    container.addEventListener('pointerup', handlePointerUp, true);
+    container.addEventListener('pointercancel', handlePointerUp, true);
+
+    return () => {
+      container.removeEventListener('pointerup', handlePointerUp, true);
+      container.removeEventListener('pointercancel', handlePointerUp, true);
+    };
+  }, []);
 
   // Memoize individual handlers
   // Handle both React synthetic events and native events from react-simple-maps
@@ -124,8 +149,11 @@ export default function MapVisualization({ category, selections, onToggle, subca
 
   return (
     // touch-action-none prevents browser gestures capturing pointer events on hybrid devices
-    <div className="w-full bg-primary-50/50 dark:bg-slate-800/50 rounded-2xl overflow-hidden border border-black/5 dark:border-white/10 shadow-premium-lg mb-6 relative touch-action-none">
-      <div className="aspect-[4/3] sm:aspect-[16/9] w-full max-h-[500px] flex items-center justify-center">
+    <div
+      ref={containerRef}
+      className="w-full bg-primary-50/50 dark:bg-slate-800/50 rounded-2xl overflow-hidden border border-black/5 dark:border-white/10 shadow-premium-lg mb-6 relative touch-action-none"
+    >
+      <div className="aspect-[4/3] sm:aspect-[16/9] w-full max-h-[500px] overflow-hidden">
         {getMapComponent(category, selections, onToggle, subcategory, tooltipHandlers, items)}
       </div>
 
