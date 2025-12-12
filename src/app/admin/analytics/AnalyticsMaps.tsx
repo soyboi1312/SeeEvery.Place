@@ -66,7 +66,8 @@ export function AnalyticsUSMap({ data, isDarkMode = false }: HeatmapProps) {
       width={800}
       height={500}
       viewBox="0 50 800 450"
-      className="w-full h-full"
+      className="w-full h-auto max-h-full"
+      style={{ maxHeight: '100%' }}
     >
       <Geographies geography={GEO_URL_USA}>
         {({ geographies }) =>
@@ -122,7 +123,8 @@ export function AnalyticsWorldMap({ data, isDarkMode = false }: HeatmapProps) {
       width={800}
       height={400}
       viewBox="0 0 800 400"
-      className="w-full h-full"
+      className="w-full h-auto max-h-full"
+      style={{ maxHeight: '100%' }}
     >
       <Sphere
         stroke={isDarkMode ? '#475569' : '#e4e5e6'}
