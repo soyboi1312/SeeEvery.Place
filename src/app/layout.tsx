@@ -10,7 +10,8 @@ export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   maximumScale: 1,
-  userScalable: false,
+  // Removed userScalable: false to fix Lighthouse accessibility audit
+  // Users with low vision must be able to zoom.
 }
 
 export const metadata: Metadata = {
@@ -114,6 +115,16 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-title" content="See Every Place" />
         <meta name="format-detection" content="telephone=no" />
         <meta name="mobile-web-app-capable" content="yes" />
+
+        {/* Preload the world map data to improve LCP by avoiding request chaining */}
+        <link
+          rel="preload"
+          href="/geo/countries-110m.json"
+          as="fetch"
+          type="application/json"
+          crossOrigin="anonymous"
+        />
+
         {/* Prevent dark mode FOUC by setting class before React hydration */}
         <script
           dangerouslySetInnerHTML={{
