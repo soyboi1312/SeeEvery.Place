@@ -2,6 +2,20 @@ import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
 export async function updateSession(request: NextRequest) {
+  // OPTIMIZATION: Check for auth cookies before doing anything expensive
+  // Supabase cookies typically start with 'sb-'
+  const hasAuthCookie = request.cookies.getAll().some(cookie => cookie.name.startsWith('sb-'));
+
+  // If there's no auth cookie, and the user isn't trying to access a protected admin route,
+  // we can skip the entire Supabase initialization and network call.
+  // This saves CPU time for the majority of traffic (anonymous public visitors).
+  const isAdminRoute = request.nextUrl.pathname.startsWith('/admin');
+  if (!hasAuthCookie && !isAdminRoute) {
+    return NextResponse.next({
+      request,
+    });
+  }
+
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
@@ -42,8 +56,7 @@ export async function updateSession(request: NextRequest) {
   // Get current user
   const { data: { user } } = await supabase.auth.getUser();
 
-  // Protect admin routes
-  const isAdminRoute = request.nextUrl.pathname.startsWith('/admin');
+  // Protect admin routes (isAdminRoute already computed above)
   if (isAdminRoute) {
     // No user = not authenticated, redirect to home
     if (!user) {
