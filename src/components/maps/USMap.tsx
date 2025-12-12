@@ -44,11 +44,14 @@ const USMap = memo(function USMap({ selections, onToggle, tooltip }: BaseMapProp
   }, [statusMap]);
 
   return (
-    <div className="relative w-full h-full group overflow-hidden">
+    <div className="relative w-full group">
       <ComposableMap
         projection="geoAlbersUsa"
         projectionConfig={{ scale: 1000 }}
-        className="w-full h-full"
+        width={800}
+        height={500}
+        viewBox="0 0 800 500"
+        className="w-full"
       >
         <ZoomableGroup
           zoom={position.zoom}
