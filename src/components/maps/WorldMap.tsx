@@ -48,7 +48,7 @@ const WorldMap = memo(function WorldMap({ selections, onToggle, tooltip }: BaseM
   }, [statusMap]);
 
   return (
-    <div className="relative w-full h-full group">
+    <div className="relative w-full h-full group overflow-hidden">
       <ComposableMap
         projection="geoEqualEarth"
         // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Library uses branded Longitude/Latitude types
