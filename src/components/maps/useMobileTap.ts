@@ -50,10 +50,14 @@ export function useMobileTap(onTap: () => void) {
     // Force release pointer capture to fix "sticky cursor" on iPad Magic Keyboard
     // The trackpad on iPad behaves as a hybrid pointer type, and d3-zoom may
     // capture the pointer without properly releasing it
+    // Walk up the DOM tree since capture may be on an ancestor element
     try {
-      const target = e.target as Element;
-      if (target.hasPointerCapture?.(e.pointerId)) {
-        target.releasePointerCapture(e.pointerId);
+      let element: Element | null = e.target as Element;
+      while (element && element !== document.documentElement) {
+        if (element.hasPointerCapture?.(e.pointerId)) {
+          element.releasePointerCapture(e.pointerId);
+        }
+        element = element.parentElement;
       }
     } catch {
       // Ignore errors - some browsers don't support this
@@ -78,10 +82,14 @@ export function useMobileTap(onTap: () => void) {
       state.current.isDown = false;
     }
     // Also release pointer capture on leave/cancel
+    // Walk up DOM tree since capture may be on an ancestor element
     try {
-      const target = e.target as Element;
-      if (target.hasPointerCapture?.(e.pointerId)) {
-        target.releasePointerCapture(e.pointerId);
+      let element: Element | null = e.target as Element;
+      while (element && element !== document.documentElement) {
+        if (element.hasPointerCapture?.(e.pointerId)) {
+          element.releasePointerCapture(e.pointerId);
+        }
+        element = element.parentElement;
       }
     } catch {
       // Ignore errors
