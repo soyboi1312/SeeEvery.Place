@@ -7,7 +7,6 @@ import Header from '@/components/Header';
 import CategoryTabs from '@/components/CategoryTabs';
 import SelectionList from '@/components/SelectionList';
 import QuickStats from '@/components/QuickStats';
-import InstallPWA from '@/components/InstallPWA';
 
 // Dynamically import heavy modals to reduce initial bundle size
 // ShareCard imports all category data files (~100KB+ of coordinates/names)
@@ -211,7 +210,8 @@ export default function Home() {
 
   return (
     // UPDATED: Clean background removed gradient
-    <div className="min-h-screen bg-white dark:bg-gray-900 transition-colors duration-300">
+    // Note: Removed transition-colors to fix non-composited animation (Lighthouse CLS)
+    <div className="min-h-screen bg-white dark:bg-gray-900">
       <Header
         onSignIn={() => setShowAuthModal(true)}
         onSignOut={signOut}
@@ -286,9 +286,6 @@ export default function Home() {
           stats={currentStats}
           category={activeCategory}
         />
-
-        {/* Install PWA Button - New addition */}
-        <InstallPWA />
 
         {/* Floating Share Button - Updated to be more explicit */}
         <button
