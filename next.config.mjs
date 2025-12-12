@@ -63,9 +63,11 @@ const withPWA = withPWAInit({
         },
       },
       {
-        // Match geo data files - NetworkFirst to ensure updates are seen
+        // Match geo data files - StaleWhileRevalidate for snappy performance
+        // These files rarely change, so serve from cache immediately while
+        // fetching updates in the background for next time
         urlPattern: /\/geo\/.*/i,
-        handler: "NetworkFirst",
+        handler: "StaleWhileRevalidate",
         options: {
           cacheName: "geo-data",
           expiration: {
