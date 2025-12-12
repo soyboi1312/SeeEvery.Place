@@ -2,14 +2,13 @@
  * CategoryMarkerMap Component
  * Generic map with markers for category-specific locations
  * Follows DRY principle by unifying USMarkerMap and WorldMarkerMap logic
+ * Follows ISP by using useCategoryMarkers hook for data fetching
  */
 'use client';
 
-import { memo, useState, useEffect } from 'react';
+import { memo } from 'react';
 import { Geographies, Geography } from '@vnedyalk0v/react19-simple-maps';
-import { MarkerData, getMarkersFromData } from '@/lib/markerUtils';
-import { loadCategoryData } from '@/lib/categoryUtils';
-import { useNameGetter, getMarkerSize } from '@/lib/hooks/useMapData';
+import { useNameGetter, getMarkerSize, useCategoryMarkers } from '@/lib/hooks/useMapData';
 import { renderCategoryMarker } from '@/components/MapMarkers/registry';
 import { MarkerMapProps } from './types';
 import InteractiveMapShell from './InteractiveMapShell';
@@ -67,11 +66,6 @@ const CategoryMarkerMap = memo(function CategoryMarkerMap({
   items,
   config,
 }: CategoryMarkerMapProps) {
-  const [markers, setMarkers] = useState<MarkerData[]>([]);
-
-  // Use extracted hook for name lookup - DRY principle
-  const getItemName = useNameGetter(items);
-
   const {
     geoUrl,
     projection,
@@ -86,31 +80,11 @@ const CategoryMarkerMap = memo(function CategoryMarkerMap({
     filterAlbersUsa = false,
   } = config;
 
-  // Asynchronously load data and generate markers
-  useEffect(() => {
-    let isMounted = true;
+  // Use extracted hook for data fetching - ISP/SRP
+  const markers = useCategoryMarkers(category, selections, filterAlbersUsa, subcategory);
 
-    const loadMarkers = async () => {
-      // Re-use the existing async data loader (code-split)
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const data = await loadCategoryData(category) as any[];
-
-      if (isMounted) {
-        const generatedMarkers = getMarkersFromData(
-          category,
-          data,
-          selections,
-          filterAlbersUsa,
-          subcategory
-        );
-        setMarkers(generatedMarkers);
-      }
-    };
-
-    loadMarkers();
-
-    return () => { isMounted = false; };
-  }, [category, selections, subcategory, filterAlbersUsa]);
+  // Use extracted hook for name lookup - DRY principle
+  const getItemName = useNameGetter(items);
 
   return (
     <InteractiveMapShell

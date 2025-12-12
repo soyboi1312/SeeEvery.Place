@@ -1,90 +1,64 @@
 import { ReactNode } from "react";
 
-// 1. DISTINCT CATEGORIES - Single source of truth
-// Export as const array so the type can be derived from it (prevents drift)
+// =====================
+// SINGLE SOURCE OF TRUTH - Category Schema
+// =====================
+// All category definitions derive from this schema (DRY + OCP)
+// To add a new category: simply add it here, everything else derives automatically
 // NOTE: If updating this, also update get_analytics_summary() in supabase/migrations/20241207_analytics_rpc.sql
-export const ALL_CATEGORIES = [
-  "countries",
-  "states",
-  "territories",
-  "usCities",
-  "worldCities",
-  "nationalParks",
-  "nationalMonuments",
-  "stateParks",
-  "fiveKPeaks",
-  "fourteeners",
-  "museums",
-  "mlbStadiums",
-  "nflStadiums",
-  "nbaStadiums",
-  "nhlStadiums",
-  "soccerStadiums",
-  "f1Tracks",
-  "marathons",
-  "airports",
-  "skiResorts",
-  "themeParks",
-  "surfingReserves",
-  "weirdAmericana",
-] as const;
 
-// Derive type from the array to ensure they never drift apart
-export type Category = typeof ALL_CATEGORIES[number];
+const CATEGORY_SCHEMA = {
+  countries: { label: "Countries", icon: "🌍", group: "destinations" },
+  states: { label: "US States", icon: "🇺🇸", group: "destinations" },
+  territories: { label: "US Territories", icon: "🏝️", group: "destinations" },
+  usCities: { label: "US Cities", icon: "🏙️", group: "destinations" },
+  worldCities: { label: "World Cities", icon: "🌆", group: "destinations" },
+  nationalParks: { label: "National Parks", icon: "🏞️", group: "nature" },
+  nationalMonuments: { label: "National Monuments", icon: "🗽", group: "nature" },
+  stateParks: { label: "State Parks", icon: "🌲", group: "nature" },
+  fiveKPeaks: { label: "5000m+ Peaks", icon: "🏔️", group: "nature" },
+  fourteeners: { label: "US 14ers", icon: "⛰️", group: "nature" },
+  museums: { label: "Museums", icon: "🎨", group: "culture" },
+  mlbStadiums: { label: "MLB Stadiums", icon: "⚾", group: "sports" },
+  nflStadiums: { label: "NFL Stadiums", icon: "🏈", group: "sports" },
+  nbaStadiums: { label: "NBA Arenas", icon: "🏀", group: "sports" },
+  nhlStadiums: { label: "NHL Arenas", icon: "🏒", group: "sports" },
+  soccerStadiums: { label: "Soccer Stadiums", icon: "⚽", group: "sports" },
+  f1Tracks: { label: "F1 Tracks", icon: "🏎️", group: "sports" },
+  marathons: { label: "Marathon Majors", icon: "🏃", group: "sports" },
+  airports: { label: "Airports", icon: "✈️", group: "destinations" },
+  skiResorts: { label: "Ski Resorts", icon: "⛷️", group: "nature" },
+  themeParks: { label: "Theme Parks", icon: "🎢", group: "culture" },
+  surfingReserves: { label: "Surfing Reserves", icon: "🌊", group: "nature" },
+  weirdAmericana: { label: "Weird Americana", icon: "🗿", group: "culture" },
+} as const;
+
+// =====================
+// DERIVED TYPES AND CONSTANTS (DRY)
+// =====================
+
+// Derive Category type from schema keys
+export type Category = keyof typeof CATEGORY_SCHEMA;
+
+// Derive ALL_CATEGORIES array from schema keys
+export const ALL_CATEGORIES = Object.keys(CATEGORY_SCHEMA) as Category[];
+
+// Derive categoryLabels from schema
+export const categoryLabels = Object.fromEntries(
+  Object.entries(CATEGORY_SCHEMA).map(([k, v]) => [k, v.label])
+) as Record<Category, string>;
+
+// Derive categoryIcons from schema
+export const categoryIcons = Object.fromEntries(
+  Object.entries(CATEGORY_SCHEMA).map(([k, v]) => [k, v.icon])
+) as Record<Category, ReactNode>;
+
+// =====================
+// STATUS AND SELECTION TYPES
+// =====================
 
 export type Status = "visited" | "bucketList" | "unvisited";
 
-// 2. META-GROUPS (For UI Organization Only)
-export type CategoryGroup = 'destinations' | 'nature' | 'sports' | 'culture';
-
-export interface GroupConfig {
-  label: string;
-  icon: string;
-  categories: Category[];
-}
-
-// Define which specific categories belong to which group
-export const categoryGroups: Record<CategoryGroup, GroupConfig> = {
-  destinations: {
-    label: 'Destinations',
-    icon: '🌍',
-    categories: ['countries', 'states', 'territories', 'usCities', 'worldCities', 'airports'],
-  },
-  nature: {
-    label: 'Nature',
-    icon: '🌲',
-    categories: ['nationalParks', 'nationalMonuments', 'stateParks', 'fiveKPeaks', 'fourteeners', 'skiResorts', 'surfingReserves'],
-  },
-  sports: {
-    label: 'Sports',
-    icon: '🏆',
-    categories: [
-      'mlbStadiums',
-      'nflStadiums',
-      'nbaStadiums',
-      'nhlStadiums',
-      'soccerStadiums',
-      'f1Tracks',
-      'marathons'
-    ],
-  },
-  culture: {
-    label: 'Culture',
-    icon: '🏛️',
-    categories: ['museums', 'themeParks', 'weirdAmericana'],
-  },
-};
-
-export const getGroupForCategory = (category: Category): CategoryGroup => {
-  for (const [group, config] of Object.entries(categoryGroups)) {
-    if (config.categories.includes(category)) {
-      return group as CategoryGroup;
-    }
-  }
-  return 'destinations';
-};
-
-// 3. SELECTIONS (Distinct Keys)
 export interface Selection {
   id: string;
   status: Status;
@@ -94,31 +68,69 @@ export interface Selection {
   deleted?: boolean;
 }
 
-export interface UserSelections {
-  countries: Selection[];
-  states: Selection[];
-  territories: Selection[];
-  usCities: Selection[];
-  worldCities: Selection[];
-  nationalParks: Selection[];
-  nationalMonuments: Selection[];
-  stateParks: Selection[];
-  fiveKPeaks: Selection[];
-  fourteeners: Selection[];
-  museums: Selection[];
-  mlbStadiums: Selection[];
-  nflStadiums: Selection[];
-  nbaStadiums: Selection[];
-  nhlStadiums: Selection[];
-  soccerStadiums: Selection[];
-  f1Tracks: Selection[];
-  marathons: Selection[];
-  airports: Selection[];
-  skiResorts: Selection[];
-  themeParks: Selection[];
-  surfingReserves: Selection[];
-  weirdAmericana: Selection[];
+// Derive UserSelections type from Category (each category has Selection[])
+export type UserSelections = {
+  [K in Category]: Selection[];
+};
+
+// Derive emptySelections from schema keys
+export const emptySelections: UserSelections = Object.keys(CATEGORY_SCHEMA).reduce(
+  (acc, key) => ({ ...acc, [key]: [] }),
+  {} as UserSelections
+);
+
+// =====================
+// CATEGORY GROUPS (For UI Organization)
+// =====================
+
+export type CategoryGroup = 'destinations' | 'nature' | 'sports' | 'culture';
+
+export interface GroupConfig {
+  label: string;
+  icon: string;
+  categories: Category[];
 }
+
+// Group metadata (labels and icons)
+const GROUP_META: Record<CategoryGroup, { label: string; icon: string }> = {
+  destinations: { label: 'Destinations', icon: '🌍' },
+  nature: { label: 'Nature', icon: '🌲' },
+  sports: { label: 'Sports', icon: '🏆' },
+  culture: { label: 'Culture', icon: '🏛️' },
+};
+
+// Derive categoryGroups from schema (DRY - groups defined in schema, not duplicated)
+export const categoryGroups: Record<CategoryGroup, GroupConfig> = (() => {
+  const groups: Record<CategoryGroup, Category[]> = {
+    destinations: [],
+    nature: [],
+    sports: [],
+    culture: [],
+  };
+
+  // Build groups from schema
+  for (const [category, config] of Object.entries(CATEGORY_SCHEMA)) {
+    const group = config.group as CategoryGroup;
+    groups[group].push(category as Category);
+  }
+
+  // Combine with metadata
+  return Object.fromEntries(
+    Object.entries(GROUP_META).map(([group, meta]) => [
+      group,
+      { ...meta, categories: groups[group as CategoryGroup] },
+    ])
+  ) as Record<CategoryGroup, GroupConfig>;
+})();
+
+// Get group for a category (derived from schema)
+export const getGroupForCategory = (category: Category): CategoryGroup => {
+  return CATEGORY_SCHEMA[category].group as CategoryGroup;
+};
+
+// =====================
+// OTHER INTERFACES
+// =====================
 
 export interface ShareStats {
   category: Category;
@@ -137,82 +149,3 @@ export interface UserProfile {
   createdAt: Date;
   updatedAt: Date;
 }
-
-// 4. LABELS & ICONS
-export const categoryLabels: Record<Category, string> = {
-  countries: "Countries",
-  states: "US States",
-  territories: "US Territories",
-  usCities: "US Cities",
-  worldCities: "World Cities",
-  nationalParks: "National Parks",
-  nationalMonuments: "National Monuments",
-  stateParks: "State Parks",
-  fiveKPeaks: "5000m+ Peaks",
-  fourteeners: "US 14ers",
-  museums: "Museums",
-  mlbStadiums: "MLB Stadiums",
-  nflStadiums: "NFL Stadiums",
-  nbaStadiums: "NBA Arenas",
-  nhlStadiums: "NHL Arenas",
-  soccerStadiums: "Soccer Stadiums",
-  f1Tracks: "F1 Tracks",
-  marathons: "Marathon Majors",
-  airports: "Airports",
-  skiResorts: "Ski Resorts",
-  themeParks: "Theme Parks",
-  surfingReserves: "Surfing Reserves",
-  weirdAmericana: "Weird Americana",
-};
-
-export const categoryIcons: Record<Category, ReactNode> = {
-  countries: "🌍",
-  states: "🇺🇸",
-  territories: "🏝️",
-  usCities: "🏙️",
-  worldCities: "🌆",
-  nationalParks: "🏞️",
-  nationalMonuments: "🗽",
-  stateParks: "🌲",
-  fiveKPeaks: "🏔️",
-  fourteeners: "⛰️",
-  museums: "🎨",
-  mlbStadiums: "⚾",
-  nflStadiums: "🏈",
-  nbaStadiums: "🏀",
-  nhlStadiums: "🏒",
-  soccerStadiums: "⚽",
-  f1Tracks: "🏎️",
-  marathons: "🏃",
-  airports: "✈️",
-  skiResorts: "⛷️",
-  themeParks: "🎢",
-  surfingReserves: "🌊",
-  weirdAmericana: "🗿",
-};
-
-export const emptySelections: UserSelections = {
-  countries: [],
-  states: [],
-  territories: [],
-  usCities: [],
-  worldCities: [],
-  nationalParks: [],
-  nationalMonuments: [],
-  stateParks: [],
-  fiveKPeaks: [],
-  fourteeners: [],
-  museums: [],
-  mlbStadiums: [],
-  nflStadiums: [],
-  nbaStadiums: [],
-  nhlStadiums: [],
-  soccerStadiums: [],
-  f1Tracks: [],
-  marathons: [],
-  airports: [],
-  skiResorts: [],
-  themeParks: [],
-  surfingReserves: [],
-  weirdAmericana: [],
-};

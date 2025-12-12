@@ -2,8 +2,10 @@
  * Custom hooks for map data lookup
  * Extracted to follow DRY principle - used by all map components
  */
-import { useMemo, useCallback } from 'react';
-import { Status } from '@/lib/types';
+import { useMemo, useCallback, useState, useEffect } from 'react';
+import { Category, Status, UserSelections } from '@/lib/types';
+import { MarkerData, getMarkersFromData } from '@/lib/markerUtils';
+import { loadCategoryData } from '@/lib/categoryUtils';
 
 // Selection type used across map components
 interface Selection {
@@ -65,4 +67,43 @@ export function useNameGetter(items: NamedItem[] | undefined) {
  */
 export function getMarkerSize(zoom: number): 'small' | 'default' {
   return zoom < 2 ? 'small' : 'default';
+}
+
+/**
+ * Hook for loading category markers with async data fetching
+ * Follows Interface Segregation Principle - separates data fetching from presentation
+ */
+export function useCategoryMarkers(
+  category: Category,
+  selections: UserSelections,
+  filterAlbersUsa: boolean,
+  subcategory?: string
+): MarkerData[] {
+  const [markers, setMarkers] = useState<MarkerData[]>([]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadMarkers = async () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const data = await loadCategoryData(category) as any[];
+
+      if (isMounted) {
+        const generatedMarkers = getMarkersFromData(
+          category,
+          data,
+          selections,
+          filterAlbersUsa,
+          subcategory
+        );
+        setMarkers(generatedMarkers);
+      }
+    };
+
+    loadMarkers();
+
+    return () => { isMounted = false; };
+  }, [category, selections, subcategory, filterAlbersUsa]);
+
+  return markers;
 }

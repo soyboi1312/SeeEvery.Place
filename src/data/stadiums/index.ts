@@ -1,3 +1,9 @@
+/**
+ * Stadium Data Exports
+ * Following SRP: This file only handles data exports
+ * Utility functions are in stadiumUtils.ts
+ */
+
 // Re-export types
 export type { Stadium } from './types';
 
@@ -48,21 +54,15 @@ export const stadiums: Stadium[] = [
 export const sports = ["Baseball", "American Football", "Basketball", "Hockey", "Football", "Cricket", "Rugby", "Tennis", "Motorsport"];
 export const leagues = ["MLB", "NFL", "NBA", "NHL", "MLS"];
 
-// Utility functions
-export const getStadiumsBySport = (sport: string) =>
-  stadiums.filter(s => s.sport === sport);
-
-export const getStadiumsByLeague = (league: string) =>
-  stadiums.filter(s => s.league === league);
-
-export const getStadiumsByCountry = (country: string) =>
-  stadiums.filter(s => s.country === country);
-
-export const getTotalStadiums = () => stadiums.length;
-
-// Category-specific getters (for backwards compatibility)
-export const getMlbStadiums = () => [...mlbStadiums, ...internationalBaseballStadiums];
-export const getNflStadiums = () => nflStadiums;
-export const getNbaStadiums = () => nbaStadiums;
-export const getNhlStadiums = () => nhlStadiums;
-export const getSoccerStadiums = () => soccerStadiums;
+// Re-export utility functions from stadiumUtils.ts (SRP)
+export {
+  getStadiumsBySport,
+  getStadiumsByLeague,
+  getStadiumsByCountry,
+  getTotalStadiums,
+  getMlbStadiums,
+  getNflStadiums,
+  getNbaStadiums,
+  getNhlStadiums,
+  getSoccerStadiums,
+} from './stadiumUtils';
