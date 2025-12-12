@@ -1,6 +1,48 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { Plus, Pencil, Trash2, Power, PowerOff, Loader2 } from 'lucide-react';
 
 interface Banner {
   id: string;
@@ -25,8 +67,6 @@ interface AdminLog {
   created_at: string;
 }
 
-type Tab = 'banners' | 'logs' | 'admins';
-
 interface AdminUser {
   id: string;
   email: string;
@@ -34,13 +74,18 @@ interface AdminUser {
   created_at: string;
 }
 
-export default function AdminSettingsPage() {
-  const [activeTab, setActiveTab] = useState<Tab>('banners');
+const bannerTypeVariants: Record<Banner['type'], 'info' | 'warning' | 'success' | 'destructive'> = {
+  info: 'info',
+  warning: 'warning',
+  success: 'success',
+  error: 'destructive',
+};
 
+export default function AdminSettingsPage() {
   // Banner state
   const [banners, setBanners] = useState<Banner[]>([]);
   const [loadingBanners, setLoadingBanners] = useState(true);
-  const [showBannerForm, setShowBannerForm] = useState(false);
+  const [bannerDialogOpen, setBannerDialogOpen] = useState(false);
   const [editingBanner, setEditingBanner] = useState<Banner | null>(null);
   const [bannerForm, setBannerForm] = useState({
     message: '',
@@ -51,6 +96,7 @@ export default function AdminSettingsPage() {
     ends_at: '',
   });
   const [savingBanner, setSavingBanner] = useState(false);
+  const [deleteBannerDialog, setDeleteBannerDialog] = useState<Banner | null>(null);
 
   // Logs state
   const [logs, setLogs] = useState<AdminLog[]>([]);
@@ -62,9 +108,10 @@ export default function AdminSettingsPage() {
   const [admins, setAdmins] = useState<AdminUser[]>([]);
   const [loadingAdmins, setLoadingAdmins] = useState(true);
   const [currentRole, setCurrentRole] = useState<string>('admin');
-  const [showAddAdmin, setShowAddAdmin] = useState(false);
+  const [addAdminDialog, setAddAdminDialog] = useState(false);
   const [newAdminEmail, setNewAdminEmail] = useState('');
   const [addingAdmin, setAddingAdmin] = useState(false);
+  const [deleteAdminDialog, setDeleteAdminDialog] = useState<AdminUser | null>(null);
 
   // Fetch banners
   useEffect(() => {
@@ -125,69 +172,6 @@ export default function AdminSettingsPage() {
     fetchAdmins();
   }, []);
 
-  const handleAddAdmin = async () => {
-    if (!newAdminEmail.trim()) return;
-    setAddingAdmin(true);
-    try {
-      const response = await fetch('/api/admin/roles', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: newAdminEmail, role: 'admin' }),
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setAdmins(prev => [...prev, data.admin]);
-        setNewAdminEmail('');
-        setShowAddAdmin(false);
-      } else {
-        const data = await response.json();
-        alert(data.error || 'Failed to add admin');
-      }
-    } catch (error) {
-      console.error('Failed to add admin:', error);
-    } finally {
-      setAddingAdmin(false);
-    }
-  };
-
-  const handleRemoveAdmin = async (adminId: string) => {
-    if (!confirm('Are you sure you want to remove this admin?')) return;
-    try {
-      const response = await fetch('/api/admin/roles', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ adminId }),
-      });
-      if (response.ok) {
-        setAdmins(prev => prev.filter(a => a.id !== adminId));
-      } else {
-        const data = await response.json();
-        alert(data.error || 'Failed to remove admin');
-      }
-    } catch (error) {
-      console.error('Failed to remove admin:', error);
-    }
-  };
-
-  const handleToggleRole = async (admin: AdminUser) => {
-    const newRole = admin.role === 'super_admin' ? 'admin' : 'super_admin';
-    try {
-      const response = await fetch('/api/admin/roles', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ adminId: admin.id, role: newRole }),
-      });
-      if (response.ok) {
-        setAdmins(prev => prev.map(a => a.id === admin.id ? { ...a, role: newRole } : a));
-      } else {
-        const data = await response.json();
-        alert(data.error || 'Failed to update role');
-      }
-    } catch (error) {
-      console.error('Failed to update role:', error);
-    }
-  };
-
   const resetBannerForm = () => {
     setBannerForm({
       message: '',
@@ -198,7 +182,7 @@ export default function AdminSettingsPage() {
       ends_at: '',
     });
     setEditingBanner(null);
-    setShowBannerForm(false);
+    setBannerDialogOpen(false);
   };
 
   const handleEditBanner = (banner: Banner) => {
@@ -211,7 +195,7 @@ export default function AdminSettingsPage() {
       is_active: banner.is_active,
       ends_at: banner.ends_at ? banner.ends_at.split('T')[0] : '',
     });
-    setShowBannerForm(true);
+    setBannerDialogOpen(true);
   };
 
   const handleSaveBanner = async () => {
@@ -251,18 +235,19 @@ export default function AdminSettingsPage() {
     }
   };
 
-  const handleDeleteBanner = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this banner?')) return;
+  const handleDeleteBanner = async () => {
+    if (!deleteBannerDialog) return;
 
     try {
       const response = await fetch('/api/admin/banners', {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id }),
+        body: JSON.stringify({ id: deleteBannerDialog.id }),
       });
 
       if (response.ok) {
-        setBanners(prev => prev.filter(b => b.id !== id));
+        setBanners(prev => prev.filter(b => b.id !== deleteBannerDialog.id));
+        setDeleteBannerDialog(null);
       }
     } catch (error) {
       console.error('Failed to delete banner:', error);
@@ -283,6 +268,70 @@ export default function AdminSettingsPage() {
       }
     } catch (error) {
       console.error('Failed to toggle banner:', error);
+    }
+  };
+
+  const handleAddAdmin = async () => {
+    if (!newAdminEmail.trim()) return;
+    setAddingAdmin(true);
+    try {
+      const response = await fetch('/api/admin/roles', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: newAdminEmail, role: 'admin' }),
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setAdmins(prev => [...prev, data.admin]);
+        setNewAdminEmail('');
+        setAddAdminDialog(false);
+      } else {
+        const data = await response.json();
+        alert(data.error || 'Failed to add admin');
+      }
+    } catch (error) {
+      console.error('Failed to add admin:', error);
+    } finally {
+      setAddingAdmin(false);
+    }
+  };
+
+  const handleRemoveAdmin = async () => {
+    if (!deleteAdminDialog) return;
+    try {
+      const response = await fetch('/api/admin/roles', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ adminId: deleteAdminDialog.id }),
+      });
+      if (response.ok) {
+        setAdmins(prev => prev.filter(a => a.id !== deleteAdminDialog.id));
+        setDeleteAdminDialog(null);
+      } else {
+        const data = await response.json();
+        alert(data.error || 'Failed to remove admin');
+      }
+    } catch (error) {
+      console.error('Failed to remove admin:', error);
+    }
+  };
+
+  const handleToggleRole = async (admin: AdminUser) => {
+    const newRole = admin.role === 'super_admin' ? 'admin' : 'super_admin';
+    try {
+      const response = await fetch('/api/admin/roles', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ adminId: admin.id, role: newRole }),
+      });
+      if (response.ok) {
+        setAdmins(prev => prev.map(a => a.id === admin.id ? { ...a, role: newRole } : a));
+      } else {
+        const data = await response.json();
+        alert(data.error || 'Failed to update role');
+      }
+    } catch (error) {
+      console.error('Failed to update role:', error);
     }
   };
 
@@ -308,518 +357,433 @@ export default function AdminSettingsPage() {
     return labels[action] || action;
   };
 
-  const typeColors: Record<string, string> = {
-    info: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',
-    warning: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300',
-    success: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300',
-    error: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300',
-  };
-
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-primary-900 dark:text-white mb-2">Admin Settings</h1>
-          <p className="text-primary-600 dark:text-primary-300">
-            Manage system banners and view activity logs.
-          </p>
-        </div>
+    <div className="p-6 max-w-6xl mx-auto">
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold">Settings</h1>
+        <p className="text-muted-foreground">
+          Manage system banners, view activity logs, and admin access.
+        </p>
+      </div>
 
-        {/* Tabs */}
-        <div className="flex gap-2 mb-6">
-          <button
-            onClick={() => setActiveTab('banners')}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-              activeTab === 'banners'
-                ? 'bg-primary-600 text-white'
-                : 'bg-primary-100 dark:bg-slate-700 text-primary-700 dark:text-primary-300 hover:bg-primary-200 dark:hover:bg-slate-600'
-            }`}
-          >
-            Banners
-          </button>
-          <button
-            onClick={() => setActiveTab('logs')}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-              activeTab === 'logs'
-                ? 'bg-primary-600 text-white'
-                : 'bg-primary-100 dark:bg-slate-700 text-primary-700 dark:text-primary-300 hover:bg-primary-200 dark:hover:bg-slate-600'
-            }`}
-          >
-            Activity Logs
-          </button>
-          <button
-            onClick={() => setActiveTab('admins')}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-              activeTab === 'admins'
-                ? 'bg-primary-600 text-white'
-                : 'bg-primary-100 dark:bg-slate-700 text-primary-700 dark:text-primary-300 hover:bg-primary-200 dark:hover:bg-slate-600'
-            }`}
-          >
-            Admin Users
-          </button>
-        </div>
+      <Tabs defaultValue="banners" className="w-full">
+        <TabsList className="mb-4">
+          <TabsTrigger value="banners">Banners</TabsTrigger>
+          <TabsTrigger value="logs">Activity Logs</TabsTrigger>
+          <TabsTrigger value="admins">Admin Users</TabsTrigger>
+        </TabsList>
 
         {/* Banners Tab */}
-        {activeTab === 'banners' && (
-          <div className="space-y-6">
-            {/* Create Banner Button */}
-            <div className="flex justify-end">
-              <button
-                onClick={() => setShowBannerForm(true)}
-                className="px-4 py-2 bg-primary-600 text-white rounded-lg font-medium hover:bg-primary-700 transition-colors flex items-center gap-2"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                </svg>
-                New Banner
-              </button>
-            </div>
-
-            {/* Banner Form Modal */}
-            {showBannerForm && (
-              <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-                <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-lg w-full p-6">
-                  <h3 className="text-xl font-bold text-primary-900 dark:text-white mb-4">
-                    {editingBanner ? 'Edit Banner' : 'Create Banner'}
-                  </h3>
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-primary-700 dark:text-primary-300 mb-1">
-                        Message *
-                      </label>
-                      <textarea
-                        value={bannerForm.message}
-                        onChange={(e) => setBannerForm(prev => ({ ...prev, message: e.target.value }))}
-                        className="w-full px-3 py-2 bg-primary-50 dark:bg-slate-700 border border-primary-200 dark:border-slate-600 rounded-lg text-primary-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
-                        rows={3}
-                        placeholder="Enter banner message..."
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-primary-700 dark:text-primary-300 mb-1">
-                        Type
-                      </label>
-                      <select
-                        value={bannerForm.type}
-                        onChange={(e) => setBannerForm(prev => ({ ...prev, type: e.target.value as Banner['type'] }))}
-                        className="w-full px-3 py-2 bg-primary-50 dark:bg-slate-700 border border-primary-200 dark:border-slate-600 rounded-lg text-primary-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
-                      >
-                        <option value="info">Info (Blue)</option>
-                        <option value="success">Success (Green)</option>
-                        <option value="warning">Warning (Amber)</option>
-                        <option value="error">Error (Red)</option>
-                      </select>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-primary-700 dark:text-primary-300 mb-1">
-                          Link Text (optional)
-                        </label>
-                        <input
-                          type="text"
-                          value={bannerForm.link_text}
-                          onChange={(e) => setBannerForm(prev => ({ ...prev, link_text: e.target.value }))}
-                          className="w-full px-3 py-2 bg-primary-50 dark:bg-slate-700 border border-primary-200 dark:border-slate-600 rounded-lg text-primary-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
-                          placeholder="Learn more"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-primary-700 dark:text-primary-300 mb-1">
-                          Link URL (optional)
-                        </label>
-                        <input
-                          type="url"
-                          value={bannerForm.link_url}
-                          onChange={(e) => setBannerForm(prev => ({ ...prev, link_url: e.target.value }))}
-                          className="w-full px-3 py-2 bg-primary-50 dark:bg-slate-700 border border-primary-200 dark:border-slate-600 rounded-lg text-primary-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
-                          placeholder="https://..."
-                        />
-                      </div>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-primary-700 dark:text-primary-300 mb-1">
-                        End Date (optional)
-                      </label>
-                      <input
-                        type="date"
-                        value={bannerForm.ends_at}
-                        onChange={(e) => setBannerForm(prev => ({ ...prev, ends_at: e.target.value }))}
-                        className="w-full px-3 py-2 bg-primary-50 dark:bg-slate-700 border border-primary-200 dark:border-slate-600 rounded-lg text-primary-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
-                      />
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="checkbox"
-                        id="is_active"
-                        checked={bannerForm.is_active}
-                        onChange={(e) => setBannerForm(prev => ({ ...prev, is_active: e.target.checked }))}
-                        className="w-4 h-4 text-primary-600 bg-primary-50 dark:bg-slate-700 border-primary-300 dark:border-slate-600 rounded focus:ring-primary-500"
-                      />
-                      <label htmlFor="is_active" className="text-sm font-medium text-primary-700 dark:text-primary-300">
-                        Active (visible to users)
-                      </label>
-                    </div>
-                  </div>
-                  <div className="flex justify-end gap-3 mt-6">
-                    <button
-                      onClick={resetBannerForm}
-                      className="px-4 py-2 text-sm font-medium text-primary-700 dark:text-primary-200 bg-primary-100 dark:bg-slate-700 rounded-lg hover:bg-primary-200 dark:hover:bg-slate-600 transition-colors"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      onClick={handleSaveBanner}
-                      disabled={savingBanner || !bannerForm.message.trim()}
-                      className="px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 disabled:opacity-50 transition-colors flex items-center gap-2"
-                    >
-                      {savingBanner ? (
-                        <>
-                          <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
-                          Saving...
-                        </>
-                      ) : (
-                        'Save Banner'
-                      )}
-                    </button>
-                  </div>
-                </div>
+        <TabsContent value="banners">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle>System Banners</CardTitle>
+                <CardDescription>Manage announcements displayed to all users</CardDescription>
               </div>
-            )}
-
-            {/* Banners List */}
-            <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-black/5 dark:border-white/10 overflow-hidden">
-              <div className="p-6 border-b border-black/5 dark:border-white/10">
-                <h2 className="text-xl font-semibold text-primary-900 dark:text-white">System Banners</h2>
-                <p className="text-sm text-primary-600 dark:text-primary-400">
-                  Manage announcements displayed to all users
-                </p>
-              </div>
-
+              <Button onClick={() => setBannerDialogOpen(true)}>
+                <Plus className="mr-2 h-4 w-4" /> New Banner
+              </Button>
+            </CardHeader>
+            <CardContent>
               {loadingBanners ? (
-                <div className="flex items-center justify-center py-12">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 dark:border-primary-400"></div>
+                <div className="flex justify-center py-8">
+                  <Loader2 className="h-6 w-6 animate-spin" />
                 </div>
               ) : banners.length === 0 ? (
-                <div className="p-8 text-center text-primary-500 dark:text-primary-400">
+                <p className="text-center text-muted-foreground py-8">
                   No banners created yet. Click &ldquo;New Banner&rdquo; to create one.
-                </div>
+                </p>
               ) : (
-                <div className="divide-y divide-primary-100 dark:divide-slate-700">
-                  {banners.map((banner) => (
-                    <div key={banner.id} className="p-4 hover:bg-primary-50 dark:hover:bg-slate-700/30 transition-colors">
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-2">
-                            <span className={`px-2 py-0.5 rounded text-xs font-medium ${typeColors[banner.type]}`}>
-                              {banner.type}
-                            </span>
-                            <span className={`px-2 py-0.5 rounded text-xs font-medium ${
-                              banner.is_active
-                                ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300'
-                                : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'
-                            }`}>
-                              {banner.is_active ? 'Active' : 'Inactive'}
-                            </span>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Message</TableHead>
+                      <TableHead>Type</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Created</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {banners.map((banner) => (
+                      <TableRow key={banner.id}>
+                        <TableCell className="max-w-[300px] truncate">
+                          {banner.message}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={bannerTypeVariants[banner.type]}>
+                            {banner.type}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={banner.is_active ? 'success' : 'secondary'}>
+                            {banner.is_active ? 'Active' : 'Inactive'}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-sm text-muted-foreground">
+                          {formatDate(banner.created_at)}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex items-center justify-end gap-1">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleToggleBanner(banner)}
+                              title={banner.is_active ? 'Deactivate' : 'Activate'}
+                            >
+                              {banner.is_active ? (
+                                <PowerOff className="h-4 w-4 text-amber-600" />
+                              ) : (
+                                <Power className="h-4 w-4 text-green-600" />
+                              )}
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleEditBanner(banner)}
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => setDeleteBannerDialog(banner)}
+                            >
+                              <Trash2 className="h-4 w-4 text-destructive" />
+                            </Button>
                           </div>
-                          <p className="text-primary-900 dark:text-white font-medium">{banner.message}</p>
-                          {banner.link_text && (
-                            <p className="text-sm text-primary-600 dark:text-primary-400 mt-1">
-                              Link: {banner.link_text} ({banner.link_url})
-                            </p>
-                          )}
-                          <p className="text-xs text-primary-500 dark:text-primary-400 mt-2">
-                            Created {formatDate(banner.created_at)} by {banner.created_by}
-                            {banner.ends_at && ` • Ends ${formatDate(banner.ends_at)}`}
-                          </p>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <button
-                            onClick={() => handleToggleBanner(banner)}
-                            className={`p-2 rounded-lg transition-colors ${
-                              banner.is_active
-                                ? 'text-amber-600 hover:bg-amber-100 dark:hover:bg-amber-900/30'
-                                : 'text-green-600 hover:bg-green-100 dark:hover:bg-green-900/30'
-                            }`}
-                            title={banner.is_active ? 'Deactivate' : 'Activate'}
-                          >
-                            {banner.is_active ? (
-                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
-                              </svg>
-                            ) : (
-                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                              </svg>
-                            )}
-                          </button>
-                          <button
-                            onClick={() => handleEditBanner(banner)}
-                            className="p-2 rounded-lg text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors"
-                            title="Edit"
-                          >
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                            </svg>
-                          </button>
-                          <button
-                            onClick={() => handleDeleteBanner(banner.id)}
-                            className="p-2 rounded-lg text-red-600 hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
-                            title="Delete"
-                          >
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                            </svg>
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
               )}
-            </div>
-          </div>
-        )}
+            </CardContent>
+          </Card>
+        </TabsContent>
 
         {/* Activity Logs Tab */}
-        {activeTab === 'logs' && (
-          <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-black/5 dark:border-white/10 overflow-hidden">
-            <div className="p-6 border-b border-black/5 dark:border-white/10">
-              <h2 className="text-xl font-semibold text-primary-900 dark:text-white">Activity Logs</h2>
-              <p className="text-sm text-primary-600 dark:text-primary-400">
-                Track admin actions for auditing and debugging
-              </p>
-            </div>
-
-            {loadingLogs ? (
-              <div className="flex items-center justify-center py-12">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 dark:border-primary-400"></div>
-              </div>
-            ) : logs.length === 0 ? (
-              <div className="p-8 text-center text-primary-500 dark:text-primary-400">
-                No activity logs yet.
-              </div>
-            ) : (
-              <>
-                <div className="divide-y divide-primary-100 dark:divide-slate-700">
-                  {logs.map((log) => (
-                    <div key={log.id} className="p-4 hover:bg-primary-50 dark:hover:bg-slate-700/30 transition-colors">
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <span className="px-2 py-0.5 rounded text-xs font-medium bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-300">
-                              {getActionLabel(log.action)}
-                            </span>
-                            {log.target_type && (
-                              <span className="text-xs text-primary-500 dark:text-primary-400">
-                                on {log.target_type}
-                              </span>
-                            )}
-                          </div>
-                          <p className="text-sm text-primary-900 dark:text-white mt-1">
-                            <span className="font-medium">{log.admin_email}</span>
-                            {log.target_id && (
-                              <span className="text-primary-500 dark:text-primary-400">
-                                {' '}• Target ID: {log.target_id.substring(0, 8)}...
-                              </span>
-                            )}
-                          </p>
-                          {log.details && Object.keys(log.details).length > 0 && (
-                            <p className="text-xs text-primary-500 dark:text-primary-400 mt-1 font-mono">
-                              {JSON.stringify(log.details).substring(0, 100)}
-                              {JSON.stringify(log.details).length > 100 && '...'}
-                            </p>
-                          )}
-                        </div>
-                        <span className="text-xs text-primary-500 dark:text-primary-400 whitespace-nowrap">
-                          {formatDate(log.created_at)}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
+        <TabsContent value="logs">
+          <Card>
+            <CardHeader>
+              <CardTitle>Activity Logs</CardTitle>
+              <CardDescription>Track admin actions for auditing and debugging</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {loadingLogs ? (
+                <div className="flex justify-center py-8">
+                  <Loader2 className="h-6 w-6 animate-spin" />
                 </div>
-
-                {/* Pagination */}
-                <div className="px-6 py-4 border-t border-black/5 dark:border-white/10 flex items-center justify-between">
-                  <button
-                    onClick={() => setLogsPage(p => Math.max(1, p - 1))}
-                    disabled={logsPage === 1}
-                    className="px-4 py-2 text-sm font-medium text-primary-700 dark:text-primary-200 bg-primary-50 dark:bg-slate-700 rounded-lg hover:bg-primary-100 dark:hover:bg-slate-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                  >
-                    Previous
-                  </button>
-                  <span className="text-sm text-primary-600 dark:text-primary-400">
-                    Page {logsPage}
-                  </span>
-                  <button
-                    onClick={() => setLogsPage(p => p + 1)}
-                    disabled={!hasMoreLogs}
-                    className="px-4 py-2 text-sm font-medium text-primary-700 dark:text-primary-200 bg-primary-50 dark:bg-slate-700 rounded-lg hover:bg-primary-100 dark:hover:bg-slate-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                  >
-                    Next
-                  </button>
-                </div>
-              </>
-            )}
-          </div>
-        )}
+              ) : logs.length === 0 ? (
+                <p className="text-center text-muted-foreground py-8">
+                  No activity logs yet.
+                </p>
+              ) : (
+                <>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Action</TableHead>
+                        <TableHead>Admin</TableHead>
+                        <TableHead>Target</TableHead>
+                        <TableHead>Date</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {logs.map((log) => (
+                        <TableRow key={log.id}>
+                          <TableCell>
+                            <Badge variant="secondary">{getActionLabel(log.action)}</Badge>
+                          </TableCell>
+                          <TableCell className="font-medium">{log.admin_email}</TableCell>
+                          <TableCell className="text-muted-foreground">
+                            {log.target_type && `${log.target_type}`}
+                            {log.target_id && ` (${log.target_id.substring(0, 8)}...)`}
+                          </TableCell>
+                          <TableCell className="text-sm text-muted-foreground">
+                            {formatDate(log.created_at)}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                  <div className="flex items-center justify-between mt-4">
+                    <Button
+                      variant="outline"
+                      onClick={() => setLogsPage(p => Math.max(1, p - 1))}
+                      disabled={logsPage === 1}
+                    >
+                      Previous
+                    </Button>
+                    <span className="text-sm text-muted-foreground">Page {logsPage}</span>
+                    <Button
+                      variant="outline"
+                      onClick={() => setLogsPage(p => p + 1)}
+                      disabled={!hasMoreLogs}
+                    >
+                      Next
+                    </Button>
+                  </div>
+                </>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
 
         {/* Admin Users Tab */}
-        {activeTab === 'admins' && (
-          <div className="space-y-6">
-            {/* Add Admin Button (Super Admin Only) */}
-            {currentRole === 'super_admin' && (
-              <div className="flex justify-end">
-                <button
-                  onClick={() => setShowAddAdmin(true)}
-                  className="px-4 py-2 bg-primary-600 text-white rounded-lg font-medium hover:bg-primary-700 transition-colors flex items-center gap-2"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                  </svg>
-                  Add Admin
-                </button>
+        <TabsContent value="admins">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle>Admin Users</CardTitle>
+                <CardDescription>Manage users who have admin access</CardDescription>
               </div>
-            )}
-
-            {/* Add Admin Modal */}
-            {showAddAdmin && (
-              <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-                <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-md w-full p-6">
-                  <h3 className="text-xl font-bold text-primary-900 dark:text-white mb-4">
-                    Add New Admin
-                  </h3>
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-primary-700 dark:text-primary-300 mb-1">
-                        Email Address
-                      </label>
-                      <input
-                        type="email"
-                        value={newAdminEmail}
-                        onChange={(e) => setNewAdminEmail(e.target.value)}
-                        className="w-full px-3 py-2 bg-primary-50 dark:bg-slate-700 border border-primary-200 dark:border-slate-600 rounded-lg text-primary-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
-                        placeholder="admin@example.com"
-                      />
-                    </div>
-                    <p className="text-sm text-primary-500 dark:text-primary-400">
-                      The user will be granted admin access with basic privileges. You can promote them to super admin later.
-                    </p>
-                  </div>
-                  <div className="flex justify-end gap-3 mt-6">
-                    <button
-                      onClick={() => { setShowAddAdmin(false); setNewAdminEmail(''); }}
-                      className="px-4 py-2 text-sm font-medium text-primary-700 dark:text-primary-200 bg-primary-100 dark:bg-slate-700 rounded-lg hover:bg-primary-200 dark:hover:bg-slate-600 transition-colors"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      onClick={handleAddAdmin}
-                      disabled={addingAdmin || !newAdminEmail.trim()}
-                      className="px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 disabled:opacity-50 transition-colors flex items-center gap-2"
-                    >
-                      {addingAdmin ? (
-                        <>
-                          <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
-                          Adding...
-                        </>
-                      ) : (
-                        'Add Admin'
-                      )}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Admins List */}
-            <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-black/5 dark:border-white/10 overflow-hidden">
-              <div className="p-6 border-b border-black/5 dark:border-white/10">
-                <h2 className="text-xl font-semibold text-primary-900 dark:text-white">Admin Users</h2>
-                <p className="text-sm text-primary-600 dark:text-primary-400">
-                  Manage users who have admin access to this dashboard
-                </p>
-              </div>
-
+              {currentRole === 'super_admin' && (
+                <Button onClick={() => setAddAdminDialog(true)}>
+                  <Plus className="mr-2 h-4 w-4" /> Add Admin
+                </Button>
+              )}
+            </CardHeader>
+            <CardContent>
               {loadingAdmins ? (
-                <div className="flex items-center justify-center py-12">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 dark:border-primary-400"></div>
+                <div className="flex justify-center py-8">
+                  <Loader2 className="h-6 w-6 animate-spin" />
                 </div>
               ) : admins.length === 0 ? (
-                <div className="p-8 text-center text-primary-500 dark:text-primary-400">
+                <p className="text-center text-muted-foreground py-8">
                   No admin users found.
-                </div>
+                </p>
               ) : (
-                <div className="divide-y divide-primary-100 dark:divide-slate-700">
-                  {admins.map((admin) => (
-                    <div key={admin.id} className="p-4 hover:bg-primary-50 dark:hover:bg-slate-700/30 transition-colors">
-                      <div className="flex items-center justify-between gap-4">
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            <p className="font-medium text-primary-900 dark:text-white truncate">
-                              {admin.email}
-                            </p>
-                            <span className={`px-2 py-0.5 rounded text-xs font-medium ${
-                              admin.role === 'super_admin'
-                                ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300'
-                                : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
-                            }`}>
-                              {admin.role === 'super_admin' ? 'Super Admin' : 'Admin'}
-                            </span>
-                          </div>
-                          <p className="text-xs text-primary-500 dark:text-primary-400 mt-1">
-                            Added {formatDate(admin.created_at)}
-                          </p>
-                        </div>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Email</TableHead>
+                      <TableHead>Role</TableHead>
+                      <TableHead>Added</TableHead>
+                      {currentRole === 'super_admin' && (
+                        <TableHead className="text-right">Actions</TableHead>
+                      )}
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {admins.map((admin) => (
+                      <TableRow key={admin.id}>
+                        <TableCell className="font-medium">{admin.email}</TableCell>
+                        <TableCell>
+                          <Badge variant={admin.role === 'super_admin' ? 'default' : 'secondary'}>
+                            {admin.role === 'super_admin' ? 'Super Admin' : 'Admin'}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-sm text-muted-foreground">
+                          {formatDate(admin.created_at)}
+                        </TableCell>
                         {currentRole === 'super_admin' && (
-                          <div className="flex items-center gap-2">
-                            <button
-                              onClick={() => handleToggleRole(admin)}
-                              className="px-3 py-1.5 text-sm font-medium text-primary-700 dark:text-primary-200 bg-primary-100 dark:bg-slate-700 rounded-lg hover:bg-primary-200 dark:hover:bg-slate-600 transition-colors"
-                              title={admin.role === 'super_admin' ? 'Demote to Admin' : 'Promote to Super Admin'}
-                            >
-                              {admin.role === 'super_admin' ? 'Demote' : 'Promote'}
-                            </button>
-                            <button
-                              onClick={() => handleRemoveAdmin(admin.id)}
-                              className="p-2 rounded-lg text-red-600 hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
-                              title="Remove Admin"
-                            >
-                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                              </svg>
-                            </button>
-                          </div>
+                          <TableCell className="text-right">
+                            <div className="flex items-center justify-end gap-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleToggleRole(admin)}
+                              >
+                                {admin.role === 'super_admin' ? 'Demote' : 'Promote'}
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => setDeleteAdminDialog(admin)}
+                              >
+                                <Trash2 className="h-4 w-4 text-destructive" />
+                              </Button>
+                            </div>
+                          </TableCell>
                         )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
               )}
-            </div>
 
-            {/* Role Explanation */}
-            <div className="bg-primary-50 dark:bg-slate-800/50 rounded-xl p-6 border border-primary-200 dark:border-slate-700">
-              <h3 className="font-semibold text-primary-900 dark:text-white mb-3">Role Permissions</h3>
-              <div className="space-y-3 text-sm">
-                <div className="flex gap-3">
-                  <span className="px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 h-fit">
-                    Admin
-                  </span>
-                  <p className="text-primary-600 dark:text-primary-400">
-                    Can view analytics, manage users, update suggestions, and manage banners.
-                  </p>
-                </div>
-                <div className="flex gap-3">
-                  <span className="px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 h-fit whitespace-nowrap">
-                    Super Admin
-                  </span>
-                  <p className="text-primary-600 dark:text-primary-400">
-                    All Admin permissions plus: add/remove admins, change admin roles, suspend/ban users, and impersonate users.
-                  </p>
+              {/* Role explanation */}
+              <div className="mt-6 p-4 bg-muted rounded-lg">
+                <h4 className="font-semibold mb-2">Role Permissions</h4>
+                <div className="space-y-2 text-sm">
+                  <div className="flex gap-3">
+                    <Badge variant="secondary">Admin</Badge>
+                    <span className="text-muted-foreground">
+                      View analytics, manage users, update suggestions, and manage banners.
+                    </span>
+                  </div>
+                  <div className="flex gap-3">
+                    <Badge>Super Admin</Badge>
+                    <span className="text-muted-foreground">
+                      All Admin permissions plus: add/remove admins, change admin roles, suspend/ban users.
+                    </span>
+                  </div>
                 </div>
               </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+
+      {/* Banner Dialog */}
+      <Dialog open={bannerDialogOpen} onOpenChange={(open) => !open && resetBannerForm()}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{editingBanner ? 'Edit Banner' : 'Create Banner'}</DialogTitle>
+            <DialogDescription>
+              {editingBanner ? 'Update the banner details below.' : 'Create a new announcement banner.'}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="message">Message *</Label>
+              <Textarea
+                id="message"
+                value={bannerForm.message}
+                onChange={(e) => setBannerForm(prev => ({ ...prev, message: e.target.value }))}
+                placeholder="Enter banner message..."
+                rows={3}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="type">Type</Label>
+              <Select
+                value={bannerForm.type}
+                onValueChange={(value) => setBannerForm(prev => ({ ...prev, type: value as Banner['type'] }))}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="info">Info (Blue)</SelectItem>
+                  <SelectItem value="success">Success (Green)</SelectItem>
+                  <SelectItem value="warning">Warning (Amber)</SelectItem>
+                  <SelectItem value="error">Error (Red)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="link_text">Link Text</Label>
+                <Input
+                  id="link_text"
+                  value={bannerForm.link_text}
+                  onChange={(e) => setBannerForm(prev => ({ ...prev, link_text: e.target.value }))}
+                  placeholder="Learn more"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="link_url">Link URL</Label>
+                <Input
+                  id="link_url"
+                  type="url"
+                  value={bannerForm.link_url}
+                  onChange={(e) => setBannerForm(prev => ({ ...prev, link_url: e.target.value }))}
+                  placeholder="https://..."
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="ends_at">End Date (optional)</Label>
+              <Input
+                id="ends_at"
+                type="date"
+                value={bannerForm.ends_at}
+                onChange={(e) => setBannerForm(prev => ({ ...prev, ends_at: e.target.value }))}
+              />
+            </div>
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="is_active"
+                checked={bannerForm.is_active}
+                onCheckedChange={(checked) => setBannerForm(prev => ({ ...prev, is_active: checked }))}
+              />
+              <Label htmlFor="is_active">Active (visible to users)</Label>
             </div>
           </div>
-        )}
+          <DialogFooter>
+            <Button variant="outline" onClick={resetBannerForm}>Cancel</Button>
+            <Button onClick={handleSaveBanner} disabled={savingBanner || !bannerForm.message.trim()}>
+              {savingBanner && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {editingBanner ? 'Save Changes' : 'Create Banner'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Banner Dialog */}
+      <AlertDialog open={!!deleteBannerDialog} onOpenChange={(open) => !open && setDeleteBannerDialog(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Banner?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete this banner. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteBanner} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Add Admin Dialog */}
+      <Dialog open={addAdminDialog} onOpenChange={setAddAdminDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add New Admin</DialogTitle>
+            <DialogDescription>
+              Enter the email address of the user you want to grant admin access.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="admin_email">Email Address</Label>
+              <Input
+                id="admin_email"
+                type="email"
+                value={newAdminEmail}
+                onChange={(e) => setNewAdminEmail(e.target.value)}
+                placeholder="admin@example.com"
+              />
+            </div>
+            <p className="text-sm text-muted-foreground">
+              The user will be granted admin access with basic privileges. You can promote them to super admin later.
+            </p>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setAddAdminDialog(false); setNewAdminEmail(''); }}>
+              Cancel
+            </Button>
+            <Button onClick={handleAddAdmin} disabled={addingAdmin || !newAdminEmail.trim()}>
+              {addingAdmin && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Add Admin
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Admin Dialog */}
+      <AlertDialog open={!!deleteAdminDialog} onOpenChange={(open) => !open && setDeleteAdminDialog(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove Admin?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will remove admin access for {deleteAdminDialog?.email}. They will no longer be able to access the admin panel.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleRemoveAdmin} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Remove
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
