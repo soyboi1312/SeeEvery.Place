@@ -1,66 +1,32 @@
 /**
  * USMap Component
  * Interactive US map with state region coloring based on visit status
- * Includes territory indicators for PR, VI, GU, AS, MP which can't be shown on Albers USA projection
+ * Uses generic RegionMap with US-specific configuration
  */
 'use client';
 
-import { useCallback, memo } from 'react';
-import { Geographies } from '@vnedyalk0v/react19-simple-maps';
-import { Status } from '@/lib/types';
-import { GEO_URL_USA, fipsToAbbr } from '@/lib/mapConstants';
-import { useStatusLookup } from '@/lib/hooks/useMapData';
+import { memo } from 'react';
+import RegionMap from './RegionMap';
+import { US_REGION_CONFIG } from './mapConfigs';
 import { BaseMapProps } from './types';
-import InteractiveMapShell from './InteractiveMapShell';
-import { TappableGeography } from './TappableGeography';
 
 const USMap = memo(function USMap({ selections, onToggle, tooltip }: BaseMapProps) {
-  // Use extracted hook for status lookup - DRY principle
-  const statusMap = useStatusLookup(selections.states);
-
-  const getStatus = useCallback((id: string): Status => {
-    return statusMap.get(id) || 'unvisited';
-  }, [statusMap]);
-
   return (
-    <InteractiveMapShell
-      projection="geoAlbersUsa"
-      projectionConfig={{ scale: 1000 }}
-      width={800}
-      height={500}
-      viewBox="0 0 800 500"
-      initialCenter={[-97, 38]}
-      maxZoom={8}
-      className="w-full"
-    >
-      {() => (
-        <Geographies geography={GEO_URL_USA}>
-          {({ geographies }) =>
-            geographies.map((geo) => {
-              // Ensure ID is a string and padded to 2 digits (e.g. 1 -> "01")
-              const fips = String(geo.id).padStart(2, '0');
-              const id = fipsToAbbr[fips];
-              const name = geo.properties.name;
-              const status = id ? getStatus(id) : 'unvisited';
-
-              return (
-                <TappableGeography
-                  key={geo.rsmKey}
-                  geo={geo}
-                  id={id}
-                  status={status}
-                  name={name}
-                  onToggle={onToggle}
-                  onMouseEnter={tooltip.onMouseEnter}
-                  onMouseLeave={tooltip.onMouseLeave}
-                  onMouseMove={tooltip.onMouseMove}
-                />
-              );
-            })
-          }
-        </Geographies>
-      )}
-    </InteractiveMapShell>
+    <RegionMap
+      selections={selections}
+      onToggle={onToggle}
+      tooltip={tooltip}
+      geoUrl={US_REGION_CONFIG.geoUrl}
+      projection={US_REGION_CONFIG.projection}
+      projectionConfig={US_REGION_CONFIG.projectionConfig}
+      width={US_REGION_CONFIG.width}
+      height={US_REGION_CONFIG.height}
+      viewBox={US_REGION_CONFIG.viewBox}
+      initialCenter={US_REGION_CONFIG.initialCenter}
+      maxZoom={US_REGION_CONFIG.maxZoom}
+      getId={US_REGION_CONFIG.getId}
+      getSelections={US_REGION_CONFIG.getSelections}
+    />
   );
 });
 
