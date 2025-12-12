@@ -12,6 +12,8 @@
     "test:coverage": "vitest run --coverage",
     "preview": "opennextjs-cloudflare build && wrangler dev",
     "deploy": "opennextjs-cloudflare build && wrangler deploy",
+    "deploy:workflow": "wrangler deploy --config wrangler.workflow.jsonc",
+    "deploy:all": "npm run deploy:workflow && npm run deploy",
     "postinstall": "node -e \"const fs=require('fs');const p=require('path');const d=p.join('public','geo');fs.mkdirSync(d,{recursive:true});fs.copyFileSync(p.join('node_modules','world-atlas','countries-110m.json'),p.join(d,'countries-110m.json'));fs.copyFileSync(p.join('node_modules','us-atlas','states-10m.json'),p.join(d,'states-10m.json'));\""
   },
   "dependencies": {

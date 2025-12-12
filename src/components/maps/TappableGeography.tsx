@@ -41,7 +41,7 @@ export function TappableGeography({
   }, [id, status, onToggle]);
 
   // Use the unified pointer hook for both desktop and mobile
-  const { onPointerDown, onPointerUp, onPointerLeave } = useMobileTap(handleTap);
+  const { onPointerDown, onPointerUp, onPointerLeave, onPointerCancel } = useMobileTap(handleTap);
 
   const statusClass = status === 'bucketList' ? 'bucket-list' : status;
   const statusLabel = status === 'visited' ? 'visited' : status === 'bucketList' ? 'on bucket list' : 'not visited';
@@ -64,6 +64,7 @@ export function TappableGeography({
       onPointerDown={onPointerDown}
       onPointerUp={onPointerUp}
       onPointerLeave={onPointerLeave}
+      onPointerCancel={onPointerCancel}
 
       // Keyboard support remains standard
       onKeyDown={(e) => {
