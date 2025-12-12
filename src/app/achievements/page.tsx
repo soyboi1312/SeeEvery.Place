@@ -179,11 +179,13 @@ function AchievementCard({
   isUnlocked,
   progress,
   unlockedAt,
+  isGuest,
 }: {
   achievement: AchievementDefinition;
   isUnlocked: boolean;
   progress: { current: number; target: number; percentage: number };
   unlockedAt?: string;
+  isGuest?: boolean;
 }) {
   const tierColors: Record<AchievementTier, string> = {
     bronze: 'border-amber-500/50 bg-amber-500/5',
@@ -195,12 +197,20 @@ function AchievementCard({
 
   return (
     <div
-      className={`rounded-xl border-2 p-4 transition-all ${
+      className={`rounded-xl border-2 p-4 transition-all relative ${
         isUnlocked
           ? tierColors[achievement.tier]
           : 'border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50'
-      }`}
+      } ${isUnlocked && isGuest ? 'border-dashed' : ''}`}
     >
+      {/* Guest indicator for unlocked achievements */}
+      {isUnlocked && isGuest && (
+        <div className="absolute top-2 right-2">
+          <span className="text-[10px] px-1.5 py-0.5 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 rounded font-medium">
+            LOCAL ONLY
+          </span>
+        </div>
+      )}
       <div className="flex items-start gap-4">
         <AchievementBadge
           achievement={achievement}
@@ -517,6 +527,7 @@ export default function AchievementsPage() {
                   isUnlocked={true}
                   progress={item.progress}
                   unlockedAt={new Date().toISOString()}
+                  isGuest={!user}
                 />
               ))}
             </div>
@@ -614,6 +625,7 @@ export default function AchievementsPage() {
                 isUnlocked={item.isUnlocked}
                 progress={item.progress}
                 unlockedAt={item.unlockedAt}
+                isGuest={!user}
               />
             ))}
           </div>
@@ -626,21 +638,37 @@ export default function AchievementsPage() {
           </div>
         )}
 
-        {/* Not signed in notice */}
+        {/* Not signed in notice - More prominent for guests with achievements */}
         {!user && (
-          <div className="mt-8 p-6 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-200 dark:border-blue-800 text-center">
-            <h3 className="font-bold text-primary-900 dark:text-white mb-2">
-              Sign in to save your progress
-            </h3>
-            <p className="text-primary-600 dark:text-primary-300 mb-4">
-              Your achievements are currently stored locally. Sign in to sync across devices and share your profile.
-            </p>
-            <Link
-              href="/"
-              className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
-            >
-              Go to Home
-            </Link>
+          <div className="mt-8 p-6 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 rounded-xl border-2 border-dashed border-amber-400 dark:border-amber-600">
+            <div className="flex flex-col sm:flex-row items-center gap-4">
+              <div className="text-4xl">🏆</div>
+              <div className="flex-1 text-center sm:text-left">
+                <h3 className="font-bold text-amber-900 dark:text-amber-100 mb-1 flex items-center justify-center sm:justify-start gap-2">
+                  {achievementStats.unlocked > 0 ? (
+                    <>
+                      You have {achievementStats.unlocked} unclaimed achievement{achievementStats.unlocked !== 1 ? 's' : ''}!
+                    </>
+                  ) : (
+                    <>Save your progress</>
+                  )}
+                </h3>
+                <p className="text-amber-700 dark:text-amber-300 text-sm">
+                  {achievementStats.unlocked > 0
+                    ? 'Sign in to claim them permanently and sync across all your devices.'
+                    : 'Your achievements are stored locally. Sign in to sync across devices and share your profile.'}
+                </p>
+              </div>
+              <Link
+                href="/"
+                className="shrink-0 inline-flex items-center gap-2 px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-white rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                </svg>
+                Sign In to Claim
+              </Link>
+            </div>
           </div>
         )}
       </main>
