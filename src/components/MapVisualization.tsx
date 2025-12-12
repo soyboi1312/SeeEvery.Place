@@ -87,25 +87,58 @@ export default function MapVisualization({ category, selections, onToggle, subca
 
   // Fix sticky pointer on iPad Magic Keyboard by releasing pointer capture on pointerup
   // This handles cases where d3-zoom captures the pointer but doesn't release it
+  // iPad trackpad behaves as a hybrid pointer type and d3-zoom may capture on an ancestor element
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
 
     const handlePointerUp = (e: PointerEvent) => {
-      // Release pointer capture from any element that has it
-      const target = e.target as Element;
-      if (target?.hasPointerCapture?.(e.pointerId)) {
-        target.releasePointerCapture(e.pointerId);
+      // Walk up the DOM tree and release pointer capture from any element that has it
+      // d3-zoom may set capture on SVG or container elements, not just the target
+      let element: Element | null = e.target as Element;
+      while (element && element !== document.documentElement) {
+        try {
+          if (element.hasPointerCapture?.(e.pointerId)) {
+            element.releasePointerCapture(e.pointerId);
+          }
+        } catch {
+          // Ignore errors - some elements don't support pointer capture
+        }
+        element = element.parentElement;
       }
+    };
+
+    // Also handle global pointer events as a fallback for iPad trackpad
+    // When Ctrl+click releases the capture, it's because the right-click context
+    // sends different events - we simulate this by listening at document level
+    const handleGlobalPointerUp = (e: PointerEvent) => {
+      // Only process if the event originated from within our container
+      if (!container.contains(e.target as Node)) return;
+
+      // Check the container and all its children for pointer capture
+      const allElements = container.querySelectorAll('*');
+      allElements.forEach((el) => {
+        try {
+          if (el.hasPointerCapture?.(e.pointerId)) {
+            el.releasePointerCapture(e.pointerId);
+          }
+        } catch {
+          // Ignore errors
+        }
+      });
     };
 
     // Listen on the container for all pointerup events (capture phase)
     container.addEventListener('pointerup', handlePointerUp, true);
     container.addEventListener('pointercancel', handlePointerUp, true);
 
+    // Also listen at document level as fallback
+    document.addEventListener('pointerup', handleGlobalPointerUp, true);
+
     return () => {
       container.removeEventListener('pointerup', handlePointerUp, true);
       container.removeEventListener('pointercancel', handlePointerUp, true);
+      document.removeEventListener('pointerup', handleGlobalPointerUp, true);
     };
   }, []);
 
