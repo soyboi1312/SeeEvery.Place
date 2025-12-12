@@ -2,7 +2,7 @@
 
 import { useMemo } from 'react';
 import { ComposableMap, Geographies, Geography, Sphere, Graticule } from '@vnedyalk0v/react19-simple-maps';
-import { GEO_URL_USA, GEO_URL_WORLD, fipsToAbbr, countryNameToISO } from '@/lib/mapUtils';
+import { GEO_URL_USA, GEO_URL_WORLD, fipsToAbbr, countryNameToISO } from '@/lib/mapConstants';
 
 // Type helper for center coordinates (library uses branded types)
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

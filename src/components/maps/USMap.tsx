@@ -8,7 +8,7 @@
 import { useCallback, useMemo, memo } from 'react';
 import { ComposableMap, Geographies, ZoomableGroup } from '@vnedyalk0v/react19-simple-maps';
 import { Status } from '@/lib/types';
-import { GEO_URL_USA, fipsToAbbr } from '@/lib/mapUtils';
+import { GEO_URL_USA, fipsToAbbr } from '@/lib/mapConstants';
 import { BaseMapProps } from './types';
 import { useMapZoom } from './useMapZoom';
 import ZoomControls from './ZoomControls';

@@ -1,27 +1,19 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Category, UserSelections, categoryGroups } from '@/lib/types';
 import { getStats } from '@/lib/storage';
-// Data imports for totals
-import { countries, continents, getCountriesByContinent } from '@/data/countries';
-import { usStates } from '@/data/usStates';
-import { usTerritories } from '@/data/usTerritories';
-import { nationalParks } from '@/data/nationalParks';
-import { nationalMonuments } from '@/data/nationalMonuments';
-import { stateParks } from '@/data/stateParks';
-import { get5000mPeaks, getUS14ers } from '@/data/mountains';
-import { museums } from '@/data/museums';
-import { getMlbStadiums, getNflStadiums, getNbaStadiums, getNhlStadiums, getSoccerStadiums } from '@/data/stadiums';
-import { f1Tracks } from '@/data/f1Tracks';
-import { marathons } from '@/data/marathons';
-import { airports } from '@/data/airports';
-import { skiResorts } from '@/data/skiResorts';
-import { themeParks } from '@/data/themeParks';
-import { surfingReserves } from '@/data/surfingReserves';
-import { weirdAmericana } from '@/data/weirdAmericana';
-import { usCities } from '@/data/usCities';
-import { worldCities } from '@/data/worldCities';
+import { categoryTotals } from '@/lib/categoryUtils';
+
+// Continent icons and colors
+const continentConfig: Record<string, { icon: string; color: string; bgColor: string }> = {
+  'Africa': { icon: '🌍', color: 'bg-amber-500', bgColor: 'bg-amber-50 dark:bg-amber-900/20' },
+  'Asia': { icon: '🌏', color: 'bg-red-500', bgColor: 'bg-red-50 dark:bg-red-900/20' },
+  'Europe': { icon: '🏰', color: 'bg-blue-500', bgColor: 'bg-blue-50 dark:bg-blue-900/20' },
+  'North America': { icon: '🗽', color: 'bg-green-500', bgColor: 'bg-green-50 dark:bg-green-900/20' },
+  'South America': { icon: '🌴', color: 'bg-emerald-500', bgColor: 'bg-emerald-50 dark:bg-emerald-900/20' },
+  'Oceania': { icon: '🏝️', color: 'bg-cyan-500', bgColor: 'bg-cyan-50 dark:bg-cyan-900/20' },
+};
 
 interface QuickStatsProps {
   selections: UserSelections;
@@ -34,46 +26,20 @@ const markerCategories: Category[] = Object.values(categoryGroups)
   .flatMap(group => group.categories)
   .filter(cat => cat !== 'countries' && cat !== 'states');
 
-const categoryTotals: Record<Category, number> = {
-  countries: countries.length,
-  states: usStates.length,
-  territories: usTerritories.length,
-  usCities: usCities.length,
-  worldCities: worldCities.length,
-  nationalParks: nationalParks.length,
-  nationalMonuments: nationalMonuments.length,
-  stateParks: stateParks.length,
-  fiveKPeaks: get5000mPeaks().length,
-  fourteeners: getUS14ers().length,
-  museums: museums.length,
-  mlbStadiums: getMlbStadiums().length,
-  nflStadiums: getNflStadiums().length,
-  nbaStadiums: getNbaStadiums().length,
-  nhlStadiums: getNhlStadiums().length,
-  soccerStadiums: getSoccerStadiums().length,
-  f1Tracks: f1Tracks.length,
-  marathons: marathons.length,
-  airports: airports.length,
-  skiResorts: skiResorts.length,
-  themeParks: themeParks.length,
-  surfingReserves: surfingReserves.length,
-  weirdAmericana: weirdAmericana.length,
-};
-
-// Continent icons and colors
-const continentConfig: Record<string, { icon: string; color: string; bgColor: string }> = {
-  'Africa': { icon: '🌍', color: 'bg-amber-500', bgColor: 'bg-amber-50 dark:bg-amber-900/20' },
-  'Asia': { icon: '🌏', color: 'bg-red-500', bgColor: 'bg-red-50 dark:bg-red-900/20' },
-  'Europe': { icon: '🏰', color: 'bg-blue-500', bgColor: 'bg-blue-50 dark:bg-blue-900/20' },
-  'North America': { icon: '🗽', color: 'bg-green-500', bgColor: 'bg-green-50 dark:bg-green-900/20' },
-  'South America': { icon: '🌴', color: 'bg-emerald-500', bgColor: 'bg-emerald-50 dark:bg-emerald-900/20' },
-  'Oceania': { icon: '🏝️', color: 'bg-cyan-500', bgColor: 'bg-cyan-50 dark:bg-cyan-900/20' },
-};
+interface ContinentStat {
+  continent: string;
+  visited: number;
+  total: number;
+  percentage: number;
+}
 
 export default function QuickStats({ selections, onCategoryClick }: QuickStatsProps) {
   const [showContinents, setShowContinents] = useState(false);
+  const [continentStats, setContinentStats] = useState<ContinentStat[]>([]);
+  const [isLoadingContinents, setIsLoadingContinents] = useState(false);
 
   // Helper to get stats for a specific category
+  // Uses the categoryTotals proxy from categoryUtils which returns fallback numbers instantly
   const getCatStats = (cat: Category) => getStats(selections, cat, categoryTotals[cat]);
 
   // Calculate Aggregates
@@ -90,17 +56,26 @@ export default function QuickStats({ selections, onCategoryClick }: QuickStatsPr
 
   const markersPercentage = Math.round((markersStats.visited / markersStats.total) * 100) || 0;
 
-  // Calculate continent stats
-  const continentStats = continents.map(continent => {
-    const continentCountries = getCountriesByContinent(continent);
-    const countrySelections = selections.countries || [];
-    const visitedInContinent = continentCountries.filter(c =>
-      countrySelections.some(sel => sel.id === c.code && sel.status === 'visited')
-    ).length;
-    const total = continentCountries.length;
-    const percentage = Math.round((visitedInContinent / total) * 100) || 0;
-    return { continent, visited: visitedInContinent, total, percentage };
-  });
+  // Lazy load continent data only when requested
+  useEffect(() => {
+    if (showContinents && continentStats.length === 0 && !isLoadingContinents) {
+      setIsLoadingContinents(true);
+      import('@/data/countries').then(({ continents, getCountriesByContinent }) => {
+        const stats = continents.map(continent => {
+          const continentCountries = getCountriesByContinent(continent);
+          const countrySelections = selections.countries || [];
+          const visitedInContinent = continentCountries.filter(c =>
+            countrySelections.some(sel => sel.id === c.code && sel.status === 'visited')
+          ).length;
+          const total = continentCountries.length;
+          const percentage = Math.round((visitedInContinent / total) * 100) || 0;
+          return { continent, visited: visitedInContinent, total, percentage };
+        });
+        setContinentStats(stats);
+        setIsLoadingContinents(false);
+      });
+    }
+  }, [showContinents, continentStats.length, isLoadingContinents, selections.countries]);
 
   // Render only the "Big 3" Cards
   return (
@@ -147,26 +122,30 @@ export default function QuickStats({ selections, onCategoryClick }: QuickStatsPr
         {/* Continent Breakdown */}
         {showContinents && (
           <div className="px-4 pb-4 pt-2 border-t border-gray-100 dark:border-gray-700 space-y-2 bg-gray-50/50 dark:bg-gray-800/50">
-            {continentStats.map(({ continent, visited, total, percentage }) => {
-              const config = continentConfig[continent];
-              return (
-                <div key={continent} className="flex items-center gap-2">
-                  <span className="text-sm w-5">{config?.icon || '🌐'}</span>
-                  <div className="flex-1">
-                    <div className="flex justify-between text-xs mb-0.5">
-                      <span className="text-gray-600 dark:text-gray-400">{continent}</span>
-                      <span className="text-gray-500 dark:text-gray-500 font-medium">{visited}/{total}</span>
-                    </div>
-                    <div className="w-full h-1.5 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
-                      <div
-                        className={`h-full rounded-full ${config?.color || 'bg-gray-400'}`}
-                        style={{ width: `${percentage}%` }}
-                      />
+            {isLoadingContinents ? (
+              <div className="py-2 text-center text-xs text-gray-500">Loading data...</div>
+            ) : (
+              continentStats.map(({ continent, visited, total, percentage }) => {
+                const config = continentConfig[continent];
+                return (
+                  <div key={continent} className="flex items-center gap-2">
+                    <span className="text-sm w-5">{config?.icon || '🌐'}</span>
+                    <div className="flex-1">
+                      <div className="flex justify-between text-xs mb-0.5">
+                        <span className="text-gray-600 dark:text-gray-400">{continent}</span>
+                        <span className="text-gray-500 dark:text-gray-500 font-medium">{visited}/{total}</span>
+                      </div>
+                      <div className="w-full h-1.5 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+                        <div
+                          className={`h-full rounded-full ${config?.color || 'bg-gray-400'}`}
+                          style={{ width: `${percentage}%` }}
+                        />
+                      </div>
                     </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })
+            )}
           </div>
         )}
       </div>
