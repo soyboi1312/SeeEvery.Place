@@ -107,6 +107,24 @@ export default function MapVisualization({ category, selections, onToggle, subca
     };
   }, []);
 
+  // Dismiss tooltip on scroll or touch anywhere (mobile fix)
+  // This handles cases where tooltip gets stuck on hybrid devices or when scrolling
+  useEffect(() => {
+    if (!tooltip) return;
+
+    const dismissTooltip = () => setTooltip(null);
+
+    // Dismiss on scroll (user scrolling the page)
+    window.addEventListener('scroll', dismissTooltip, true);
+    // Dismiss on any touch (user tapping elsewhere on mobile)
+    window.addEventListener('touchstart', dismissTooltip, true);
+
+    return () => {
+      window.removeEventListener('scroll', dismissTooltip, true);
+      window.removeEventListener('touchstart', dismissTooltip, true);
+    };
+  }, [tooltip]);
+
   // Memoize individual handlers
   // Handle both React synthetic events and native events from react-simple-maps
   const getMousePosition = useCallback((e: React.MouseEvent | MouseEvent) => {
