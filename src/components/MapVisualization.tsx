@@ -153,7 +153,7 @@ export default function MapVisualization({ category, selections, onToggle, subca
       ref={containerRef}
       className="w-full bg-primary-50/50 dark:bg-slate-800/50 rounded-2xl overflow-hidden border border-black/5 dark:border-white/10 shadow-premium-lg mb-6 relative touch-action-none"
     >
-      <div className="aspect-[4/3] sm:aspect-[16/9] w-full max-h-[500px] overflow-hidden">
+      <div className="w-full overflow-hidden">
         {getMapComponent(category, selections, onToggle, subcategory, tooltipHandlers, items)}
       </div>
 

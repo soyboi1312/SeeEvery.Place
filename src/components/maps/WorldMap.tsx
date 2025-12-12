@@ -48,7 +48,7 @@ const WorldMap = memo(function WorldMap({ selections, onToggle, tooltip }: BaseM
   }, [statusMap]);
 
   return (
-    <div className="relative w-full h-full group overflow-hidden">
+    <div className="relative w-full group">
       <ComposableMap
         projection="geoEqualEarth"
         // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Library uses branded Longitude/Latitude types
@@ -56,7 +56,7 @@ const WorldMap = memo(function WorldMap({ selections, onToggle, tooltip }: BaseM
         width={800}
         height={400}
         viewBox="0 0 800 400"
-        className="w-full h-full"
+        className="w-full"
       >
         <ZoomableGroup
           zoom={position.zoom}
