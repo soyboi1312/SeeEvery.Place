@@ -1,6 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 
+// Reserved usernames that could conflict with routes or have special meaning
+const RESERVED_USERNAMES = new Set([
+  // Route segments
+  'admin', 'api', 'auth', 'login', 'logout', 'signup', 'register',
+  'settings', 'profile', 'dashboard', 'edit', 'new', 'create',
+  // File extensions / formats
+  'json', 'xml', 'rss', 'atom', 'sitemap', 'robots',
+  // Common reserved words
+  'null', 'undefined', 'true', 'false', 'system', 'support',
+  'help', 'about', 'contact', 'privacy', 'terms', 'legal',
+  // App-specific
+  'map', 'maps', 'share', 'explore', 'discover', 'search',
+  'suggestions', 'suggest', 'feedback', 'report',
+]);
+
 /**
  * GET /api/profile
  * Get the current user's profile
@@ -71,7 +86,16 @@ export async function PUT(request: NextRequest) {
         );
       }
 
+      // Check for reserved usernames
+      if (RESERVED_USERNAMES.has(username.toLowerCase())) {
+        return NextResponse.json(
+          { error: 'This username is reserved and cannot be used' },
+          { status: 400 }
+        );
+      }
+
       // Check if username is available (case-insensitive)
+      // This is for a better UI error message; the DB constraint is the hard stop
       const { data: existingUser } = await supabase
         .from('profiles')
         .select('id')
@@ -105,6 +129,14 @@ export async function PUT(request: NextRequest) {
       .single();
 
     if (error) {
+      // Handle unique constraint violation (race condition protection)
+      // Postgres error code 23505 = unique_violation
+      if (error.code === '23505') {
+        return NextResponse.json(
+          { error: 'Username is already taken' },
+          { status: 400 }
+        );
+      }
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 

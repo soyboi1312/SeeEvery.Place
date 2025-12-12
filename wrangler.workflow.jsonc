@@ -1,7 +1,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "seeevery-place-newsletter-workflow",
-  "main": "src/workflows/send-newsletter.ts",
+  "main": "workers/send-newsletter.ts",
   "compatibility_date": "2024-09-23",
   "compatibility_flags": ["nodejs_compat"],
   // Environment variables - set these via `wrangler secret put` or Cloudflare dashboard

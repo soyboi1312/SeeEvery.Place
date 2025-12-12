@@ -13,8 +13,10 @@ import { useMapZoom } from './useMapZoom';
 import ZoomControls from './ZoomControls';
 import { TappableGeography } from './TappableGeography';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Library uses branded Longitude/Latitude types
-const CENTER_ORIGIN: any = [0, 0];
+// Coordinate type for map center: [longitude, latitude]
+// The library internally uses D3 geo projections which expect this format
+type Coordinates = [number, number];
+const CENTER_ORIGIN: Coordinates = [0, 0];
 
 const WorldMap = memo(function WorldMap({ selections, onToggle, tooltip }: BaseMapProps) {
   const {

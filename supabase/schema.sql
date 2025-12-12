@@ -60,9 +60,17 @@ create table if not exists public.profiles (
   email text,
   full_name text,
   avatar_url text,
+  username text,
+  bio text,
+  is_public boolean default false,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null,
   updated_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
+
+-- Add unique constraint on username (case-insensitive) to prevent race conditions
+-- This is the hard stop that ensures no duplicates even with concurrent requests
+create unique index if not exists profiles_username_lower_idx on public.profiles (lower(username))
+  where username is not null;
 
 -- Enable RLS on profiles
 alter table public.profiles enable row level security;
