@@ -1,128 +1,12 @@
 /**
- * Shared map utilities, coordinate data, and helper functions
- * Used by MapVisualization.tsx and ShareCard.tsx
+ * Map Utilities
+ * Coordinate data and marker generation functions
+ * Uses mapRegistry for category-to-data mapping (OCP)
+ * Uses mapHelpers for generic utilities (SRP)
  */
 
 import { Category, UserSelections, Status } from '@/lib/types';
-import { nationalParks, NationalPark } from '@/data/nationalParks';
-import { nationalMonuments, NationalMonument } from '@/data/nationalMonuments';
-import { stateParks, StatePark } from '@/data/stateParks';
-import { get5000mPeaks, getUS14ers, Mountain } from '@/data/mountains';
-import { museums, Museum } from '@/data/museums';
-import { getMlbStadiums, getNflStadiums, getNbaStadiums, getNhlStadiums, getSoccerStadiums, Stadium } from '@/data/stadiums';
-import { f1Tracks, F1Track } from '@/data/f1Tracks';
-import { marathons, Marathon } from '@/data/marathons';
-import { airports, Airport } from '@/data/airports';
-import { skiResorts, SkiResort } from '@/data/skiResorts';
-import { themeParks, ThemePark } from '@/data/themeParks';
-import { surfingReserves, SurfingReserve } from '@/data/surfingReserves';
-import { weirdAmericana, WeirdAmericana } from '@/data/weirdAmericana';
-import { usTerritories, USTerritory } from '@/data/usTerritories';
-import { usCities, USCity } from '@/data/usCities';
-import { worldCities, WorldCity } from '@/data/worldCities';
-
-// =====================
-// O(1) Lookup Maps - Created once at module load for fast coordinate lookups
-// =====================
-type CoordItem = { id: string; lat: number; lng: number; type?: string };
-
-function createLookupMap<T extends CoordItem>(items: T[]): Map<string, T> {
-  return new Map(items.map(item => [item.id, item]));
-}
-
-// Static data maps (created once)
-const nationalParksMap = createLookupMap(nationalParks);
-const nationalMonumentsMap = createLookupMap(nationalMonuments);
-const stateParksMap = createLookupMap(stateParks);
-const museumsMap = createLookupMap(museums);
-const f1TracksMap = createLookupMap(f1Tracks);
-const marathonsMap = createLookupMap(marathons);
-const airportsMap = createLookupMap(airports);
-const skiResortsMap = createLookupMap(skiResorts);
-const themeParksMap = createLookupMap(themeParks);
-const surfingReservesMap = createLookupMap(surfingReserves);
-const weirdAmericanaMap = createLookupMap(weirdAmericana);
-const usCitiesMap = createLookupMap(usCities);
-const worldCitiesMap = createLookupMap(worldCities);
-
-// Territories use 'code' as ID, so we need a custom map
-type TerritoryCoordItem = { id: string; lat: number; lng: number; name: string };
-const territoriesMap = new Map<string, TerritoryCoordItem>(
-  usTerritories.map(t => [t.code, { id: t.code, lat: t.lat, lng: t.lng, name: t.name }])
-);
-
-// Lazy-initialized maps for function-generated data
-let fiveKPeaksMap: Map<string, Mountain> | null = null;
-let fourteenersMap: Map<string, Mountain> | null = null;
-let mlbStadiumsMap: Map<string, Stadium> | null = null;
-let nflStadiumsMap: Map<string, Stadium> | null = null;
-let nbaStadiumsMap: Map<string, Stadium> | null = null;
-let nhlStadiumsMap: Map<string, Stadium> | null = null;
-let soccerStadiumsMap: Map<string, Stadium> | null = null;
-
-function getFiveKPeaksMap(): Map<string, Mountain> {
-  if (!fiveKPeaksMap) fiveKPeaksMap = createLookupMap(get5000mPeaks());
-  return fiveKPeaksMap;
-}
-
-function getFourteenersMap(): Map<string, Mountain> {
-  if (!fourteenersMap) fourteenersMap = createLookupMap(getUS14ers());
-  return fourteenersMap;
-}
-
-function getMlbStadiumsMap(): Map<string, Stadium> {
-  if (!mlbStadiumsMap) mlbStadiumsMap = createLookupMap(getMlbStadiums());
-  return mlbStadiumsMap;
-}
-
-function getNflStadiumsMap(): Map<string, Stadium> {
-  if (!nflStadiumsMap) nflStadiumsMap = createLookupMap(getNflStadiums());
-  return nflStadiumsMap;
-}
-
-function getNbaStadiumsMap(): Map<string, Stadium> {
-  if (!nbaStadiumsMap) nbaStadiumsMap = createLookupMap(getNbaStadiums());
-  return nbaStadiumsMap;
-}
-
-function getNhlStadiumsMap(): Map<string, Stadium> {
-  if (!nhlStadiumsMap) nhlStadiumsMap = createLookupMap(getNhlStadiums());
-  return nhlStadiumsMap;
-}
-
-function getSoccerStadiumsMap(): Map<string, Stadium> {
-  if (!soccerStadiumsMap) soccerStadiumsMap = createLookupMap(getSoccerStadiums());
-  return soccerStadiumsMap;
-}
-
-// Helper to get the raw lookup map for a category (used internally)
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function getLookupMapForCategory(category: Category): Map<string, any> | null {
-  switch (category) {
-    case 'nationalParks': return nationalParksMap;
-    case 'nationalMonuments': return nationalMonumentsMap;
-    case 'stateParks': return stateParksMap;
-    case 'fiveKPeaks': return getFiveKPeaksMap();
-    case 'fourteeners': return getFourteenersMap();
-    case 'museums': return museumsMap;
-    case 'mlbStadiums': return getMlbStadiumsMap();
-    case 'nflStadiums': return getNflStadiumsMap();
-    case 'nbaStadiums': return getNbaStadiumsMap();
-    case 'nhlStadiums': return getNhlStadiumsMap();
-    case 'soccerStadiums': return getSoccerStadiumsMap();
-    case 'f1Tracks': return f1TracksMap;
-    case 'marathons': return marathonsMap;
-    case 'airports': return airportsMap;
-    case 'skiResorts': return skiResortsMap;
-    case 'themeParks': return themeParksMap;
-    case 'surfingReserves': return surfingReservesMap;
-    case 'weirdAmericana': return weirdAmericanaMap;
-    case 'territories': return territoriesMap;
-    case 'usCities': return usCitiesMap;
-    case 'worldCities': return worldCitiesMap;
-    default: return null;
-  }
-}
+import { getLookupMapForCategory } from './mapRegistry';
 
 // Map Data URLs - must be absolute for react-simple-maps URL parsing.
 // The library uses new URL() internally which requires absolute URLs.
@@ -310,29 +194,18 @@ export const stadiumCategoryToSport: Record<string, string> = {
   'soccerStadiums': 'Football',
 };
 
-// Country name to ISO code mapping - module-level constant to avoid GC churn
-const countryCodeMap: Record<string, string> = {
-  "France": "FR", "USA": "US", "United States": "US", "UK": "GB", "United Kingdom": "GB",
-  "Germany": "DE", "Italy": "IT", "Spain": "ES", "Netherlands": "NL", "Austria": "AT",
-  "Russia": "RU", "Japan": "JP", "Australia": "AU", "Brazil": "BR", "Argentina": "AR",
-  "Mexico": "MX", "Canada": "CA", "Egypt": "EG", "South Africa": "ZA", "India": "IN",
-  "China": "CN", "Thailand": "TH", "UAE": "AE", "Qatar": "QA", "Saudi Arabia": "SA",
-  "Turkey": "TR", "Greece": "GR", "Portugal": "PT", "Belgium": "BE", "Switzerland": "CH",
-  "Sweden": "SE", "Norway": "NO", "Denmark": "DK", "Finland": "FI", "Poland": "PL",
-  "Czech Republic": "CZ", "Hungary": "HU", "Ireland": "IE", "New Zealand": "NZ",
-  "Singapore": "SG", "Malaysia": "MY", "Indonesia": "ID", "South Korea": "KR",
-  "Taiwan": "TW", "Colombia": "CO", "Peru": "PE", "Chile": "CL", "Ecuador": "EC",
-  "England": "GB", "Scotland": "GB", "Wales": "GB", "Monaco": "MC",
-  "Hong Kong": "HK", "Bahrain": "BH", "Azerbaijan": "AZ",
-};
+// US territories that cannot be displayed on the Albers USA projection
+// These are filtered out at the data layer to avoid hardcoding IDs in the UI
+export const UNSUPPORTED_ALBERS_USA_IDS = new Set([
+  'american-samoa',
+  'virgin-islands',
+]);
 
-// Helper to get country code from country name
-export function getCountryCode(countryName: string): string {
-  return countryCodeMap[countryName] || "";
-}
+// Re-export helper functions
+export { getCountryCode } from './mapHelpers';
 
 // Get coordinates for an item based on category - O(1) Map lookups
-// Reuses getLookupMapForCategory to avoid duplicating switch statement
+// Reuses getLookupMapForCategory from registry
 export function getItemCoordinates(category: Category, itemId: string): [number, number] | null {
   const lookupMap = getLookupMapForCategory(category);
   const item = lookupMap?.get(itemId);
@@ -342,13 +215,6 @@ export function getItemCoordinates(category: Category, itemId: string): [number,
   }
   return null;
 }
-
-// US territories that cannot be displayed on the Albers USA projection
-// These are filtered out at the data layer to avoid hardcoding IDs in the UI
-export const UNSUPPORTED_ALBERS_USA_IDS = new Set([
-  'american-samoa',
-  'virgin-islands',
-]);
 
 // Get markers for a category
 // Options:
@@ -410,4 +276,3 @@ export function getCategoryMarkers(
 
   return markers;
 }
-
