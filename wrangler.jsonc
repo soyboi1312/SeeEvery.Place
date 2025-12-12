@@ -13,6 +13,15 @@
     "NEXT_PUBLIC_SUPABASE_URL": "https://miutxzmojvfdpihqvjsa.supabase.co",
     "NEXT_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1pdXR4em1vanZmZHBpaHF2anNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ0MTgyMjYsImV4cCI6MjA3OTk5NDIyNn0.lu0vLGAVpcTTSmu2ytDnECWbGGOQEIMRLYcSCxUnxfA"
   },
+  // Workflow bindings - Newsletter workflow runs durably in the background
+  "workflows": [
+    {
+      "name": "send-newsletter-workflow",
+      "binding": "NEWSLETTER_WORKFLOW",
+      "class_name": "SendNewsletterWorkflow",
+      "script_name": "seeevery-place-newsletter-workflow"
+    }
+  ],
   "assets": {
     "directory": ".open-next/assets",
     "binding": "ASSETS"

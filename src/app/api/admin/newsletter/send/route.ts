@@ -1,6 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient, createAdminClient } from '@/lib/supabase/server';
 import { sendEmail, wrapInEmailTemplate, generateUnsubscribeLink, generateToken } from '@/lib/email';
+import { getCloudflareContext } from '@opennextjs/cloudflare';
+
+// Type for the newsletter workflow binding
+interface NewsletterWorkflow {
+  create(options: {
+    id?: string;
+    params: {
+      newsletterId: string;
+      adminEmail: string;
+      ipAddress: string;
+    };
+  }): Promise<{ id: string }>;
+}
+
+interface CloudflareEnv {
+  NEWSLETTER_WORKFLOW?: NewsletterWorkflow;
+}
 
 // Helper to verify admin status
 async function verifyAdmin(supabase: Awaited<ReturnType<typeof createClient>>) {
@@ -107,7 +124,43 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Get all active, confirmed subscribers
+    const ip = request.headers.get('x-forwarded-for')?.split(',')[0] || 'unknown';
+
+    // Try to use Cloudflare Workflow for durable, resumable newsletter sending
+    try {
+      const ctx = await getCloudflareContext();
+      const env = ctx.env as CloudflareEnv;
+
+      if (env.NEWSLETTER_WORKFLOW) {
+        // Dispatch to workflow - returns immediately while workflow runs in background
+        const instance = await env.NEWSLETTER_WORKFLOW.create({
+          id: `newsletter-${newsletter_id}-${Date.now()}`,
+          params: {
+            newsletterId: newsletter_id,
+            adminEmail,
+            ipAddress: ip,
+          },
+        });
+
+        // Update status to indicate workflow is handling it
+        await adminClient
+          .from('newsletters')
+          .update({ status: 'sending' })
+          .eq('id', newsletter_id);
+
+        return NextResponse.json({
+          success: true,
+          message: 'Newsletter send started in background',
+          workflow_id: instance.id,
+          mode: 'workflow',
+        });
+      }
+    } catch (workflowError) {
+      // Workflow not available (e.g., in development) - fall back to synchronous sending
+      console.log('Workflow not available, using fallback:', workflowError);
+    }
+
+    // Fallback: Synchronous sending (for development or when workflow is unavailable)
     const { data: subscribers, error: subError } = await adminClient
       .from('newsletter_subscribers')
       .select('id, email, name')
@@ -212,7 +265,6 @@ export async function POST(request: NextRequest) {
       })
       .eq('id', newsletter_id);
 
-    const ip = request.headers.get('x-forwarded-for')?.split(',')[0] || 'unknown';
     await logAdminAction(adminEmail, 'send_newsletter', 'newsletter', newsletter_id, {
       subject: newsletter.subject,
       success_count: successCount,
@@ -223,6 +275,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       message: `Newsletter sent to ${successCount} subscribers`,
+      mode: 'fallback',
       stats: {
         total: subscribers.length,
         success: successCount,
