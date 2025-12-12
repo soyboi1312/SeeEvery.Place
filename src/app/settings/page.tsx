@@ -136,12 +136,12 @@ export default function SettingsPage() {
   useEffect(() => {
     const supabase = createClient();
 
-    supabase.auth.getUser().then(({ data: { user } }) => {
+    supabase.auth.getUser().then(async ({ data: { user } }) => {
       setUser(user);
       if (user) {
         loadProfile(user.id);
         // Load selections for XP calculation
-        const sel = loadSelections();
+        const sel = await loadSelections();
         setSelections(sel);
       }
       setIsLoading(false);
@@ -157,14 +157,14 @@ export default function SettingsPage() {
     return () => subscription.unsubscribe();
   }, [loadProfile]);
 
-  const handleExportData = () => {
+  const handleExportData = async () => {
     setExportStatus('exporting');
 
     let url: string | null = null;
     let a: HTMLAnchorElement | null = null;
 
     try {
-      const selections = loadSelections();
+      const selections = await loadSelections();
       const exportData = {
         exportedAt: new Date().toISOString(),
         email: user?.email,
@@ -213,7 +213,7 @@ export default function SettingsPage() {
       }
 
       // Load current selections
-      const currentSelections = loadSelections();
+      const currentSelections = await loadSelections();
       let added = 0;
       let updated = 0;
 
@@ -401,14 +401,14 @@ export default function SettingsPage() {
     }
   };
 
-  const handleResetCategory = (category: string) => {
+  const handleResetCategory = async (category: string) => {
     if (resetConfirmText !== 'RESET') return;
 
     setIsResetting(true);
 
     try {
       // Load current selections
-      const currentSelections = loadSelections();
+      const currentSelections = await loadSelections();
 
       // Clear the specific category
       const updatedSelections = {

@@ -39,8 +39,8 @@ export default function AchievementToast({ onSignInClick }: AchievementToastProp
   }, []);
 
   // Check for new achievements
-  const checkAchievements = useCallback(() => {
-    const selections = loadSelections();
+  const checkAchievements = useCallback(async () => {
+    const selections = await loadSelections();
     if (!selections) return;
 
     const totalXp = calculateTotalXp(selections);

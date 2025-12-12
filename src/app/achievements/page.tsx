@@ -303,9 +303,9 @@ export default function AchievementsPage() {
   useEffect(() => {
     const supabase = createClient();
 
-    supabase.auth.getUser().then(({ data: { user } }) => {
+    supabase.auth.getUser().then(async ({ data: { user } }) => {
       setUser(user);
-      const sel = loadSelections();
+      const sel = await loadSelections();
       setSelections(sel);
       setIsLoading(false);
     });
