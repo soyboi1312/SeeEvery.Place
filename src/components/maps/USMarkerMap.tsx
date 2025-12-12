@@ -4,21 +4,15 @@
  */
 'use client';
 
-import { useCallback, useMemo, memo, useState, useEffect } from 'react';
-import { ComposableMap, Geographies, Geography, ZoomableGroup } from '@vnedyalk0v/react19-simple-maps';
+import { memo, useState, useEffect } from 'react';
+import { Geographies, Geography } from '@vnedyalk0v/react19-simple-maps';
 import { GEO_URL_USA } from '@/lib/mapConstants';
 import { MarkerData, getMarkersFromData } from '@/lib/markerUtils';
 import { loadCategoryData } from '@/lib/categoryUtils';
-import {
-  MountainMarker,
-  FlagMarker,
-  ParkMarker,
-  WeirdMarker,
-  MarkerSize,
-} from '@/components/MapMarkers';
+import { useNameGetter, getMarkerSize } from '@/lib/hooks/useMapData';
+import { renderCategoryMarker } from '@/components/MapMarkers/registry';
 import { MarkerMapProps } from './types';
-import { useMapZoom } from './useMapZoom';
-import ZoomControls from './ZoomControls';
+import InteractiveMapShell from './InteractiveMapShell';
 import MemoizedMarker from './MemoizedMarker';
 
 /**
@@ -54,19 +48,10 @@ const USMarkerMap = memo(function USMarkerMap({
   tooltip,
   items
 }: MarkerMapProps) {
-  const {
-    position,
-    handleZoomIn,
-    handleZoomOut,
-    handleMoveEnd,
-    canZoomIn,
-    canZoomOut,
-  } = useMapZoom({
-    maxZoom: 8,
-    initialCenter: [-97, 38] // Center on the US
-  });
-
   const [markers, setMarkers] = useState<MarkerData[]>([]);
+
+  // Use extracted hook for name lookup - DRY principle
+  const getItemName = useNameGetter(items);
 
   // Asynchronously load data and generate markers
   useEffect(() => {
@@ -94,87 +79,44 @@ const USMarkerMap = memo(function USMarkerMap({
     return () => { isMounted = false; };
   }, [category, selections, subcategory]);
 
-  // Determine marker size based on zoom level
-  // Less than 2x zoom = small markers to prevent overcrowding
-  const markerSize: MarkerSize = position.zoom < 2 ? 'small' : 'default';
-
-  // Memoize name lookup map for O(1) access
-  const nameMap = useMemo(() => {
-    const map = new Map<string, string>();
-    if (items) {
-      for (const item of items) {
-        map.set(item.id, item.name);
-      }
-    }
-    return map;
-  }, [items]);
-
-  const getItemName = useCallback((id: string) => nameMap.get(id) || id, [nameMap]);
-
-  const isMountains = category === 'fourteeners';
-  const isParks = category === 'nationalParks' || category === 'stateParks';
-  const isWeird = category === 'weirdAmericana';
-
-  // Get the appropriate marker for the category
-  // Now accepts size prop to pass through to the underlying LogoMarker
-  const getUSMarkerIcon = (marker: MarkerData, size: MarkerSize) => {
-    const fillColor = marker.status === 'visited' ? '#22c55e' : '#f59e0b';
-
-    if (isMountains) {
-      return <MountainMarker fillColor={fillColor} size={size} />;
-    }
-
-    if (isParks) {
-      return <ParkMarker fillColor={fillColor} size={size} />;
-    }
-
-    if (isWeird) {
-      return <WeirdMarker fillColor={fillColor} size={size} />;
-    }
-
-    // Default flag marker fallback
-    return <FlagMarker fillColor={fillColor} size={size} />;
-  };
-
   return (
-    <div className="relative w-full h-full group">
-      <ComposableMap
-        projection="geoAlbersUsa"
-        projectionConfig={{ scale: 1000 }}
-        className="w-full h-full"
-      >
-        <ZoomableGroup
-          zoom={position.zoom}
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Library uses branded Longitude/Latitude types
-          center={position.coordinates as any}
-          onMoveEnd={handleMoveEnd}
-        >
-          <StaticUSBackground />
-          {markers.map((marker) => (
-            <MemoizedMarker
-              key={marker.id}
-              id={marker.id}
-              coordinates={marker.coordinates}
-              status={marker.status}
-              name={getItemName(marker.id)}
-              size={markerSize}
-              onToggle={onToggle}
-              onMouseEnter={tooltip.onMouseEnter}
-              onMouseLeave={tooltip.onMouseLeave}
-              onMouseMove={tooltip.onMouseMove}
-            >
-              {getUSMarkerIcon(marker, markerSize)}
-            </MemoizedMarker>
-          ))}
-        </ZoomableGroup>
-      </ComposableMap>
-      <ZoomControls
-        onZoomIn={handleZoomIn}
-        onZoomOut={handleZoomOut}
-        canZoomIn={canZoomIn}
-        canZoomOut={canZoomOut}
-      />
-    </div>
+    <InteractiveMapShell
+      projection="geoAlbersUsa"
+      projectionConfig={{ scale: 1000 }}
+      initialCenter={[-97, 38]}
+      maxZoom={8}
+      className="w-full h-full"
+    >
+      {({ zoom }) => {
+        const markerSize = getMarkerSize(zoom);
+
+        return (
+          <>
+            <StaticUSBackground />
+            {markers.map((marker) => {
+              const fillColor = marker.status === 'visited' ? '#22c55e' : '#f59e0b';
+
+              return (
+                <MemoizedMarker
+                  key={marker.id}
+                  id={marker.id}
+                  coordinates={marker.coordinates}
+                  status={marker.status}
+                  name={getItemName(marker.id)}
+                  size={markerSize}
+                  onToggle={onToggle}
+                  onMouseEnter={tooltip.onMouseEnter}
+                  onMouseLeave={tooltip.onMouseLeave}
+                  onMouseMove={tooltip.onMouseMove}
+                >
+                  {renderCategoryMarker(category, fillColor, markerSize, marker.sport)}
+                </MemoizedMarker>
+              );
+            })}
+          </>
+        );
+      }}
+    </InteractiveMapShell>
   );
 });
 

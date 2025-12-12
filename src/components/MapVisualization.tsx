@@ -4,7 +4,7 @@
  */
 'use client';
 
-import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
+import { useState, useCallback, useMemo, useEffect, useRef, memo } from 'react';
 import { createPortal } from 'react-dom';
 import dynamic from 'next/dynamic';
 import { Category, Status } from '@/lib/types';
@@ -78,7 +78,7 @@ function getMapComponent(
   }
 }
 
-export default function MapVisualization({ category, selections, onToggle, subcategory, items }: MapVisualizationProps) {
+const MapVisualization = memo(function MapVisualization({ category, selections, onToggle, subcategory, items }: MapVisualizationProps) {
   const isRegionMap = usesRegionMap(category);
   const [tooltip, setTooltip] = useState<TooltipState | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -254,7 +254,7 @@ export default function MapVisualization({ category, selections, onToggle, subca
     // Two-finger gestures still work for map pan/zoom via d3-zoom
     <div
       ref={containerRef}
-      className="w-full bg-primary-50/50 dark:bg-slate-800/50 rounded-2xl overflow-hidden border border-black/5 dark:border-white/10 shadow-premium-lg mb-6 relative"
+      className="w-full bg-primary-50/50 dark:bg-slate-800/50 rounded-2xl overflow-hidden border border-black/5 dark:border-white/10 shadow-premium-lg mb-6 relative will-change-transform"
     >
       <div className="w-full overflow-hidden">
         {getMapComponent(category, selections, onToggle, subcategory, tooltipHandlers, items)}
@@ -307,4 +307,6 @@ export default function MapVisualization({ category, selections, onToggle, subca
       </div>
     </div>
   );
-}
+});
+
+export default MapVisualization;

@@ -21,6 +21,9 @@ const AuthModal = dynamic(() => import('@/components/AuthModal'), {
   ssr: false,
 });
 
+// Preload AuthModal chunk on hover to reduce perceived latency
+const preloadAuthModal = () => import('@/components/AuthModal');
+
 import MapErrorBoundary from '@/components/MapErrorBoundary';
 
 const MapVisualization = dynamic(() => import('@/components/MapVisualization'), {
@@ -251,6 +254,7 @@ function HomeContent() {
         onToggleDarkMode={toggleDarkMode}
         isAdmin={isAdmin}
         syncStatus={isSyncing ? 'syncing' : 'idle'}
+        onPreloadAuth={preloadAuthModal}
       />
 
       <div className="max-w-6xl mx-auto px-4 py-6 space-y-6">
@@ -353,6 +357,8 @@ function HomeContent() {
                 <>
                   <button
                     onClick={() => setShowAuthModal(true)}
+                    onMouseEnter={preloadAuthModal}
+                    onFocus={preloadAuthModal}
                     className="text-blue-600 dark:text-blue-400 hover:underline"
                   >
                     Sign in
