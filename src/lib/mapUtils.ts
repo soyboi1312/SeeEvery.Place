@@ -124,10 +124,11 @@ function getLookupMapForCategory(category: Category): Map<string, any> | null {
   }
 }
 
-// Map Data URLs - use relative paths to match preload URLs for proper cache hits.
-// Same-origin requests avoid CORS mode mismatches between preload and fetch.
-export const GEO_URL_WORLD = "/geo/countries-110m.json";
-export const GEO_URL_USA = "/geo/states-10m.json";
+// Map Data URLs - must be absolute for react-simple-maps URL parsing.
+// The library uses new URL() internally which requires absolute URLs.
+// Use same-origin URLs to avoid CORS issues and enable preload cache hits.
+export const GEO_URL_WORLD = "https://seeevery.place/geo/countries-110m.json";
+export const GEO_URL_USA = "https://seeevery.place/geo/states-10m.json";
 
 // Mapping FIPS codes (from US topojson) to Postal Codes
 export const fipsToAbbr: Record<string, string> = {
