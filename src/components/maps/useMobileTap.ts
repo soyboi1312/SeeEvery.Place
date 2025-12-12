@@ -56,12 +56,11 @@ export function useMobileTap(onTap: () => void) {
 
     // If it was a quick tap without much movement
     if (duration < MAX_TAP_DURATION && dist < MAX_TAP_DISTANCE) {
-      // Prevent default to avoid double-firing synthetic clicks or browser zooming
-      if (e.cancelable) e.preventDefault();
-
-      // NOTE: We intentionally do NOT call e.stopPropagation() here.
-      // The event must bubble up so the map container (ZoomableGroup/D3)
-      // receives pointerup and correctly ends its drag state.
+      // REMOVED: e.preventDefault()
+      // We must allow the event to bubble so d3-zoom receives the 'up' signal
+      // and terminates the drag gesture. This fixes "sticky cursor" on iPad
+      // Magic Keyboard where the map gets stuck to the cursor after a click.
+      // We rely on 'touch-action: none' in CSS to prevent browser gestures.
 
       onTap();
     }
@@ -75,5 +74,11 @@ export function useMobileTap(onTap: () => void) {
     }
   }, []);
 
-  return { onPointerDown, onPointerUp, onPointerLeave };
+  return {
+    onPointerDown,
+    onPointerUp,
+    onPointerLeave,
+    // Map pointercancel to leave to handle interruptions (e.g. system gestures)
+    onPointerCancel: onPointerLeave
+  };
 }
