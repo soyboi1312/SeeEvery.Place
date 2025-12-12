@@ -5,11 +5,10 @@ import { Status, Category } from '@/lib/types';
 import { Search, Check, Star, Circle, Trash2, X, AlertCircle } from 'lucide-react';
 
 // Shadcn Imports
-import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -301,7 +300,7 @@ export default function SelectionList({
       </div>
 
       {/* Main List Area */}
-      <ScrollArea className="flex-1 max-h-[60vh] sm:max-h-[500px]">
+      <div className="flex-1 overflow-y-auto max-h-[60vh] sm:max-h-[500px]">
         <div className="p-4">
           {Object.entries(groupedItems).map(([group, groupItems]) => (
             <div key={group} className="mb-6 last:mb-0">
@@ -376,7 +375,7 @@ export default function SelectionList({
             </div>
           )}
         </div>
-      </ScrollArea>
+      </div>
     </Card>
   );
 }
