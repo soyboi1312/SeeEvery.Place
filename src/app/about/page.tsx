@@ -3,52 +3,43 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useDarkMode } from '@/lib/hooks/useDarkMode';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Sun, Moon, ArrowRight, Globe, BarChart3, Trophy, User, Palette, Sparkles, Mail, Rocket } from 'lucide-react';
 
 export default function AboutPage() {
   const { isDarkMode, toggleDarkMode } = useDarkMode();
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-primary-50 to-white dark:from-slate-900 dark:to-slate-800">
+    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white dark:from-slate-900 dark:to-slate-800">
       {/* Header */}
-      <header className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-black/5 dark:border-white/10 sticky top-0 z-40">
+      <header className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-border sticky top-0 z-40">
         <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3 group">
             <div className="relative w-8 h-8 transition-transform group-hover:scale-110 duration-200">
               <Image src="/logo.svg" alt="See Every Place Logo" fill className="object-contain" priority />
             </div>
             <div className="flex flex-col">
-              <h1 className="text-xl font-bold text-primary-900 dark:text-white leading-none">
-                SeeEvery<span className="text-accent-500">.</span>Place<span className="text-[10px] align-super text-primary-400">™</span>
+              <h1 className="text-xl font-bold text-foreground leading-none">
+                SeeEvery<span className="text-blue-500">.</span>Place<span className="text-[10px] align-super text-muted-foreground">™</span>
               </h1>
-              <span className="text-[10px] text-primary-500 dark:text-primary-400 font-medium tracking-wider uppercase hidden sm:block">
+              <span className="text-[10px] text-muted-foreground font-medium tracking-wider uppercase hidden sm:block">
                 Free Travel Tracker
               </span>
             </div>
           </Link>
           <div className="flex items-center gap-2">
-            {/* Dark Mode Toggle */}
-            <button
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={toggleDarkMode}
-              className="p-2 rounded-lg bg-primary-50 dark:bg-slate-800 text-primary-600 dark:text-primary-300 hover:bg-primary-100 dark:hover:bg-slate-700 transition-colors"
               title={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
-              aria-label={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
             >
-              {isDarkMode ? (
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-                </svg>
-              ) : (
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-                </svg>
-              )}
-            </button>
-            <Link
-              href="/"
-              className="px-4 py-2 bg-primary-700 hover:bg-primary-800 text-white rounded-lg font-medium hover:shadow-lg transition-all text-sm"
-            >
-              Start Mapping
-            </Link>
+              {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+            </Button>
+            <Button asChild>
+              <Link href="/">Start Mapping</Link>
+            </Button>
           </div>
         </div>
       </header>
@@ -56,32 +47,35 @@ export default function AboutPage() {
       {/* Content */}
       <div className="max-w-4xl mx-auto px-4 py-12">
         <article className="prose prose-lg max-w-none">
-          <h1 className="text-4xl font-bold text-primary-900 dark:text-white mb-6">About See Every Place</h1>
+          <h1 className="text-4xl font-bold text-foreground mb-6">About See Every Place</h1>
 
-          <p className="text-xl text-primary-600 dark:text-primary-300 mb-8">
+          <p className="text-xl text-muted-foreground mb-8">
             Track your adventures, build your bucket list, and share beautiful maps with friends and family.
           </p>
 
-          {/* What is it - First so users know what they're reading about */}
+          {/* What is it */}
           <section className="mb-12">
-            <h2 className="text-2xl font-bold text-primary-900 dark:text-white mb-4">What is See Every Place?</h2>
-            <p className="text-primary-600 dark:text-primary-300 mb-4">
+            <h2 className="text-2xl font-bold text-foreground mb-4">What is See Every Place?</h2>
+            <p className="text-muted-foreground mb-4">
               See Every Place is a free travel tracking app that helps you visualize everywhere you&apos;ve been
               and everywhere you want to go. Whether you&apos;re a seasoned globetrotter or just starting your
               travel journey, See Every Place makes it easy to keep track of your adventures.
             </p>
-            <p className="text-primary-600 dark:text-primary-300">
+            <p className="text-muted-foreground">
               Track far more than just countries. From national parks and mountain peaks to stadiums and weird
               roadside attractions, we help you capture the full detail of your journey.
             </p>
           </section>
 
           {/* The Story Section */}
-          <section className="mb-12 bg-primary-50/50 dark:bg-primary-900/20 rounded-2xl p-6 md:p-8 border border-black/5 dark:border-white/10">
-            <h2 className="text-2xl font-bold text-primary-900 dark:text-white mb-4 flex items-center gap-2">
-              <span className="text-2xl">✨</span> The Story
-            </h2>
-            <div className="space-y-4 text-primary-600 dark:text-primary-300">
+          <Card className="mb-12 bg-blue-50/50 dark:bg-blue-900/10 border-blue-200/50 dark:border-blue-800/50">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Sparkles className="w-6 h-6 text-blue-500" />
+                The Story
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4 text-muted-foreground">
               <p>
                 Memories fade faster than we&apos;d like. We wanted a way to hold onto the places we&apos;ve seen, not just the countries, but the mountain peaks and the random roadside attractions that made the trip special.
               </p>
@@ -92,218 +86,236 @@ export default function AboutPage() {
                 We wanted something simple, a visual way to see where we&apos;d been and dream about where we&apos;d go next. Just a beautiful map that showed our journey.
               </p>
               <p>
-                <strong className="text-primary-900 dark:text-white">So we built one.</strong> And now we&apos;re sharing it with you.
+                <strong className="text-foreground">So we built one.</strong> And now we&apos;re sharing it with you.
               </p>
-              <p className="text-sm text-primary-500 dark:text-primary-400 pt-2 border-t border-black/5 dark:border-white/10">
+              <p className="text-sm text-muted-foreground pt-2 border-t">
                 See Every Place is free and works offline. Your data stays private by default.
                 Sign up to unlock achievements, earn XP, and create a shareable public profile.
               </p>
-            </div>
-          </section>
+            </CardContent>
+          </Card>
 
+          {/* Features */}
           <section className="mb-12">
-            <h2 className="text-2xl font-bold text-primary-900 dark:text-white mb-4">Features</h2>
+            <h2 className="text-2xl font-bold text-foreground mb-4">Features</h2>
             <div className="grid md:grid-cols-2 gap-6">
-              <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-premium border border-black/5 dark:border-white/10">
-                <div className="text-3xl mb-3">🌍</div>
-                <h3 className="font-bold text-primary-900 dark:text-white mb-2">Interactive Maps</h3>
-                <p className="text-primary-600 dark:text-primary-300 text-sm">
-                  See your travels come to life on beautiful interactive world and US maps with countries
-                  and states colored by visit status.
-                </p>
-              </div>
-              <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-premium border border-black/5 dark:border-white/10">
-                <div className="text-3xl mb-3">📊</div>
-                <h3 className="font-bold text-primary-900 dark:text-white mb-2">Track Everything</h3>
-                <p className="text-primary-600 dark:text-primary-300 text-sm">
-                  Go beyond countries - track parks, mountains, museums,
-                  stadiums, airports, ski resorts, theme parks, and surf spots.
-                </p>
-              </div>
-              <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-premium border border-black/5 dark:border-white/10">
-                <div className="text-3xl mb-3">🏆</div>
-                <h3 className="font-bold text-primary-900 dark:text-white mb-2">Achievements & XP</h3>
-                <p className="text-primary-600 dark:text-primary-300 text-sm">
-                  Unlock achievements as you explore. Earn XP, level up, and collect badges from bronze
-                  to legendary tier. Discover secret achievements along the way.
-                </p>
-              </div>
-              <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-premium border border-black/5 dark:border-white/10">
-                <div className="text-3xl mb-3">👤</div>
-                <h3 className="font-bold text-primary-900 dark:text-white mb-2">Public Profiles</h3>
-                <p className="text-primary-600 dark:text-primary-300 text-sm">
-                  Create a unique shareable profile at seeevery.place/u/yourname. Show off your travels,
-                  achievements, and stats. Privacy controls let you choose what to share.
-                </p>
-              </div>
-              <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-premium border border-black/5 dark:border-white/10">
-                <div className="text-3xl mb-3">🎨</div>
-                <h3 className="font-bold text-primary-900 dark:text-white mb-2">Shareable Graphics</h3>
-                <p className="text-primary-600 dark:text-primary-300 text-sm">
-                  Generate beautiful, customizable graphics to share your travel stats on social media
-                  or with friends.
-                </p>
-              </div>
-              <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-premium border border-black/5 dark:border-white/10">
-                <div className="text-3xl mb-3">✨</div>
-                <h3 className="font-bold text-primary-900 dark:text-white mb-2">Bucket List</h3>
-                <p className="text-primary-600 dark:text-primary-300 text-sm">
-                  Plan your future adventures by adding destinations to your bucket list and watch
-                  your dreams become reality.
-                </p>
-              </div>
+              <Card>
+                <CardContent className="pt-6">
+                  <Globe className="w-8 h-8 text-blue-500 mb-3" />
+                  <h3 className="font-bold text-foreground mb-2">Interactive Maps</h3>
+                  <p className="text-muted-foreground text-sm">
+                    See your travels come to life on beautiful interactive world and US maps with countries
+                    and states colored by visit status.
+                  </p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="pt-6">
+                  <BarChart3 className="w-8 h-8 text-green-500 mb-3" />
+                  <h3 className="font-bold text-foreground mb-2">Track Everything</h3>
+                  <p className="text-muted-foreground text-sm">
+                    Go beyond countries - track parks, mountains, museums,
+                    stadiums, airports, ski resorts, theme parks, and surf spots.
+                  </p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="pt-6">
+                  <Trophy className="w-8 h-8 text-yellow-500 mb-3" />
+                  <h3 className="font-bold text-foreground mb-2">Achievements & XP</h3>
+                  <p className="text-muted-foreground text-sm">
+                    Unlock achievements as you explore. Earn XP, level up, and collect badges from bronze
+                    to legendary tier. Discover secret achievements along the way.
+                  </p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="pt-6">
+                  <User className="w-8 h-8 text-purple-500 mb-3" />
+                  <h3 className="font-bold text-foreground mb-2">Public Profiles</h3>
+                  <p className="text-muted-foreground text-sm">
+                    Create a unique shareable profile at seeevery.place/u/yourname. Show off your travels,
+                    achievements, and stats. Privacy controls let you choose what to share.
+                  </p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="pt-6">
+                  <Palette className="w-8 h-8 text-pink-500 mb-3" />
+                  <h3 className="font-bold text-foreground mb-2">Shareable Graphics</h3>
+                  <p className="text-muted-foreground text-sm">
+                    Generate beautiful, customizable graphics to share your travel stats on social media
+                    or with friends.
+                  </p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="pt-6">
+                  <Sparkles className="w-8 h-8 text-cyan-500 mb-3" />
+                  <h3 className="font-bold text-foreground mb-2">Bucket List</h3>
+                  <p className="text-muted-foreground text-sm">
+                    Plan your future adventures by adding destinations to your bucket list and watch
+                    your dreams become reality.
+                  </p>
+                </CardContent>
+              </Card>
             </div>
           </section>
 
+          {/* Categories */}
           <section className="mb-12">
-            <h2 className="text-2xl font-bold text-primary-900 dark:text-white mb-4">Categories</h2>
-            <div className="grid md:grid-cols-2 gap-4">
-              <div className="space-y-3 text-primary-600 dark:text-primary-300">
-                <h3 className="font-semibold text-primary-900 dark:text-white text-sm uppercase tracking-wide">Destinations</h3>
-                <ul className="space-y-2">
+            <h2 className="text-2xl font-bold text-foreground mb-4">Categories</h2>
+            <div className="grid md:grid-cols-2 gap-6">
+              <div className="space-y-3 text-muted-foreground">
+                <h3 className="font-semibold text-foreground text-sm uppercase tracking-wide">Destinations</h3>
+                <ul className="space-y-2 text-sm">
                   <li className="flex items-center gap-3">
                     <span className="text-xl">🌍</span>
-                    <span><strong className="text-primary-900 dark:text-white">Countries</strong> - All 197 countries worldwide</span>
+                    <span><strong className="text-foreground">Countries</strong> - All 197 countries worldwide</span>
                   </li>
                   <li className="flex items-center gap-3">
                     <span className="text-xl">🇺🇸</span>
-                    <span><strong className="text-primary-900 dark:text-white">US States</strong> - 50 states plus DC and territories</span>
+                    <span><strong className="text-foreground">US States</strong> - 50 states plus DC and territories</span>
                   </li>
                   <li className="flex items-center gap-3">
                     <span className="text-xl">✈️</span>
-                    <span><strong className="text-primary-900 dark:text-white">Airports</strong> - Major hubs from JFK to Changi</span>
+                    <span><strong className="text-foreground">Airports</strong> - Major hubs from JFK to Changi</span>
                   </li>
                 </ul>
               </div>
-              <div className="space-y-3 text-primary-600 dark:text-primary-300">
-                <h3 className="font-semibold text-primary-900 dark:text-white text-sm uppercase tracking-wide">Nature</h3>
-                <ul className="space-y-2">
+              <div className="space-y-3 text-muted-foreground">
+                <h3 className="font-semibold text-foreground text-sm uppercase tracking-wide">Nature</h3>
+                <ul className="space-y-2 text-sm">
                   <li className="flex items-center gap-3">
                     <span className="text-xl">🏞️</span>
-                    <span><strong className="text-primary-900 dark:text-white">National Parks</strong> - America&apos;s natural treasures</span>
+                    <span><strong className="text-foreground">National Parks</strong> - America&apos;s natural treasures</span>
                   </li>
                   <li className="flex items-center gap-3">
                     <span className="text-xl">🌲</span>
-                    <span><strong className="text-primary-900 dark:text-white">State Parks</strong> - Hidden gems across all 50 states</span>
+                    <span><strong className="text-foreground">State Parks</strong> - Hidden gems across all 50 states</span>
                   </li>
                   <li className="flex items-center gap-3">
                     <span className="text-xl">🏔️</span>
-                    <span><strong className="text-primary-900 dark:text-white">5000m+ Peaks</strong> - World&apos;s highest mountains</span>
+                    <span><strong className="text-foreground">5000m+ Peaks</strong> - World&apos;s highest mountains</span>
                   </li>
                   <li className="flex items-center gap-3">
                     <span className="text-xl">⛰️</span>
-                    <span><strong className="text-primary-900 dark:text-white">US 14ers</strong> - Peaks over 14,000 feet</span>
+                    <span><strong className="text-foreground">US 14ers</strong> - Peaks over 14,000 feet</span>
                   </li>
                   <li className="flex items-center gap-3">
                     <span className="text-xl">⛷️</span>
-                    <span><strong className="text-primary-900 dark:text-white">Ski Resorts</strong> - Whistler, Zermatt, Niseko & more</span>
+                    <span><strong className="text-foreground">Ski Resorts</strong> - Whistler, Zermatt, Niseko & more</span>
                   </li>
                   <li className="flex items-center gap-3">
                     <span className="text-xl">🌊</span>
-                    <span><strong className="text-primary-900 dark:text-white">Surfing Reserves</strong> - Legendary breaks worldwide</span>
+                    <span><strong className="text-foreground">Surfing Reserves</strong> - Legendary breaks worldwide</span>
                   </li>
                 </ul>
               </div>
-              <div className="space-y-3 text-primary-600 dark:text-primary-300">
-                <h3 className="font-semibold text-primary-900 dark:text-white text-sm uppercase tracking-wide">Sports</h3>
-                <ul className="space-y-2">
+              <div className="space-y-3 text-muted-foreground">
+                <h3 className="font-semibold text-foreground text-sm uppercase tracking-wide">Sports</h3>
+                <ul className="space-y-2 text-sm">
                   <li className="flex items-center gap-3">
                     <span className="text-xl">🏟️</span>
-                    <span><strong className="text-primary-900 dark:text-white">Stadiums</strong> - MLB, NFL, NBA, NHL, Soccer, Cricket, Rugby, Tennis</span>
+                    <span><strong className="text-foreground">Stadiums</strong> - MLB, NFL, NBA, NHL, Soccer, Cricket, Rugby, Tennis</span>
                   </li>
                   <li className="flex items-center gap-3">
                     <span className="text-xl">🏎️</span>
-                    <span><strong className="text-primary-900 dark:text-white">F1 Tracks</strong> - Formula 1 race circuits worldwide</span>
+                    <span><strong className="text-foreground">F1 Tracks</strong> - Formula 1 race circuits worldwide</span>
                   </li>
                   <li className="flex items-center gap-3">
                     <span className="text-xl">🏃</span>
-                    <span><strong className="text-primary-900 dark:text-white">Marathons</strong> - World Marathon Majors</span>
+                    <span><strong className="text-foreground">Marathons</strong> - World Marathon Majors</span>
                   </li>
                 </ul>
               </div>
-              <div className="space-y-3 text-primary-600 dark:text-primary-300">
-                <h3 className="font-semibold text-primary-900 dark:text-white text-sm uppercase tracking-wide">Culture</h3>
-                <ul className="space-y-2">
+              <div className="space-y-3 text-muted-foreground">
+                <h3 className="font-semibold text-foreground text-sm uppercase tracking-wide">Culture</h3>
+                <ul className="space-y-2 text-sm">
                   <li className="flex items-center gap-3">
                     <span className="text-xl">🎨</span>
-                    <span><strong className="text-primary-900 dark:text-white">Museums</strong> - World-class art and history</span>
+                    <span><strong className="text-foreground">Museums</strong> - World-class art and history</span>
                   </li>
                   <li className="flex items-center gap-3">
                     <span className="text-xl">🎢</span>
-                    <span><strong className="text-primary-900 dark:text-white">Theme Parks</strong> - Disney, Universal & more</span>
+                    <span><strong className="text-foreground">Theme Parks</strong> - Disney, Universal & more</span>
                   </li>
                   <li className="flex items-center gap-3">
                     <span className="text-xl">🗿</span>
-                    <span><strong className="text-primary-900 dark:text-white">Weird Americana</strong> - Quirky roadside attractions</span>
+                    <span><strong className="text-foreground">Weird Americana</strong> - Quirky roadside attractions</span>
                   </li>
                 </ul>
               </div>
             </div>
           </section>
 
+          {/* Privacy */}
           <section className="mb-12">
-            <h2 className="text-2xl font-bold text-primary-900 dark:text-white mb-4">Privacy</h2>
-            <p className="text-primary-600 dark:text-primary-300">
+            <h2 className="text-2xl font-bold text-foreground mb-4">Privacy</h2>
+            <p className="text-muted-foreground">
               Your data belongs to you. By default, it lives on your device and is private. We don&apos;t track your travels, and we never sell your data.
               If you choose to create a public profile, only the information you explicitly choose to share will be visible.
-              Sync is optional and encrypted. Read the full <Link href="/privacy" className="text-primary-700 dark:text-primary-400 hover:underline">Privacy Policy</Link>.
+              Sync is optional and encrypted. Read the full <Link href="/privacy" className="text-primary hover:underline">Privacy Policy</Link>.
             </p>
           </section>
 
+          {/* Contact */}
           <section className="mb-12">
-            <h2 className="text-2xl font-bold text-primary-900 dark:text-white mb-4">Contact</h2>
-            <p className="text-primary-600 dark:text-primary-300">
+            <h2 className="text-2xl font-bold text-foreground mb-4 flex items-center gap-2">
+              <Mail className="w-6 h-6" /> Contact
+            </h2>
+            <p className="text-muted-foreground">
               Have questions, feedback, or suggestions? Reach out at{' '}
-              <a href="mailto:hello@seeevery.place" className="text-primary-700 dark:text-primary-400 hover:underline">
+              <a href="mailto:hello@seeevery.place" className="text-primary hover:underline">
                 hello@seeevery.place
               </a>.
             </p>
           </section>
 
           {/* What's Next Section */}
-          <section className="mb-12 bg-accent-50/50 dark:bg-accent-900/20 rounded-2xl p-6 md:p-8 border border-black/5 dark:border-white/10">
-            <h2 className="text-2xl font-bold text-primary-900 dark:text-white mb-4 flex items-center gap-2">
-              <span className="text-2xl">🚀</span> What&apos;s Next?
-            </h2>
-            <div className="space-y-4 text-primary-600 dark:text-primary-300">
+          <Card className="mb-12 bg-amber-50/50 dark:bg-amber-900/10 border-amber-200/50 dark:border-amber-800/50">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Rocket className="w-6 h-6 text-amber-500" />
+                What&apos;s Next?
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4 text-muted-foreground">
               <p>
                 I&apos;m constantly adding new maps and markers, and I let the community decide what comes first.
               </p>
               <p>
                 Visit the{' '}
-                <Link href="/suggest" className="text-primary-700 dark:text-primary-400 hover:underline font-medium">
+                <Link href="/suggest" className="text-primary hover:underline font-medium">
                   Suggestions Page
                 </Link>{' '}
                 to see what I&apos;m working on, vote for your favorite categories, or submit a new idea. If enough people want it, I&apos;ll build it.
               </p>
-            </div>
-          </section>
+            </CardContent>
+          </Card>
 
           <section className="text-center py-8">
-            <Link
-              href="/"
-              className="inline-flex items-center gap-2 px-8 py-4 bg-primary-700 hover:bg-primary-800 text-white rounded-xl font-bold text-lg hover:shadow-xl transition-all"
-            >
-              Start Tracking Your Travels
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-              </svg>
-            </Link>
+            <Button asChild size="lg" className="gap-2">
+              <Link href="/">
+                Start Tracking Your Travels
+                <ArrowRight className="w-5 h-5" />
+              </Link>
+            </Button>
           </section>
         </article>
       </div>
 
       {/* Footer */}
-      <footer className="border-t border-black/5 dark:border-white/10 bg-white/50 dark:bg-slate-900/50">
-        <div className="max-w-4xl mx-auto px-4 py-6 text-center text-sm text-primary-500 dark:text-primary-400">
+      <footer className="border-t bg-background/50">
+        <div className="max-w-4xl mx-auto px-4 py-6 text-center text-sm text-muted-foreground">
           <div className="flex justify-center gap-4 mb-2">
-            <Link href="/" className="hover:text-primary-700 dark:hover:text-primary-200 transition-colors">Home</Link>
+            <Link href="/" className="hover:text-foreground transition-colors">Home</Link>
             <span>•</span>
-            <Link href="/suggest" className="hover:text-primary-700 dark:hover:text-primary-200 transition-colors">Suggest</Link>
+            <Link href="/suggest" className="hover:text-foreground transition-colors">Suggest</Link>
             <span>•</span>
-            <Link href="/privacy" className="hover:text-primary-700 dark:hover:text-primary-200 transition-colors">Privacy</Link>
+            <Link href="/privacy" className="hover:text-foreground transition-colors">Privacy</Link>
             <span>•</span>
-            <Link href="/terms" className="hover:text-primary-700 dark:hover:text-primary-200 transition-colors">Terms</Link>
+            <Link href="/terms" className="hover:text-foreground transition-colors">Terms</Link>
           </div>
           <p>See Every Place - Free Travel Tracker</p>
         </div>
