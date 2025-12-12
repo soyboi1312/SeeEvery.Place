@@ -2,6 +2,47 @@
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { categoryLabels, ALL_CATEGORIES, Category } from '@/lib/types';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Search, Download, CheckCircle, AlertTriangle, XCircle, FileWarning, Pencil, Trash2, Loader2 } from 'lucide-react';
 
 interface PlaceData {
   id: string;
@@ -68,6 +109,9 @@ export default function DataHealthPage() {
   });
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+
+  // Delete confirmation state
+  const [deleteOverride, setDeleteOverride] = useState<PlaceOverride | null>(null);
 
   // Load all data on mount
   useEffect(() => {
@@ -208,26 +252,26 @@ export default function DataHealthPage() {
   };
 
   // Delete override
-  const handleDeleteOverride = async (override: PlaceOverride) => {
-    if (!confirm('Are you sure you want to remove this override? The place will revert to its original data.')) {
-      return;
-    }
+  const handleConfirmDeleteOverride = async () => {
+    if (!deleteOverride) return;
 
     try {
       const response = await fetch('/api/admin/places', {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          category: override.category,
-          placeId: override.place_id,
+          category: deleteOverride.category,
+          placeId: deleteOverride.place_id,
         }),
       });
 
       if (response.ok) {
-        setOverrides(prev => prev.filter(o => o.id !== override.id));
+        setOverrides(prev => prev.filter(o => o.id !== deleteOverride.id));
       }
     } catch (error) {
       console.error('Failed to delete override:', error);
+    } finally {
+      setDeleteOverride(null);
     }
   };
 
@@ -426,282 +470,258 @@ export default function DataHealthPage() {
     };
   }, [validationIssues]);
 
-  const issueTypeLabels: Record<ValidationIssue['type'], { label: string; color: string }> = {
-    duplicate_id: { label: 'Duplicate ID', color: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300' },
-    missing_coords: { label: 'Missing Coordinates', color: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300' },
-    invalid_url: { label: 'Invalid URL', color: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300' },
-    missing_name: { label: 'Missing Name', color: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300' },
+  const issueTypeConfig: Record<ValidationIssue['type'], { label: string; variant: 'destructive' | 'warning' | 'secondary' }> = {
+    duplicate_id: { label: 'Duplicate ID', variant: 'destructive' },
+    missing_coords: { label: 'Missing Coordinates', variant: 'warning' },
+    invalid_url: { label: 'Invalid URL', variant: 'warning' },
+    missing_name: { label: 'Missing Name', variant: 'secondary' },
   };
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-primary-900 dark:text-white mb-2">Data Health</h1>
-          <p className="text-primary-600 dark:text-primary-300">
-            Browse all places and validate data integrity across {places.length.toLocaleString()} entries.
-          </p>
-        </div>
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-foreground mb-2">Data Health</h1>
+        <p className="text-muted-foreground">
+          Browse all places and validate data integrity across {places.length.toLocaleString()} entries.
+        </p>
+      </div>
 
-        {/* Tabs */}
-        <div className="flex flex-wrap gap-2 mb-6">
-          <button
-            onClick={() => setActiveTab('browser')}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-              activeTab === 'browser'
-                ? 'bg-primary-600 text-white'
-                : 'bg-primary-100 dark:bg-slate-700 text-primary-700 dark:text-primary-300 hover:bg-primary-200 dark:hover:bg-slate-600'
-            }`}
-          >
-            Place Browser
-          </button>
-          <button
-            onClick={() => setActiveTab('validation')}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 ${
-              activeTab === 'validation'
-                ? 'bg-primary-600 text-white'
-                : 'bg-primary-100 dark:bg-slate-700 text-primary-700 dark:text-primary-300 hover:bg-primary-200 dark:hover:bg-slate-600'
-            }`}
-          >
+      {/* Tabs */}
+      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as Tab)} className="mb-6">
+        <TabsList>
+          <TabsTrigger value="browser">Place Browser</TabsTrigger>
+          <TabsTrigger value="validation" className="flex items-center gap-2">
             Validation
             {validationIssues.length > 0 && (
-              <span className="px-1.5 py-0.5 text-xs rounded-full bg-red-500 text-white">
+              <Badge variant="destructive" className="ml-1 px-1.5 py-0.5 text-xs">
                 {validationIssues.length}
-              </span>
+              </Badge>
             )}
-          </button>
-          <button
-            onClick={() => setActiveTab('overrides')}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 ${
-              activeTab === 'overrides'
-                ? 'bg-primary-600 text-white'
-                : 'bg-primary-100 dark:bg-slate-700 text-primary-700 dark:text-primary-300 hover:bg-primary-200 dark:hover:bg-slate-600'
-            }`}
-          >
+          </TabsTrigger>
+          <TabsTrigger value="overrides" className="flex items-center gap-2">
             Overrides
             {overrides.length > 0 && (
-              <span className="px-1.5 py-0.5 text-xs rounded-full bg-blue-500 text-white">
+              <Badge variant="secondary" className="ml-1 px-1.5 py-0.5 text-xs">
                 {overrides.length}
-              </span>
+              </Badge>
             )}
-          </button>
+          </TabsTrigger>
+        </TabsList>
+      </Tabs>
+
+      {loading ? (
+        <div className="flex items-center justify-center py-20">
+          <Loader2 className="h-12 w-12 animate-spin text-primary" />
         </div>
-
-        {loading ? (
-          <div className="flex items-center justify-center py-20">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 dark:border-primary-400"></div>
-          </div>
-        ) : (
-          <>
-            {/* Place Browser Tab */}
-            {activeTab === 'browser' && (
-              <div className="space-y-6">
-                {/* Filters */}
-                <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-black/5 dark:border-white/10 p-4">
+      ) : (
+        <>
+          {/* Place Browser Tab */}
+          {activeTab === 'browser' && (
+            <div className="space-y-6">
+              {/* Filters */}
+              <Card>
+                <CardContent className="pt-6">
                   <div className="flex flex-col sm:flex-row gap-4">
-                    <div className="flex-1">
-                      <div className="relative">
-                        <svg className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                        </svg>
-                        <input
-                          type="text"
-                          placeholder="Search by ID or name..."
-                          value={searchTerm}
-                          onChange={(e) => setSearchTerm(e.target.value)}
-                          className="w-full pl-10 pr-4 py-2 bg-primary-50 dark:bg-slate-700 border border-primary-200 dark:border-slate-600 rounded-lg text-primary-900 dark:text-white placeholder-primary-400 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500"
-                        />
-                      </div>
+                    <div className="flex-1 relative">
+                      <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                      <Input
+                        placeholder="Search by ID or name..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="pl-9"
+                      />
                     </div>
-                    <div>
-                      <select
-                        value={selectedCategory}
-                        onChange={(e) => setSelectedCategory(e.target.value as Category | 'all')}
-                        className="w-full sm:w-auto px-4 py-2 bg-primary-50 dark:bg-slate-700 border border-primary-200 dark:border-slate-600 rounded-lg text-primary-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
-                      >
-                        <option value="all">All Categories ({categoryCounts.all})</option>
+                    <Select
+                      value={selectedCategory}
+                      onValueChange={(value) => setSelectedCategory(value as Category | 'all')}
+                    >
+                      <SelectTrigger className="w-full sm:w-[250px]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Categories ({categoryCounts.all})</SelectItem>
                         {ALL_CATEGORIES.map(cat => (
-                          <option key={cat} value={cat}>
+                          <SelectItem key={cat} value={cat}>
                             {categoryLabels[cat]} ({categoryCounts[cat] || 0})
-                          </option>
+                          </SelectItem>
                         ))}
-                      </select>
-                    </div>
+                      </SelectContent>
+                    </Select>
                   </div>
-                </div>
+                </CardContent>
+              </Card>
 
-                {/* Results */}
-                <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-black/5 dark:border-white/10 overflow-hidden">
-                  <div className="p-4 border-b border-black/5 dark:border-white/10">
-                    <p className="text-sm text-primary-600 dark:text-primary-400">
-                      Showing {filteredPlaces.length.toLocaleString()} of {places.length.toLocaleString()} places
-                    </p>
-                  </div>
+              {/* Results */}
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardDescription>
+                    Showing {filteredPlaces.length.toLocaleString()} of {places.length.toLocaleString()} places
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="p-0">
                   <div className="max-h-[600px] overflow-y-auto">
-                    <table className="w-full">
-                      <thead className="bg-primary-50 dark:bg-slate-700/50 sticky top-0">
-                        <tr>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-primary-600 dark:text-primary-300 uppercase tracking-wider">
-                            ID
-                          </th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-primary-600 dark:text-primary-300 uppercase tracking-wider">
-                            Name
-                          </th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-primary-600 dark:text-primary-300 uppercase tracking-wider">
-                            Category
-                          </th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-primary-600 dark:text-primary-300 uppercase tracking-wider">
-                            Location
-                          </th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-primary-600 dark:text-primary-300 uppercase tracking-wider">
-                            Coordinates
-                          </th>
-                          <th className="px-4 py-3 text-center text-xs font-medium text-primary-600 dark:text-primary-300 uppercase tracking-wider">
-                            Actions
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-primary-100 dark:divide-slate-700">
+                    <Table>
+                      <TableHeader className="sticky top-0 bg-muted/50 backdrop-blur-sm">
+                        <TableRow>
+                          <TableHead>ID</TableHead>
+                          <TableHead>Name</TableHead>
+                          <TableHead>Category</TableHead>
+                          <TableHead>Location</TableHead>
+                          <TableHead>Coordinates</TableHead>
+                          <TableHead className="text-center">Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
                         {filteredPlaces.slice(0, 500).map((place, idx) => (
-                          <tr key={`${place.category}-${place.id}-${idx}`} className={`hover:bg-primary-50 dark:hover:bg-slate-700/30 transition-colors ${place.hasOverride ? 'bg-blue-50/50 dark:bg-blue-900/10' : ''}`}>
-                            <td className="px-4 py-3">
-                              <code className="text-xs bg-primary-100 dark:bg-slate-700 px-1.5 py-0.5 rounded text-primary-700 dark:text-primary-300">
+                          <TableRow
+                            key={`${place.category}-${place.id}-${idx}`}
+                            className={place.hasOverride ? 'bg-blue-50/50 dark:bg-blue-900/10' : ''}
+                          >
+                            <TableCell>
+                              <code className="text-xs bg-muted px-1.5 py-0.5 rounded">
                                 {place.id}
                               </code>
-                            </td>
-                            <td className="px-4 py-3 text-sm text-primary-900 dark:text-white">
+                            </TableCell>
+                            <TableCell>
                               <div className="flex items-center gap-2">
                                 {place.name}
                                 {place.hasOverride && (
-                                  <span className="px-1.5 py-0.5 text-[10px] font-medium rounded bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
+                                  <Badge variant="secondary" className="text-[10px] px-1.5">
                                     modified
-                                  </span>
+                                  </Badge>
                                 )}
                               </div>
-                            </td>
-                            <td className="px-4 py-3">
-                              <span className="text-xs px-2 py-0.5 rounded-full bg-primary-100 dark:bg-slate-700 text-primary-700 dark:text-primary-300">
-                                {categoryLabels[place.category]}
-                              </span>
-                            </td>
-                            <td className="px-4 py-3 text-sm text-primary-600 dark:text-primary-400">
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant="outline">{categoryLabels[place.category]}</Badge>
+                            </TableCell>
+                            <TableCell className="text-muted-foreground">
                               {place.state || place.country || place.region || '-'}
-                            </td>
-                            <td className="px-4 py-3 text-sm font-mono text-primary-500 dark:text-primary-400">
+                            </TableCell>
+                            <TableCell className="font-mono text-sm text-muted-foreground">
                               {place.lat !== undefined && place.lng !== undefined
                                 ? `${place.lat.toFixed(2)}, ${place.lng.toFixed(2)}`
                                 : '-'}
-                            </td>
-                            <td className="px-4 py-3 text-center">
-                              <button
+                            </TableCell>
+                            <TableCell className="text-center">
+                              <Button
+                                variant="ghost"
+                                size="icon"
                                 onClick={() => handleEditPlace(place)}
-                                className="p-1.5 rounded-lg text-primary-600 hover:bg-primary-100 dark:text-primary-400 dark:hover:bg-slate-700 transition-colors"
                                 title="Edit place"
                               >
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                </svg>
-                              </button>
-                            </td>
-                          </tr>
+                                <Pencil className="w-4 h-4" />
+                              </Button>
+                            </TableCell>
+                          </TableRow>
                         ))}
-                      </tbody>
-                    </table>
+                      </TableBody>
+                    </Table>
                     {filteredPlaces.length > 500 && (
-                      <div className="p-4 text-center text-sm text-primary-500 dark:text-primary-400 border-t border-primary-100 dark:border-slate-700">
+                      <div className="p-4 text-center text-sm text-muted-foreground border-t">
                         Showing first 500 results. Use search to narrow down.
                       </div>
                     )}
                   </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {/* Validation Tab */}
+          {activeTab === 'validation' && (
+            <div className="space-y-6">
+              {/* Run Validation Button */}
+              <div className="flex items-center justify-between flex-wrap gap-4">
+                <p className="text-muted-foreground">
+                  {validationIssues.length === 0
+                    ? 'Run validation to check for data issues.'
+                    : `Found ${validationIssues.length} issue${validationIssues.length !== 1 ? 's' : ''}.`}
+                </p>
+                <div className="flex gap-2">
+                  {validationIssues.length > 0 && (
+                    <Button variant="outline" onClick={exportIssuesToCSV}>
+                      <Download className="w-4 h-4 mr-2" />
+                      Export CSV
+                    </Button>
+                  )}
+                  <Button onClick={runValidation} disabled={validating}>
+                    {validating ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Validating...
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle className="w-4 h-4 mr-2" />
+                        Run Validation
+                      </>
+                    )}
+                  </Button>
                 </div>
               </div>
-            )}
 
-            {/* Validation Tab */}
-            {activeTab === 'validation' && (
-              <div className="space-y-6">
-                {/* Run Validation Button */}
-                <div className="flex items-center justify-between flex-wrap gap-4">
-                  <div>
-                    <p className="text-primary-600 dark:text-primary-300">
-                      {validationIssues.length === 0
-                        ? 'Run validation to check for data issues.'
-                        : `Found ${validationIssues.length} issue${validationIssues.length !== 1 ? 's' : ''}.`}
-                    </p>
-                  </div>
-                  <div className="flex gap-2">
-                    {validationIssues.length > 0 && (
-                      <button
-                        onClick={exportIssuesToCSV}
-                        className="px-4 py-2 bg-primary-100 dark:bg-slate-700 text-primary-700 dark:text-primary-300 rounded-lg font-medium hover:bg-primary-200 dark:hover:bg-slate-600 transition-colors flex items-center gap-2"
-                      >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                        </svg>
-                        Export CSV
-                      </button>
-                    )}
-                    <button
-                      onClick={runValidation}
-                      disabled={validating}
-                      className="px-4 py-2 bg-primary-600 text-white rounded-lg font-medium hover:bg-primary-700 disabled:opacity-50 transition-colors flex items-center gap-2"
-                    >
-                      {validating ? (
-                        <>
-                          <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
-                          Validating...
-                        </>
-                      ) : (
-                        <>
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                          </svg>
-                          Run Validation
-                        </>
-                      )}
-                    </button>
-                  </div>
+              {/* Issue Summary Cards */}
+              {validationIssues.length > 0 && (
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <Card className="bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800">
+                    <CardContent className="pt-4">
+                      <div className="flex items-center gap-2 mb-1">
+                        <XCircle className="w-4 h-4 text-red-600 dark:text-red-400" />
+                        <span className="text-sm text-red-700 dark:text-red-300">Duplicate IDs</span>
+                      </div>
+                      <p className="text-2xl font-bold text-red-700 dark:text-red-300">{issueCounts.duplicate_id}</p>
+                    </CardContent>
+                  </Card>
+                  <Card className="bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800">
+                    <CardContent className="pt-4">
+                      <div className="flex items-center gap-2 mb-1">
+                        <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                        <span className="text-sm text-amber-700 dark:text-amber-300">Missing Coords</span>
+                      </div>
+                      <p className="text-2xl font-bold text-amber-700 dark:text-amber-300">{issueCounts.missing_coords}</p>
+                    </CardContent>
+                  </Card>
+                  <Card className="bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800">
+                    <CardContent className="pt-4">
+                      <div className="flex items-center gap-2 mb-1">
+                        <AlertTriangle className="w-4 h-4 text-orange-600 dark:text-orange-400" />
+                        <span className="text-sm text-orange-700 dark:text-orange-300">Invalid URLs</span>
+                      </div>
+                      <p className="text-2xl font-bold text-orange-700 dark:text-orange-300">{issueCounts.invalid_url}</p>
+                    </CardContent>
+                  </Card>
+                  <Card className="bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-800">
+                    <CardContent className="pt-4">
+                      <div className="flex items-center gap-2 mb-1">
+                        <FileWarning className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                        <span className="text-sm text-purple-700 dark:text-purple-300">Missing Names</span>
+                      </div>
+                      <p className="text-2xl font-bold text-purple-700 dark:text-purple-300">{issueCounts.missing_name}</p>
+                    </CardContent>
+                  </Card>
                 </div>
+              )}
 
-                {/* Issue Summary Cards */}
-                {validationIssues.length > 0 && (
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div className={`p-4 rounded-xl ${issueTypeLabels.duplicate_id.color}`}>
-                      <p className="text-2xl font-bold">{issueCounts.duplicate_id}</p>
-                      <p className="text-sm">Duplicate IDs</p>
-                    </div>
-                    <div className={`p-4 rounded-xl ${issueTypeLabels.missing_coords.color}`}>
-                      <p className="text-2xl font-bold">{issueCounts.missing_coords}</p>
-                      <p className="text-sm">Missing Coords</p>
-                    </div>
-                    <div className={`p-4 rounded-xl ${issueTypeLabels.invalid_url.color}`}>
-                      <p className="text-2xl font-bold">{issueCounts.invalid_url}</p>
-                      <p className="text-sm">Invalid URLs</p>
-                    </div>
-                    <div className={`p-4 rounded-xl ${issueTypeLabels.missing_name.color}`}>
-                      <p className="text-2xl font-bold">{issueCounts.missing_name}</p>
-                      <p className="text-sm">Missing Names</p>
-                    </div>
-                  </div>
-                )}
-
-                {/* Issues List */}
-                {validationIssues.length > 0 && (
-                  <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-black/5 dark:border-white/10 overflow-hidden">
-                    <div className="max-h-[500px] overflow-y-auto divide-y divide-primary-100 dark:divide-slate-700">
+              {/* Issues List */}
+              {validationIssues.length > 0 && (
+                <Card>
+                  <CardContent className="p-0">
+                    <div className="max-h-[500px] overflow-y-auto divide-y">
                       {validationIssues.map((issue, idx) => (
-                        <div key={idx} className="p-4 hover:bg-primary-50 dark:hover:bg-slate-700/30 transition-colors">
+                        <div key={idx} className="p-4 hover:bg-muted/50 transition-colors">
                           <div className="flex items-start gap-3">
-                            <span className={`px-2 py-0.5 rounded text-xs font-medium ${issueTypeLabels[issue.type].color}`}>
-                              {issueTypeLabels[issue.type].label}
-                            </span>
+                            <Badge variant={issueTypeConfig[issue.type].variant}>
+                              {issueTypeConfig[issue.type].label}
+                            </Badge>
                             <div className="flex-1 min-w-0">
-                              <p className="text-sm font-medium text-primary-900 dark:text-white">
+                              <p className="text-sm font-medium">
                                 {issue.name}
-                                <code className="ml-2 text-xs bg-primary-100 dark:bg-slate-700 px-1.5 py-0.5 rounded text-primary-600 dark:text-primary-400">
+                                <code className="ml-2 text-xs bg-muted px-1.5 py-0.5 rounded text-muted-foreground">
                                   {issue.id}
                                 </code>
                               </p>
-                              <p className="text-xs text-primary-500 dark:text-primary-400 mt-1">
+                              <p className="text-xs text-muted-foreground mt-1">
                                 {categoryLabels[issue.category]} - {issue.details}
                               </p>
                             </div>
@@ -709,64 +729,63 @@ export default function DataHealthPage() {
                         </div>
                       ))}
                     </div>
-                  </div>
-                )}
+                  </CardContent>
+                </Card>
+              )}
 
-                {validationIssues.length === 0 && !validating && (
-                  <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-black/5 dark:border-white/10 p-8 text-center">
+              {validationIssues.length === 0 && !validating && (
+                <Card>
+                  <CardContent className="py-12 text-center">
                     <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-                      <svg className="w-8 h-8 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
+                      <CheckCircle className="w-8 h-8 text-green-600 dark:text-green-400" />
                     </div>
-                    <p className="text-primary-600 dark:text-primary-300">
+                    <p className="text-muted-foreground">
                       Click &ldquo;Run Validation&rdquo; to check for data integrity issues.
                     </p>
-                  </div>
-                )}
-              </div>
-            )}
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          )}
 
-            {/* Overrides Tab */}
-            {activeTab === 'overrides' && (
-              <div className="space-y-6">
-                <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-black/5 dark:border-white/10 overflow-hidden">
-                  <div className="p-6 border-b border-black/5 dark:border-white/10">
-                    <h2 className="text-xl font-semibold text-primary-900 dark:text-white">Data Overrides</h2>
-                    <p className="text-sm text-primary-600 dark:text-primary-400">
-                      Custom edits applied to static place data. Overrides are stored in the database and merged with source data.
-                    </p>
-                  </div>
-
+          {/* Overrides Tab */}
+          {activeTab === 'overrides' && (
+            <div className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Data Overrides</CardTitle>
+                  <CardDescription>
+                    Custom edits applied to static place data. Overrides are stored in the database and merged with source data.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="p-0">
                   {loadingOverrides ? (
                     <div className="flex items-center justify-center py-12">
-                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 dark:border-primary-400"></div>
+                      <Loader2 className="h-8 w-8 animate-spin text-primary" />
                     </div>
                   ) : overrides.length === 0 ? (
-                    <div className="p-8 text-center text-primary-500 dark:text-primary-400">
-                      <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-primary-100 dark:bg-slate-700 flex items-center justify-center">
-                        <svg className="w-8 h-8 text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                        </svg>
+                    <div className="p-8 text-center text-muted-foreground">
+                      <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center">
+                        <Pencil className="w-8 h-8 text-muted-foreground" />
                       </div>
                       <p>No overrides yet. Edit a place in the Place Browser to create an override.</p>
                     </div>
                   ) : (
-                    <div className="divide-y divide-primary-100 dark:divide-slate-700">
+                    <div className="divide-y">
                       {overrides.map((override) => (
-                        <div key={override.id} className="p-4 hover:bg-primary-50 dark:hover:bg-slate-700/30 transition-colors">
+                        <div key={override.id} className="p-4 hover:bg-muted/50 transition-colors">
                           <div className="flex items-start justify-between gap-4">
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2 flex-wrap">
-                                <code className="text-xs bg-primary-100 dark:bg-slate-700 px-1.5 py-0.5 rounded text-primary-700 dark:text-primary-300">
+                                <code className="text-xs bg-muted px-1.5 py-0.5 rounded">
                                   {override.place_id}
                                 </code>
-                                <span className="text-xs px-2 py-0.5 rounded-full bg-primary-100 dark:bg-slate-700 text-primary-700 dark:text-primary-300">
+                                <Badge variant="outline">
                                   {categoryLabels[override.category as Category] || override.category}
-                                </span>
+                                </Badge>
                               </div>
-                              <div className="mt-2 text-sm text-primary-600 dark:text-primary-400">
-                                <p className="font-medium">Changes:</p>
+                              <div className="mt-2 text-sm text-muted-foreground">
+                                <p className="font-medium text-foreground">Changes:</p>
                                 <ul className="list-disc list-inside ml-2 text-xs mt-1">
                                   {Object.entries(override.overrides).map(([key, value]) => (
                                     <li key={key}>
@@ -776,150 +795,151 @@ export default function DataHealthPage() {
                                 </ul>
                               </div>
                               {override.notes && (
-                                <p className="text-xs text-primary-500 dark:text-primary-400 mt-2 italic">
+                                <p className="text-xs text-muted-foreground mt-2 italic">
                                   Note: {override.notes}
                                 </p>
                               )}
-                              <p className="text-xs text-primary-400 mt-2">
+                              <p className="text-xs text-muted-foreground mt-2">
                                 Updated by {override.updated_by} on {new Date(override.updated_at).toLocaleDateString()}
                               </p>
                             </div>
-                            <button
-                              onClick={() => handleDeleteOverride(override)}
-                              className="p-2 rounded-lg text-red-600 hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => setDeleteOverride(override)}
+                              className="text-destructive hover:text-destructive hover:bg-destructive/10"
                               title="Remove override"
                             >
-                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                              </svg>
-                            </button>
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
                           </div>
                         </div>
                       ))}
                     </div>
                   )}
-                </div>
-              </div>
-            )}
-          </>
-        )}
+                </CardContent>
+              </Card>
+            </div>
+          )}
+        </>
+      )}
 
-        {/* Edit Modal */}
-        {editingPlace && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-lg w-full p-6">
-              <h3 className="text-xl font-bold text-primary-900 dark:text-white mb-4">
-                Edit Place
-              </h3>
-              <div className="mb-4">
-                <div className="flex items-center gap-2">
-                  <code className="text-xs bg-primary-100 dark:bg-slate-700 px-1.5 py-0.5 rounded text-primary-700 dark:text-primary-300">
-                    {editingPlace.id}
-                  </code>
-                  <span className="text-xs px-2 py-0.5 rounded-full bg-primary-100 dark:bg-slate-700 text-primary-700 dark:text-primary-300">
-                    {categoryLabels[editingPlace.category]}
-                  </span>
-                </div>
+      {/* Edit Place Dialog */}
+      <Dialog open={!!editingPlace} onOpenChange={(open) => !open && setEditingPlace(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Place</DialogTitle>
+            <DialogDescription>
+              <div className="flex items-center gap-2 mt-2">
+                <code className="text-xs bg-muted px-1.5 py-0.5 rounded">
+                  {editingPlace?.id}
+                </code>
+                <Badge variant="outline">
+                  {editingPlace && categoryLabels[editingPlace.category]}
+                </Badge>
               </div>
+            </DialogDescription>
+          </DialogHeader>
 
-              {saveError && (
-                <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg text-sm">
-                  {saveError}
-                </div>
-              )}
+          {saveError && (
+            <div className="p-3 bg-destructive/10 text-destructive rounded-lg text-sm">
+              {saveError}
+            </div>
+          )}
 
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-primary-700 dark:text-primary-300 mb-1">
-                    Name
-                  </label>
-                  <input
-                    type="text"
-                    value={editForm.name}
-                    onChange={(e) => setEditForm(prev => ({ ...prev, name: e.target.value }))}
-                    className="w-full px-3 py-2 bg-primary-50 dark:bg-slate-700 border border-primary-200 dark:border-slate-600 rounded-lg text-primary-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
-                    placeholder="Place name"
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-primary-700 dark:text-primary-300 mb-1">
-                      Latitude
-                    </label>
-                    <input
-                      type="text"
-                      value={editForm.lat}
-                      onChange={(e) => setEditForm(prev => ({ ...prev, lat: e.target.value }))}
-                      className="w-full px-3 py-2 bg-primary-50 dark:bg-slate-700 border border-primary-200 dark:border-slate-600 rounded-lg text-primary-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 font-mono"
-                      placeholder="e.g., 37.7749"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-primary-700 dark:text-primary-300 mb-1">
-                      Longitude
-                    </label>
-                    <input
-                      type="text"
-                      value={editForm.lng}
-                      onChange={(e) => setEditForm(prev => ({ ...prev, lng: e.target.value }))}
-                      className="w-full px-3 py-2 bg-primary-50 dark:bg-slate-700 border border-primary-200 dark:border-slate-600 rounded-lg text-primary-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 font-mono"
-                      placeholder="e.g., -122.4194"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-primary-700 dark:text-primary-300 mb-1">
-                    Website URL
-                  </label>
-                  <input
-                    type="url"
-                    value={editForm.website}
-                    onChange={(e) => setEditForm(prev => ({ ...prev, website: e.target.value }))}
-                    className="w-full px-3 py-2 bg-primary-50 dark:bg-slate-700 border border-primary-200 dark:border-slate-600 rounded-lg text-primary-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
-                    placeholder="https://..."
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-primary-700 dark:text-primary-300 mb-1">
-                    Notes (optional)
-                  </label>
-                  <textarea
-                    value={editForm.notes}
-                    onChange={(e) => setEditForm(prev => ({ ...prev, notes: e.target.value }))}
-                    className="w-full px-3 py-2 bg-primary-50 dark:bg-slate-700 border border-primary-200 dark:border-slate-600 rounded-lg text-primary-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
-                    rows={2}
-                    placeholder="Why this change was made..."
-                  />
-                </div>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="edit-name">Name</Label>
+              <Input
+                id="edit-name"
+                value={editForm.name}
+                onChange={(e) => setEditForm(prev => ({ ...prev, name: e.target.value }))}
+                placeholder="Place name"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="edit-lat">Latitude</Label>
+                <Input
+                  id="edit-lat"
+                  value={editForm.lat}
+                  onChange={(e) => setEditForm(prev => ({ ...prev, lat: e.target.value }))}
+                  placeholder="e.g., 37.7749"
+                  className="font-mono"
+                />
               </div>
-              <p className="text-xs text-primary-500 dark:text-primary-400 mt-4">
-                Changes are saved as overrides. Original source data remains unchanged.
-              </p>
-              <div className="flex justify-end gap-3 mt-6">
-                <button
-                  onClick={() => setEditingPlace(null)}
-                  className="px-4 py-2 text-sm font-medium text-primary-700 dark:text-primary-200 bg-primary-100 dark:bg-slate-700 rounded-lg hover:bg-primary-200 dark:hover:bg-slate-600 transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleSaveEdit}
-                  disabled={saving}
-                  className="px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 disabled:opacity-50 transition-colors flex items-center gap-2"
-                >
-                  {saving ? (
-                    <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
-                      Saving...
-                    </>
-                  ) : (
-                    'Save Override'
-                  )}
-                </button>
+              <div>
+                <Label htmlFor="edit-lng">Longitude</Label>
+                <Input
+                  id="edit-lng"
+                  value={editForm.lng}
+                  onChange={(e) => setEditForm(prev => ({ ...prev, lng: e.target.value }))}
+                  placeholder="e.g., -122.4194"
+                  className="font-mono"
+                />
               </div>
             </div>
+            <div>
+              <Label htmlFor="edit-website">Website URL</Label>
+              <Input
+                id="edit-website"
+                type="url"
+                value={editForm.website}
+                onChange={(e) => setEditForm(prev => ({ ...prev, website: e.target.value }))}
+                placeholder="https://..."
+              />
+            </div>
+            <div>
+              <Label htmlFor="edit-notes">Notes (optional)</Label>
+              <Textarea
+                id="edit-notes"
+                value={editForm.notes}
+                onChange={(e) => setEditForm(prev => ({ ...prev, notes: e.target.value }))}
+                rows={2}
+                placeholder="Why this change was made..."
+              />
+            </div>
           </div>
-        )}
+
+          <p className="text-xs text-muted-foreground">
+            Changes are saved as overrides. Original source data remains unchanged.
+          </p>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditingPlace(null)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSaveEdit} disabled={saving}>
+              {saving ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                'Save Override'
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Override Confirmation */}
+      <AlertDialog open={!!deleteOverride} onOpenChange={(open) => !open && setDeleteOverride(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove Override</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to remove this override? The place will revert to its original data.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmDeleteOverride} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Remove
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

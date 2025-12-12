@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
@@ -49,7 +49,7 @@ import { useCloudSync } from '@/lib/hooks/useCloudSync';
 import { createClient } from '@/lib/supabase/client';
 import { categoryTotals, categoryTitles, getCategoryItemsAsync, type CategoryItem } from '@/lib/categoryUtils';
 
-export default function Home() {
+function HomeContent() {
   const searchParams = useSearchParams();
   const [selections, setSelections] = useState<UserSelections>(emptySelections);
   const [activeCategory, setActiveCategory] = useState<Category>('countries');
@@ -438,5 +438,17 @@ export default function Home() {
         <AuthModal onClose={() => setShowAuthModal(false)} />
       )}
     </div>
+  );
+}
+
+export default function Home() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-white to-blue-50/30 dark:from-slate-900 dark:to-slate-950">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 dark:border-blue-400" />
+      </div>
+    }>
+      <HomeContent />
+    </Suspense>
   );
 }
