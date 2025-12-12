@@ -7,19 +7,17 @@ import { Category, categoryLabels, categoryIcons, CategoryGroup, getGroupForCate
 
 // Group categories by their CategoryGroup for the dropdown
 const categoryGroups: Record<CategoryGroup, Category[]> = {
-  geography: ['countries', 'states', 'territories', 'usCities', 'worldCities'],
-  nature: ['nationalParks', 'nationalMonuments', 'stateParks', 'fiveKPeaks', 'fourteeners'],
-  culture: ['museums', 'weirdAmericana'],
+  destinations: ['countries', 'states', 'territories', 'usCities', 'worldCities', 'airports'],
+  nature: ['nationalParks', 'nationalMonuments', 'stateParks', 'fiveKPeaks', 'fourteeners', 'skiResorts', 'surfingReserves'],
   sports: ['mlbStadiums', 'nflStadiums', 'nbaStadiums', 'nhlStadiums', 'soccerStadiums', 'f1Tracks', 'marathons'],
-  adventure: ['airports', 'skiResorts', 'themeParks', 'surfingReserves'],
+  culture: ['museums', 'themeParks', 'weirdAmericana'],
 };
 
 const groupLabels: Record<CategoryGroup, string> = {
-  geography: 'Geography',
+  destinations: 'Destinations',
   nature: 'Nature & Parks',
-  culture: 'Culture',
   sports: 'Sports',
-  adventure: 'Adventure',
+  culture: 'Culture',
 };
 
 type SyncStatus = 'idle' | 'syncing' | 'offline';
