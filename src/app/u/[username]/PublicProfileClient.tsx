@@ -438,8 +438,6 @@ export default function PublicProfileClient({
           <div className="flex justify-center gap-4 mb-2">
             <Link href="/about" className="hover:text-foreground transition-colors">About</Link>
             <span>|</span>
-            <Link href="/achievements" className="hover:text-foreground transition-colors">Achievements</Link>
-            <span>|</span>
             <Link href="/privacy" className="hover:text-foreground transition-colors">Privacy</Link>
             <span>|</span>
             <Link href="/terms" className="hover:text-foreground transition-colors">Terms</Link>
