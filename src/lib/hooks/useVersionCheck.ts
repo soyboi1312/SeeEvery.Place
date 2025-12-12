@@ -13,6 +13,26 @@ interface VersionResponse {
 }
 
 /**
+ * Request persistent storage using the modern navigator.storage API.
+ * This replaces the deprecated StorageType.persistent / webkitPersistentStorage API
+ * and should be called early to satisfy any third-party code (Cloudflare scripts,
+ * service workers) that might otherwise trigger deprecated API warnings.
+ */
+async function requestPersistentStorage() {
+  if (typeof navigator === 'undefined') return;
+  if (!navigator.storage?.persist) return;
+
+  try {
+    const isPersisted = await navigator.storage.persisted();
+    if (!isPersisted) {
+      await navigator.storage.persist();
+    }
+  } catch {
+    // Silently ignore - persistent storage is non-critical
+  }
+}
+
+/**
  * Hook that checks the server API version against the cached version.
  *
  * If the API version has changed (indicating a potentially breaking backend change),
@@ -32,6 +52,9 @@ export function useVersionCheck() {
 
     // Don't run during SSR
     if (typeof window === 'undefined') return;
+
+    // Request persistent storage using modern API to avoid deprecated API warnings
+    requestPersistentStorage();
 
     // Throttle checks to avoid excessive API calls
     const lastCheck = localStorage.getItem(LAST_CHECK_KEY);
