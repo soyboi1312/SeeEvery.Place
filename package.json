@@ -72,10 +72,10 @@
     "wrangler": "^4.51.0"
   },
   "browserslist": [
-    "Chrome >= 92",
-    "Firefox >= 91",
-    "Safari >= 15.4",
-    "Edge >= 92",
+    "Chrome >= 105",
+    "Firefox >= 104",
+    "Safari >= 16",
+    "Edge >= 105",
     "not dead"
   ]
 }

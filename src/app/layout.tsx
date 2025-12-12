@@ -115,13 +115,14 @@ export default function RootLayout({
         <meta name="format-detection" content="telephone=no" />
         <meta name="mobile-web-app-capable" content="yes" />
 
-        {/* Preload the world map data to improve LCP by avoiding request chaining */}
+        {/* Preload the world map data to improve LCP.
+            Removed crossOrigin="anonymous" - the map data is same-origin,
+            so this ensures the preload matches the fetch mode for cache hit. */}
         <link
           rel="preload"
           href="/geo/countries-110m.json"
           as="fetch"
           type="application/json"
-          crossOrigin="anonymous"
         />
 
         {/* Prevent dark mode FOUC by setting class before React hydration */}
