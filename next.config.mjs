@@ -87,16 +87,6 @@ const nextConfig = {
   async headers() {
     return [
       {
-        // Prevent caching of HTML pages to avoid stale chunk references after deployments
-        source: '/:path((?!_next/static|_next/image|favicon.ico|.*\\..*).*)',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'no-cache, no-store, must-revalidate',
-          },
-        ],
-      },
-      {
         // Apply security headers to all routes
         source: '/:path*',
         headers: [
