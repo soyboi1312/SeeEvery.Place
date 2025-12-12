@@ -3,6 +3,60 @@
 import { useState, useMemo } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { categoryLabels, ALL_CATEGORIES, Category } from '@/lib/types';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  MoreHorizontal,
+  CheckCircle,
+  Clock,
+  XCircle,
+  Rocket,
+  Trash2,
+  MapPin,
+  Loader2,
+  ThumbsUp,
+  Mail,
+  Calendar,
+  Link as LinkIcon,
+} from 'lucide-react';
 
 export interface Suggestion {
   id: string;
@@ -34,6 +88,13 @@ interface ConvertForm {
   description: string;
 }
 
+const statusConfig: Record<SuggestionStatus, { variant: 'default' | 'secondary' | 'destructive' | 'success' | 'warning' | 'info'; icon: typeof Clock; label: string }> = {
+  pending: { variant: 'secondary', icon: Clock, label: 'Pending' },
+  approved: { variant: 'info', icon: CheckCircle, label: 'Approved' },
+  rejected: { variant: 'destructive', icon: XCircle, label: 'Rejected' },
+  implemented: { variant: 'success', icon: Rocket, label: 'Implemented' },
+};
+
 export default function AdminSuggestionsClient({ initialSuggestions }: AdminSuggestionsClientProps) {
   const [suggestions, setSuggestions] = useState<Suggestion[]>(initialSuggestions);
   const [updating, setUpdating] = useState<string | null>(null);
@@ -57,7 +118,6 @@ export default function AdminSuggestionsClient({ initialSuggestions }: AdminSugg
   const [converting, setConverting] = useState(false);
   const [convertError, setConvertError] = useState<string | null>(null);
 
-  // Create supabase client only on client side for mutations
   const supabase = useMemo(() => {
     if (typeof window === 'undefined') return null;
     return createClient();
@@ -155,7 +215,6 @@ export default function AdminSuggestionsClient({ initialSuggestions }: AdminSugg
         throw new Error(data.error || 'Failed to create place');
       }
 
-      // Update the suggestion status locally
       setSuggestions(prev =>
         prev.map(s => s.id === suggestionToConvert.id ? { ...s, status: 'implemented' as const } : s)
       );
@@ -165,19 +224,6 @@ export default function AdminSuggestionsClient({ initialSuggestions }: AdminSugg
       setConvertError(err instanceof Error ? err.message : 'Failed to convert suggestion');
     } finally {
       setConverting(false);
-    }
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'implemented':
-        return 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400';
-      case 'approved':
-        return 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400';
-      case 'rejected':
-        return 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400';
-      default:
-        return 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400';
     }
   };
 
@@ -194,350 +240,312 @@ export default function AdminSuggestionsClient({ initialSuggestions }: AdminSugg
   };
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-primary-900 dark:text-white mb-2">Manage Suggestions</h1>
-          <p className="text-primary-600 dark:text-primary-300">
-            Review and update the status of category suggestions.
-          </p>
+    <div className="p-6 max-w-6xl mx-auto">
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold">Suggestions</h1>
+        <p className="text-muted-foreground">
+          Review and manage category suggestions from users.
+        </p>
+      </div>
+
+      {error && (
+        <div className="mb-6 p-4 bg-destructive/10 text-destructive rounded-lg">
+          {error}
         </div>
+      )}
 
-        {error && (
-          <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg">
-            {error}
-          </div>
-        )}
+      {/* Status Filter Tabs */}
+      <Tabs value={filterStatus} onValueChange={(v) => setFilterStatus(v as typeof filterStatus)} className="mb-6">
+        <TabsList>
+          <TabsTrigger value="all">All ({statusCounts.all})</TabsTrigger>
+          <TabsTrigger value="pending">Pending ({statusCounts.pending})</TabsTrigger>
+          <TabsTrigger value="approved">Approved ({statusCounts.approved})</TabsTrigger>
+          <TabsTrigger value="rejected">Rejected ({statusCounts.rejected})</TabsTrigger>
+          <TabsTrigger value="implemented">Implemented ({statusCounts.implemented})</TabsTrigger>
+        </TabsList>
+      </Tabs>
 
-        {/* Status Filter Tabs */}
-        <div className="flex flex-wrap gap-2 mb-6">
-          {(['all', 'pending', 'approved', 'rejected', 'implemented'] as const).map((status) => (
-            <button
-              key={status}
-              onClick={() => setFilterStatus(status)}
-              className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors ${
-                filterStatus === status
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-600'
-              }`}
-            >
-              {status.charAt(0).toUpperCase() + status.slice(1)} ({statusCounts[status]})
-            </button>
-          ))}
-        </div>
-
-        {/* Suggestions Table */}
-        {filteredSuggestions.length === 0 ? (
-          <div className="bg-white dark:bg-slate-800 rounded-2xl p-8 shadow-premium border border-black/5 dark:border-white/10 text-center">
+      {/* Suggestions List */}
+      {filteredSuggestions.length === 0 ? (
+        <Card>
+          <CardContent className="flex flex-col items-center justify-center py-12">
             <div className="text-5xl mb-4">📭</div>
-            <p className="text-primary-600 dark:text-primary-300">
+            <p className="text-muted-foreground">
               No suggestions found{filterStatus !== 'all' ? ` with status "${filterStatus}"` : ''}.
             </p>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {filteredSuggestions.map((suggestion) => (
-              <div
-                key={suggestion.id}
-                className="bg-white dark:bg-slate-800 rounded-xl p-5 shadow-premium border border-black/5 dark:border-white/10"
-              >
-                <div className="flex flex-col lg:flex-row lg:items-start gap-4">
-                  {/* Main Content */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-2 flex-wrap">
-                      <h3 className="font-bold text-lg text-primary-900 dark:text-white">
-                        {suggestion.title}
-                      </h3>
-                      <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${getStatusColor(suggestion.status)}`}>
-                        {suggestion.status}
-                      </span>
-                      <span className="text-sm text-gray-500 dark:text-gray-400">
-                        {suggestion.vote_count} vote{suggestion.vote_count !== 1 ? 's' : ''}
-                      </span>
-                    </div>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="space-y-4">
+          {filteredSuggestions.map((suggestion) => {
+            const config = statusConfig[suggestion.status];
+            const StatusIcon = config.icon;
 
-                    {suggestion.description && (
-                      <p className="text-primary-600 dark:text-primary-300 mb-2">
-                        {suggestion.description}
-                      </p>
-                    )}
-
-                    <div className="grid sm:grid-cols-2 gap-2 text-sm">
-                      {suggestion.example_places && (
-                        <div>
-                          <span className="font-medium text-gray-700 dark:text-gray-300">Examples:</span>{' '}
-                          <span className="text-gray-600 dark:text-gray-400">{suggestion.example_places}</span>
-                        </div>
-                      )}
-                      {suggestion.data_source && (
-                        <div>
-                          <span className="font-medium text-gray-700 dark:text-gray-300">Data Source:</span>{' '}
-                          <span className="text-gray-600 dark:text-gray-400">{suggestion.data_source}</span>
-                        </div>
-                      )}
-                      {suggestion.submitter_email && (
-                        <div>
-                          <span className="font-medium text-gray-700 dark:text-gray-300">Email:</span>{' '}
-                          <a href={`mailto:${suggestion.submitter_email}`} className="text-primary-700 dark:text-primary-400 hover:underline">
-                            {suggestion.submitter_email}
-                          </a>
-                        </div>
-                      )}
-                      <div>
-                        <span className="font-medium text-gray-700 dark:text-gray-300">Submitted:</span>{' '}
-                        <span className="text-gray-600 dark:text-gray-400">
+            return (
+              <Card key={suggestion.id}>
+                <CardHeader className="pb-3">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap mb-1">
+                        <CardTitle className="text-lg">{suggestion.title}</CardTitle>
+                        <Badge variant={config.variant}>
+                          <StatusIcon className="w-3 h-3 mr-1" />
+                          {config.label}
+                        </Badge>
+                      </div>
+                      <CardDescription className="flex items-center gap-3 text-xs">
+                        <span className="flex items-center gap-1">
+                          <ThumbsUp className="w-3 h-3" />
+                          {suggestion.vote_count} vote{suggestion.vote_count !== 1 ? 's' : ''}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Calendar className="w-3 h-3" />
                           {new Date(suggestion.created_at).toLocaleDateString()}
                         </span>
-                      </div>
+                      </CardDescription>
                     </div>
-                  </div>
 
-                  {/* Status Actions */}
-                  <div className="flex flex-wrap lg:flex-col gap-2 lg:min-w-[140px]">
-                    {(['pending', 'approved', 'rejected', 'implemented'] as const).map((status) => (
-                      <button
-                        key={status}
-                        onClick={() => updateStatus(suggestion.id, status)}
-                        disabled={updating === suggestion.id || suggestion.status === status}
-                        className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
-                          suggestion.status === status
-                            ? getStatusColor(status)
-                            : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-                        }`}
-                      >
-                        {updating === suggestion.id ? '...' : status.charAt(0).toUpperCase() + status.slice(1)}
-                      </button>
-                    ))}
-                    <button
-                      onClick={() => setSuggestionToDelete(suggestion)}
-                      className="px-3 py-1.5 rounded-lg text-sm font-medium bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors"
-                    >
-                      Delete
-                    </button>
-                    {(suggestion.status === 'approved' || suggestion.status === 'pending') && (
-                      <button
-                        onClick={() => openConvertModal(suggestion)}
-                        className="px-3 py-1.5 rounded-lg text-sm font-medium bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 hover:bg-purple-200 dark:hover:bg-purple-900/50 transition-colors flex items-center gap-1"
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                        Convert
-                      </button>
+                    {/* Actions Dropdown */}
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" disabled={updating === suggestion.id}>
+                          {updating === suggestion.id ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <MoreHorizontal className="h-4 w-4" />
+                          )}
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuLabel>Set Status</DropdownMenuLabel>
+                        <DropdownMenuItem
+                          onClick={() => updateStatus(suggestion.id, 'pending')}
+                          disabled={suggestion.status === 'pending'}
+                        >
+                          <Clock className="mr-2 h-4 w-4" /> Pending
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => updateStatus(suggestion.id, 'approved')}
+                          disabled={suggestion.status === 'approved'}
+                        >
+                          <CheckCircle className="mr-2 h-4 w-4" /> Approved
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => updateStatus(suggestion.id, 'rejected')}
+                          disabled={suggestion.status === 'rejected'}
+                        >
+                          <XCircle className="mr-2 h-4 w-4" /> Rejected
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => updateStatus(suggestion.id, 'implemented')}
+                          disabled={suggestion.status === 'implemented'}
+                        >
+                          <Rocket className="mr-2 h-4 w-4" /> Implemented
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        {(suggestion.status === 'approved' || suggestion.status === 'pending') && (
+                          <DropdownMenuItem onClick={() => openConvertModal(suggestion)}>
+                            <MapPin className="mr-2 h-4 w-4" /> Convert to Place
+                          </DropdownMenuItem>
+                        )}
+                        <DropdownMenuItem
+                          onClick={() => setSuggestionToDelete(suggestion)}
+                          className="text-destructive focus:text-destructive"
+                        >
+                          <Trash2 className="mr-2 h-4 w-4" /> Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  {suggestion.description && (
+                    <p className="text-sm text-muted-foreground mb-3">
+                      {suggestion.description}
+                    </p>
+                  )}
+
+                  <div className="grid sm:grid-cols-2 gap-2 text-sm">
+                    {suggestion.example_places && (
+                      <div className="flex items-start gap-2">
+                        <MapPin className="w-4 h-4 mt-0.5 text-muted-foreground shrink-0" />
+                        <span className="text-muted-foreground">
+                          <span className="font-medium">Examples:</span> {suggestion.example_places}
+                        </span>
+                      </div>
+                    )}
+                    {suggestion.data_source && (
+                      <div className="flex items-start gap-2">
+                        <LinkIcon className="w-4 h-4 mt-0.5 text-muted-foreground shrink-0" />
+                        <span className="text-muted-foreground">
+                          <span className="font-medium">Source:</span> {suggestion.data_source}
+                        </span>
+                      </div>
+                    )}
+                    {suggestion.submitter_email && (
+                      <div className="flex items-center gap-2">
+                        <Mail className="w-4 h-4 text-muted-foreground shrink-0" />
+                        <a href={`mailto:${suggestion.submitter_email}`} className="text-primary hover:underline">
+                          {suggestion.submitter_email}
+                        </a>
+                      </div>
                     )}
                   </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
-      {/* Delete Confirmation Modal */}
-      {suggestionToDelete && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
-          <div className="bg-white dark:bg-slate-800 rounded-xl shadow-xl max-w-md w-full p-6">
-            <h3 className="text-lg font-semibold text-primary-900 dark:text-white mb-2">
-              Delete Suggestion
-            </h3>
-            <p className="text-primary-600 dark:text-primary-300 mb-4">
-              Are you sure you want to delete &quot;{suggestionToDelete.title}&quot;? This action cannot be undone.
-            </p>
-            <div className="flex justify-end gap-3">
-              <button
-                onClick={() => setSuggestionToDelete(null)}
-                disabled={deleting}
-                className="px-4 py-2 text-sm font-medium text-primary-700 dark:text-primary-200 bg-primary-100 dark:bg-slate-700 rounded-lg hover:bg-primary-200 dark:hover:bg-slate-600 disabled:opacity-50 transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={deleteSuggestion}
-                disabled={deleting}
-                className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 disabled:opacity-50 transition-colors flex items-center gap-2"
-              >
-                {deleting ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
-                    Deleting...
-                  </>
-                ) : (
-                  'Delete'
-                )}
-              </button>
-            </div>
-          </div>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       )}
 
-      {/* Convert to Place Modal */}
-      {suggestionToConvert && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm overflow-y-auto">
-          <div className="bg-white dark:bg-slate-800 rounded-xl shadow-xl max-w-2xl w-full p-6 my-8">
-            <h3 className="text-lg font-semibold text-primary-900 dark:text-white mb-2">
-              Convert to Place
-            </h3>
-            <p className="text-primary-600 dark:text-primary-300 mb-4">
-              Create a new place entry from &quot;{suggestionToConvert.title}&quot;. This will mark the suggestion as implemented.
-            </p>
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={!!suggestionToDelete} onOpenChange={(open) => !open && setSuggestionToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Suggestion?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete &quot;{suggestionToDelete?.title}&quot;? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={deleteSuggestion}
+              disabled={deleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
-            {convertError && (
-              <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg text-sm">
-                {convertError}
-              </div>
+      {/* Convert to Place Dialog */}
+      <Dialog open={!!suggestionToConvert} onOpenChange={(open) => !open && setSuggestionToConvert(null)}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Convert to Place</DialogTitle>
+            <DialogDescription>
+              Create a new place entry from &quot;{suggestionToConvert?.title}&quot;. This will mark the suggestion as implemented.
+            </DialogDescription>
+          </DialogHeader>
+
+          {convertError && (
+            <div className="p-3 bg-destructive/10 text-destructive rounded-lg text-sm">
+              {convertError}
+            </div>
+          )}
+
+          {/* Source Info */}
+          <div className="p-3 bg-muted rounded-lg text-sm">
+            <p className="font-medium mb-1">Original Suggestion:</p>
+            <p className="text-muted-foreground">{suggestionToConvert?.description}</p>
+            {suggestionToConvert?.example_places && (
+              <p className="text-xs text-muted-foreground mt-1">
+                Examples: {suggestionToConvert.example_places}
+              </p>
             )}
+          </div>
 
-            {/* Source Suggestion Info */}
-            <div className="mb-4 p-3 bg-primary-50 dark:bg-slate-700/50 rounded-lg text-sm">
-              <p className="font-medium text-primary-700 dark:text-primary-300">Original Suggestion:</p>
-              <p className="text-primary-600 dark:text-primary-400 mt-1">{suggestionToConvert.description}</p>
-              {suggestionToConvert.example_places && (
-                <p className="text-primary-500 dark:text-primary-400 mt-1 text-xs">
-                  Examples: {suggestionToConvert.example_places}
-                </p>
-              )}
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-primary-700 dark:text-primary-300 mb-1">
-                  Category *
-                </label>
-                <select
-                  value={convertForm.category}
-                  onChange={(e) => setConvertForm(prev => ({ ...prev, category: e.target.value as Category }))}
-                  className="w-full px-3 py-2 bg-primary-50 dark:bg-slate-700 border border-primary-200 dark:border-slate-600 rounded-lg text-primary-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
-                >
-                  <option value="">Select a category...</option>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="md:col-span-2 space-y-2">
+              <Label>Category *</Label>
+              <Select
+                value={convertForm.category}
+                onValueChange={(value) => setConvertForm(prev => ({ ...prev, category: value as Category }))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a category..." />
+                </SelectTrigger>
+                <SelectContent>
                   {ALL_CATEGORIES.map(cat => (
-                    <option key={cat} value={cat}>{categoryLabels[cat]}</option>
+                    <SelectItem key={cat} value={cat}>{categoryLabels[cat]}</SelectItem>
                   ))}
-                </select>
-              </div>
-
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-primary-700 dark:text-primary-300 mb-1">
-                  Name *
-                </label>
-                <input
-                  type="text"
-                  value={convertForm.name}
-                  onChange={(e) => setConvertForm(prev => ({ ...prev, name: e.target.value }))}
-                  className="w-full px-3 py-2 bg-primary-50 dark:bg-slate-700 border border-primary-200 dark:border-slate-600 rounded-lg text-primary-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
-                  placeholder="Place name"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-primary-700 dark:text-primary-300 mb-1">
-                  Latitude
-                </label>
-                <input
-                  type="text"
-                  value={convertForm.lat}
-                  onChange={(e) => setConvertForm(prev => ({ ...prev, lat: e.target.value }))}
-                  className="w-full px-3 py-2 bg-primary-50 dark:bg-slate-700 border border-primary-200 dark:border-slate-600 rounded-lg text-primary-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 font-mono"
-                  placeholder="e.g., 37.7749"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-primary-700 dark:text-primary-300 mb-1">
-                  Longitude
-                </label>
-                <input
-                  type="text"
-                  value={convertForm.lng}
-                  onChange={(e) => setConvertForm(prev => ({ ...prev, lng: e.target.value }))}
-                  className="w-full px-3 py-2 bg-primary-50 dark:bg-slate-700 border border-primary-200 dark:border-slate-600 rounded-lg text-primary-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 font-mono"
-                  placeholder="e.g., -122.4194"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-primary-700 dark:text-primary-300 mb-1">
-                  State/Region
-                </label>
-                <input
-                  type="text"
-                  value={convertForm.state}
-                  onChange={(e) => setConvertForm(prev => ({ ...prev, state: e.target.value }))}
-                  className="w-full px-3 py-2 bg-primary-50 dark:bg-slate-700 border border-primary-200 dark:border-slate-600 rounded-lg text-primary-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
-                  placeholder="e.g., California"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-primary-700 dark:text-primary-300 mb-1">
-                  Country
-                </label>
-                <input
-                  type="text"
-                  value={convertForm.country}
-                  onChange={(e) => setConvertForm(prev => ({ ...prev, country: e.target.value }))}
-                  className="w-full px-3 py-2 bg-primary-50 dark:bg-slate-700 border border-primary-200 dark:border-slate-600 rounded-lg text-primary-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
-                  placeholder="e.g., United States"
-                />
-              </div>
-
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-primary-700 dark:text-primary-300 mb-1">
-                  Website URL
-                </label>
-                <input
-                  type="url"
-                  value={convertForm.website}
-                  onChange={(e) => setConvertForm(prev => ({ ...prev, website: e.target.value }))}
-                  className="w-full px-3 py-2 bg-primary-50 dark:bg-slate-700 border border-primary-200 dark:border-slate-600 rounded-lg text-primary-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
-                  placeholder="https://..."
-                />
-              </div>
-
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-primary-700 dark:text-primary-300 mb-1">
-                  Description
-                </label>
-                <textarea
-                  value={convertForm.description}
-                  onChange={(e) => setConvertForm(prev => ({ ...prev, description: e.target.value }))}
-                  className="w-full px-3 py-2 bg-primary-50 dark:bg-slate-700 border border-primary-200 dark:border-slate-600 rounded-lg text-primary-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
-                  rows={3}
-                  placeholder="Brief description of the place..."
-                />
-              </div>
+                </SelectContent>
+              </Select>
             </div>
 
-            <div className="flex justify-end gap-3 mt-6">
-              <button
-                onClick={() => setSuggestionToConvert(null)}
-                disabled={converting}
-                className="px-4 py-2 text-sm font-medium text-primary-700 dark:text-primary-200 bg-primary-100 dark:bg-slate-700 rounded-lg hover:bg-primary-200 dark:hover:bg-slate-600 disabled:opacity-50 transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleConvert}
-                disabled={converting || !convertForm.category || !convertForm.name}
-                className="px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-700 disabled:opacity-50 transition-colors flex items-center gap-2"
-              >
-                {converting ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
-                    Creating Place...
-                  </>
-                ) : (
-                  <>
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                    Create Place
-                  </>
-                )}
-              </button>
+            <div className="md:col-span-2 space-y-2">
+              <Label>Name *</Label>
+              <Input
+                value={convertForm.name}
+                onChange={(e) => setConvertForm(prev => ({ ...prev, name: e.target.value }))}
+                placeholder="Place name"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Latitude</Label>
+              <Input
+                value={convertForm.lat}
+                onChange={(e) => setConvertForm(prev => ({ ...prev, lat: e.target.value }))}
+                placeholder="e.g., 37.7749"
+                className="font-mono"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Longitude</Label>
+              <Input
+                value={convertForm.lng}
+                onChange={(e) => setConvertForm(prev => ({ ...prev, lng: e.target.value }))}
+                placeholder="e.g., -122.4194"
+                className="font-mono"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>State/Region</Label>
+              <Input
+                value={convertForm.state}
+                onChange={(e) => setConvertForm(prev => ({ ...prev, state: e.target.value }))}
+                placeholder="e.g., California"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Country</Label>
+              <Input
+                value={convertForm.country}
+                onChange={(e) => setConvertForm(prev => ({ ...prev, country: e.target.value }))}
+                placeholder="e.g., United States"
+              />
+            </div>
+
+            <div className="md:col-span-2 space-y-2">
+              <Label>Website URL</Label>
+              <Input
+                type="url"
+                value={convertForm.website}
+                onChange={(e) => setConvertForm(prev => ({ ...prev, website: e.target.value }))}
+                placeholder="https://..."
+              />
+            </div>
+
+            <div className="md:col-span-2 space-y-2">
+              <Label>Description</Label>
+              <Textarea
+                value={convertForm.description}
+                onChange={(e) => setConvertForm(prev => ({ ...prev, description: e.target.value }))}
+                placeholder="Brief description of the place..."
+                rows={3}
+              />
             </div>
           </div>
-        </div>
-      )}
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setSuggestionToConvert(null)} disabled={converting}>
+              Cancel
+            </Button>
+            <Button onClick={handleConvert} disabled={converting || !convertForm.category || !convertForm.name}>
+              {converting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              <MapPin className="mr-2 h-4 w-4" />
+              Create Place
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
