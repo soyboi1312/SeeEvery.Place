@@ -116,11 +116,11 @@ export default function RootLayout({
         <meta name="mobile-web-app-capable" content="yes" />
 
         {/* Preload the world map data to improve LCP.
-            Removed crossOrigin="anonymous" - the map data is same-origin,
-            so this ensures the preload matches the fetch mode for cache hit. */}
+            Must use same absolute URL as GEO_URL_WORLD in mapUtils.ts for cache hit.
+            Same-origin URL avoids CORS issues. */}
         <link
           rel="preload"
-          href="/geo/countries-110m.json"
+          href="https://seeevery.place/geo/countries-110m.json"
           as="fetch"
           type="application/json"
         />
