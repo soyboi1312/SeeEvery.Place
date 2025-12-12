@@ -5,6 +5,10 @@ import Script from 'next/script';
 import { Category, categoryLabels, categoryIcons, CategoryGroup, getGroupForCategory } from '@/lib/types';
 import Link from 'next/link';
 import { getCategoryItemsAsync, CategoryItem } from '@/lib/categoryUtils';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { ArrowRight, ChevronRight, ChevronDown } from 'lucide-react';
 import { mountains } from '@/data/mountains';
 import { mlbStadiums } from '@/data/stadiums/mlb';
 import { nflStadiums } from '@/data/stadiums/nfl';
@@ -835,97 +839,96 @@ export default async function CategoryLandingPage({ params }: Props) {
         style={{ backgroundImage: 'radial-gradient(currentColor 1px, transparent 1px)', backgroundSize: '24px 24px' }}
       />
 
-      <header className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-black/5 dark:border-white/10 sticky top-0 z-40">
+      <header className="bg-background/90 backdrop-blur-md border-b border-border sticky top-0 z-40">
         <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3 group">
             <div className="relative w-8 h-8 transition-transform group-hover:scale-110 duration-200">
               <Image src="/logo.svg" alt="See Every Place Logo" fill className="object-contain" priority />
             </div>
             <div className="flex flex-col">
-              <span className="text-xl font-bold text-primary-900 dark:text-white leading-none">
-                SeeEvery<span className="text-accent-500">.</span>Place<span className="text-[10px] align-super text-primary-400">™</span>
+              <span className="text-xl font-bold text-foreground leading-none">
+                SeeEvery<span className="text-primary">.</span>Place<span className="text-[10px] align-super text-muted-foreground">™</span>
               </span>
-              <span className="text-[10px] text-primary-500 dark:text-primary-400 font-medium tracking-wider uppercase hidden sm:block">
+              <span className="text-[10px] text-muted-foreground font-medium tracking-wider uppercase hidden sm:block">
                 Free Travel Tracker
               </span>
             </div>
           </Link>
-          <Link
-            href={`/?category=${category}`}
-            className={`px-4 py-2 ${accent.bg} ${accent.hover} text-white rounded-lg font-medium hover:shadow-lg transition-all text-sm`}
-          >
-            Start Tracking
-          </Link>
+          <Button asChild size="sm">
+            <Link href={`/?category=${category}`}>
+              Start Tracking
+            </Link>
+          </Button>
         </div>
       </header>
 
       <main className="max-w-4xl mx-auto px-4 py-12">
         {/* Visual Breadcrumb Navigation */}
         <nav className="mb-6 text-sm" aria-label="Breadcrumb">
-          <ol className="flex items-center gap-2 text-primary-500 dark:text-primary-400">
+          <ol className="flex items-center gap-2 text-muted-foreground">
             <li>
-              <Link href="/" className="hover:text-primary-700 dark:hover:text-primary-200 transition-colors">Home</Link>
+              <Link href="/" className="hover:text-foreground transition-colors">Home</Link>
             </li>
-            <li className="text-primary-400 dark:text-primary-500">/</li>
-            <li className="text-primary-900 dark:text-white font-medium">{label}</li>
+            <li className="text-muted-foreground/60">/</li>
+            <li className="text-foreground font-medium">{label}</li>
           </ol>
         </nav>
 
         <div className="text-center mb-12">
           <span className="text-6xl mb-4 block">{icon}</span>
-          <h1 className="text-4xl font-bold text-primary-900 dark:text-white mb-4">
+          <h1 className="text-4xl font-bold text-foreground mb-4">
             Track {label} You&apos;ve Visited
           </h1>
-          <p className="text-xl text-primary-600 dark:text-primary-300 max-w-2xl mx-auto">
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
             {description}
           </p>
         </div>
 
         {/* By the Numbers Section */}
         <section className="mb-12">
-          <h2 className="text-lg font-semibold text-primary-700 dark:text-primary-300 text-center mb-6">By the Numbers</h2>
+          <h2 className="text-lg font-semibold text-muted-foreground text-center mb-6">By the Numbers</h2>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-6">
             {stats.map((stat, index) => (
-              <div
+              <Card
                 key={index}
-                className={`bg-white dark:bg-slate-800 rounded-xl p-4 md:p-6 shadow-premium border border-black/5 dark:border-white/10 text-center ${index === stats.length - 1 ? 'col-span-2 md:col-span-1' : ''}`}
+                className={`text-center ${index === stats.length - 1 ? 'col-span-2 md:col-span-1' : ''}`}
               >
-                <div className="text-2xl md:text-3xl mb-2 md:mb-3">{stat.icon}</div>
-                <div className="text-xl md:text-2xl font-bold text-primary-900 dark:text-white mb-1">{stat.value}</div>
-                <p className="text-primary-600 dark:text-primary-400 text-xs md:text-sm">{stat.label}</p>
-              </div>
+                <CardContent className="p-4 md:p-6">
+                  <div className="text-2xl md:text-3xl mb-2 md:mb-3">{stat.icon}</div>
+                  <div className="text-xl md:text-2xl font-bold text-foreground mb-1">{stat.value}</div>
+                  <p className="text-muted-foreground text-xs md:text-sm">{stat.label}</p>
+                </CardContent>
+              </Card>
             ))}
           </div>
         </section>
 
         <div className="text-center">
-          <Link
-            href={`/?category=${category}`}
-            className={`inline-flex items-center gap-2 px-8 py-4 ${accent.bg} ${accent.hover} text-white rounded-xl font-bold text-lg hover:shadow-xl transition-all`}
-          >
-            Start Tracking {label}
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-            </svg>
-          </Link>
-          <p className="mt-4 text-primary-500 dark:text-primary-400 text-sm">
+          <Button asChild size="lg" className="text-lg px-8 py-6 h-auto">
+            <Link href={`/?category=${category}`}>
+              Start Tracking {label}
+              <ArrowRight className="w-5 h-5 ml-2" />
+            </Link>
+          </Button>
+          <p className="mt-4 text-muted-foreground text-sm">
             Free to use, no account required
           </p>
         </div>
 
         {/* Distribution Visualizer */}
         <section className="my-12">
-          <h3 className="font-bold text-center text-primary-900 dark:text-white mb-6">Breakdown by Region</h3>
-          <div className="flex flex-wrap justify-center gap-3">
+          <h3 className="font-bold text-center text-foreground mb-6">Breakdown by Region</h3>
+          <div className="flex flex-wrap justify-center gap-2">
             {Object.entries(distribution)
               .sort(([, a], [, b]) => b - a)
               .map(([region, count]) => (
-                <div
+                <Badge
                   key={region}
-                  className="bg-white/70 dark:bg-slate-800/70 px-4 py-2 rounded-full text-sm font-medium border border-black/5 dark:border-white/10 hover:bg-white dark:hover:bg-slate-700 transition-colors"
+                  variant="secondary"
+                  className="px-4 py-2 text-sm font-medium hover:bg-secondary/80 transition-colors"
                 >
-                  {region}: <span className="font-bold text-primary-700 dark:text-primary-300">{count}</span>
-                </div>
+                  {region}: <span className="font-bold ml-1">{count}</span>
+                </Badge>
               ))}
           </div>
         </section>
@@ -933,10 +936,10 @@ export default async function CategoryLandingPage({ params }: Props) {
         {/* Browse by State - for state-filterable categories */}
         {stateFilterableCategories.includes(category as Category) && (
           <section className="my-12">
-            <h3 className="font-bold text-center text-primary-900 dark:text-white mb-2">
+            <h3 className="font-bold text-center text-foreground mb-2">
               Browse {label} by State
             </h3>
-            <p className="text-center text-primary-500 dark:text-primary-400 text-sm mb-6">
+            <p className="text-center text-muted-foreground text-sm mb-6">
               Click a state to see all {label.toLowerCase()} in that state
             </p>
             <div className="flex flex-wrap justify-center gap-1.5">
@@ -944,14 +947,18 @@ export default async function CategoryLandingPage({ params }: Props) {
                 <Link
                   key={code}
                   href={`/track/${category}/${code.toLowerCase()}`}
-                  className="bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm px-2.5 py-1 rounded-md text-xs font-bold border border-black/5 dark:border-white/10 hover:bg-white dark:hover:bg-slate-700 hover:scale-105 transition-all"
                 >
-                  {name} <span className="text-primary-500 dark:text-primary-400 font-normal ml-1">{count}</span>
+                  <Badge
+                    variant="outline"
+                    className="hover:bg-secondary hover:scale-105 transition-all cursor-pointer"
+                  >
+                    {name} <span className="text-muted-foreground font-normal ml-1">{count}</span>
+                  </Badge>
                 </Link>
               ))}
             </div>
             {getStatesWithCounts(category as Category).length > 20 && (
-              <p className="text-center mt-4 text-sm text-primary-500 dark:text-primary-400">
+              <p className="text-center mt-4 text-sm text-muted-foreground">
                 + {getStatesWithCounts(category as Category).length - 20} more states
               </p>
             )}
@@ -961,50 +968,51 @@ export default async function CategoryLandingPage({ params }: Props) {
         {/* Featured Challenge */}
         {biggestRegion && challengeDesc && (
           <section className="my-12">
-            <div className={`${accent.challenge} text-white rounded-xl p-8 text-center`}>
-              <h3 className="font-bold text-2xl mb-3">The {biggestRegion[0]} Challenge</h3>
-              <p className="opacity-90 mb-6 text-lg">
-                {challengeDesc(biggestRegion[0], biggestRegion[1])}
-              </p>
-              <Link
-                href={`/?category=${category}`}
-                className="inline-flex items-center gap-2 px-6 py-3 bg-white/20 hover:bg-white/30 rounded-lg font-semibold transition-colors"
-              >
-                View Checklist
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </Link>
-            </div>
+            <Card className="bg-gradient-to-br from-primary to-primary/80 text-primary-foreground border-0">
+              <CardContent className="p-8 text-center">
+                <h3 className="font-bold text-2xl mb-3">The {biggestRegion[0]} Challenge</h3>
+                <p className="opacity-90 mb-6 text-lg">
+                  {challengeDesc(biggestRegion[0], biggestRegion[1])}
+                </p>
+                <Button asChild variant="secondary" className="bg-white/20 hover:bg-white/30 text-white border-0">
+                  <Link href={`/?category=${category}`}>
+                    View Checklist
+                    <ChevronRight className="w-4 h-4 ml-1" />
+                  </Link>
+                </Button>
+              </CardContent>
+            </Card>
           </section>
         )}
 
         {/* Examples Section */}
         <section className="mt-16">
-          <h2 className="text-2xl font-bold text-primary-900 dark:text-white mb-2 text-center">
+          <h2 className="text-2xl font-bold text-foreground mb-2 text-center">
             {label} to Explore
           </h2>
-          <p className="text-primary-600 dark:text-primary-300 text-center mb-8">
+          <p className="text-muted-foreground text-center mb-8">
             Here are some amazing {label.toLowerCase()} to add to your bucket list
           </p>
           <div className="grid gap-4 md:grid-cols-2">
             {categoryExamples[category as Category]?.map((example, index) => (
-              <div
+              <Card
                 key={index}
-                className={`bg-white dark:bg-slate-800 rounded-xl p-5 shadow-premium border border-black/5 dark:border-white/10 hover:shadow-premium-lg transition-all hover:-translate-y-1 border-l-4 ${accent.bg.replace('bg-', 'border-')}`}
+                className="hover:shadow-lg transition-all hover:-translate-y-1 border-l-4 border-l-primary"
               >
-                <h3 className="font-bold text-primary-900 dark:text-white text-lg mb-2">{example.name}</h3>
-                <div className="space-y-2">
-                  <p className="text-primary-600 dark:text-primary-400 text-sm">
-                    <span className="font-medium text-primary-700 dark:text-primary-300">Unique fact:</span>{' '}
-                    {example.fact}
-                  </p>
-                  <p className="text-primary-600 dark:text-primary-400 text-sm">
-                    <span className="font-medium text-accent-600 dark:text-accent-400">Why visit:</span>{' '}
-                    {example.reason}
-                  </p>
-                </div>
-              </div>
+                <CardContent className="p-5">
+                  <h3 className="font-bold text-foreground text-lg mb-2">{example.name}</h3>
+                  <div className="space-y-2">
+                    <p className="text-muted-foreground text-sm">
+                      <span className="font-medium text-foreground">Unique fact:</span>{' '}
+                      {example.fact}
+                    </p>
+                    <p className="text-muted-foreground text-sm">
+                      <span className="font-medium text-primary">Why visit:</span>{' '}
+                      {example.reason}
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
             ))}
           </div>
         </section>
@@ -1012,40 +1020,32 @@ export default async function CategoryLandingPage({ params }: Props) {
         {/* FAQ Section */}
         {faqs.length > 0 && (
           <section className="mt-16">
-            <h2 className="text-2xl font-bold text-primary-900 dark:text-white mb-2 text-center">
+            <h2 className="text-2xl font-bold text-foreground mb-2 text-center">
               Frequently Asked Questions
             </h2>
-            <p className="text-primary-600 dark:text-primary-300 text-center mb-8">
+            <p className="text-muted-foreground text-center mb-8">
               Common questions about tracking {label.toLowerCase()}
             </p>
             <div className="space-y-4">
               {faqs.map((faq, index) => (
-                <details
-                  key={index}
-                  className="bg-white dark:bg-slate-800 rounded-xl shadow-premium border border-black/5 dark:border-white/10 group"
-                >
-                  <summary className="px-6 py-4 cursor-pointer list-none flex items-center justify-between font-semibold text-primary-900 dark:text-white hover:bg-primary-50 dark:hover:bg-slate-700 rounded-xl transition-colors">
-                    {faq.question}
-                    <svg
-                      className="w-5 h-5 text-primary-500 group-open:rotate-180 transition-transform"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </summary>
-                  <div className="px-6 pb-4 text-primary-600 dark:text-primary-300">
-                    {faq.answer}
-                  </div>
-                </details>
+                <Card key={index} className="group">
+                  <details>
+                    <summary className="px-6 py-4 cursor-pointer list-none flex items-center justify-between font-semibold text-foreground hover:bg-muted/50 rounded-xl transition-colors">
+                      {faq.question}
+                      <ChevronDown className="w-5 h-5 text-muted-foreground group-open:rotate-180 transition-transform" />
+                    </summary>
+                    <div className="px-6 pb-4 text-muted-foreground">
+                      {faq.answer}
+                    </div>
+                  </details>
+                </Card>
               ))}
             </div>
           </section>
         )}
 
         <section className="mt-16">
-          <h2 className="text-2xl font-bold text-primary-900 dark:text-white mb-6 text-center">
+          <h2 className="text-2xl font-bold text-foreground mb-6 text-center">
             Also Track
           </h2>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -1053,29 +1053,29 @@ export default async function CategoryLandingPage({ params }: Props) {
               .filter((c) => c !== category)
               .slice(0, 4)
               .map((c) => (
-                <Link
-                  key={c}
-                  href={`/track/${c}`}
-                  className="bg-white dark:bg-slate-800 rounded-lg p-4 shadow-premium border border-black/5 dark:border-white/10 hover:shadow-premium-lg transition-all text-center"
-                >
-                  <span className="text-2xl block mb-2">{categoryIcons[c]}</span>
-                  <span className="text-sm font-medium text-primary-700 dark:text-primary-300">{categoryLabels[c]}</span>
+                <Link key={c} href={`/track/${c}`}>
+                  <Card className="hover:shadow-lg transition-all text-center h-full">
+                    <CardContent className="p-4">
+                      <span className="text-2xl block mb-2">{categoryIcons[c]}</span>
+                      <span className="text-sm font-medium text-muted-foreground">{categoryLabels[c]}</span>
+                    </CardContent>
+                  </Card>
                 </Link>
               ))}
           </div>
         </section>
       </main>
 
-      <footer className="border-t border-black/5 dark:border-white/10 bg-white/50 dark:bg-slate-900/50">
-        <div className="max-w-4xl mx-auto px-4 py-6 text-center text-sm text-primary-500 dark:text-primary-400">
+      <footer className="border-t border-border bg-muted/50">
+        <div className="max-w-4xl mx-auto px-4 py-6 text-center text-sm text-muted-foreground">
           <div className="flex justify-center gap-4 mb-2">
-            <Link href="/about" className="hover:text-primary-700 dark:hover:text-primary-200 transition-colors">About</Link>
+            <Link href="/about" className="hover:text-foreground transition-colors">About</Link>
             <span>•</span>
-            <Link href="/suggest" className="hover:text-primary-700 dark:hover:text-primary-200 transition-colors">Suggest</Link>
+            <Link href="/suggest" className="hover:text-foreground transition-colors">Suggest</Link>
             <span>•</span>
-            <Link href="/privacy" className="hover:text-primary-700 dark:hover:text-primary-200 transition-colors">Privacy</Link>
+            <Link href="/privacy" className="hover:text-foreground transition-colors">Privacy</Link>
             <span>•</span>
-            <Link href="/terms" className="hover:text-primary-700 dark:hover:text-primary-200 transition-colors">Terms</Link>
+            <Link href="/terms" className="hover:text-foreground transition-colors">Terms</Link>
           </div>
           <p>See Every Place - Free Travel Tracker</p>
         </div>
