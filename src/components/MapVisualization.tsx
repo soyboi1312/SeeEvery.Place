@@ -82,6 +82,8 @@ export default function MapVisualization({ category, selections, onToggle, subca
   const isRegionMap = usesRegionMap(category);
   const [tooltip, setTooltip] = useState<TooltipState | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const [showTwoFingerHint, setShowTwoFingerHint] = useState(false);
+  const hintTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Fix sticky pointer on iPad Magic Keyboard by releasing pointer capture on pointerup
   // This handles cases where d3-zoom captures the pointer but doesn't release it
@@ -125,6 +127,55 @@ export default function MapVisualization({ category, selections, onToggle, subca
     };
   }, [tooltip]);
 
+  // Show two-finger hint on single-touch pan attempts (mobile UX)
+  // This prevents the "scroll trap" where users get stuck trying to scroll past the map
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const handleTouchStart = (e: TouchEvent) => {
+      // Show hint for single-finger touch (trying to scroll)
+      if (e.touches.length === 1) {
+        // Clear any existing timeout
+        if (hintTimeoutRef.current) {
+          clearTimeout(hintTimeoutRef.current);
+        }
+        setShowTwoFingerHint(true);
+        // Auto-hide after 2 seconds
+        hintTimeoutRef.current = setTimeout(() => {
+          setShowTwoFingerHint(false);
+        }, 2000);
+      } else {
+        // Two or more fingers - user is trying to interact with map
+        setShowTwoFingerHint(false);
+        if (hintTimeoutRef.current) {
+          clearTimeout(hintTimeoutRef.current);
+        }
+      }
+    };
+
+    const handleTouchEnd = () => {
+      // Hide hint shortly after touch ends
+      if (hintTimeoutRef.current) {
+        clearTimeout(hintTimeoutRef.current);
+      }
+      hintTimeoutRef.current = setTimeout(() => {
+        setShowTwoFingerHint(false);
+      }, 1000);
+    };
+
+    container.addEventListener('touchstart', handleTouchStart, { passive: true });
+    container.addEventListener('touchend', handleTouchEnd, { passive: true });
+
+    return () => {
+      container.removeEventListener('touchstart', handleTouchStart);
+      container.removeEventListener('touchend', handleTouchEnd);
+      if (hintTimeoutRef.current) {
+        clearTimeout(hintTimeoutRef.current);
+      }
+    };
+  }, []);
+
   // Memoize individual handlers
   // Handle both React synthetic events and native events from react-simple-maps
   const getMousePosition = useCallback((e: React.MouseEvent | MouseEvent) => {
@@ -166,14 +217,29 @@ export default function MapVisualization({ category, selections, onToggle, subca
   }), [onMouseEnter, onMouseLeave, onMouseMove]);
 
   return (
-    // touch-action-none prevents browser gestures capturing pointer events on hybrid devices
+    // Removed touch-action-none to allow single-finger page scrolling
+    // Two-finger gestures still work for map pan/zoom via d3-zoom
     <div
       ref={containerRef}
-      className="w-full bg-primary-50/50 dark:bg-slate-800/50 rounded-2xl overflow-hidden border border-black/5 dark:border-white/10 shadow-premium-lg mb-6 relative touch-action-none"
+      className="w-full bg-primary-50/50 dark:bg-slate-800/50 rounded-2xl overflow-hidden border border-black/5 dark:border-white/10 shadow-premium-lg mb-6 relative"
     >
       <div className="w-full overflow-hidden">
         {getMapComponent(category, selections, onToggle, subcategory, tooltipHandlers, items)}
       </div>
+
+      {/* Two-finger pan hint overlay for mobile */}
+      {showTwoFingerHint && (
+        <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] flex items-center justify-center pointer-events-none z-40 animate-fade-in">
+          <div className="bg-white dark:bg-slate-800 px-4 py-3 rounded-xl shadow-lg flex items-center gap-3">
+            <svg className="w-8 h-8 text-primary-600 dark:text-primary-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 11.5V14m0-2.5v-6a1.5 1.5 0 113 0m-3 6a1.5 1.5 0 00-3 0v2a7.5 7.5 0 0015 0v-5a1.5 1.5 0 00-3 0m-6-3V11m0-5.5v-1a1.5 1.5 0 013 0v1m0 0V11m0-5.5a1.5 1.5 0 013 0v3m0 0V11" />
+            </svg>
+            <span className="text-sm font-medium text-primary-800 dark:text-primary-200">
+              Use two fingers to move the map
+            </span>
+          </div>
+        </div>
+      )}
 
       {/* Tooltip - rendered via portal to escape CSS transform stacking context */}
       {tooltip && typeof document !== 'undefined' && createPortal(
