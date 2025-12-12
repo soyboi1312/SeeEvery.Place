@@ -1,20 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-
-// Reserved usernames that could conflict with routes or have special meaning
-const RESERVED_USERNAMES = new Set([
-  // Route segments
-  'admin', 'api', 'auth', 'login', 'logout', 'signup', 'register',
-  'settings', 'profile', 'dashboard', 'edit', 'new', 'create',
-  // File extensions / formats
-  'json', 'xml', 'rss', 'atom', 'sitemap', 'robots',
-  // Common reserved words
-  'null', 'undefined', 'true', 'false', 'system', 'support',
-  'help', 'about', 'contact', 'privacy', 'terms', 'legal',
-  // App-specific
-  'map', 'maps', 'share', 'explore', 'discover', 'search',
-  'suggestions', 'suggest', 'feedback', 'report',
-]);
+import { isReservedUsername } from '@/lib/constants/reservedUsernames';
 
 /**
  * GET /api/profile
@@ -87,7 +73,7 @@ export async function PUT(request: NextRequest) {
       }
 
       // Check for reserved usernames
-      if (RESERVED_USERNAMES.has(username.toLowerCase())) {
+      if (isReservedUsername(username)) {
         return NextResponse.json(
           { error: 'This username is reserved and cannot be used' },
           { status: 400 }
