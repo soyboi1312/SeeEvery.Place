@@ -44,7 +44,7 @@ const USMap = memo(function USMap({ selections, onToggle, tooltip }: BaseMapProp
   }, [statusMap]);
 
   return (
-    <div className="relative w-full h-full group">
+    <div className="relative w-full h-full group overflow-hidden">
       <ComposableMap
         projection="geoAlbersUsa"
         projectionConfig={{ scale: 1000 }}
