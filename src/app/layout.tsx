@@ -5,14 +5,12 @@ import SystemBanner from '@/components/SystemBanner'
 import AchievementToast from '@/components/AchievementToast'
 import VersionChecker from '@/components/VersionChecker'
 
-// PWA Viewport settings (Controls the browser chrome color on mobile)
 export const viewport: Viewport = {
   themeColor: '#3b82f6',
   width: 'device-width',
   initialScale: 1,
-  maximumScale: 1,
-  // Removed userScalable: false to fix Lighthouse accessibility audit
-  // Users with low vision must be able to zoom.
+  // Removed maximumScale to fix Lighthouse accessibility audit
+  // Users must be able to zoom.
 }
 
 export const metadata: Metadata = {

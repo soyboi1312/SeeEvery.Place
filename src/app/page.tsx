@@ -209,46 +209,35 @@ function HomeContent() {
     ) as Record<Category, { visited: number; total: number; bucketList: number; percentage: number }>;
   }, [selections]);
 
-  // Loading Skeletons for data-dependent components
-  const DataLoadingSkeletons = () => (
-    <>
-      {/* Quick Stats Skeleton */}
-      <div className="flex flex-wrap justify-center gap-3">
+  // Skeletons to prevent Layout Shift (CLS)
+  const LoadingSkeletons = () => (
+    <div className="space-y-6 animate-pulse">
+      {/* QuickStats Skeleton */}
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
         {[...Array(6)].map((_, i) => (
-          <div key={i} className="w-24 h-16 bg-gray-200 dark:bg-slate-700 rounded-xl animate-pulse" />
+          <div key={i} className="h-24 bg-gray-100 dark:bg-slate-800/50 rounded-xl border border-gray-200 dark:border-slate-700/50" />
         ))}
       </div>
 
       {/* Map Skeleton */}
       <div className="w-full bg-blue-50/50 dark:bg-slate-800/50 rounded-2xl overflow-hidden border border-blue-100 dark:border-slate-700 shadow-inner">
-        <div className="aspect-[16/9] w-full max-h-[500px] bg-gray-200 dark:bg-slate-700 animate-pulse" />
-        <div className="flex justify-center gap-6 py-4">
-          {[...Array(3)].map((_, i) => (
-            <div key={i} className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-gray-300 dark:bg-slate-600 animate-pulse" />
-              <div className="w-12 h-3 bg-gray-200 dark:bg-slate-700 rounded animate-pulse" />
-            </div>
-          ))}
-        </div>
+        <div className="aspect-[16/9] w-full max-h-[500px] bg-blue-100/50 dark:bg-slate-700/50" />
       </div>
 
-      {/* Category Tabs Skeleton */}
-      <div className="flex flex-wrap justify-center gap-2">
-        {[...Array(8)].map((_, i) => (
-          <div key={i} className="w-24 h-10 bg-gray-200 dark:bg-slate-700 rounded-lg animate-pulse" />
+      {/* Tabs Skeleton */}
+      <div className="flex gap-2 overflow-x-auto pb-2">
+        {[...Array(5)].map((_, i) => (
+          <div key={i} className="w-24 h-10 bg-gray-200 dark:bg-slate-700 rounded-lg shrink-0" />
         ))}
       </div>
 
       {/* List Skeleton */}
-      <div className="space-y-3">
-        <div className="w-48 h-6 bg-gray-200 dark:bg-slate-700 rounded animate-pulse mx-auto" />
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
-          {[...Array(12)].map((_, i) => (
-            <div key={i} className="h-10 bg-gray-200 dark:bg-slate-700 rounded-lg animate-pulse" />
-          ))}
-        </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+        {[...Array(12)].map((_, i) => (
+          <div key={i} className="h-12 bg-gray-100 dark:bg-slate-800 rounded-lg" />
+        ))}
       </div>
-    </>
+    </div>
   );
 
   return (
@@ -281,9 +270,9 @@ function HomeContent() {
           </p>
         </div>
 
-        {/* Data Dependent Content: Shows Skeletons until localStorage is read */}
+        {/* Render Skeletons or Content */}
         {!isLoaded ? (
-          <DataLoadingSkeletons />
+          <LoadingSkeletons />
         ) : (
           <div className="animate-fade-in space-y-6">
             <QuickStats
@@ -415,7 +404,7 @@ function HomeContent() {
 export default function Home() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-white to-blue-50/30 dark:from-slate-900 dark:to-slate-950">
+      <div className="min-h-screen flex items-center justify-center bg-white dark:bg-gray-900">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 dark:border-blue-400" />
       </div>
     }>
