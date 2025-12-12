@@ -23,6 +23,18 @@ import {
 import { categoryLabels, categoryIcons, Category } from '@/lib/types';
 import type { User } from '@supabase/supabase-js';
 import type { UserSelections } from '@/lib/types';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Sun, Moon, Trophy, Medal, Sparkles, Lock, LogIn, Loader2 } from 'lucide-react';
 
 // Type for processed achievement items
 interface ProcessedAchievement {
@@ -160,13 +172,7 @@ function AchievementBadge({
       {/* Lock overlay for locked achievements */}
       {!isUnlocked && (
         <div className="absolute bottom-0 right-0 w-6 h-6 bg-gray-500 dark:bg-gray-600 rounded-full flex items-center justify-center shadow-md">
-          <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-            <path
-              fillRule="evenodd"
-              d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"
-              clipRule="evenodd"
-            />
-          </svg>
+          <Lock className="w-3 h-3 text-white" />
         </div>
       )}
     </div>
@@ -196,98 +202,99 @@ function AchievementCard({
   };
 
   return (
-    <div
-      className={`rounded-xl border-2 p-4 transition-all relative ${
+    <Card
+      className={`transition-all relative ${
         isUnlocked
           ? tierColors[achievement.tier]
-          : 'border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50'
+          : 'border-muted bg-muted/30'
       } ${isUnlocked && isGuest ? 'border-dashed' : ''}`}
     >
       {/* Guest indicator for unlocked achievements */}
       {isUnlocked && isGuest && (
-        <div className="absolute top-2 right-2">
-          <span className="text-[10px] px-1.5 py-0.5 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 rounded font-medium">
-            Locals Only
-          </span>
-        </div>
+        <Badge variant="secondary" className="absolute top-2 right-2 text-[10px] bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400">
+          Local Only
+        </Badge>
       )}
-      <div className="flex items-start gap-4">
-        <AchievementBadge
-          achievement={achievement}
-          isUnlocked={isUnlocked}
-          progress={progress}
-          size="default"
-        />
+      <CardContent className="p-4">
+        <div className="flex items-start gap-4">
+          <AchievementBadge
+            achievement={achievement}
+            isUnlocked={isUnlocked}
+            progress={progress}
+            size="default"
+          />
 
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-1">
-            <h3
-              className={`font-bold ${
-                isUnlocked
-                  ? 'text-primary-900 dark:text-white'
-                  : 'text-gray-500 dark:text-gray-400'
-              }`}
-            >
-              {achievement.name}
-            </h3>
-            <span
-              className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                isUnlocked
-                  ? `bg-gradient-to-r ${getTierColor(achievement.tier)} text-white`
-                  : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
-              }`}
-            >
-              {getTierLabel(achievement.tier)}
-            </span>
-          </div>
-
-          <p
-            className={`text-sm mb-2 ${
-              isUnlocked
-                ? 'text-primary-600 dark:text-primary-300'
-                : 'text-gray-500 dark:text-gray-400'
-            }`}
-          >
-            {achievement.description}
-          </p>
-
-          {/* Progress bar for locked achievements */}
-          {!isUnlocked && (
-            <div className="mb-2">
-              <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mb-1">
-                <span>Progress</span>
-                <span>
-                  {progress.current} / {progress.target}
-                </span>
-              </div>
-              <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                <div
-                  className="bg-gradient-to-r from-purple-500 to-blue-500 h-2 rounded-full transition-all duration-500"
-                  style={{ width: `${progress.percentage}%` }}
-                />
-              </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-1">
+              <h3
+                className={`font-bold ${
+                  isUnlocked
+                    ? 'text-foreground'
+                    : 'text-muted-foreground'
+                }`}
+              >
+                {achievement.name}
+              </h3>
+              <Badge
+                className={
+                  isUnlocked
+                    ? `bg-gradient-to-r ${getTierColor(achievement.tier)} text-white`
+                    : ''
+                }
+                variant={isUnlocked ? 'default' : 'secondary'}
+              >
+                {getTierLabel(achievement.tier)}
+              </Badge>
             </div>
-          )}
 
-          <div className="flex items-center justify-between">
-            <span className="text-xs text-primary-500 dark:text-primary-400">
-              +{achievement.xpReward} XP
-            </span>
-            {isUnlocked && unlockedAt && (
-              <span className="text-xs text-green-600 dark:text-green-400">
-                Unlocked {new Date(unlockedAt).toLocaleDateString()}
-              </span>
+            <p
+              className={`text-sm mb-2 ${
+                isUnlocked
+                  ? 'text-muted-foreground'
+                  : 'text-muted-foreground/70'
+              }`}
+            >
+              {achievement.description}
+            </p>
+
+            {/* Progress bar for locked achievements */}
+            {!isUnlocked && (
+              <div className="mb-2">
+                <div className="flex justify-between text-xs text-muted-foreground mb-1">
+                  <span>Progress</span>
+                  <span>
+                    {progress.current} / {progress.target}
+                  </span>
+                </div>
+                <div className="w-full bg-muted rounded-full h-2">
+                  <div
+                    className="bg-gradient-to-r from-purple-500 to-blue-500 h-2 rounded-full transition-all duration-500"
+                    style={{ width: `${progress.percentage}%` }}
+                  />
+                </div>
+              </div>
             )}
-            {achievement.category !== 'global' && (
-              <span className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1">
-                {categoryIcons[achievement.category as Category]}
-                {categoryLabels[achievement.category as Category]}
+
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-primary">
+                +{achievement.xpReward} XP
               </span>
-            )}
+              {isUnlocked && unlockedAt && (
+                <span className="text-xs text-green-600 dark:text-green-400">
+                  Unlocked {new Date(unlockedAt).toLocaleDateString()}
+                </span>
+              )}
+              {achievement.category !== 'global' && (
+                <span className="text-xs text-muted-foreground flex items-center gap-1">
+                  {categoryIcons[achievement.category as Category]}
+                  {categoryLabels[achievement.category as Category]}
+                </span>
+              )}
+            </div>
           </div>
         </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -345,7 +352,6 @@ export default function AchievementsPage() {
         achievement,
         isUnlocked,
         progress,
-        // In a real app, this would come from the database
         unlockedAt: isUnlocked ? new Date().toISOString() : undefined,
       };
     });
@@ -355,12 +361,10 @@ export default function AchievementsPage() {
   useEffect(() => {
     if (processedAchievements.length === 0) return;
 
-    // Get list of known IDs (this key must match the one in AchievementToast)
     const KNOWN_KEY = 'seeeveryplace_known_achievements';
     const stored = localStorage.getItem(KNOWN_KEY);
     const knownIds: string[] = stored ? JSON.parse(stored) : [];
 
-    // Filter for unlocked items that aren't in the known list
     const brandNew = processedAchievements.filter(item =>
       item.isUnlocked && !knownIds.includes(item.achievement.id)
     );
@@ -368,7 +372,6 @@ export default function AchievementsPage() {
     if (brandNew.length > 0) {
       setNewUnlocks(brandNew);
 
-      // Mark them as known after viewing
       const allUnlockedIds = processedAchievements
         .filter(a => a.isUnlocked)
         .map(a => a.achievement.id);
@@ -380,11 +383,9 @@ export default function AchievementsPage() {
   // Filter achievements
   const filteredAchievements = useMemo(() => {
     return processedAchievements.filter((item) => {
-      // Status filter
       if (filter === 'unlocked' && !item.isUnlocked) return false;
       if (filter === 'locked' && item.isUnlocked) return false;
 
-      // Category filter
       if (categoryFilter !== 'all' && item.achievement.category !== categoryFilter) {
         return false;
       }
@@ -413,52 +414,42 @@ export default function AchievementsPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-primary-50 to-white dark:from-slate-900 dark:to-slate-800 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white dark:from-slate-900 dark:to-slate-800 flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-primary-50 to-white dark:from-slate-900 dark:to-slate-800">
+    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white dark:from-slate-900 dark:to-slate-800">
       {/* Header */}
-      <header className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-black/5 dark:border-white/10 sticky top-0 z-40">
+      <header className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-border sticky top-0 z-40">
         <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3 group">
             <div className="relative w-8 h-8 transition-transform group-hover:scale-110 duration-200">
               <Image src="/logo.svg" alt="See Every Place Logo" fill className="object-contain" priority />
             </div>
             <div className="flex flex-col">
-              <h1 className="text-xl font-bold text-primary-900 dark:text-white leading-none">
-                SeeEvery<span className="text-accent-500">.</span>Place<span className="text-[10px] align-super">TM</span>
+              <h1 className="text-xl font-bold text-foreground leading-none">
+                SeeEvery<span className="text-blue-500">.</span>Place<span className="text-[10px] align-super">™</span>
               </h1>
-              <span className="text-[10px] text-primary-500 dark:text-primary-400 font-medium tracking-wider uppercase hidden sm:block">
+              <span className="text-[10px] text-muted-foreground font-medium tracking-wider uppercase hidden sm:block">
                 Free Travel Tracker
               </span>
             </div>
           </Link>
           <div className="flex items-center gap-2">
-            <button
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={toggleDarkMode}
-              className="p-2 rounded-lg bg-primary-50 dark:bg-slate-800 text-primary-600 dark:text-primary-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
               title={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
             >
-              {isDarkMode ? (
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-                </svg>
-              ) : (
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-                </svg>
-              )}
-            </button>
-            <Link
-              href="/"
-              className="px-4 py-2 bg-primary-700 hover:bg-primary-800 text-white rounded-lg font-medium hover:shadow-lg transition-all text-sm"
-            >
-              Back to Map
-            </Link>
+              {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+            </Button>
+            <Button asChild>
+              <Link href="/">Back to Map</Link>
+            </Button>
           </div>
         </div>
       </header>
@@ -467,15 +458,15 @@ export default function AchievementsPage() {
       <main className="max-w-4xl mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h2 className="text-3xl font-bold text-primary-900 dark:text-white mb-1">Achievements</h2>
-            <p className="text-primary-600 dark:text-primary-300">
+            <h2 className="text-3xl font-bold text-foreground mb-1">Achievements</h2>
+            <p className="text-muted-foreground">
               Track your travel milestones and earn badges
             </p>
           </div>
           {user && (
             <Link
               href="/settings"
-              className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
+              className="text-sm text-primary hover:underline"
             >
               View Profile
             </Link>
@@ -484,135 +475,123 @@ export default function AchievementsPage() {
 
         {/* Stats Overview */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <div className="bg-white dark:bg-slate-800 rounded-xl p-4 shadow-sm border border-black/5 dark:border-white/10">
-            <div className="text-3xl font-bold text-primary-900 dark:text-white">
-              {stats.level}
-            </div>
-            <div className="text-sm text-primary-600 dark:text-primary-300">Level</div>
-          </div>
-          <div className="bg-white dark:bg-slate-800 rounded-xl p-4 shadow-sm border border-black/5 dark:border-white/10">
-            <div className="text-3xl font-bold text-primary-900 dark:text-white">
-              {stats.totalXp.toLocaleString()}
-            </div>
-            <div className="text-sm text-primary-600 dark:text-primary-300">Total XP</div>
-          </div>
-          <div className="bg-white dark:bg-slate-800 rounded-xl p-4 shadow-sm border border-black/5 dark:border-white/10">
-            <div className="text-3xl font-bold text-primary-900 dark:text-white">
-              {achievementStats.unlocked}/{achievementStats.total}
-            </div>
-            <div className="text-sm text-primary-600 dark:text-primary-300">Achievements</div>
-          </div>
-          <div className="bg-white dark:bg-slate-800 rounded-xl p-4 shadow-sm border border-black/5 dark:border-white/10">
-            <div className="text-3xl font-bold text-primary-900 dark:text-white">
-              {stats.totalVisited}
-            </div>
-            <div className="text-sm text-primary-600 dark:text-primary-300">Places Visited</div>
-          </div>
+          <Card>
+            <CardContent className="pt-4">
+              <div className="text-3xl font-bold text-foreground">
+                {stats.level}
+              </div>
+              <div className="text-sm text-muted-foreground">Level</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-4">
+              <div className="text-3xl font-bold text-foreground">
+                {stats.totalXp.toLocaleString()}
+              </div>
+              <div className="text-sm text-muted-foreground">Total XP</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-4">
+              <div className="text-3xl font-bold text-foreground">
+                {achievementStats.unlocked}/{achievementStats.total}
+              </div>
+              <div className="text-sm text-muted-foreground">Achievements</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-4">
+              <div className="text-3xl font-bold text-foreground">
+                {stats.totalVisited}
+              </div>
+              <div className="text-sm text-muted-foreground">Places Visited</div>
+            </CardContent>
+          </Card>
         </div>
 
         {/* New Achievements Alert */}
         {newUnlocks.length > 0 && (
-          <div className="mb-8 p-6 bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border border-yellow-500/30 rounded-xl relative overflow-hidden">
-            <div className="absolute top-0 right-0 p-4 opacity-10 text-6xl">
-              <span role="img" aria-label="trophy">&#127942;</span>
-            </div>
-            <h3 className="text-xl font-bold text-yellow-700 dark:text-yellow-400 mb-4 flex items-center gap-2">
-              <span className="animate-pulse" role="img" aria-label="sparkles">&#10024;</span> New Unlocks!
-            </h3>
-            <div className="space-y-4">
-              {newUnlocks.map((item) => (
-                <AchievementCard
-                  key={item.achievement.id}
-                  achievement={item.achievement}
-                  isUnlocked={true}
-                  progress={item.progress}
-                  unlockedAt={new Date().toISOString()}
-                  isGuest={!user}
-                />
-              ))}
-            </div>
-          </div>
+          <Card className="mb-8 bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border-yellow-500/30">
+            <CardContent className="pt-6 relative overflow-hidden">
+              <div className="absolute top-0 right-0 p-4 opacity-10 text-6xl">
+                <Trophy className="w-16 h-16" />
+              </div>
+              <h3 className="text-xl font-bold text-yellow-700 dark:text-yellow-400 mb-4 flex items-center gap-2">
+                <Sparkles className="w-5 h-5 animate-pulse" /> New Unlocks!
+              </h3>
+              <div className="space-y-4">
+                {newUnlocks.map((item) => (
+                  <AchievementCard
+                    key={item.achievement.id}
+                    achievement={item.achievement}
+                    isUnlocked={true}
+                    progress={item.progress}
+                    unlockedAt={new Date().toISOString()}
+                    isGuest={!user}
+                  />
+                ))}
+              </div>
+            </CardContent>
+          </Card>
         )}
 
         {/* Level Progress */}
-        <div className="bg-gradient-to-r from-purple-500/10 to-blue-500/10 dark:from-purple-500/20 dark:to-blue-500/20 rounded-xl p-6 mb-8 border border-purple-500/20 dark:border-purple-500/30">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-3">
-              <span className="text-4xl">🎖️</span>
-              <div>
-                <div className="font-bold text-xl text-primary-900 dark:text-white">
-                  Level {stats.level}
-                </div>
-                <div className="text-sm text-primary-600 dark:text-primary-300">
-                  {stats.levelProgress.current.toLocaleString()} / {stats.levelProgress.needed.toLocaleString()} XP to next level
+        <Card className="mb-8 bg-gradient-to-r from-purple-500/10 to-blue-500/10 border-purple-500/20">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-3">
+                <Medal className="w-10 h-10 text-purple-500" />
+                <div>
+                  <div className="font-bold text-xl text-foreground">
+                    Level {stats.level}
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    {stats.levelProgress.current.toLocaleString()} / {stats.levelProgress.needed.toLocaleString()} XP to next level
+                  </div>
                 </div>
               </div>
-            </div>
-            <div className="text-right">
-              <div className="text-2xl font-bold text-primary-900 dark:text-white">
-                Level {stats.level + 1}
+              <div className="text-right">
+                <div className="text-2xl font-bold text-foreground">
+                  Level {stats.level + 1}
+                </div>
+                <div className="text-sm text-muted-foreground">Next Level</div>
               </div>
-              <div className="text-sm text-primary-500 dark:text-primary-400">Next Level</div>
             </div>
-          </div>
-          <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-4">
-            <div
-              className="bg-gradient-to-r from-purple-500 to-blue-500 h-4 rounded-full transition-all duration-500"
-              style={{ width: `${stats.levelProgress.progress}%` }}
-            />
-          </div>
-        </div>
+            <div className="w-full bg-muted rounded-full h-4">
+              <div
+                className="bg-gradient-to-r from-purple-500 to-blue-500 h-4 rounded-full transition-all duration-500"
+                style={{ width: `${stats.levelProgress.progress}%` }}
+              />
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Filters */}
-        <div className="flex flex-wrap gap-3 mb-6">
-          <div className="flex gap-1 bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
-            <button
-              onClick={() => setFilter('all')}
-              className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
-                filter === 'all'
-                  ? 'bg-white dark:bg-gray-700 text-primary-900 dark:text-white shadow-sm'
-                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
-              }`}
-            >
-              All ({processedAchievements.length})
-            </button>
-            <button
-              onClick={() => setFilter('unlocked')}
-              className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
-                filter === 'unlocked'
-                  ? 'bg-white dark:bg-gray-700 text-primary-900 dark:text-white shadow-sm'
-                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
-              }`}
-            >
-              Unlocked ({achievementStats.unlocked})
-            </button>
-            <button
-              onClick={() => setFilter('locked')}
-              className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
-                filter === 'locked'
-                  ? 'bg-white dark:bg-gray-700 text-primary-900 dark:text-white shadow-sm'
-                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
-              }`}
-            >
-              Locked ({achievementStats.total - achievementStats.unlocked})
-            </button>
-          </div>
+        <div className="flex flex-wrap items-center gap-4 mb-6">
+          <Tabs value={filter} onValueChange={(v) => setFilter(v as typeof filter)}>
+            <TabsList>
+              <TabsTrigger value="all">All ({processedAchievements.length})</TabsTrigger>
+              <TabsTrigger value="unlocked">Unlocked ({achievementStats.unlocked})</TabsTrigger>
+              <TabsTrigger value="locked">Locked ({achievementStats.total - achievementStats.unlocked})</TabsTrigger>
+            </TabsList>
+          </Tabs>
 
-          <select
-            value={categoryFilter}
-            onChange={(e) => setCategoryFilter(e.target.value)}
-            className="px-3 py-1.5 text-sm font-medium rounded-lg bg-gray-100 dark:bg-gray-800 text-primary-900 dark:text-white border-0"
-          >
-            <option value="all">All Categories</option>
-            <option value="global">Global</option>
-            {achievementCategories
-              .filter((c) => c !== 'global')
-              .map((category) => (
-                <option key={category} value={category}>
-                  {categoryLabels[category as Category] || category}
-                </option>
-              ))}
-          </select>
+          <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="All Categories" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Categories</SelectItem>
+              <SelectItem value="global">Global</SelectItem>
+              {achievementCategories
+                .filter((c) => c !== 'global')
+                .map((category) => (
+                  <SelectItem key={category} value={category}>
+                    {categoryLabels[category as Category] || category}
+                  </SelectItem>
+                ))}
+            </SelectContent>
+          </Select>
         </div>
 
         {/* Achievements Grid */}
@@ -630,62 +609,63 @@ export default function AchievementsPage() {
             ))}
           </div>
         ) : (
-          <div className="text-center py-12 bg-white dark:bg-slate-800 rounded-xl border border-black/5 dark:border-white/10">
-            <span className="text-4xl mb-3 block">🔍</span>
-            <p className="text-primary-600 dark:text-primary-300">
-              No achievements found with current filters
-            </p>
-          </div>
+          <Card>
+            <CardContent className="py-12 text-center">
+              <span className="text-4xl mb-3 block">🔍</span>
+              <p className="text-muted-foreground">
+                No achievements found with current filters
+              </p>
+            </CardContent>
+          </Card>
         )}
 
-        {/* Not signed in notice - More prominent for guests with achievements */}
+        {/* Not signed in notice */}
         {!user && (
-          <div className="mt-8 p-6 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 rounded-xl border-2 border-dashed border-amber-400 dark:border-amber-600">
-            <div className="flex flex-col sm:flex-row items-center gap-4">
-              <div className="text-4xl">🏆</div>
-              <div className="flex-1 text-center sm:text-left">
-                <h3 className="font-bold text-amber-900 dark:text-amber-100 mb-1 flex items-center justify-center sm:justify-start gap-2">
-                  {achievementStats.unlocked > 0 ? (
-                    <>
-                      You have {achievementStats.unlocked} unclaimed achievement{achievementStats.unlocked !== 1 ? 's' : ''}!
-                    </>
-                  ) : (
-                    <>Save your progress</>
-                  )}
-                </h3>
-                <p className="text-amber-700 dark:text-amber-300 text-sm">
-                  {achievementStats.unlocked > 0
-                    ? 'Sign in to claim them permanently and sync across all your devices.'
-                    : 'Your achievements are stored locally. Sign in to sync across devices and share your profile.'}
-                </p>
+          <Card className="mt-8 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border-2 border-dashed border-amber-400 dark:border-amber-600">
+            <CardContent className="py-6">
+              <div className="flex flex-col sm:flex-row items-center gap-4">
+                <Trophy className="w-10 h-10 text-amber-500" />
+                <div className="flex-1 text-center sm:text-left">
+                  <h3 className="font-bold text-amber-900 dark:text-amber-100 mb-1 flex items-center justify-center sm:justify-start gap-2">
+                    {achievementStats.unlocked > 0 ? (
+                      <>
+                        You have {achievementStats.unlocked} unclaimed achievement{achievementStats.unlocked !== 1 ? 's' : ''}!
+                      </>
+                    ) : (
+                      <>Save your progress</>
+                    )}
+                  </h3>
+                  <p className="text-amber-700 dark:text-amber-300 text-sm">
+                    {achievementStats.unlocked > 0
+                      ? 'Sign in to claim them permanently and sync across all your devices.'
+                      : 'Your achievements are stored locally. Sign in to sync across devices and share your profile.'}
+                  </p>
+                </div>
+                <Button asChild className="shrink-0 bg-amber-500 hover:bg-amber-600">
+                  <Link href="/" className="gap-2">
+                    <LogIn className="w-4 h-4" />
+                    Sign In to Claim
+                  </Link>
+                </Button>
               </div>
-              <Link
-                href="/"
-                className="shrink-0 inline-flex items-center gap-2 px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-white rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
-                </svg>
-                Sign In to Claim
-              </Link>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
         )}
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-black/5 dark:border-white/10 bg-white/50 dark:bg-slate-900/50">
-        <div className="max-w-4xl mx-auto px-4 py-6 text-center text-sm text-primary-500 dark:text-primary-400">
+      <footer className="border-t bg-background/50">
+        <div className="max-w-4xl mx-auto px-4 py-6 text-center text-sm text-muted-foreground">
           <div className="flex justify-center gap-4 mb-2">
-            <Link href="/about" className="hover:text-primary-700 dark:hover:text-primary-200 transition-colors">About</Link>
+            <Link href="/about" className="hover:text-foreground transition-colors">About</Link>
             <span>|</span>
-            <Link href="/settings" className="hover:text-primary-700 dark:hover:text-primary-200 transition-colors">Settings</Link>
+            <Link href="/settings" className="hover:text-foreground transition-colors">Settings</Link>
             <span>|</span>
-            <Link href="/suggest" className="hover:text-primary-700 dark:hover:text-primary-200 transition-colors">Suggest</Link>
+            <Link href="/suggest" className="hover:text-foreground transition-colors">Suggest</Link>
             <span>|</span>
-            <Link href="/privacy" className="hover:text-primary-700 dark:hover:text-primary-200 transition-colors">Privacy</Link>
+            <Link href="/privacy" className="hover:text-foreground transition-colors">Privacy</Link>
             <span>|</span>
-            <Link href="/terms" className="hover:text-primary-700 dark:hover:text-primary-200 transition-colors">Terms</Link>
+            <Link href="/terms" className="hover:text-foreground transition-colors">Terms</Link>
           </div>
           <p>See Every Place - Free Travel Tracker</p>
         </div>

@@ -4,6 +4,10 @@ import Image from 'next/image';
 import Script from 'next/script';
 import { Category, categoryLabels, categoryIcons, getGroupForCategory, CategoryGroup } from '@/lib/types';
 import Link from 'next/link';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { ArrowRight, ChevronRight, ChevronLeft } from 'lucide-react';
 import { nationalParks } from '@/data/nationalParks';
 import { nationalMonuments } from '@/data/nationalMonuments';
 import { stateParks } from '@/data/stateParks';
@@ -272,54 +276,53 @@ export default async function StateCategoryPage({ params }: Props) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
       <div className={`min-h-screen bg-gradient-to-b ${gradientClass}`}>
-        <header className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-black/5 dark:border-white/10 sticky top-0 z-40">
+        <header className="bg-background/90 backdrop-blur-md border-b border-border sticky top-0 z-40">
           <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
             <Link href="/" className="flex items-center gap-3 group">
               <div className="relative w-8 h-8 transition-transform group-hover:scale-110 duration-200">
                 <Image src="/logo.svg" alt="See Every Place Logo" fill className="object-contain" priority />
               </div>
               <div className="flex flex-col">
-                <span className="text-xl font-bold text-primary-900 dark:text-white leading-none">
-                  SeeEvery<span className="text-accent-500">.</span>Place<span className="text-[10px] align-super text-primary-400">™</span>
+                <span className="text-xl font-bold text-foreground leading-none">
+                  SeeEvery<span className="text-primary">.</span>Place<span className="text-[10px] align-super text-muted-foreground">™</span>
                 </span>
-                <span className="text-[10px] text-primary-500 dark:text-primary-400 font-medium tracking-wider uppercase hidden sm:block">
+                <span className="text-[10px] text-muted-foreground font-medium tracking-wider uppercase hidden sm:block">
                   Free Travel Tracker
                 </span>
               </div>
             </Link>
-            <Link
-              href={`/?category=${category}`}
-              className={`px-4 py-2 ${accent.bg} ${accent.hover} text-white rounded-lg font-medium hover:shadow-lg transition-all text-sm`}
-            >
-              Start Tracking
-            </Link>
+            <Button asChild size="sm">
+              <Link href={`/?category=${category}`}>
+                Start Tracking
+              </Link>
+            </Button>
           </div>
         </header>
 
         <main className="max-w-4xl mx-auto px-4 py-12">
           {/* Visual Breadcrumb Navigation */}
           <nav className="mb-6 text-sm" aria-label="Breadcrumb">
-            <ol className="flex items-center gap-2 text-primary-500 dark:text-primary-400">
+            <ol className="flex items-center gap-2 text-muted-foreground">
               <li>
-                <Link href="/" className="hover:text-primary-700 dark:hover:text-primary-200 transition-colors">Home</Link>
+                <Link href="/" className="hover:text-foreground transition-colors">Home</Link>
               </li>
-              <li className="text-primary-400 dark:text-primary-500">/</li>
+              <li className="text-muted-foreground/60">/</li>
               <li>
-                <Link href={`/track/${category}`} className="hover:text-primary-700 dark:hover:text-primary-200 transition-colors">
+                <Link href={`/track/${category}`} className="hover:text-foreground transition-colors">
                   {label}
                 </Link>
               </li>
-              <li className="text-primary-400 dark:text-primary-500">/</li>
-              <li className="text-primary-900 dark:text-white font-medium">{stateName}</li>
+              <li className="text-muted-foreground/60">/</li>
+              <li className="text-foreground font-medium">{stateName}</li>
             </ol>
           </nav>
 
           <div className="text-center mb-12">
             <span className="text-6xl mb-4 block">{icon}</span>
-            <h1 className="text-4xl font-bold text-primary-900 dark:text-white mb-4">
+            <h1 className="text-4xl font-bold text-foreground mb-4">
               {label} in {stateName}
             </h1>
-            <p className="text-xl text-primary-600 dark:text-primary-300 max-w-2xl mx-auto">
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
               {description}
             </p>
           </div>
@@ -327,85 +330,86 @@ export default async function StateCategoryPage({ params }: Props) {
           {/* Stats Section */}
           <section className="mb-12">
             <div className="grid md:grid-cols-3 gap-6">
-              <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-premium border border-black/5 dark:border-white/10 text-center">
-                <div className="text-3xl mb-3">📍</div>
-                <div className="text-2xl font-bold text-primary-900 dark:text-white mb-1">{items.length}</div>
-                <p className="text-primary-600 dark:text-primary-400 text-sm">
-                  {label} in {stateName}
-                </p>
-              </div>
-              <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-premium border border-black/5 dark:border-white/10 text-center">
-                <div className="text-3xl mb-3">🗺️</div>
-                <div className="text-2xl font-bold text-primary-900 dark:text-white mb-1">Interactive</div>
-                <p className="text-primary-600 dark:text-primary-400 text-sm">
-                  Visual map tracking
-                </p>
-              </div>
-              <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-premium border border-black/5 dark:border-white/10 text-center">
-                <div className="text-3xl mb-3">✓</div>
-                <div className="text-2xl font-bold text-primary-900 dark:text-white mb-1">Free</div>
-                <p className="text-primary-600 dark:text-primary-400 text-sm">
-                  No account required
-                </p>
-              </div>
+              <Card className="text-center">
+                <CardContent className="p-6">
+                  <div className="text-3xl mb-3">📍</div>
+                  <div className="text-2xl font-bold text-foreground mb-1">{items.length}</div>
+                  <p className="text-muted-foreground text-sm">
+                    {label} in {stateName}
+                  </p>
+                </CardContent>
+              </Card>
+              <Card className="text-center">
+                <CardContent className="p-6">
+                  <div className="text-3xl mb-3">🗺️</div>
+                  <div className="text-2xl font-bold text-foreground mb-1">Interactive</div>
+                  <p className="text-muted-foreground text-sm">
+                    Visual map tracking
+                  </p>
+                </CardContent>
+              </Card>
+              <Card className="text-center">
+                <CardContent className="p-6">
+                  <div className="text-3xl mb-3">✓</div>
+                  <div className="text-2xl font-bold text-foreground mb-1">Free</div>
+                  <p className="text-muted-foreground text-sm">
+                    No account required
+                  </p>
+                </CardContent>
+              </Card>
             </div>
           </section>
 
           {/* CTA */}
           <div className="text-center mb-12">
-            <Link
-              href={`/?category=${category}`}
-              className={`inline-flex items-center gap-2 px-8 py-4 ${accent.bg} ${accent.hover} text-white rounded-xl font-bold text-lg hover:shadow-xl transition-all`}
-            >
-              Start Tracking {stateName} {label}
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-              </svg>
-            </Link>
-            <p className="mt-4 text-primary-500 dark:text-primary-400 text-sm">
+            <Button asChild size="lg" className="text-lg px-8 py-6 h-auto">
+              <Link href={`/?category=${category}`}>
+                Start Tracking {stateName} {label}
+                <ArrowRight className="w-5 h-5 ml-2" />
+              </Link>
+            </Button>
+            <p className="mt-4 text-muted-foreground text-sm">
               Free to use, no account required
             </p>
           </div>
 
           {/* Challenge Section */}
           <section className="my-12">
-            <div className={`${accent.challenge} text-white rounded-xl p-8 text-center`}>
-              <h2 className="font-bold text-2xl mb-3">The {stateName} Challenge</h2>
-              <p className="opacity-90 mb-6 text-lg">
-                Can you visit all {items.length} {label.toLowerCase()} in {stateName}? Start tracking your progress today!
-              </p>
-              <Link
-                href={`/?category=${category}`}
-                className="inline-flex items-center gap-2 px-6 py-3 bg-white/20 hover:bg-white/30 rounded-lg font-semibold transition-colors"
-              >
-                Accept the Challenge
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </Link>
-            </div>
+            <Card className="bg-gradient-to-br from-primary to-primary/80 text-primary-foreground border-0">
+              <CardContent className="p-8 text-center">
+                <h2 className="font-bold text-2xl mb-3">The {stateName} Challenge</h2>
+                <p className="opacity-90 mb-6 text-lg">
+                  Can you visit all {items.length} {label.toLowerCase()} in {stateName}? Start tracking your progress today!
+                </p>
+                <Button asChild variant="secondary" className="bg-white/20 hover:bg-white/30 text-white border-0">
+                  <Link href={`/?category=${category}`}>
+                    Accept the Challenge
+                    <ChevronRight className="w-4 h-4 ml-1" />
+                  </Link>
+                </Button>
+              </CardContent>
+            </Card>
           </section>
 
           {/* List of Items */}
           <section className="my-12">
-            <h2 className="text-2xl font-bold text-primary-900 dark:text-white mb-6 text-center">
+            <h2 className="text-2xl font-bold text-foreground mb-6 text-center">
               All {label} in {stateName}
             </h2>
             <div className="grid gap-3 md:grid-cols-2">
               {items.map((item) => (
-                <div
-                  key={item.id}
-                  className="bg-white dark:bg-slate-800 rounded-lg p-4 shadow-premium border border-black/5 dark:border-white/10"
-                >
-                  <h3 className="font-semibold text-primary-900 dark:text-white">
-                    {item.name}
-                  </h3>
-                  {'region' in item && (
-                    <p className="text-sm text-primary-500 dark:text-primary-400">
-                      {item.region}
-                    </p>
-                  )}
-                </div>
+                <Card key={item.id}>
+                  <CardContent className="p-4">
+                    <h3 className="font-semibold text-foreground">
+                      {item.name}
+                    </h3>
+                    {'region' in item && (
+                      <p className="text-sm text-muted-foreground">
+                        {item.region}
+                      </p>
+                    )}
+                  </CardContent>
+                </Card>
               ))}
             </div>
           </section>
@@ -413,24 +417,28 @@ export default async function StateCategoryPage({ params }: Props) {
           {/* Explore Other States */}
           {otherStates.length > 0 && (
             <section className="my-12">
-              <h2 className="text-2xl font-bold text-primary-900 dark:text-white mb-6 text-center">
+              <h2 className="text-2xl font-bold text-foreground mb-6 text-center">
                 Explore {label} in Other States
               </h2>
-              <div className="flex flex-wrap justify-center gap-3">
+              <div className="flex flex-wrap justify-center gap-2">
                 {otherStates.map((otherState) => (
                   <Link
                     key={otherState}
                     href={`/track/${category}/${otherState.toLowerCase()}`}
-                    className="bg-white/70 dark:bg-slate-800/70 px-4 py-2 rounded-full text-sm font-medium border border-black/5 dark:border-white/10 hover:bg-white dark:hover:bg-slate-700 transition-colors"
                   >
-                    {stateNames[otherState] || otherState}
+                    <Badge
+                      variant="secondary"
+                      className="px-4 py-2 text-sm font-medium hover:bg-secondary/80 transition-colors cursor-pointer"
+                    >
+                      {stateNames[otherState] || otherState}
+                    </Badge>
                   </Link>
                 ))}
               </div>
               <div className="text-center mt-4">
                 <Link
                   href={`/track/${category}`}
-                  className="text-sm text-primary-600 dark:text-primary-400 hover:underline"
+                  className="text-sm text-muted-foreground hover:text-foreground hover:underline transition-colors"
                 >
                   View all {allStates.length} states with {label.toLowerCase()} →
                 </Link>
@@ -440,28 +448,25 @@ export default async function StateCategoryPage({ params }: Props) {
 
           {/* Back to main category */}
           <section className="mt-16 text-center">
-            <Link
-              href={`/track/${category}`}
-              className="inline-flex items-center gap-2 text-primary-600 dark:text-primary-400 hover:text-primary-800 dark:hover:text-primary-200 font-medium"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-              Back to All {label}
-            </Link>
+            <Button asChild variant="ghost" className="text-muted-foreground hover:text-foreground">
+              <Link href={`/track/${category}`}>
+                <ChevronLeft className="w-4 h-4 mr-1" />
+                Back to All {label}
+              </Link>
+            </Button>
           </section>
         </main>
 
-        <footer className="border-t border-black/5 dark:border-white/10 bg-white/50 dark:bg-slate-900/50">
-          <div className="max-w-4xl mx-auto px-4 py-6 text-center text-sm text-primary-500 dark:text-primary-400">
+        <footer className="border-t border-border bg-muted/50">
+          <div className="max-w-4xl mx-auto px-4 py-6 text-center text-sm text-muted-foreground">
             <div className="flex justify-center gap-4 mb-2">
-              <Link href="/about" className="hover:text-primary-700 dark:hover:text-primary-200 transition-colors">About</Link>
+              <Link href="/about" className="hover:text-foreground transition-colors">About</Link>
               <span>•</span>
-              <Link href="/suggest" className="hover:text-primary-700 dark:hover:text-primary-200 transition-colors">Suggest</Link>
+              <Link href="/suggest" className="hover:text-foreground transition-colors">Suggest</Link>
               <span>•</span>
-              <Link href="/privacy" className="hover:text-primary-700 dark:hover:text-primary-200 transition-colors">Privacy</Link>
+              <Link href="/privacy" className="hover:text-foreground transition-colors">Privacy</Link>
               <span>•</span>
-              <Link href="/terms" className="hover:text-primary-700 dark:hover:text-primary-200 transition-colors">Terms</Link>
+              <Link href="/terms" className="hover:text-foreground transition-colors">Terms</Link>
             </div>
             <p>See Every Place - Free Travel Tracker</p>
           </div>

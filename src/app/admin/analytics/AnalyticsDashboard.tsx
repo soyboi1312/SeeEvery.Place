@@ -2,11 +2,39 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { Tooltip } from 'react-tooltip';
+import { Download, X, MapPin, ExternalLink, Copy, Loader2 } from 'lucide-react';
 import { useDarkMode } from '@/lib/hooks/useDarkMode';
 import { categoryLabels, ALL_CATEGORIES, Category } from '@/lib/types';
 import { AnalyticsUSMap, AnalyticsWorldMap, HeatmapLegend } from './AnalyticsMaps';
 import { lookupPlace, PlaceDetails } from './placeLookup';
 import TimeSeriesChart from './TimeSeriesChart';
+
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface TimeSeriesPoint {
   date: string;
@@ -24,16 +52,12 @@ interface TimeSeriesData {
 function exportToCSV(data: Record<string, unknown>[], filename: string) {
   if (!data || data.length === 0) return;
 
-  // Get headers from first object
   const headers = Object.keys(data[0]);
-
-  // Create CSV content
   const csvContent = [
     headers.join(','),
     ...data.map(row =>
       headers.map(header => {
         const value = row[header];
-        // Handle strings with commas or quotes
         if (typeof value === 'string' && (value.includes(',') || value.includes('"'))) {
           return `"${value.replace(/"/g, '""')}"`;
         }
@@ -86,7 +110,6 @@ interface AnalyticsData {
 type ViewMode = 'top' | 'bottom' | 'zero';
 type Timeframe = 'allTime' | 'last7Days' | 'last30Days' | 'previousMonth';
 
-// US state abbreviation to full name mapping
 const stateNames: Record<string, string> = {
   'AL': 'Alabama', 'AK': 'Alaska', 'AZ': 'Arizona', 'AR': 'Arkansas', 'CA': 'California',
   'CO': 'Colorado', 'CT': 'Connecticut', 'DE': 'Delaware', 'FL': 'Florida', 'GA': 'Georgia',
@@ -113,21 +136,17 @@ export default function AnalyticsDashboard() {
   const [timeSeriesData, setTimeSeriesData] = useState<TimeSeriesData | null>(null);
   const [loadingTimeSeries, setLoadingTimeSeries] = useState(false);
 
-  // Handle place click to show details
   const handlePlaceClick = useCallback((category: Category, id: string) => {
     const details = lookupPlace(category, id);
     setSelectedPlace(details);
   }, []);
 
-  // Get items based on view mode
   const getFilteredItems = (items: PopularItem[]): PopularItem[] => {
     if (viewMode === 'top') {
       return items.slice(0, 10);
     } else if (viewMode === 'bottom') {
-      // Get items with at least 1 visit, sorted ascending
       return items.filter(i => i.timesVisited > 0).sort((a, b) => a.timesVisited - b.timesVisited).slice(0, 10);
     } else {
-      // Zero visits - items only on bucket lists (visited = 0)
       return items.filter(i => i.timesVisited === 0 && i.timesBucketListed > 0).slice(0, 20);
     }
   };
@@ -137,9 +156,7 @@ export default function AnalyticsDashboard() {
       setLoading(true);
       try {
         const response = await fetch(`/api/admin/analytics?timeframe=${timeframe}`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch analytics');
-        }
+        if (!response.ok) throw new Error('Failed to fetch analytics');
         const analyticsData = await response.json();
         setData(analyticsData);
       } catch (err) {
@@ -148,19 +165,15 @@ export default function AnalyticsDashboard() {
         setLoading(false);
       }
     }
-
     fetchAnalytics();
   }, [timeframe]);
 
-  // Fetch time series data
   useEffect(() => {
     async function fetchTimeSeries() {
       setLoadingTimeSeries(true);
       try {
         const response = await fetch('/api/admin/analytics/timeseries?days=30');
-        if (!response.ok) {
-          throw new Error('Failed to fetch time series');
-        }
+        if (!response.ok) throw new Error('Failed to fetch time series');
         const tsData = await response.json();
         setTimeSeriesData(tsData);
       } catch (err) {
@@ -169,7 +182,6 @@ export default function AnalyticsDashboard() {
         setLoadingTimeSeries(false);
       }
     }
-
     fetchTimeSeries();
   }, []);
 
@@ -182,113 +194,137 @@ export default function AnalyticsDashboard() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8">
-        <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-bold text-primary-900 dark:text-white mb-2">User Analytics</h1>
-            <p className="text-primary-600 dark:text-primary-300">
-              Insights into how users are tracking their travels.
-            </p>
-          </div>
-          {/* Timeframe Selector and Export */}
-          <div className="flex items-center gap-3">
-            <label className="text-sm font-medium text-primary-600 dark:text-primary-300">Timeframe:</label>
-            <select
-              value={timeframe}
-              onChange={(e) => setTimeframe(e.target.value as Timeframe)}
-              className="px-3 py-2 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-lg text-sm font-medium text-primary-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-            >
-              <option value="allTime">All Time</option>
-              <option value="last7Days">Last 7 Days</option>
-              <option value="last30Days">Last 30 Days</option>
-              <option value="previousMonth">Previous Month</option>
-            </select>
-            {data && (
-              <button
-                onClick={() => {
-                  // Export category stats
-                  const categoryData = data.categoryStats.map(stat => ({
-                    Category: getCategoryLabel(stat.category),
-                    'Users Tracking': stat.usersTracking,
-                    'Avg Visited': stat.avgVisited.toFixed(1),
-                    'Avg Bucket List': stat.avgBucketList.toFixed(1),
-                    'Max Visited': stat.maxVisited,
-                    'Total Visits': stat.totalVisited,
-                  }));
-                  exportToCSV(categoryData, `analytics_categories_${timeframe}`);
-                }}
-                className="px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2 text-sm"
-                title="Export analytics to CSV"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                </svg>
-                Export
-              </button>
-            )}
-          </div>
+    <div className="p-6 space-y-6">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">User Analytics</h1>
+          <p className="text-muted-foreground">
+            Insights into how users are tracking their travels.
+          </p>
         </div>
+        <div className="flex items-center gap-3">
+          <Select value={timeframe} onValueChange={(value) => setTimeframe(value as Timeframe)}>
+            <SelectTrigger className="w-[160px]">
+              <SelectValue placeholder="Select timeframe" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="allTime">All Time</SelectItem>
+              <SelectItem value="last7Days">Last 7 Days</SelectItem>
+              <SelectItem value="last30Days">Last 30 Days</SelectItem>
+              <SelectItem value="previousMonth">Previous Month</SelectItem>
+            </SelectContent>
+          </Select>
+          {data && (
+            <Button
+              onClick={() => {
+                const categoryData = data.categoryStats.map(stat => ({
+                  Category: getCategoryLabel(stat.category),
+                  'Users Tracking': stat.usersTracking,
+                  'Avg Visited': stat.avgVisited.toFixed(1),
+                  'Avg Bucket List': stat.avgBucketList.toFixed(1),
+                  'Max Visited': stat.maxVisited,
+                  'Total Visits': stat.totalVisited,
+                }));
+                exportToCSV(categoryData, `analytics_categories_${timeframe}`);
+              }}
+              className="bg-green-600 hover:bg-green-700"
+            >
+              <Download className="w-4 h-4 mr-2" />
+              Export
+            </Button>
+          )}
+        </div>
+      </div>
 
-        {loading && (
-          <div className="flex items-center justify-center py-20">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 dark:border-primary-400"></div>
-          </div>
-        )}
+      {loading && (
+        <div className="flex items-center justify-center py-20">
+          <Loader2 className="w-12 h-12 animate-spin text-muted-foreground" />
+        </div>
+      )}
 
-        {error && (
-          <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-4 rounded-lg">
-            {error}
-          </div>
-        )}
+      {error && (
+        <div className="bg-destructive/10 text-destructive p-4 rounded-lg">
+          {error}
+        </div>
+      )}
 
-        {data && (
-          <div className="space-y-8">
-            {/* Overview Cards */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-              <StatCard
-                title="Total Users"
-                value={data.overview.totalUsers}
-                icon="👥"
-              />
-              <StatCard
-                title="Active Users"
-                value={data.overview.usersWithSelections}
-                subtitle={`${data.overview.totalUsers > 0 ? Math.round((data.overview.usersWithSelections / data.overview.totalUsers) * 100) : 0}% of total`}
-                icon="📊"
-              />
-              <StatCard
-                title="Tracking States"
-                value={data.overview.usersTrackingStates}
-                icon="🇺🇸"
-              />
-              <StatCard
-                title="Tracking Countries"
-                value={data.overview.usersTrackingCountries}
-                icon="🌍"
-              />
-            </div>
-
-            {/* Time Series Charts */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* New Users Chart */}
-              <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-premium border border-black/5 dark:border-white/10 p-5">
-                <div className="flex items-center justify-between mb-4">
+      {data && (
+        <div className="space-y-6">
+          {/* Overview Cards */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <Card>
+              <CardContent className="p-5">
+                <div className="flex items-start justify-between">
                   <div>
-                    <h3 className="text-lg font-bold text-primary-900 dark:text-white">New Users</h3>
-                    <p className="text-sm text-primary-600 dark:text-primary-400">Last 30 days</p>
+                    <p className="text-sm text-muted-foreground">Total Users</p>
+                    <p className="text-3xl font-bold mt-1">{data.overview.totalUsers}</p>
+                  </div>
+                  <span className="text-2xl">👥</span>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-5">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Active Users</p>
+                    <p className="text-3xl font-bold mt-1">{data.overview.usersWithSelections}</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {data.overview.totalUsers > 0 ? Math.round((data.overview.usersWithSelections / data.overview.totalUsers) * 100) : 0}% of total
+                    </p>
+                  </div>
+                  <span className="text-2xl">📊</span>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-5">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Tracking States</p>
+                    <p className="text-3xl font-bold mt-1">{data.overview.usersTrackingStates}</p>
+                  </div>
+                  <span className="text-2xl">🇺🇸</span>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-5">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Tracking Countries</p>
+                    <p className="text-3xl font-bold mt-1">{data.overview.usersTrackingCountries}</p>
+                  </div>
+                  <span className="text-2xl">🌍</span>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Time Series Charts */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader className="pb-2">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>New Users</CardTitle>
+                    <CardDescription>Last 30 days</CardDescription>
                   </div>
                   {timeSeriesData && (
                     <div className="text-right">
                       <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">
                         {timeSeriesData.totals.newUsers}
                       </span>
-                      <p className="text-xs text-primary-500 dark:text-primary-400">total signups</p>
+                      <p className="text-xs text-muted-foreground">total signups</p>
                     </div>
                   )}
                 </div>
+              </CardHeader>
+              <CardContent>
                 {loadingTimeSeries ? (
                   <div className="flex items-center justify-center h-48">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 dark:border-blue-400"></div>
+                    <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
                   </div>
                 ) : timeSeriesData ? (
                   <TimeSeriesChart
@@ -299,31 +335,34 @@ export default function AnalyticsDashboard() {
                     showDots={timeSeriesData.timeseries.length <= 15}
                   />
                 ) : (
-                  <div className="flex items-center justify-center h-48 text-primary-500">
+                  <div className="flex items-center justify-center h-48 text-muted-foreground">
                     No data available
                   </div>
                 )}
-              </div>
+              </CardContent>
+            </Card>
 
-              {/* Activity Chart */}
-              <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-premium border border-black/5 dark:border-white/10 p-5">
-                <div className="flex items-center justify-between mb-4">
+            <Card>
+              <CardHeader className="pb-2">
+                <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="text-lg font-bold text-primary-900 dark:text-white">User Activity</h3>
-                    <p className="text-sm text-primary-600 dark:text-primary-400">Items tracked per day</p>
+                    <CardTitle>User Activity</CardTitle>
+                    <CardDescription>Items tracked per day</CardDescription>
                   </div>
                   {timeSeriesData && (
                     <div className="text-right">
                       <span className="text-2xl font-bold text-green-600 dark:text-green-400">
                         {timeSeriesData.totals.itemsTracked.toLocaleString()}
                       </span>
-                      <p className="text-xs text-primary-500 dark:text-primary-400">total items</p>
+                      <p className="text-xs text-muted-foreground">total items</p>
                     </div>
                   )}
                 </div>
+              </CardHeader>
+              <CardContent>
                 {loadingTimeSeries ? (
                   <div className="flex items-center justify-center h-48">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 dark:border-green-400"></div>
+                    <Loader2 className="w-8 h-8 animate-spin text-green-600" />
                   </div>
                 ) : timeSeriesData ? (
                   <TimeSeriesChart
@@ -334,399 +373,327 @@ export default function AnalyticsDashboard() {
                     showDots={timeSeriesData.timeseries.length <= 15}
                   />
                 ) : (
-                  <div className="flex items-center justify-center h-48 text-primary-500">
+                  <div className="flex items-center justify-center h-48 text-muted-foreground">
                     No data available
                   </div>
                 )}
-              </div>
-            </div>
+              </CardContent>
+            </Card>
+          </div>
 
-            {/* Category Stats Table */}
-            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-premium border border-black/5 dark:border-white/10 overflow-hidden">
-              <div className="p-5 border-b border-gray-100 dark:border-gray-700">
-                <h2 className="text-xl font-bold text-primary-900 dark:text-white">Category Statistics</h2>
-                <p className="text-sm text-primary-600 dark:text-primary-300 mt-1">
-                  Breakdown by category for users who have tracked at least one item
-                </p>
-              </div>
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-gray-50 dark:bg-slate-700/50">
-                    <tr>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Category</th>
-                      <th className="px-4 py-3 text-right text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Users</th>
-                      <th className="px-4 py-3 text-right text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Avg Visited</th>
-                      <th className="px-4 py-3 text-right text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Avg Bucket List</th>
-                      <th className="px-4 py-3 text-right text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Max Visited</th>
-                      <th className="px-4 py-3 text-right text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total Visits</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-                    {data.categoryStats.map((stat) => (
-                      <tr key={stat.category} className="hover:bg-gray-50 dark:hover:bg-slate-700/30">
-                        <td className="px-4 py-3 text-sm font-medium text-primary-900 dark:text-white">
-                          {getCategoryLabel(stat.category)}
-                        </td>
-                        <td className="px-4 py-3 text-sm text-right text-gray-600 dark:text-gray-300">
-                          {stat.usersTracking}
-                        </td>
-                        <td className="px-4 py-3 text-sm text-right text-green-600 dark:text-green-400 font-medium">
-                          {stat.avgVisited.toFixed(1)}
-                        </td>
-                        <td className="px-4 py-3 text-sm text-right text-amber-600 dark:text-amber-400">
-                          {stat.avgBucketList.toFixed(1)}
-                        </td>
-                        <td className="px-4 py-3 text-sm text-right text-gray-600 dark:text-gray-300">
-                          {stat.maxVisited}
-                        </td>
-                        <td className="px-4 py-3 text-sm text-right text-gray-600 dark:text-gray-300">
-                          {stat.totalVisited}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+          {/* Category Stats Table */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Category Statistics</CardTitle>
+              <CardDescription>
+                Breakdown by category for users who have tracked at least one item
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="p-0">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Category</TableHead>
+                    <TableHead className="text-right">Users</TableHead>
+                    <TableHead className="text-right">Avg Visited</TableHead>
+                    <TableHead className="text-right">Avg Bucket List</TableHead>
+                    <TableHead className="text-right">Max Visited</TableHead>
+                    <TableHead className="text-right">Total Visits</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {data.categoryStats.map((stat) => (
+                    <TableRow key={stat.category}>
+                      <TableCell className="font-medium">{getCategoryLabel(stat.category)}</TableCell>
+                      <TableCell className="text-right">{stat.usersTracking}</TableCell>
+                      <TableCell className="text-right text-green-600 dark:text-green-400 font-medium">
+                        {stat.avgVisited.toFixed(1)}
+                      </TableCell>
+                      <TableCell className="text-right text-amber-600 dark:text-amber-400">
+                        {stat.avgBucketList.toFixed(1)}
+                      </TableCell>
+                      <TableCell className="text-right">{stat.maxVisited}</TableCell>
+                      <TableCell className="text-right">{stat.totalVisited}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
               {data.categoryStats.length === 0 && (
-                <div className="p-8 text-center text-gray-500 dark:text-gray-400">
+                <div className="p-8 text-center text-muted-foreground">
                   No category data available yet.
                 </div>
               )}
-            </div>
+            </CardContent>
+          </Card>
 
-            {/* Heatmaps Section */}
-            <div className="grid lg:grid-cols-2 gap-6">
-              {/* US Heatmap */}
-              <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-premium border border-black/5 dark:border-white/10 overflow-hidden">
-                <div className="p-5 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
-                  <h2 className="text-lg font-bold text-primary-900 dark:text-white flex items-center gap-2">
-                    <span>🇺🇸</span> US Visitor Heatmap
-                  </h2>
-                  <HeatmapLegend
-                    maxValue={Math.max(...data.popularStates.map(s => s.timesVisited), 1)}
-                    isDarkMode={isDarkMode}
-                  />
-                </div>
-                <div className="h-[280px] w-full p-2">
-                  {data.popularStates.length > 0 ? (
-                    <AnalyticsUSMap data={data.popularStates} isDarkMode={isDarkMode} />
-                  ) : (
-                    <div className="flex items-center justify-center h-full text-gray-400">No data</div>
-                  )}
-                </div>
-              </div>
-
-              {/* World Heatmap */}
-              <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-premium border border-black/5 dark:border-white/10 overflow-hidden">
-                <div className="p-5 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
-                  <h2 className="text-lg font-bold text-primary-900 dark:text-white flex items-center gap-2">
-                    <span>🌍</span> Global Visitor Heatmap
-                  </h2>
-                  <HeatmapLegend
-                    maxValue={Math.max(...data.popularCountries.map(c => c.timesVisited), 1)}
-                    isDarkMode={isDarkMode}
-                  />
-                </div>
-                <div className="h-[280px] w-full p-2">
-                  {data.popularCountries.length > 0 ? (
-                    <AnalyticsWorldMap data={data.popularCountries} isDarkMode={isDarkMode} />
-                  ) : (
-                    <div className="flex items-center justify-center h-full text-gray-400">No data</div>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Tooltip for heatmaps */}
-            <Tooltip id="analytics-tooltip" />
-
-            {/* Category Explorer - All Categories */}
-            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-premium border border-black/5 dark:border-white/10 overflow-hidden">
-              <div className="p-5 border-b border-gray-100 dark:border-gray-700">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                  <h2 className="text-xl font-bold text-primary-900 dark:text-white">Category Explorer</h2>
-                  <div className="flex flex-wrap items-center gap-3">
-                    {/* Category Selector */}
-                    <select
-                      value={selectedCategory}
-                      onChange={(e) => setSelectedCategory(e.target.value as Category)}
-                      className="px-3 py-2 bg-gray-100 dark:bg-slate-700 rounded-lg text-sm font-medium text-primary-900 dark:text-white border-0 focus:ring-2 focus:ring-primary-500"
-                    >
-                      {ALL_CATEGORIES.filter(cat => cat !== 'states' && cat !== 'countries').map(cat => (
-                        <option key={cat} value={cat}>{getCategoryLabel(cat)}</option>
-                      ))}
-                    </select>
-                    {/* View Mode Tabs */}
-                    <div className="flex bg-gray-100 dark:bg-slate-700 rounded-lg p-1">
-                      <button
-                        onClick={() => setViewMode('top')}
-                        className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
-                          viewMode === 'top'
-                            ? 'bg-white dark:bg-slate-600 text-primary-900 dark:text-white shadow-sm'
-                            : 'text-gray-600 dark:text-gray-400 hover:text-primary-900 dark:hover:text-white'
-                        }`}
-                      >
-                        Top 10
-                      </button>
-                      <button
-                        onClick={() => setViewMode('bottom')}
-                        className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
-                          viewMode === 'bottom'
-                            ? 'bg-white dark:bg-slate-600 text-primary-900 dark:text-white shadow-sm'
-                            : 'text-gray-600 dark:text-gray-400 hover:text-primary-900 dark:hover:text-white'
-                        }`}
-                      >
-                        Hidden Gems
-                      </button>
-                      <button
-                        onClick={() => setViewMode('zero')}
-                        className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
-                          viewMode === 'zero'
-                            ? 'bg-white dark:bg-slate-600 text-primary-900 dark:text-white shadow-sm'
-                            : 'text-gray-600 dark:text-gray-400 hover:text-primary-900 dark:hover:text-white'
-                        }`}
-                      >
-                        Unvisited
-                      </button>
-                    </div>
-                  </div>
-                </div>
-                <p className="text-sm text-primary-600 dark:text-primary-300 mt-2">
-                  {viewMode === 'top' && 'Most visited places in this category'}
-                  {viewMode === 'bottom' && 'Least visited places (hidden gems for newsletter challenges)'}
-                  {viewMode === 'zero' && 'Places on bucket lists but never visited yet'}
-                </p>
-              </div>
-              <div className="p-4">
-                {data.popularItems && data.popularItems[selectedCategory] ? (
-                  (() => {
-                    const filteredItems = getFilteredItems(data.popularItems[selectedCategory]);
-                    return filteredItems.length > 0 ? (
-                      <div className="space-y-3">
-                        {filteredItems.map((item, index) => (
-                          <div key={item.id} className="flex items-center gap-3">
-                            <span className={`w-6 h-6 flex items-center justify-center rounded-full text-xs font-bold ${
-                              viewMode === 'top' && index < 3
-                                ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
-                                : viewMode === 'bottom'
-                                ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400'
-                                : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'
-                            }`}>
-                              {index + 1}
-                            </span>
-                            <button
-                              onClick={() => handlePlaceClick(selectedCategory, item.id)}
-                              className="flex-1 text-sm font-medium text-primary-900 dark:text-white truncate text-left hover:text-primary-600 dark:hover:text-primary-400 hover:underline cursor-pointer"
-                              title={`Click for details: ${item.id}`}
-                            >
-                              {item.id}
-                            </button>
-                            <span className="text-sm text-green-600 dark:text-green-400">
-                              {item.timesVisited} visits
-                            </span>
-                            {item.timesBucketListed > 0 && (
-                              <span className="text-xs text-amber-600 dark:text-amber-400">
-                                +{item.timesBucketListed} bucket
-                              </span>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <p className="text-center text-gray-500 dark:text-gray-400 py-8">
-                        {viewMode === 'zero' ? 'No unvisited bucket list items in this category.' : 'No data available for this category yet.'}
-                      </p>
-                    );
-                  })()
+          {/* Heatmaps Section */}
+          <div className="grid lg:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader className="pb-2 flex flex-row items-center justify-between">
+                <CardTitle className="flex items-center gap-2">
+                  <span>🇺🇸</span> US Visitor Heatmap
+                </CardTitle>
+                <HeatmapLegend
+                  maxValue={Math.max(...data.popularStates.map(s => s.timesVisited), 1)}
+                  isDarkMode={isDarkMode}
+                />
+              </CardHeader>
+              <CardContent className="h-[280px] p-2">
+                {data.popularStates.length > 0 ? (
+                  <AnalyticsUSMap data={data.popularStates} isDarkMode={isDarkMode} />
                 ) : (
-                  <p className="text-center text-gray-500 dark:text-gray-400 py-8">
-                    No data available for this category yet.
+                  <div className="flex items-center justify-center h-full text-muted-foreground">No data</div>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="pb-2 flex flex-row items-center justify-between">
+                <CardTitle className="flex items-center gap-2">
+                  <span>🌍</span> Global Visitor Heatmap
+                </CardTitle>
+                <HeatmapLegend
+                  maxValue={Math.max(...data.popularCountries.map(c => c.timesVisited), 1)}
+                  isDarkMode={isDarkMode}
+                />
+              </CardHeader>
+              <CardContent className="h-[280px] p-2">
+                {data.popularCountries.length > 0 ? (
+                  <AnalyticsWorldMap data={data.popularCountries} isDarkMode={isDarkMode} />
+                ) : (
+                  <div className="flex items-center justify-center h-full text-muted-foreground">No data</div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+
+          <Tooltip id="analytics-tooltip" />
+
+          {/* Category Explorer */}
+          <Card>
+            <CardHeader>
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <CardTitle>Category Explorer</CardTitle>
+                <div className="flex flex-wrap items-center gap-3">
+                  <Select value={selectedCategory} onValueChange={(value) => setSelectedCategory(value as Category)}>
+                    <SelectTrigger className="w-[180px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {ALL_CATEGORIES.filter(cat => cat !== 'states' && cat !== 'countries').map(cat => (
+                        <SelectItem key={cat} value={cat}>{getCategoryLabel(cat)}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as ViewMode)}>
+                    <TabsList>
+                      <TabsTrigger value="top">Top 10</TabsTrigger>
+                      <TabsTrigger value="bottom">Hidden Gems</TabsTrigger>
+                      <TabsTrigger value="zero">Unvisited</TabsTrigger>
+                    </TabsList>
+                  </Tabs>
+                </div>
+              </div>
+              <CardDescription>
+                {viewMode === 'top' && 'Most visited places in this category'}
+                {viewMode === 'bottom' && 'Least visited places (hidden gems for newsletter challenges)'}
+                {viewMode === 'zero' && 'Places on bucket lists but never visited yet'}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {data.popularItems && data.popularItems[selectedCategory] ? (
+                (() => {
+                  const filteredItems = getFilteredItems(data.popularItems[selectedCategory]);
+                  return filteredItems.length > 0 ? (
+                    <div className="space-y-3">
+                      {filteredItems.map((item, index) => (
+                        <div key={item.id} className="flex items-center gap-3">
+                          <span className={`w-6 h-6 flex items-center justify-center rounded-full text-xs font-bold ${
+                            viewMode === 'top' && index < 3
+                              ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
+                              : viewMode === 'bottom'
+                              ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400'
+                              : 'bg-muted text-muted-foreground'
+                          }`}>
+                            {index + 1}
+                          </span>
+                          <button
+                            onClick={() => handlePlaceClick(selectedCategory, item.id)}
+                            className="flex-1 text-sm font-medium truncate text-left hover:text-primary hover:underline cursor-pointer"
+                            title={`Click for details: ${item.id}`}
+                          >
+                            {item.id}
+                          </button>
+                          <span className="text-sm text-green-600 dark:text-green-400">
+                            {item.timesVisited} visits
+                          </span>
+                          {item.timesBucketListed > 0 && (
+                            <span className="text-xs text-amber-600 dark:text-amber-400">
+                              +{item.timesBucketListed} bucket
+                            </span>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-center text-muted-foreground py-8">
+                      {viewMode === 'zero' ? 'No unvisited bucket list items in this category.' : 'No data available for this category yet.'}
+                    </p>
+                  );
+                })()
+              ) : (
+                <p className="text-center text-muted-foreground py-8">
+                  No data available for this category yet.
+                </p>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Popular Items */}
+          <div className="grid md:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <span>🇺🇸</span> Top 10 States
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {data.popularStates.length > 0 ? (
+                  <div className="space-y-3">
+                    {data.popularStates.slice(0, 10).map((item, index) => (
+                      <div key={item.id} className="flex items-center gap-3">
+                        <span className={`w-6 h-6 flex items-center justify-center rounded-full text-xs font-bold ${
+                          index < 3 ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' : 'bg-muted text-muted-foreground'
+                        }`}>
+                          {index + 1}
+                        </span>
+                        <span className="flex-1 text-sm font-medium">
+                          {getStateName(item.id)}
+                        </span>
+                        <span className="text-sm text-green-600 dark:text-green-400">
+                          {item.timesVisited} visits
+                        </span>
+                        {item.timesBucketListed > 0 && (
+                          <span className="text-xs text-amber-600 dark:text-amber-400">
+                            +{item.timesBucketListed} bucket
+                          </span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-center text-muted-foreground py-4">
+                    No state data available yet.
                   </p>
                 )}
-              </div>
-            </div>
+              </CardContent>
+            </Card>
 
-            {/* Popular Items */}
-            <div className="grid md:grid-cols-2 gap-6">
-              {/* Popular States */}
-              <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-premium border border-black/5 dark:border-white/10 overflow-hidden">
-                <div className="p-5 border-b border-gray-100 dark:border-gray-700">
-                  <h2 className="text-lg font-bold text-primary-900 dark:text-white flex items-center gap-2">
-                    <span>🇺🇸</span> Top 10 States
-                  </h2>
-                </div>
-                <div className="p-4">
-                  {data.popularStates.length > 0 ? (
-                    <div className="space-y-3">
-                      {data.popularStates.slice(0, 10).map((item, index) => (
-                        <div key={item.id} className="flex items-center gap-3">
-                          <span className={`w-6 h-6 flex items-center justify-center rounded-full text-xs font-bold ${
-                            index < 3 ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'
-                          }`}>
-                            {index + 1}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <span>🌍</span> Top 10 Countries
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {data.popularCountries.length > 0 ? (
+                  <div className="space-y-3">
+                    {data.popularCountries.slice(0, 10).map((item, index) => (
+                      <div key={item.id} className="flex items-center gap-3">
+                        <span className={`w-6 h-6 flex items-center justify-center rounded-full text-xs font-bold ${
+                          index < 3 ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' : 'bg-muted text-muted-foreground'
+                        }`}>
+                          {index + 1}
+                        </span>
+                        <span className="flex-1 text-sm font-medium">
+                          {item.id}
+                        </span>
+                        <span className="text-sm text-green-600 dark:text-green-400">
+                          {item.timesVisited} visits
+                        </span>
+                        {item.timesBucketListed > 0 && (
+                          <span className="text-xs text-amber-600 dark:text-amber-400">
+                            +{item.timesBucketListed} bucket
                           </span>
-                          <span className="flex-1 text-sm font-medium text-primary-900 dark:text-white">
-                            {getStateName(item.id)}
-                          </span>
-                          <span className="text-sm text-green-600 dark:text-green-400">
-                            {item.timesVisited} visits
-                          </span>
-                          {item.timesBucketListed > 0 && (
-                            <span className="text-xs text-amber-600 dark:text-amber-400">
-                              +{item.timesBucketListed} bucket
-                            </span>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-center text-gray-500 dark:text-gray-400 py-4">
-                      No state data available yet.
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              {/* Popular Countries */}
-              <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-premium border border-black/5 dark:border-white/10 overflow-hidden">
-                <div className="p-5 border-b border-gray-100 dark:border-gray-700">
-                  <h2 className="text-lg font-bold text-primary-900 dark:text-white flex items-center gap-2">
-                    <span>🌍</span> Top 10 Countries
-                  </h2>
-                </div>
-                <div className="p-4">
-                  {data.popularCountries.length > 0 ? (
-                    <div className="space-y-3">
-                      {data.popularCountries.slice(0, 10).map((item, index) => (
-                        <div key={item.id} className="flex items-center gap-3">
-                          <span className={`w-6 h-6 flex items-center justify-center rounded-full text-xs font-bold ${
-                            index < 3 ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'
-                          }`}>
-                            {index + 1}
-                          </span>
-                          <span className="flex-1 text-sm font-medium text-primary-900 dark:text-white">
-                            {item.id}
-                          </span>
-                          <span className="text-sm text-green-600 dark:text-green-400">
-                            {item.timesVisited} visits
-                          </span>
-                          {item.timesBucketListed > 0 && (
-                            <span className="text-xs text-amber-600 dark:text-amber-400">
-                              +{item.timesBucketListed} bucket
-                            </span>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-center text-gray-500 dark:text-gray-400 py-4">
-                      No country data available yet.
-                    </p>
-                  )}
-                </div>
-              </div>
-            </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-center text-muted-foreground py-4">
+                    No country data available yet.
+                  </p>
+                )}
+              </CardContent>
+            </Card>
           </div>
-        )}
+        </div>
+      )}
 
-      {/* Place Details Modal */}
-      {selectedPlace && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setSelectedPlace(null)}>
-          <div
-            className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-md w-full overflow-hidden"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="p-5 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
-              <h3 className="text-lg font-bold text-primary-900 dark:text-white">Place Details</h3>
-              <button
-                onClick={() => setSelectedPlace(null)}
-                className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-            <div className="p-5 space-y-4">
+      {/* Place Details Dialog */}
+      <Dialog open={!!selectedPlace} onOpenChange={(open) => !open && setSelectedPlace(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Place Details</DialogTitle>
+            <DialogDescription>{selectedPlace?.name}</DialogDescription>
+          </DialogHeader>
+
+          {selectedPlace && (
+            <div className="space-y-4 py-4">
               <div>
-                <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Name</p>
-                <p className="text-lg font-bold text-primary-900 dark:text-white mt-1">{selectedPlace.name}</p>
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Name</p>
+                <p className="text-lg font-bold mt-1">{selectedPlace.name}</p>
               </div>
               <div>
-                <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">ID</p>
-                <p className="text-sm font-mono text-primary-700 dark:text-primary-300 mt-1 bg-gray-100 dark:bg-slate-700 px-2 py-1 rounded">
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">ID</p>
+                <p className="text-sm font-mono bg-muted px-2 py-1 rounded mt-1">
                   {selectedPlace.id}
                 </p>
               </div>
               {selectedPlace.location && (
                 <div>
-                  <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Location</p>
-                  <p className="text-sm text-primary-700 dark:text-primary-300 mt-1">{selectedPlace.location}</p>
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Location</p>
+                  <p className="text-sm mt-1">{selectedPlace.location}</p>
                 </div>
               )}
               {selectedPlace.type && (
                 <div>
-                  <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Type</p>
-                  <p className="text-sm text-primary-700 dark:text-primary-300 mt-1">{selectedPlace.type}</p>
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Type</p>
+                  <p className="text-sm mt-1">{selectedPlace.type}</p>
                 </div>
               )}
               {selectedPlace.coordinates && (
                 <div>
-                  <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Coordinates</p>
-                  <p className="text-sm font-mono text-primary-700 dark:text-primary-300 mt-1">
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Coordinates</p>
+                  <p className="text-sm font-mono mt-1">
                     {selectedPlace.coordinates.lat.toFixed(4)}, {selectedPlace.coordinates.lng.toFixed(4)}
                   </p>
                 </div>
               )}
             </div>
-            <div className="p-5 border-t border-gray-100 dark:border-gray-700 flex gap-3">
-              {selectedPlace.googleMapsUrl && (
-                <a
-                  href={selectedPlace.googleMapsUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex-1 px-4 py-2 bg-primary-600 text-white rounded-lg font-medium text-sm text-center hover:bg-primary-700 transition-colors"
-                >
+          )}
+
+          <DialogFooter className="gap-2 sm:gap-0">
+            {selectedPlace?.googleMapsUrl && (
+              <Button asChild>
+                <a href={selectedPlace.googleMapsUrl} target="_blank" rel="noopener noreferrer">
+                  <MapPin className="w-4 h-4 mr-2" />
                   Open in Google Maps
                 </a>
-              )}
-              <button
-                onClick={() => {
-                  navigator.clipboard.writeText(selectedPlace.name);
-                }}
-                className="px-4 py-2 bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 rounded-lg font-medium text-sm hover:bg-gray-200 dark:hover:bg-slate-600 transition-colors"
-              >
-                Copy Name
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-    </div>
-  );
-}
-
-interface StatCardProps {
-  title: string;
-  value: number;
-  subtitle?: string;
-  icon: string;
-}
-
-function StatCard({ title, value, subtitle, icon }: StatCardProps) {
-  return (
-    <div className="bg-white dark:bg-slate-800 rounded-xl p-5 shadow-premium border border-black/5 dark:border-white/10">
-      <div className="flex items-start justify-between">
-        <div>
-          <p className="text-sm text-primary-600 dark:text-primary-300">{title}</p>
-          <p className="text-3xl font-bold text-primary-900 dark:text-white mt-1">{value}</p>
-          {subtitle && (
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{subtitle}</p>
-          )}
-        </div>
-        <span className="text-2xl">{icon}</span>
-      </div>
+              </Button>
+            )}
+            <Button
+              variant="outline"
+              onClick={() => {
+                if (selectedPlace) navigator.clipboard.writeText(selectedPlace.name);
+              }}
+            >
+              <Copy className="w-4 h-4 mr-2" />
+              Copy Name
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
