@@ -438,7 +438,7 @@ export default function AnalyticsDashboard() {
                   isDarkMode={isDarkMode}
                 />
               </CardHeader>
-              <CardContent className="h-[280px] p-2">
+              <CardContent className="h-[280px] p-2 overflow-hidden">
                 {data.popularStates.length > 0 ? (
                   <AnalyticsUSMap data={data.popularStates} isDarkMode={isDarkMode} />
                 ) : (
@@ -457,7 +457,7 @@ export default function AnalyticsDashboard() {
                   isDarkMode={isDarkMode}
                 />
               </CardHeader>
-              <CardContent className="h-[280px] p-2">
+              <CardContent className="h-[280px] p-2 overflow-hidden">
                 {data.popularCountries.length > 0 ? (
                   <AnalyticsWorldMap data={data.popularCountries} isDarkMode={isDarkMode} />
                 ) : (
