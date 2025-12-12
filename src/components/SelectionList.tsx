@@ -2,6 +2,26 @@
 
 import { useState, useMemo } from 'react';
 import { Status, Category } from '@/lib/types';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Search, Trash2, Check, Star, Circle } from 'lucide-react';
 
 interface Item {
   id: string;
@@ -209,48 +229,39 @@ export default function SelectionList({
       </div>
 
       {/* Search and Filter */}
-      <div className="p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 space-y-3">
+      <div className="p-4 border-b border-border bg-muted/50 space-y-3">
         {showSearch && (
           <div className="relative">
-            <input
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input
               type="text"
               placeholder="Search by name or abbreviation (e.g., UK, CA)..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full px-4 py-2 pl-10 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder-gray-400"
+              className="pl-10"
             />
-            <svg className="absolute left-3 top-2.5 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
           </div>
         )}
 
         <div className="flex gap-2 flex-wrap items-center justify-between">
-          <div className="flex gap-2 flex-wrap">
-            {(['all', 'visited', 'bucketList', 'unvisited'] as const).map((mode) => (
-              <button
-                key={mode}
-                onClick={() => setFilterMode(mode)}
-                className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
-                  filterMode === mode
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700'
-                }`}
-              >
-                {mode === 'all' && 'All'}
-                {mode === 'visited' && '✓ Visited'}
-                {mode === 'bucketList' && '★ Bucket List'}
-                {mode === 'unvisited' && '○ Not Yet'}
-              </button>
-            ))}
-          </div>
+          <Tabs value={filterMode} onValueChange={(v) => setFilterMode(v as typeof filterMode)}>
+            <TabsList>
+              <TabsTrigger value="all">All</TabsTrigger>
+              <TabsTrigger value="visited">✓ Visited</TabsTrigger>
+              <TabsTrigger value="bucketList">★ Bucket List</TabsTrigger>
+              <TabsTrigger value="unvisited">○ Not Yet</TabsTrigger>
+            </TabsList>
+          </Tabs>
           {onClearAll && hasSelections && (
-            <button
+            <Button
+              variant="outline"
+              size="sm"
               onClick={() => setShowClearConfirm(true)}
-              className="px-3 py-1.5 rounded-full text-sm font-medium transition-all bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800 hover:bg-red-100 dark:hover:bg-red-900/50"
+              className="text-destructive hover:text-destructive hover:bg-destructive/10"
             >
+              <Trash2 className="w-4 h-4 mr-1" />
               Clear All
-            </button>
+            </Button>
           )}
         </div>
       </div>
@@ -330,39 +341,25 @@ export default function SelectionList({
       </div>
 
       {/* Clear All Confirmation Modal */}
-      {showClearConfirm && (
-        <>
-          <div
-            className="fixed inset-0 bg-black/50 z-50"
-            onClick={() => setShowClearConfirm(false)}
-          />
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-sm w-full p-6">
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">Clear All Selections?</h3>
-              <p className="text-gray-600 dark:text-gray-300 mb-6">
-                This will remove all {stats.visited} visited and {stats.bucketList} bucket list items from {title}. This action cannot be undone.
-              </p>
-              <div className="flex gap-3 justify-end">
-                <button
-                  onClick={() => setShowClearConfirm(false)}
-                  className="px-4 py-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 font-medium transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={() => {
-                    onClearAll?.();
-                    setShowClearConfirm(false);
-                  }}
-                  className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 font-medium transition-colors"
-                >
-                  Clear All
-                </button>
-              </div>
-            </div>
-          </div>
-        </>
-      )}
+      <AlertDialog open={showClearConfirm} onOpenChange={setShowClearConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Clear All Selections?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will remove all {stats.visited} visited and {stats.bucketList} bucket list items from {title}. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => onClearAll?.()}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Clear All
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
@@ -375,12 +372,10 @@ interface ItemCardProps {
 }
 
 function ItemCard({ item, status, onToggle, onSetStatus }: ItemCardProps) {
-  const [showMenu, setShowMenu] = useState(false);
-
   const statusStyles = {
     visited: 'bg-green-100 dark:bg-green-900/40 border-green-400 dark:border-green-600 text-green-800 dark:text-green-200',
     bucketList: 'bg-amber-50 dark:bg-amber-900/40 border-amber-400 dark:border-amber-600 text-amber-800 dark:text-amber-200',
-    unvisited: 'bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600',
+    unvisited: 'bg-card border-border text-card-foreground hover:bg-muted/50',
   };
 
   const statusIcons = {
@@ -390,63 +385,58 @@ function ItemCard({ item, status, onToggle, onSetStatus }: ItemCardProps) {
   };
 
   return (
-    <div className="relative">
-      <button
-        onClick={onToggle}
-        onContextMenu={(e) => {
-          e.preventDefault();
-          setShowMenu(true);
-        }}
-        className={`
-          w-full text-left px-3 py-2.5 rounded-lg border-2 transition-all duration-200
-          flex items-center gap-2 group
-          ${statusStyles[status]}
-        `}
-        aria-label={`${item.name}: ${status === 'visited' ? 'Visited' : status === 'bucketList' ? 'On bucket list' : 'Not visited'}. Click to change status.`}
-      >
-        <span className={`
-          w-6 h-6 rounded-full flex items-center justify-center text-sm font-bold shrink-0
-          ${status === 'visited' ? 'bg-green-500 text-white' : ''}
-          ${status === 'bucketList' ? 'bg-amber-500 text-white' : ''}
-          ${status === 'unvisited' ? 'bg-gray-200 dark:bg-gray-600 text-gray-400 dark:text-gray-400 group-hover:bg-gray-300 dark:group-hover:bg-gray-500' : ''}
-        `}>
-          {statusIcons[status]}
-        </span>
-        <span className="truncate font-medium">{item.name}</span>
-      </button>
-
-      {/* Context Menu */}
-      {showMenu && (
-        <>
-          <div
-            className="fixed inset-0 z-40"
-            onClick={() => setShowMenu(false)}
-          />
-          <div className="absolute right-0 top-full mt-1 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 z-50 py-1 min-w-[140px]">
-            <button
-              onClick={() => { onSetStatus('visited'); setShowMenu(false); }}
-              className="w-full px-4 py-2 text-left hover:bg-green-50 dark:hover:bg-green-900/30 flex items-center gap-2 text-gray-700 dark:text-gray-200"
-              aria-label={`Mark ${item.name} as visited`}
-            >
-              <span className="text-green-600 dark:text-green-400">✓</span> Visited
-            </button>
-            <button
-              onClick={() => { onSetStatus('bucketList'); setShowMenu(false); }}
-              className="w-full px-4 py-2 text-left hover:bg-amber-50 dark:hover:bg-amber-900/30 flex items-center gap-2 text-gray-700 dark:text-gray-200"
-              aria-label={`Add ${item.name} to bucket list`}
-            >
-              <span className="text-amber-500 dark:text-amber-400">★</span> Bucket List
-            </button>
-            <button
-              onClick={() => { onSetStatus(null); setShowMenu(false); }}
-              className="w-full px-4 py-2 text-left hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2 text-gray-500 dark:text-gray-400"
-              aria-label={`Clear status for ${item.name}`}
-            >
-              <span>○</span> Clear
-            </button>
-          </div>
-        </>
-      )}
-    </div>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button
+          onClick={(e) => {
+            // Only toggle on left click without modifier keys
+            if (!e.ctrlKey && !e.metaKey && !e.shiftKey) {
+              e.preventDefault();
+              onToggle();
+            }
+          }}
+          onContextMenu={(e) => e.preventDefault()}
+          className={`
+            w-full text-left px-3 py-2.5 rounded-lg border-2 transition-all duration-200
+            flex items-center gap-2 group
+            ${statusStyles[status]}
+          `}
+          aria-label={`${item.name}: ${status === 'visited' ? 'Visited' : status === 'bucketList' ? 'On bucket list' : 'Not visited'}. Click to change status, right-click for options.`}
+        >
+          <span className={`
+            w-6 h-6 rounded-full flex items-center justify-center text-sm font-bold shrink-0
+            ${status === 'visited' ? 'bg-green-500 text-white' : ''}
+            ${status === 'bucketList' ? 'bg-amber-500 text-white' : ''}
+            ${status === 'unvisited' ? 'bg-muted text-muted-foreground group-hover:bg-muted/80' : ''}
+          `}>
+            {statusIcons[status]}
+          </span>
+          <span className="truncate font-medium">{item.name}</span>
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-40">
+        <DropdownMenuItem
+          onClick={() => onSetStatus('visited')}
+          className="text-green-600 dark:text-green-400 focus:text-green-600 dark:focus:text-green-400"
+        >
+          <Check className="w-4 h-4 mr-2" />
+          Visited
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          onClick={() => onSetStatus('bucketList')}
+          className="text-amber-500 dark:text-amber-400 focus:text-amber-500 dark:focus:text-amber-400"
+        >
+          <Star className="w-4 h-4 mr-2" />
+          Bucket List
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          onClick={() => onSetStatus(null)}
+          className="text-muted-foreground"
+        >
+          <Circle className="w-4 h-4 mr-2" />
+          Clear
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
