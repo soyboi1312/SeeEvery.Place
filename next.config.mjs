@@ -88,7 +88,7 @@ const nextConfig = {
   reactStrictMode: true,
   // Optimize package imports for better tree-shaking
   experimental: {
-    optimizePackageImports: ['zod', '@supabase/supabase-js', 'react-tooltip'],
+    optimizePackageImports: ['zod', '@supabase/supabase-js', 'react-tooltip', 'lucide-react'],
   },
   async headers() {
     return [

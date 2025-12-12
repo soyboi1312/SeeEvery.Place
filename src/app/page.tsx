@@ -209,79 +209,49 @@ function HomeContent() {
     ) as Record<Category, { visited: number; total: number; bucketList: number; percentage: number }>;
   }, [selections]);
 
-  if (!isLoaded) {
-    // Page Skeleton - matches the actual layout for smooth transition
-    return (
-      <div className="min-h-screen bg-white dark:bg-gray-900">
-        {/* Header Skeleton */}
-        <header className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-gray-200/60 dark:border-slate-700/60 sticky top-0 z-40">
-          <div className="max-w-6xl mx-auto px-4 py-2 sm:py-3 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-gray-200 dark:bg-slate-700 rounded animate-pulse" />
-              <div className="flex flex-col gap-1">
-                <div className="w-32 h-5 bg-gray-200 dark:bg-slate-700 rounded animate-pulse" />
-                <div className="w-20 h-2 bg-gray-200 dark:bg-slate-700 rounded animate-pulse hidden sm:block" />
-              </div>
+  // Loading Skeletons for data-dependent components
+  const DataLoadingSkeletons = () => (
+    <>
+      {/* Quick Stats Skeleton */}
+      <div className="flex flex-wrap justify-center gap-3">
+        {[...Array(6)].map((_, i) => (
+          <div key={i} className="w-24 h-16 bg-gray-200 dark:bg-slate-700 rounded-xl animate-pulse" />
+        ))}
+      </div>
+
+      {/* Map Skeleton */}
+      <div className="w-full bg-blue-50/50 dark:bg-slate-800/50 rounded-2xl overflow-hidden border border-blue-100 dark:border-slate-700 shadow-inner">
+        <div className="aspect-[16/9] w-full max-h-[500px] bg-gray-200 dark:bg-slate-700 animate-pulse" />
+        <div className="flex justify-center gap-6 py-4">
+          {[...Array(3)].map((_, i) => (
+            <div key={i} className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-gray-300 dark:bg-slate-600 animate-pulse" />
+              <div className="w-12 h-3 bg-gray-200 dark:bg-slate-700 rounded animate-pulse" />
             </div>
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gray-200 dark:bg-slate-700 rounded-lg animate-pulse" />
-              <div className="w-20 h-10 bg-gray-200 dark:bg-slate-700 rounded-lg animate-pulse" />
-            </div>
-          </div>
-        </header>
-
-        <div className="max-w-6xl mx-auto px-4 py-6 space-y-6">
-          {/* Hero Skeleton */}
-          <div className="text-center py-4 sm:py-8">
-            <div className="w-80 h-8 bg-gray-200 dark:bg-slate-700 rounded mx-auto mb-4 animate-pulse" />
-            <div className="w-64 h-5 bg-gray-200 dark:bg-slate-700 rounded mx-auto mb-2 animate-pulse" />
-            <div className="w-96 h-4 bg-gray-200 dark:bg-slate-700 rounded mx-auto animate-pulse" />
-          </div>
-
-          {/* Quick Stats Skeleton */}
-          <div className="flex flex-wrap justify-center gap-3">
-            {[...Array(6)].map((_, i) => (
-              <div key={i} className="w-24 h-16 bg-gray-200 dark:bg-slate-700 rounded-xl animate-pulse" />
-            ))}
-          </div>
-
-          {/* Map Skeleton */}
-          <div className="w-full bg-blue-50/50 dark:bg-slate-800/50 rounded-2xl overflow-hidden border border-blue-100 dark:border-slate-700 shadow-inner">
-            <div className="aspect-[16/9] w-full max-h-[500px] bg-gray-200 dark:bg-slate-700 animate-pulse" />
-            <div className="flex justify-center gap-6 py-4">
-              {[...Array(3)].map((_, i) => (
-                <div key={i} className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full bg-gray-300 dark:bg-slate-600 animate-pulse" />
-                  <div className="w-12 h-3 bg-gray-200 dark:bg-slate-700 rounded animate-pulse" />
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Category Tabs Skeleton */}
-          <div className="flex flex-wrap justify-center gap-2">
-            {[...Array(8)].map((_, i) => (
-              <div key={i} className="w-24 h-10 bg-gray-200 dark:bg-slate-700 rounded-lg animate-pulse" />
-            ))}
-          </div>
-
-          {/* List Skeleton */}
-          <div className="space-y-3">
-            <div className="w-48 h-6 bg-gray-200 dark:bg-slate-700 rounded animate-pulse mx-auto" />
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
-              {[...Array(12)].map((_, i) => (
-                <div key={i} className="h-10 bg-gray-200 dark:bg-slate-700 rounded-lg animate-pulse" />
-              ))}
-            </div>
-          </div>
+          ))}
         </div>
       </div>
-    );
-  }
+
+      {/* Category Tabs Skeleton */}
+      <div className="flex flex-wrap justify-center gap-2">
+        {[...Array(8)].map((_, i) => (
+          <div key={i} className="w-24 h-10 bg-gray-200 dark:bg-slate-700 rounded-lg animate-pulse" />
+        ))}
+      </div>
+
+      {/* List Skeleton */}
+      <div className="space-y-3">
+        <div className="w-48 h-6 bg-gray-200 dark:bg-slate-700 rounded animate-pulse mx-auto" />
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+          {[...Array(12)].map((_, i) => (
+            <div key={i} className="h-10 bg-gray-200 dark:bg-slate-700 rounded-lg animate-pulse" />
+          ))}
+        </div>
+      </div>
+    </>
+  );
 
   return (
-    // UPDATED: Clean background removed gradient
-    // Note: Removed transition-colors to fix non-composited animation (Lighthouse CLS)
     <div className="min-h-screen bg-white dark:bg-gray-900">
       <Header
         onSignIn={() => setShowAuthModal(true)}
@@ -295,7 +265,7 @@ function HomeContent() {
       />
 
       <div className="max-w-6xl mx-auto px-4 py-6 space-y-6">
-        {/* Hero Section */}
+        {/* Hero Section - NOW RENDERS IMMEDIATELY FOR FAST LCP */}
         <div className="text-center py-4 sm:py-8">
           <h1 className="text-3xl sm:text-4xl font-bold text-gray-800 dark:text-white mb-2">
             Track Your Adventures.
@@ -311,44 +281,45 @@ function HomeContent() {
           </p>
         </div>
 
-        {/* Quick Stats */}
-        <QuickStats
-          selections={selections}
-          onCategoryClick={handleCategoryChange}
-        />
-
-        {/* Map Visualization - wrapped in error boundary for graceful fallback */}
-        <div className="animate-fade-in">
-          <MapErrorBoundary>
-            <MapVisualization
-              category={activeCategory}
+        {/* Data Dependent Content: Shows Skeletons until localStorage is read */}
+        {!isLoaded ? (
+          <DataLoadingSkeletons />
+        ) : (
+          <div className="animate-fade-in space-y-6">
+            <QuickStats
               selections={selections}
-              onToggle={handleToggle}
-              items={currentItems}
+              onCategoryClick={handleCategoryChange}
             />
-          </MapErrorBoundary>
-        </div>
 
-        {/* Category Tabs - below map */}
-        <CategoryTabs
-          activeCategory={activeCategory}
-          onCategoryChange={handleCategoryChange}
-          stats={allStats}
-        />
+            <MapErrorBoundary>
+              <MapVisualization
+                category={activeCategory}
+                selections={selections}
+                onToggle={handleToggle}
+                items={currentItems}
+              />
+            </MapErrorBoundary>
 
-        {/* Selection List */}
-        <SelectionList
-          items={currentItems}
-          getStatus={getStatus}
-          onToggle={handleToggle}
-          onSetStatus={handleSetStatus}
-          onClearAll={handleClearAll}
-          groupBy="group"
-          showSearch={true}
-          title={categoryTitles[activeCategory]}
-          stats={currentStats}
-          category={activeCategory}
-        />
+            <CategoryTabs
+              activeCategory={activeCategory}
+              onCategoryChange={handleCategoryChange}
+              stats={allStats}
+            />
+
+            <SelectionList
+              items={currentItems}
+              getStatus={getStatus}
+              onToggle={handleToggle}
+              onSetStatus={handleSetStatus}
+              onClearAll={handleClearAll}
+              groupBy="group"
+              showSearch={true}
+              title={categoryTitles[activeCategory]}
+              stats={currentStats}
+              category={activeCategory}
+            />
+          </div>
+        )}
 
         {/* Floating Share Button - Updated to be more explicit */}
         <button
