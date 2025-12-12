@@ -48,6 +48,8 @@
     "resend": "^6.5.2",
     "tailwind-merge": "^2.6.0",
     "tailwindcss-animate": "^1.0.7",
+    "us-atlas": "^3.0.1",
+    "world-atlas": "^2.0.2",
     "zod": "^4.1.13"
   },
   "devDependencies": {
@@ -61,14 +63,12 @@
     "@vitejs/plugin-react": "^5.1.1",
     "autoprefixer": "^10.4.0",
     "eslint": "^8.0.0",
-    "eslint-config-next": "^14.2.0",
+    "eslint-config-next": "^15.0.0",
     "jsdom": "^27.2.0",
     "postcss": "^8.4.0",
     "tailwindcss": "^3.4.0",
     "typescript": "^5.0.0",
-    "us-atlas": "^3.0.1",
     "vitest": "^4.0.15",
-    "world-atlas": "^2.0.2",
     "wrangler": "^4.51.0"
   },
   "browserslist": [
