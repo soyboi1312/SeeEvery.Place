@@ -148,23 +148,6 @@ body {
   filter: brightness(1.1);
 }
 
-/* Input styles for light and dark mode */
-input[type="text"] {
-  color: #111827 !important;
-  background-color: #ffffff !important;
-}
-
-.dark input[type="text"] {
-  color: #f3f4f6 !important;
-  background-color: #374151 !important;
-  border-color: #4b5563 !important;
-}
-
-.dark input[type="text"]::placeholder {
-  /* Improved contrast for placeholder text (Gray-300) */
-  color: #d1d5db !important;
-}
-
 .region-path.visited {
   fill: #22c55e;
 }
