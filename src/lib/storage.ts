@@ -1,23 +1,41 @@
 import { UserSelections, emptySelections, Selection, Status, Category } from './types';
-import { mountains } from '@/data/mountains';
-import { stadiums } from '@/data/stadiums';
-import { usCities } from '@/data/usCities';
-import { worldCities } from '@/data/worldCities';
-import { countries } from '@/data/countries';
 
-// Create lookup maps for city -> state/country relationships
-const usCityToState = new Map(usCities.map(c => [c.id, c.stateCode]));
-const worldCityToCountry = new Map(worldCities.map(c => [c.id, c.countryCode]));
-// For US cities in worldCities, also track stateCode for cross-check
-const worldCityToState = new Map(
-  worldCities.filter(c => c.stateCode).map(c => [c.id, c.stateCode!])
-);
+// Removed static imports of heavy data files to reduce initial bundle size
+// Data is now loaded dynamically only when needed
+
+// Lazy-loaded lookup maps
+let usCityToState: Map<string, string> | null = null;
+let worldCityToCountry: Map<string, string> | null = null;
+let worldCityToState: Map<string, string> | null = null;
+let availableCountryCodes: Set<string> | null = null;
 
 const STORAGE_KEY = 'travelmap_selections';
 
 // 365 days in milliseconds for cleanup of permanently deleted items
 // Must match sync.ts DELETED_RETENTION_MS to prevent zombie items during cloud sync
 const PERMANENT_DELETE_THRESHOLD_MS = 365 * 24 * 60 * 60 * 1000;
+
+// Helper to ensure city data is loaded before applying relationships
+export async function preloadCityData() {
+  if (usCityToState && worldCityToCountry && worldCityToState && availableCountryCodes) return;
+
+  const [
+    { usCities },
+    { worldCities },
+    { countries }
+  ] = await Promise.all([
+    import('@/data/usCities'),
+    import('@/data/worldCities'),
+    import('@/data/countries')
+  ]);
+
+  usCityToState = new Map(usCities.map(c => [c.id, c.stateCode]));
+  worldCityToCountry = new Map(worldCities.map(c => [c.id, c.countryCode]));
+  worldCityToState = new Map(
+    worldCities.filter(c => c.stateCode).map(c => [c.id, c.stateCode!])
+  );
+  availableCountryCodes = new Set(countries.map(c => c.code));
+}
 
 // Clean up items that have been soft-deleted for more than 365 days
 // This prevents localStorage from growing indefinitely while maintaining
@@ -55,12 +73,14 @@ function cleanupOldDeletedItems(parsed: Record<string, Selection[]>): { data: Re
   return { data: result, cleaned };
 }
 
-// Migrate merged stadiums category back to individual sport-specific categories
-function migrateStadiumSelections(parsed: Record<string, Selection[]>): Record<string, Selection[]> {
+// Async migration using dynamic imports
+async function migrateStadiumSelections(parsed: Record<string, Selection[]>): Promise<Record<string, Selection[]>> {
   // Check if we have a merged stadiums category to split
   if (!parsed.stadiums || parsed.stadiums.length === 0) {
     return parsed;
   }
+
+  const { stadiums } = await import('@/data/stadiums');
 
   const result = { ...parsed };
   const mergedStadiumSelections = parsed.stadiums;
@@ -112,11 +132,13 @@ function migrateStadiumSelections(parsed: Record<string, Selection[]>): Record<s
   return result;
 }
 
-// Migrate old "mountains" selections to new fiveKPeaks and fourteeners categories
-function migrateMountainSelections(parsed: Record<string, Selection[]>): Record<string, Selection[]> {
+// Async migration using dynamic imports
+async function migrateMountainSelections(parsed: Record<string, Selection[]>): Promise<Record<string, Selection[]>> {
   if (!parsed.mountains || parsed.mountains.length === 0) {
     return parsed;
   }
+
+  const { mountains } = await import('@/data/mountains');
 
   const result = { ...parsed };
   const oldMountainSelections = parsed.mountains;
@@ -159,7 +181,8 @@ function migrateMountainSelections(parsed: Record<string, Selection[]>): Record<
   return result;
 }
 
-export function loadSelections(): UserSelections {
+// Converted to async to support dynamic imports for migration
+export async function loadSelections(): Promise<UserSelections> {
   if (typeof window === 'undefined') return emptySelections;
 
   try {
@@ -169,15 +192,14 @@ export function loadSelections(): UserSelections {
 
       let needsSave = false;
 
-      // Migrate merged stadiums back to individual categories
+      // Async migrations
       if (parsed.stadiums) {
-        parsed = migrateStadiumSelections(parsed);
+        parsed = await migrateStadiumSelections(parsed);
         needsSave = true;
       }
 
-      // Migrate old mountain selections to new fiveKPeaks and fourteeners categories
       if (parsed.mountains) {
-        parsed = migrateMountainSelections(parsed);
+        parsed = await migrateMountainSelections(parsed);
         needsSave = true;
       }
 
@@ -334,6 +356,9 @@ export function clearAllSelections(): void {
  *
  * Only applies when status is 'visited' (not for bucketList or unvisited).
  * Does not override existing selections - only adds if not already set.
+ *
+ * Updated to use preloaded maps safely - if data hasn't been loaded via
+ * preloadCityData, this function will skip automation to prevent errors.
  */
 export function applyCityRelatedSelections(
   selections: UserSelections,
@@ -344,68 +369,48 @@ export function applyCityRelatedSelections(
   // Only apply cross-checks for visited status
   if (status !== 'visited') return selections;
 
+  // If data hasn't been loaded via preloadCityData, skip this automation to prevent errors
+  if (!usCityToState || !worldCityToCountry || !worldCityToState || !availableCountryCodes) {
+    return selections;
+  }
+
   let result = { ...selections };
   const now = Date.now();
+
+  const addOrUpdateVisited = (selCategory: Category, itemId: string) => {
+    const list = [...(result[selCategory] || [])];
+    const idx = list.findIndex(s => s.id === itemId);
+    const existing = list[idx];
+
+    // Only add if not already visited (don't override bucketList or existing visited)
+    if (!existing || existing.deleted) {
+      const newItem = { id: itemId, status: 'visited' as Status, updatedAt: now, deleted: false };
+      if (existing) {
+        list[idx] = newItem;
+      } else {
+        list.push(newItem);
+      }
+      result = { ...result, [selCategory]: list };
+    }
+  };
 
   if (category === 'usCities') {
     // Get the state code for this US city
     const stateCode = usCityToState.get(cityId);
     if (stateCode) {
-      const stateSelections = [...(result.states || [])];
-      const existing = stateSelections.find(s => s.id === stateCode);
-
-      // Only add if not already visited (don't override bucketList or existing visited)
-      if (!existing || existing.deleted) {
-        if (existing) {
-          // Update existing deleted selection
-          const idx = stateSelections.findIndex(s => s.id === stateCode);
-          stateSelections[idx] = { id: stateCode, status: 'visited', updatedAt: now, deleted: false };
-        } else {
-          stateSelections.push({ id: stateCode, status: 'visited', updatedAt: now, deleted: false });
-        }
-        result = { ...result, states: stateSelections };
-      }
+      addOrUpdateVisited('states', stateCode);
     }
   } else if (category === 'worldCities') {
     // Get the country code for this world city
     const countryCode = worldCityToCountry.get(cityId);
-    if (countryCode) {
-      // Verify this country exists in our countries list
-      const countryExists = countries.some(c => c.code === countryCode);
-      if (countryExists) {
-        const countrySelections = [...(result.countries || [])];
-        const existing = countrySelections.find(s => s.id === countryCode);
-
-        // Only add if not already visited (don't override bucketList or existing visited)
-        if (!existing || existing.deleted) {
-          if (existing) {
-            // Update existing deleted selection
-            const idx = countrySelections.findIndex(s => s.id === countryCode);
-            countrySelections[idx] = { id: countryCode, status: 'visited', updatedAt: now, deleted: false };
-          } else {
-            countrySelections.push({ id: countryCode, status: 'visited', updatedAt: now, deleted: false });
-          }
-          result = { ...result, countries: countrySelections };
-        }
-      }
+    if (countryCode && availableCountryCodes.has(countryCode)) {
+      addOrUpdateVisited('countries', countryCode);
     }
 
     // For US cities in worldCities, also mark the US state
     const stateCode = worldCityToState.get(cityId);
     if (stateCode) {
-      const stateSelections = [...(result.states || [])];
-      const existing = stateSelections.find(s => s.id === stateCode);
-
-      // Only add if not already visited (don't override bucketList or existing visited)
-      if (!existing || existing.deleted) {
-        if (existing) {
-          const idx = stateSelections.findIndex(s => s.id === stateCode);
-          stateSelections[idx] = { id: stateCode, status: 'visited', updatedAt: now, deleted: false };
-        } else {
-          stateSelections.push({ id: stateCode, status: 'visited', updatedAt: now, deleted: false });
-        }
-        result = { ...result, states: stateSelections };
-      }
+      addOrUpdateVisited('states', stateCode);
     }
   }
 

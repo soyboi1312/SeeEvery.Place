@@ -39,6 +39,7 @@ import {
   setSelectionStatus,
   getStats,
   applyCityRelatedSelections,
+  preloadCityData,
 } from '@/lib/storage';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { useDarkMode } from '@/lib/hooks/useDarkMode';
@@ -69,11 +70,12 @@ export default function Home() {
     setActiveCategory(category);
   }, []);
 
-  // Load selections from localStorage on mount
+  // Load selections from localStorage on mount (async for lazy-loaded migrations)
   useEffect(() => {
-    const saved = loadSelections();
-    setSelections(saved);
-    setIsLoaded(true);
+    loadSelections().then(saved => {
+      setSelections(saved);
+      setIsLoaded(true);
+    });
   }, []);
 
   // Fetch profile data for share modal (public profile link)
@@ -134,22 +136,37 @@ export default function Home() {
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, []);
 
-  const handleToggle = useCallback((id: string, currentStatus: Status) => {
+  // Updated handleToggle to support lazy loaded city data
+  const handleToggle = useCallback(async (id: string, currentStatus: Status) => {
+    // 1. Immediate optimistic update for responsiveness
     setSelections(prev => {
-      const updated = toggleSelection(prev, activeCategory, id, currentStatus);
-      // Apply cross-category relationships for city categories
-      // When a city becomes visited, also mark the corresponding state/country
-      const nextStatus = currentStatus === 'unvisited' ? 'visited' : currentStatus === 'visited' ? 'bucketList' : null;
-      return applyCityRelatedSelections(updated, activeCategory, id, nextStatus);
+      return toggleSelection(prev, activeCategory, id, currentStatus);
     });
+
+    // 2. Check if we need to apply city-related logic (visited status only)
+    const nextStatus = currentStatus === 'unvisited' ? 'visited' : currentStatus === 'visited' ? 'bucketList' : null;
+
+    if (nextStatus === 'visited' && (activeCategory === 'usCities' || activeCategory === 'worldCities')) {
+      // Load the data dynamically if needed
+      await preloadCityData();
+
+      // Apply the related updates (now that data is loaded, applyCityRelatedSelections will work)
+      setSelections(prev => applyCityRelatedSelections(prev, activeCategory, id, nextStatus));
+    }
   }, [activeCategory]);
 
-  const handleSetStatus = useCallback((id: string, status: Status | null) => {
+  // Updated handleSetStatus to support lazy loaded city data
+  const handleSetStatus = useCallback(async (id: string, status: Status | null) => {
+    // 1. Immediate update
     setSelections(prev => {
-      const updated = setSelectionStatus(prev, activeCategory, id, status);
-      // Apply cross-category relationships for city categories
-      return applyCityRelatedSelections(updated, activeCategory, id, status);
+      return setSelectionStatus(prev, activeCategory, id, status);
     });
+
+    // 2. City logic
+    if (status === 'visited' && (activeCategory === 'usCities' || activeCategory === 'worldCities')) {
+      await preloadCityData();
+      setSelections(prev => applyCityRelatedSelections(prev, activeCategory, id, status));
+    }
   }, [activeCategory]);
 
   const getStatus = useCallback((id: string): Status => {
