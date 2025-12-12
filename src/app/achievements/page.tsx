@@ -207,7 +207,7 @@ function AchievementCard({
       {isUnlocked && isGuest && (
         <div className="absolute top-2 right-2">
           <span className="text-[10px] px-1.5 py-0.5 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 rounded font-medium">
-            LOCAL ONLY
+            Locals Only
           </span>
         </div>
       )}

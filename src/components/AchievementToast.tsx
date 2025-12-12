@@ -132,7 +132,7 @@ export default function AchievementToast({ onSignInClick }: AchievementToastProp
               </h4>
               {isGuest && (
                 <span className="text-[10px] px-1.5 py-0.5 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 rounded font-medium">
-                  LOCAL
+                  Locals Only
                 </span>
               )}
             </div>
