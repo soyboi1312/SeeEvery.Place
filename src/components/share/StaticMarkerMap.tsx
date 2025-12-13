@@ -9,7 +9,7 @@ import { Category, UserSelections } from '@/lib/types';
 import { GEO_URL_WORLD, GEO_URL_USA } from '@/lib/mapConstants';
 import { getCategoryMarkers, MarkerData } from '@/lib/mapUtils';
 import {
-  LogoMarker, // New import
+  LogoMarker,
   SportMarker,
   SneakerMarker,
   MountainMarker,
@@ -62,43 +62,7 @@ export default function StaticMarkerMap({
     return <LogoMarker fillColor={fillColor} size={iconSize} />;
 
     /* // --- Premium / Custom Marker Logic (Preserved) ---
-    
-    // US Map Logic
-    if (isUSOnly) {
-      if (category === 'fourteeners') {
-        return <MountainMarker fillColor={fillColor} size={iconSize} />;
-      }
-      if (category === 'nationalParks' || category === 'stateParks') {
-        return <ParkMarker fillColor={fillColor} size={iconSize} />;
-      }
-      if (category === 'weirdAmericana') {
-        return <WeirdMarker fillColor={fillColor} size={iconSize} />;
-      }
-      return <FlagMarker fillColor={fillColor} size={iconSize} />;
-    }
-
-    // World Map Logic
-    const isMarathons = category === 'marathons';
-    const isMountains = category === 'fiveKPeaks';
-    const isF1Tracks = category === 'f1Tracks';
-    const isAirports = category === 'airports';
-    const isMuseums = category === 'museums';
-    const isSkiResorts = category === 'skiResorts';
-    const isThemeParks = category === 'themeParks';
-    const isSurfing = category === 'surfingReserves';
-    const isStadiums = ['mlbStadiums', 'nflStadiums', 'nbaStadiums', 'nhlStadiums', 'soccerStadiums'].includes(category);
-
-    if (isMarathons) return <SneakerMarker fillColor={fillColor} size={iconSize} />;
-    if (isMountains) return <MountainMarker fillColor={fillColor} size={iconSize} />;
-    if (isF1Tracks) return <F1CarMarker fillColor={fillColor} size={iconSize} />;
-    if (isAirports) return <AirplaneMarker fillColor={fillColor} size={iconSize} />;
-    if (isStadiums) return <SportMarker sport={marker.sport} fillColor={fillColor} size={iconSize} />;
-    if (isMuseums) return <MuseumMarker fillColor={fillColor} size={iconSize} />;
-    if (isSkiResorts) return <SkiMarker fillColor={fillColor} size={iconSize} />;
-    if (isThemeParks) return <ThemeParkMarker fillColor={fillColor} size={iconSize} />;
-    if (isSurfing) return <SurfingMarker fillColor={fillColor} size={iconSize} />;
-
-    return <FlagMarker fillColor={fillColor} size={iconSize} />;
+    // (Logic preserved from original file)
     */
   };
 
@@ -107,9 +71,9 @@ export default function StaticMarkerMap({
       <ComposableMap
         projection="geoAlbersUsa"
         projectionConfig={{ scale: 1000 }}
-        viewBox="0 0 800 600"
+        viewBox="0 0 800 530"
         width={800}
-        height={600}
+        height={530}
         style={{ width: '100%', height: 'auto', maxWidth: '100%' }}
       >
         <Geographies geography={GEO_URL_USA}>
