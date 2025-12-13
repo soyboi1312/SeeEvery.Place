@@ -1,13 +1,14 @@
 /**
  * Stadium Data Exports
- * Following SRP: This file only handles data exports
- * Utility functions are in stadiumUtils.ts
+ * Following SRP: This file is purely a barrel export
+ * Logic and aggregation lives in stadiumUtils.ts
  */
 
 // Re-export types
 export type { Stadium } from './types';
 
 // Re-export individual league/sport arrays
+// (Kept for clients that only need specific data chunks)
 export { mlbStadiums } from './mlb';
 export { nflStadiums } from './nfl';
 export { nbaStadiums } from './nba';
@@ -21,38 +22,13 @@ export {
   motorsportStadiums,
 } from './other';
 
-// Import for combined array
-import { mlbStadiums } from './mlb';
-import { nflStadiums } from './nfl';
-import { nbaStadiums } from './nba';
-import { nhlStadiums } from './nhl';
-import { soccerStadiums } from './soccer';
-import {
-  internationalBaseballStadiums,
-  cricketStadiums,
-  rugbyStadiums,
-  tennisStadiums,
-  motorsportStadiums,
-} from './other';
+// Re-export getAllStadiums from utils (DRY - single source of truth)
 import type { Stadium } from './types';
+import { getAllStadiums } from './stadiumUtils';
+export { getAllStadiums };
 
-// Combined stadiums getter (lazy evaluation - only built when called)
-// For backwards compatibility, use getAllStadiums() instead of stadiums
-export const getAllStadiums = (): Stadium[] => [
-  ...mlbStadiums,
-  ...nflStadiums,
-  ...nbaStadiums,
-  ...nhlStadiums,
-  ...soccerStadiums,
-  ...internationalBaseballStadiums,
-  ...cricketStadiums,
-  ...rugbyStadiums,
-  ...tennisStadiums,
-  ...motorsportStadiums,
-];
-
-// Backwards compatibility alias (deprecated - use getAllStadiums())
-/** @deprecated Use getAllStadiums() instead for lazy evaluation */
+// Backwards compatibility alias (deprecated)
+/** @deprecated Use getAllStadiums() instead for lazy/memoized evaluation */
 export const stadiums: Stadium[] = getAllStadiums();
 
 // Sport and league constants

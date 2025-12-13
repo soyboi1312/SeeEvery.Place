@@ -1,6 +1,7 @@
 /**
  * Stadium Utility Functions
  * Separated from index.ts for Single Responsibility Principle
+ * This is the Single Source of Truth for the aggregated stadium list
  */
 import type { Stadium } from './types';
 
@@ -18,10 +19,14 @@ import {
   motorsportStadiums,
 } from './other';
 
-// Combined stadiums array (lazy-initialized to avoid circular deps)
+// Combined stadiums array (lazy-initialized singleton - built once, cached forever)
 let _allStadiums: Stadium[] | null = null;
 
-function getAllStadiums(): Stadium[] {
+/**
+ * Get all stadiums combined - Single Source of Truth
+ * Memoized to avoid O(N) allocation on every call
+ */
+export function getAllStadiums(): Stadium[] {
   if (!_allStadiums) {
     _allStadiums = [
       ...mlbStadiums,
