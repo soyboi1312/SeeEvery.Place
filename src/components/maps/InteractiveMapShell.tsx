@@ -5,7 +5,7 @@
  */
 'use client';
 
-import { ReactNode, memo } from 'react';
+import { ReactNode, memo, useState, useRef, useEffect } from 'react';
 import { ComposableMap, ZoomableGroup, Sphere, Graticule } from '@vnedyalk0v/react19-simple-maps';
 import { useMapZoom, MapPosition } from './useMapZoom';
 import ZoomControls from './ZoomControls';
@@ -69,13 +69,48 @@ const InteractiveMapShell = memo(function InteractiveMapShell({
     initialZoom,
   });
 
+  // --- Scroll Zoom Delay Logic ---
+  // Prevents accidental zooming when scrolling past the map
+  // Scroll zoom only enabled after hovering for 800ms
+  const [isScrollZoomEnabled, setIsScrollZoomEnabled] = useState(false);
+  const zoomTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handleMouseEnter = () => {
+    // Start a timer when user hovers. If they stay for 800ms, enable scroll zoom.
+    zoomTimerRef.current = setTimeout(() => {
+      setIsScrollZoomEnabled(true);
+    }, 800);
+  };
+
+  const handleMouseLeave = () => {
+    // If they leave before the timer fires, cancel it.
+    if (zoomTimerRef.current) {
+      clearTimeout(zoomTimerRef.current);
+      zoomTimerRef.current = null;
+    }
+    // Immediately disable scroll zoom so the page scrolls normally again
+    setIsScrollZoomEnabled(false);
+  };
+
+  // Cleanup timer on unmount
+  useEffect(() => {
+    return () => {
+      if (zoomTimerRef.current) clearTimeout(zoomTimerRef.current);
+    };
+  }, []);
+  // ------------------------------------
+
   const zoomState: ZoomState = {
     position,
     zoom: position.zoom,
   };
 
   return (
-    <div className="relative w-full h-full group">
+    <div
+      className="relative w-full h-full group"
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
       <ComposableMap
         projection={projection}
         projectionConfig={projectionConfig}
@@ -89,6 +124,8 @@ const InteractiveMapShell = memo(function InteractiveMapShell({
           // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Library uses branded Longitude/Latitude types
           center={position.coordinates as any}
           onMoveEnd={handleMoveEnd}
+          // Only allow scrolling if the timer has completed
+          disableScrolling={!isScrollZoomEnabled}
         >
           {/* Optional world map decorations */}
           {showSphere && (
