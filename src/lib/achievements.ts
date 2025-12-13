@@ -1,92 +1,29 @@
 /**
  * Achievements System
  * Defines all achievements, XP values, and progress tracking logic
+ *
+ * NOTE: XP values and totals are derived from CATEGORY_SCHEMA (types.ts)
+ * This avoids importing all data files and causing bundle bloat
  */
 
-import { Category, UserSelections, ALL_CATEGORIES, categoryLabels } from './types';
-import { countries } from '@/data/countries';
-import { usStates } from '@/data/usStates';
-import { usTerritories } from '@/data/usTerritories';
-import { nationalParks } from '@/data/nationalParks';
-import { nationalMonuments } from '@/data/nationalMonuments';
-import { stateParks } from '@/data/stateParks';
-import { get5000mPeaks, getUS14ers } from '@/data/mountains';
-import { museums } from '@/data/museums';
-import { getMlbStadiums, getNflStadiums, getNbaStadiums, getNhlStadiums, getSoccerStadiums } from '@/data/stadiums';
-import { f1Tracks } from '@/data/f1Tracks';
-import { marathons } from '@/data/marathons';
-import { airports } from '@/data/airports';
-import { skiResorts } from '@/data/skiResorts';
-import { themeParks } from '@/data/themeParks';
-import { surfingReserves } from '@/data/surfingReserves';
-import { weirdAmericana } from '@/data/weirdAmericana';
-import { usCities } from '@/data/usCities';
-import { worldCities } from '@/data/worldCities';
+import { Category, UserSelections, ALL_CATEGORIES, CATEGORY_SCHEMA } from './types';
+import { getCategoryTotal } from './categoryUtils';
 
 // ============================================
-// XP Values per category item
+// XP Values per category item (derived from schema)
 // ============================================
-export const XP_VALUES: Record<Category, number> = {
-  countries: 25,           // Countries are significant achievements
-  states: 15,              // US states
-  territories: 20,         // Harder to reach territories
-  usCities: 5,             // Many cities, lower XP each
-  worldCities: 10,         // World cities more valuable
-  nationalParks: 30,       // Special destinations
-  nationalMonuments: 25,   // Historic sites
-  stateParks: 15,          // Regional parks
-  fiveKPeaks: 50,          // Hard to reach peaks
-  fourteeners: 40,         // Challenging hikes
-  museums: 15,             // Cultural experiences
-  mlbStadiums: 20,         // Sports venues
-  nflStadiums: 20,
-  nbaStadiums: 20,
-  nhlStadiums: 20,
-  soccerStadiums: 25,      // International venues
-  f1Tracks: 35,            // Premium motorsport
-  marathons: 100,          // Running a marathon is huge
-  airports: 5,             // Transit points
-  skiResorts: 25,          // Seasonal destinations
-  themeParks: 20,          // Entertainment venues
-  surfingReserves: 30,     // Rare destinations
-  weirdAmericana: 15,      // Fun roadside stops
-};
+export const XP_VALUES: Record<Category, number> = Object.fromEntries(
+  Object.entries(CATEGORY_SCHEMA).map(([k, v]) => [k, v.xp])
+) as Record<Category, number>;
 
 // ============================================
-// Category totals for completion tracking
+// Category totals for completion tracking (derived from schema/cache)
 // ============================================
-let categoryTotalsCache: Record<Category, number> | null = null;
-
 export function getCategoryTotals(): Record<Category, number> {
-  if (categoryTotalsCache) return categoryTotalsCache;
-
-  categoryTotalsCache = {
-    countries: countries.length,
-    states: usStates.length,
-    territories: usTerritories.length,
-    usCities: usCities.length,
-    worldCities: worldCities.length,
-    nationalParks: nationalParks.length,
-    nationalMonuments: nationalMonuments.length,
-    stateParks: stateParks.length,
-    fiveKPeaks: get5000mPeaks().length,
-    fourteeners: getUS14ers().length,
-    museums: museums.length,
-    mlbStadiums: getMlbStadiums().length,
-    nflStadiums: getNflStadiums().length,
-    nbaStadiums: getNbaStadiums().length,
-    nhlStadiums: getNhlStadiums().length,
-    soccerStadiums: getSoccerStadiums().length,
-    f1Tracks: f1Tracks.length,
-    marathons: marathons.length,
-    airports: airports.length,
-    skiResorts: skiResorts.length,
-    themeParks: themeParks.length,
-    surfingReserves: surfingReserves.length,
-    weirdAmericana: weirdAmericana.length,
-  };
-
-  return categoryTotalsCache;
+  // Use getCategoryTotal which checks cache first, then falls back to schema
+  return Object.fromEntries(
+    ALL_CATEGORIES.map(cat => [cat, getCategoryTotal(cat)])
+  ) as Record<Category, number>;
 }
 
 // ============================================

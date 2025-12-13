@@ -1,4 +1,4 @@
-import { Category } from '@/lib/types';
+import { Category, CATEGORY_SCHEMA } from '@/lib/types';
 import type { Country } from '@/data/countries';
 import type { USState } from '@/data/usStates';
 import type { USTerritory } from '@/data/usTerritories';
@@ -76,60 +76,37 @@ export interface CategoryItem {
 // Cache for loaded data to avoid re-importing (moved up for getCategoryTotal)
 const dataCache: Partial<Record<Category, CategoryDataItem[]>> = {};
 
-// Fallback totals for initial SSR render before data loads
-// These are kept in sync via getCategoryTotal() which uses actual data when cached
-const fallbackTotals: Record<Category, number> = {
-  countries: 197,
-  states: 51,
-  territories: 14,
-  usCities: 75,
-  worldCities: 115,
-  nationalParks: 63,
-  nationalMonuments: 138,
-  stateParks: 305,
-  fiveKPeaks: 37,
-  fourteeners: 70,
-  museums: 46,
-  mlbStadiums: 33,
-  nflStadiums: 32,
-  nbaStadiums: 30,
-  nhlStadiums: 32,
-  soccerStadiums: 48,
-  f1Tracks: 34,
-  marathons: 7,
-  airports: 58,
-  skiResorts: 32,
-  themeParks: 37,
-  surfingReserves: 26,
-  weirdAmericana: 56,
-};
-
-// Dynamic getter that uses cached data when available, falls back to static values
+// Dynamic getter that uses cached data when available, falls back to schema values
 export function getCategoryTotal(category: Category): number {
   const cachedData = dataCache[category];
   if (cachedData) {
     return cachedData.length;
   }
-  return fallbackTotals[category] || 0;
+  // Use CATEGORY_SCHEMA as single source of truth for static totals
+  return CATEGORY_SCHEMA[category].total;
 }
 
 // For backwards compatibility - use getCategoryTotal() for new code
-export const categoryTotals: Record<Category, number> = new Proxy(fallbackTotals, {
-  get(target, prop: string) {
-    if (prop in target) {
-      return getCategoryTotal(prop as Category);
-    }
-    return target[prop as Category];
-  },
-});
+// Proxy dynamically resolves totals from cache or schema
+export const categoryTotals: Record<Category, number> = new Proxy(
+  {} as Record<Category, number>,
+  {
+    get(_, prop: string) {
+      if (prop in CATEGORY_SCHEMA) {
+        return getCategoryTotal(prop as Category);
+      }
+      return 0;
+    },
+  }
+);
 
-// Category display titles
+// Category display titles (order matches CATEGORY_SCHEMA)
 export const categoryTitles: Record<Category, string> = {
   countries: 'Countries of the World',
+  worldCities: 'Major World Cities',
   states: 'US States',
   territories: 'US Territories & Islands',
   usCities: 'Major US Cities',
-  worldCities: 'Major World Cities',
   nationalParks: 'National Parks',
   nationalMonuments: 'National Monuments',
   stateParks: 'State Parks',
@@ -155,7 +132,7 @@ export const categoryTitles: Record<Category, string> = {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type TransformFn = (item: any) => CategoryItem;
 
-// Transform functions for each category
+// Transform functions for each category (order matches CATEGORY_SCHEMA)
 const transforms: Record<Category, TransformFn> = {
   countries: (c) => ({
     id: c.code,
@@ -163,6 +140,11 @@ const transforms: Record<Category, TransformFn> = {
     group: c.continent,
     code: c.code,
     aliases: countryAliases[c.code] || [],
+  }),
+  worldCities: (c) => ({
+    id: c.id,
+    name: `${c.name}, ${c.country}`,
+    group: c.continent,
   }),
   states: (s) => ({
     id: s.code,
@@ -181,11 +163,6 @@ const transforms: Record<Category, TransformFn> = {
     id: c.id,
     name: `${c.name}, ${c.stateCode}`,
     group: c.region,
-  }),
-  worldCities: (c) => ({
-    id: c.id,
-    name: `${c.name}, ${c.country}`,
-    group: c.continent,
   }),
   nationalParks: (p) => ({
     id: p.id,
@@ -281,6 +258,37 @@ const transforms: Record<Category, TransformFn> = {
   }),
 };
 
+// =====================
+// DATA LOADERS MAP (OCP - Open for extension, closed for modification)
+// =====================
+// To add a new category: add entry here and in CATEGORY_SCHEMA (types.ts)
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const DATA_LOADERS: Record<Category, () => Promise<any[]>> = {
+  countries: () => import('@/data/countries').then(m => m.countries),
+  worldCities: () => import('@/data/worldCities').then(m => m.worldCities),
+  states: () => import('@/data/usStates').then(m => m.usStates),
+  territories: () => import('@/data/usTerritories').then(m => m.usTerritories),
+  usCities: () => import('@/data/usCities').then(m => m.usCities),
+  nationalParks: () => import('@/data/nationalParks').then(m => m.nationalParks),
+  nationalMonuments: () => import('@/data/nationalMonuments').then(m => m.nationalMonuments),
+  stateParks: () => import('@/data/stateParks').then(m => m.stateParks),
+  fiveKPeaks: () => import('@/data/mountains').then(m => m.get5000mPeaks()),
+  fourteeners: () => import('@/data/mountains').then(m => m.getUS14ers()),
+  museums: () => import('@/data/museums').then(m => m.museums),
+  mlbStadiums: () => import('@/data/stadiums').then(m => m.getMlbStadiums()),
+  nflStadiums: () => import('@/data/stadiums').then(m => m.getNflStadiums()),
+  nbaStadiums: () => import('@/data/stadiums').then(m => m.getNbaStadiums()),
+  nhlStadiums: () => import('@/data/stadiums').then(m => m.getNhlStadiums()),
+  soccerStadiums: () => import('@/data/stadiums').then(m => m.getSoccerStadiums()),
+  f1Tracks: () => import('@/data/f1Tracks').then(m => m.f1Tracks),
+  marathons: () => import('@/data/marathons').then(m => m.marathons),
+  airports: () => import('@/data/airports').then(m => m.airports),
+  skiResorts: () => import('@/data/skiResorts').then(m => m.skiResorts),
+  themeParks: () => import('@/data/themeParks').then(m => m.themeParks),
+  surfingReserves: () => import('@/data/surfingReserves').then(m => m.surfingReserves),
+  weirdAmericana: () => import('@/data/weirdAmericana').then(m => m.weirdAmericana),
+};
+
 // Dynamic data loaders - only load when needed
 // Exported for use by marker maps and other components that need raw data
 export async function loadCategoryData(category: Category): Promise<CategoryDataItem[]> {
@@ -289,84 +297,15 @@ export async function loadCategoryData(category: Category): Promise<CategoryData
     return dataCache[category]!;
   }
 
-  let data: CategoryDataItem[];
-  switch (category) {
-    case 'countries':
-      data = (await import('@/data/countries')).countries;
-      break;
-    case 'states':
-      data = (await import('@/data/usStates')).usStates;
-      break;
-    case 'territories':
-      data = (await import('@/data/usTerritories')).usTerritories;
-      break;
-    case 'usCities':
-      data = (await import('@/data/usCities')).usCities;
-      break;
-    case 'worldCities':
-      data = (await import('@/data/worldCities')).worldCities;
-      break;
-    case 'nationalParks':
-      data = (await import('@/data/nationalParks')).nationalParks;
-      break;
-    case 'nationalMonuments':
-      data = (await import('@/data/nationalMonuments')).nationalMonuments;
-      break;
-    case 'stateParks':
-      data = (await import('@/data/stateParks')).stateParks;
-      break;
-    case 'fiveKPeaks':
-      data = (await import('@/data/mountains')).get5000mPeaks();
-      break;
-    case 'fourteeners':
-      data = (await import('@/data/mountains')).getUS14ers();
-      break;
-    case 'museums':
-      data = (await import('@/data/museums')).museums;
-      break;
-    case 'mlbStadiums':
-      data = (await import('@/data/stadiums')).getMlbStadiums();
-      break;
-    case 'nflStadiums':
-      data = (await import('@/data/stadiums')).getNflStadiums();
-      break;
-    case 'nbaStadiums':
-      data = (await import('@/data/stadiums')).getNbaStadiums();
-      break;
-    case 'nhlStadiums':
-      data = (await import('@/data/stadiums')).getNhlStadiums();
-      break;
-    case 'soccerStadiums':
-      data = (await import('@/data/stadiums')).getSoccerStadiums();
-      break;
-    case 'f1Tracks':
-      data = (await import('@/data/f1Tracks')).f1Tracks;
-      break;
-    case 'marathons':
-      data = (await import('@/data/marathons')).marathons;
-      break;
-    case 'airports':
-      data = (await import('@/data/airports')).airports;
-      break;
-    case 'skiResorts':
-      data = (await import('@/data/skiResorts')).skiResorts;
-      break;
-    case 'themeParks':
-      data = (await import('@/data/themeParks')).themeParks;
-      break;
-    case 'surfingReserves':
-      data = (await import('@/data/surfingReserves')).surfingReserves;
-      break;
-    case 'weirdAmericana':
-      data = (await import('@/data/weirdAmericana')).weirdAmericana;
-      break;
-    default:
-      data = [];
+  const loader = DATA_LOADERS[category];
+  if (!loader) {
+    console.error(`No loader found for category: ${category}`);
+    return [];
   }
 
-  // Cache the loaded data
-  dataCache[category] = data;
-  return data;
+  const data = await loader();
+  dataCache[category] = data as CategoryDataItem[];
+  return dataCache[category]!;
 }
 
 // Async function to get category items - loads data on demand
