@@ -145,74 +145,60 @@ const ShareableMapDesign = forwardRef<HTMLDivElement, ShareableMapDesignProps>(
               </div>
             )}
 
-            {/* Icon & Title */}
-            <div className={`text-center ${includeMap ? 'mb-2' : 'mb-6'}`}>
-            <span className={`flex items-center justify-center drop-shadow-md ${includeMap ? 'text-3xl' : 'text-5xl sm:text-6xl'}`}>
+            {/* Icon & Title - consistent sizing */}
+            <div className="text-center mb-2">
+            <span className="flex items-center justify-center drop-shadow-md text-3xl">
                 {categoryIcons[category]}
             </span>
-            <h2 className={`font-bold mt-1 drop-shadow-md ${includeMap ? 'text-xl' : 'text-2xl sm:text-3xl mt-3'}`}>
+            <h2 className="font-bold mt-1 drop-shadow-md text-xl">
                 {categoryLabels[category]}
             </h2>
             </div>
 
-            {/* Big Number - compact when map is shown */}
-            {includeMap ? (
+            {/* Big Number - consistent compact layout */}
             <div className="text-center mb-2">
                 <span className="text-4xl font-black drop-shadow-md">{stats.visited}</span>
                 <span className="text-xl font-medium opacity-100 ml-2 drop-shadow-sm">of {stats.total}</span>
                 <span className="block text-sm font-medium opacity-90">{stats.percentage}% Complete</span>
             </div>
-            ) : (
-            <>
-                <div className="flex-1 flex items-center justify-center py-4">
-                <div className="text-center">
-                    <div className="text-7xl sm:text-9xl font-black drop-shadow-lg tracking-tight leading-none">
-                    {stats.visited}
-                    </div>
-                    <div className="text-xl sm:text-2xl font-bold mt-2 opacity-100 drop-shadow-md">
-                    of {stats.total} Visited
-                    </div>
-                    <div className="text-lg font-medium opacity-90 mt-1">
-                    {stats.percentage}% Complete
-                    </div>
-                </div>
-                </div>
 
-                {/* Sample locations - only when map is not shown */}
-                {visitedItems.length > 0 && (
-                <div className="mt-4 text-center bg-black/20 rounded-lg p-3 backdrop-blur-sm">
-                    <p className="text-xs uppercase tracking-wider font-bold opacity-80 mb-1">Recently visited</p>
-                    <p className="text-base font-semibold truncate leading-tight">
-                    {visitedItems.slice(0, 3).join(' \u2022 ')}
-                    {visitedItems.length > 3 && ` +${visitedItems.length - 3} more`}
-                    </p>
-                </div>
-                )}
-            </>
-            )}
-
-            {/* Bucket list preview */}
-            {stats.bucketList > 0 && !includeMap && (
-            <div className="mt-3 text-center text-sm font-medium bg-amber-400/20 text-amber-100 py-1 px-3 rounded-full mx-auto w-fit backdrop-blur-sm border border-amber-400/30">
-                ★ {stats.bucketList} on bucket list
-            </div>
-            )}
-
-            {/* Map Snapshot */}
-            {includeMap && (
+            {/* Map Snapshot or Placeholder - maintains consistent dimensions */}
             <div className="mt-4 bg-black/10 rounded-xl overflow-hidden border border-white/10 shadow-inner">
                 <div className="relative flex items-center justify-center">
-                {usesRegionMap(category) ? (
+                {includeMap ? (
+                  usesRegionMap(category) ? (
                     category === 'countries' ? (
-                    <StaticWorldMap selections={selections} />
+                      <StaticWorldMap selections={selections} />
                     ) : (
-                    <StaticUSMap selections={selections} />
+                      <StaticUSMap selections={selections} />
                     )
-                ) : (
+                  ) : (
                     <StaticMarkerMap category={category} selections={selections} subcategory={subcategory} iconSize={iconSize} />
+                  )
+                ) : (
+                  /* Placeholder with same aspect ratio as maps (800x400 = 2:1) */
+                  <div className="w-full" style={{ aspectRatio: '2/1' }}>
+                    <div className="h-full flex flex-col items-center justify-center text-white/60 p-4">
+                      {visitedItems.length > 0 && (
+                        <div className="text-center">
+                          <p className="text-xs uppercase tracking-wider font-bold opacity-80 mb-2">Recently visited</p>
+                          <p className="text-base font-semibold leading-relaxed">
+                            {visitedItems.slice(0, 5).join(' • ')}
+                            {visitedItems.length > 5 && ` +${visitedItems.length - 5} more`}
+                          </p>
+                        </div>
+                      )}
+                      {stats.bucketList > 0 && (
+                        <div className="mt-3 text-sm font-medium bg-amber-400/20 text-amber-100 py-1 px-3 rounded-full backdrop-blur-sm border border-amber-400/30">
+                          ★ {stats.bucketList} on bucket list
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 )}
                 </div>
-                {/* Map Legend */}
+                {/* Map Legend - only show when map is included */}
+                {includeMap && (
                 <div className="flex justify-center gap-4 py-2 text-xs font-medium bg-black/20 backdrop-blur-sm">
                 <div className="flex items-center gap-1.5">
                     <span className="w-2.5 h-2.5 rounded-full bg-green-500 shadow-sm ring-1 ring-white/20"></span>
@@ -223,8 +209,8 @@ const ShareableMapDesign = forwardRef<HTMLDivElement, ShareableMapDesignProps>(
                     <span className="opacity-100">Bucket List</span>
                 </div>
                 </div>
+                )}
             </div>
-            )}
 
             {/* Enhanced Branding - Prominent URL for social sharing */}
             <div className="mt-auto pt-4">
