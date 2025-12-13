@@ -7,31 +7,34 @@ import { ReactNode } from "react";
 // To add a new category: simply add it here, everything else derives automatically
 // NOTE: If updating this, also update get_analytics_summary() in supabase/migrations/20241207_analytics_rpc.sql
 
-const CATEGORY_SCHEMA = {
-  countries: { label: "Countries", icon: "🌍", group: "destinations" },
-  states: { label: "US States", icon: "🇺🇸", group: "destinations" },
-  territories: { label: "US Territories", icon: "🏝️", group: "destinations" },
-  usCities: { label: "US Cities", icon: "🏙️", group: "destinations" },
-  worldCities: { label: "World Cities", icon: "🌆", group: "destinations" },
-  nationalParks: { label: "National Parks", icon: "🏞️", group: "nature" },
-  nationalMonuments: { label: "National Monuments", icon: "🗽", group: "nature" },
-  stateParks: { label: "State Parks", icon: "🌲", group: "nature" },
-  fiveKPeaks: { label: "5000m+ Peaks", icon: "🏔️", group: "nature" },
-  fourteeners: { label: "US 14ers", icon: "⛰️", group: "nature" },
-  museums: { label: "Museums", icon: "🎨", group: "culture" },
-  mlbStadiums: { label: "MLB Stadiums", icon: "⚾", group: "sports" },
-  nflStadiums: { label: "NFL Stadiums", icon: "🏈", group: "sports" },
-  nbaStadiums: { label: "NBA Arenas", icon: "🏀", group: "sports" },
-  nhlStadiums: { label: "NHL Arenas", icon: "🏒", group: "sports" },
-  soccerStadiums: { label: "Soccer Stadiums", icon: "⚽", group: "sports" },
-  f1Tracks: { label: "F1 Tracks", icon: "🏎️", group: "sports" },
-  marathons: { label: "Marathon Majors", icon: "🏃", group: "sports" },
-  airports: { label: "Airports", icon: "✈️", group: "destinations" },
-  skiResorts: { label: "Ski Resorts", icon: "⛷️", group: "nature" },
-  themeParks: { label: "Theme Parks", icon: "🎢", group: "culture" },
-  surfingReserves: { label: "Surfing Reserves", icon: "🌊", group: "nature" },
-  weirdAmericana: { label: "Weird Americana", icon: "🗿", group: "culture" },
+export const CATEGORY_SCHEMA = {
+  countries: { label: "Countries", icon: "🌍", group: "destinations", xp: 25, total: 197 },
+  worldCities: { label: "World Cities", icon: "🌆", group: "destinations", xp: 10, total: 115 },
+  states: { label: "US States", icon: "🇺🇸", group: "destinations", xp: 15, total: 51 },
+  territories: { label: "US Territories", icon: "🏝️", group: "destinations", xp: 20, total: 14 },
+  usCities: { label: "US Cities", icon: "🏙️", group: "destinations", xp: 5, total: 75 },
+  nationalParks: { label: "National Parks", icon: "🏞️", group: "nature", xp: 30, total: 63 },
+  nationalMonuments: { label: "National Monuments", icon: "🗽", group: "nature", xp: 25, total: 138 },
+  stateParks: { label: "State Parks", icon: "🌲", group: "nature", xp: 15, total: 305 },
+  fiveKPeaks: { label: "5000m+ Peaks", icon: "🏔️", group: "nature", xp: 50, total: 37 },
+  fourteeners: { label: "US 14ers", icon: "⛰️", group: "nature", xp: 40, total: 70 },
+  museums: { label: "Museums", icon: "🎨", group: "culture", xp: 15, total: 46 },
+  mlbStadiums: { label: "MLB Stadiums", icon: "⚾", group: "sports", xp: 20, total: 33 },
+  nflStadiums: { label: "NFL Stadiums", icon: "🏈", group: "sports", xp: 20, total: 32 },
+  nbaStadiums: { label: "NBA Arenas", icon: "🏀", group: "sports", xp: 20, total: 30 },
+  nhlStadiums: { label: "NHL Arenas", icon: "🏒", group: "sports", xp: 20, total: 32 },
+  soccerStadiums: { label: "Soccer Stadiums", icon: "⚽", group: "sports", xp: 25, total: 48 },
+  f1Tracks: { label: "F1 Tracks", icon: "🏎️", group: "sports", xp: 35, total: 34 },
+  marathons: { label: "Marathon Majors", icon: "🏃", group: "sports", xp: 100, total: 7 },
+  airports: { label: "Airports", icon: "✈️", group: "destinations", xp: 5, total: 58 },
+  skiResorts: { label: "Ski Resorts", icon: "⛷️", group: "nature", xp: 25, total: 32 },
+  themeParks: { label: "Theme Parks", icon: "🎢", group: "culture", xp: 20, total: 37 },
+  surfingReserves: { label: "Surfing Reserves", icon: "🌊", group: "nature", xp: 30, total: 26 },
+  weirdAmericana: { label: "Weird Americana", icon: "🗿", group: "culture", xp: 15, total: 56 },
 } as const;
+
+// Helper to access category metadata
+export const getCategoryMeta = (category: Category) => CATEGORY_SCHEMA[category];
 
 // =====================
 // DERIVED TYPES AND CONSTANTS (DRY)
