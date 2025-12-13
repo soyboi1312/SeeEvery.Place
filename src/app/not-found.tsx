@@ -3,7 +3,9 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
-import { Home } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
+import { Home, Info } from 'lucide-react';
 
 export default function NotFound() {
   return (
@@ -28,52 +30,50 @@ export default function NotFound() {
       </header>
 
       {/* Content */}
-      <div className="flex-1 flex items-center justify-center px-4">
-        <div className="text-center">
-          {/* 404 Icon */}
-          <div className="text-8xl mb-6">🗺️</div>
-
-          {/* Error Code */}
-          <h1 className="text-6xl sm:text-8xl font-black bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-4">
-            404
-          </h1>
-
-          {/* Message */}
-          <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-4">
-            Page Not Found
-          </h2>
-          <p className="text-muted-foreground mb-8 max-w-md mx-auto">
-            Looks like this destination isn&apos;t on our map yet.
-            Let&apos;s get you back to exploring!
-          </p>
-
-          {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button asChild size="lg" className="text-lg px-8 h-14">
+      <div className="flex-1 flex items-center justify-center px-4 py-8">
+        <Card className="w-full max-w-lg text-center border-0 shadow-lg bg-background/80 backdrop-blur-sm">
+          <CardHeader className="pb-2">
+            <div className="text-8xl mb-4">🗺️</div>
+            <CardTitle className="text-6xl sm:text-7xl font-black bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              404
+            </CardTitle>
+            <CardDescription className="text-2xl sm:text-3xl font-bold text-foreground pt-2">
+              Page Not Found
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="text-muted-foreground">
+              Looks like this destination isn&apos;t on our map yet.
+              Let&apos;s get you back to exploring!
+            </p>
+          </CardContent>
+          <CardFooter className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
+            <Button asChild size="lg">
               <Link href="/">
-                <Home className="w-5 h-5 mr-2" />
+                <Home className="w-4 h-4" />
                 Go Home
               </Link>
             </Button>
-            <Button asChild variant="outline" size="lg" className="text-lg px-8 h-14">
+            <Button asChild variant="outline" size="lg">
               <Link href="/about">
+                <Info className="w-4 h-4" />
                 Learn More
               </Link>
             </Button>
-          </div>
-        </div>
+          </CardFooter>
+        </Card>
       </div>
 
       {/* Footer */}
       <footer className="border-t border-border bg-muted/50">
         <div className="max-w-4xl mx-auto px-4 py-6 text-center text-sm text-muted-foreground">
-          <div className="flex justify-center gap-4 mb-2">
+          <div className="flex justify-center items-center gap-4 mb-3">
             <Link href="/about" className="hover:text-foreground transition-colors">About</Link>
-            <span>•</span>
+            <Separator orientation="vertical" className="h-4" />
             <Link href="/suggest" className="hover:text-foreground transition-colors">Suggest</Link>
-            <span>•</span>
+            <Separator orientation="vertical" className="h-4" />
             <Link href="/privacy" className="hover:text-foreground transition-colors">Privacy</Link>
-            <span>•</span>
+            <Separator orientation="vertical" className="h-4" />
             <Link href="/terms" className="hover:text-foreground transition-colors">Terms</Link>
           </div>
           <p>Made by people who really like maps.</p>
