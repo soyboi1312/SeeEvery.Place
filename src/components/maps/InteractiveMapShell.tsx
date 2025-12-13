@@ -125,7 +125,11 @@ const InteractiveMapShell = memo(function InteractiveMapShell({
           center={position.coordinates as any}
           onMoveEnd={handleMoveEnd}
           // Only allow scrolling if the timer has completed
-          disableScrolling={!isScrollZoomEnabled}
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          filterZoomEvent={(evt: any) => {
+            if (evt.type === 'wheel' && !isScrollZoomEnabled) return false;
+            return true;
+          }}
         >
           {/* Optional world map decorations */}
           {showSphere && (
