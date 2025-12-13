@@ -1,13 +1,11 @@
 /**
  * Map components barrel export
  */
-// Specific map components (thin wrappers around generic components)
-export { default as WorldMap } from './WorldMap';
-export { default as USMap } from './USMap';
+// Marker map components
 export { default as USMarkerMap } from './USMarkerMap';
 export { default as WorldMarkerMap } from './WorldMarkerMap';
 
-// Generic map components (DRY abstractions)
+// Generic map components (DRY - use with configs from mapConfigs)
 export { default as RegionMap } from './RegionMap';
 export { default as CategoryMarkerMap } from './CategoryMarkerMap';
 

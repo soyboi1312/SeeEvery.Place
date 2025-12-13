@@ -7,18 +7,11 @@
 
 import { useCallback, memo } from 'react';
 import { Geographies } from '@vnedyalk0v/react19-simple-maps';
-import { Status, UserSelections, Selection } from '@/lib/types';
+import { Status, UserSelections } from '@/lib/types';
 import { useStatusLookup } from '@/lib/hooks/useMapData';
-import { TooltipHandlers } from './types';
+import { TooltipHandlers, IdExtractor, SelectionGetter } from './types';
 import InteractiveMapShell from './InteractiveMapShell';
 import { TappableGeography } from './TappableGeography';
-
-// Strategy pattern: function to extract ID from geography properties
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type IdExtractor = (geo: any) => string;
-
-// Strategy pattern: function to get selection list from user selections
-export type SelectionGetter = (selections: UserSelections) => Selection[] | undefined;
 
 export interface RegionMapProps {
   selections: UserSelections;

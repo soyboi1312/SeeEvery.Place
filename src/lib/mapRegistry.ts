@@ -1,7 +1,7 @@
 /**
  * Map Registry
  * Category to data source mapping following OCP (Open/Closed Principle)
- * Extend by adding to registry objects, not by modifying lookup logic
+ * All maps use lazy loading - data is only loaded when first requested
  */
 
 import { Category } from '@/lib/types';
@@ -28,76 +28,49 @@ import { get5000mPeaks, getUS14ers, Mountain } from '@/data/mountains';
 import { getMlbStadiums, getNflStadiums, getNbaStadiums, getNhlStadiums, getSoccerStadiums, Stadium } from '@/data/stadiums';
 
 // =====================
-// Static Maps Registry
+// Unified Registry (OCP + Performance)
 // =====================
 
-// Create static lookup maps once at module load
-const nationalParksMap = createLookupMap(nationalParks);
-const nationalMonumentsMap = createLookupMap(nationalMonuments);
-const stateParksMap = createLookupMap(stateParks);
-const museumsMap = createLookupMap(museums);
-const f1TracksMap = createLookupMap(f1Tracks);
-const marathonsMap = createLookupMap(marathons);
-const airportsMap = createLookupMap(airports);
-const skiResortsMap = createLookupMap(skiResorts);
-const themeParksMap = createLookupMap(themeParks);
-const surfingReservesMap = createLookupMap(surfingReserves);
-const weirdAmericanaMap = createLookupMap(weirdAmericana);
-const usCitiesMap = createLookupMap(usCities);
-const worldCitiesMap = createLookupMap(worldCities);
+// All entries are generator functions for lazy evaluation
+type DataGenerator = () => CoordItem[];
 
-// Territories use 'code' as ID, so we need a custom map
-type TerritoryCoordItem = { id: string; lat: number; lng: number; name: string };
-const territoriesMap = new Map<string, TerritoryCoordItem>(
-  usTerritories.map(t => [t.code, { id: t.code, lat: t.lat, lng: t.lng, name: t.name }])
-);
+// Helper to wrap static data into a generator (defers array reference)
+const wrapStatic = (getData: () => CoordItem[]): DataGenerator => getData;
 
-/**
- * Static maps registry - categories mapped to their pre-built lookup maps
- * Following OCP: add new static categories here without modifying getLookupMapForCategory
- */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const staticMaps: Partial<Record<Category, Map<string, any>>> = {
-  nationalParks: nationalParksMap,
-  nationalMonuments: nationalMonumentsMap,
-  stateParks: stateParksMap,
-  museums: museumsMap,
-  f1Tracks: f1TracksMap,
-  marathons: marathonsMap,
-  airports: airportsMap,
-  skiResorts: skiResortsMap,
-  themeParks: themeParksMap,
-  surfingReserves: surfingReservesMap,
-  weirdAmericana: weirdAmericanaMap,
-  territories: territoriesMap,
-  usCities: usCitiesMap,
-  worldCities: worldCitiesMap,
+// Unified registry - all categories use generator functions
+// Maps are only created when first accessed (lazy loading)
+const registry: Partial<Record<Category, DataGenerator>> = {
+  // Static data wrapped in getters for consistent lazy access pattern
+  nationalParks: wrapStatic(() => nationalParks),
+  nationalMonuments: wrapStatic(() => nationalMonuments),
+  stateParks: wrapStatic(() => stateParks),
+  museums: wrapStatic(() => museums),
+  f1Tracks: wrapStatic(() => f1Tracks),
+  marathons: wrapStatic(() => marathons),
+  airports: wrapStatic(() => airports),
+  skiResorts: wrapStatic(() => skiResorts),
+  themeParks: wrapStatic(() => themeParks),
+  surfingReserves: wrapStatic(() => surfingReserves),
+  weirdAmericana: wrapStatic(() => weirdAmericana),
+  usCities: wrapStatic(() => usCities),
+  worldCities: wrapStatic(() => worldCities),
+
+  // Custom transform for territories (uses 'code' as ID)
+  territories: () => usTerritories.map(t => ({ id: t.code, lat: t.lat, lng: t.lng, name: t.name })),
+
+  // Dynamic data generators (already functions)
+  fiveKPeaks: get5000mPeaks as DataGenerator,
+  fourteeners: getUS14ers as DataGenerator,
+  mlbStadiums: getMlbStadiums as DataGenerator,
+  nflStadiums: getNflStadiums as DataGenerator,
+  nbaStadiums: getNbaStadiums as DataGenerator,
+  nhlStadiums: getNhlStadiums as DataGenerator,
+  soccerStadiums: getSoccerStadiums as DataGenerator,
 };
 
-// =====================
-// Lazy Maps Registry
-// =====================
-
-/**
- * Lazy map generators - functions that generate data on first access
- * These are called once and cached to avoid regenerating large datasets
- */
-const lazyMapGenerators: Partial<Record<Category, () => CoordItem[]>> = {
-  fiveKPeaks: get5000mPeaks as () => CoordItem[],
-  fourteeners: getUS14ers as () => CoordItem[],
-  mlbStadiums: getMlbStadiums as () => CoordItem[],
-  nflStadiums: getNflStadiums as () => CoordItem[],
-  nbaStadiums: getNbaStadiums as () => CoordItem[],
-  nhlStadiums: getNhlStadiums as () => CoordItem[],
-  soccerStadiums: getSoccerStadiums as () => CoordItem[],
-};
-
-/**
- * Cache for lazy-initialized maps
- * Maps are created on first access and cached for subsequent lookups
- */
+// Single cache for all lookup maps
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const lazyMapCache: Partial<Record<Category, Map<string, any>>> = {};
+const mapCache = new Map<Category, Map<string, any>>();
 
 // =====================
 // Public API
@@ -106,27 +79,23 @@ const lazyMapCache: Partial<Record<Category, Map<string, any>>> = {};
 /**
  * Get the lookup map for a category
  * Uses registry pattern instead of switch statement (OCP)
+ * Maps are created lazily on first access and cached
  *
  * @param category - The category to get the lookup map for
  * @returns The lookup map or null if category not found
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function getLookupMapForCategory(category: Category): Map<string, any> | null {
-  // Check static maps first (O(1) object property lookup)
-  if (category in staticMaps) {
-    return staticMaps[category]!;
+  // Check cache first
+  if (mapCache.has(category)) {
+    return mapCache.get(category)!;
   }
 
-  // Check cache for lazy maps
-  if (lazyMapCache[category]) {
-    return lazyMapCache[category]!;
-  }
-
-  // Initialize lazy map if generator exists
-  const generator = lazyMapGenerators[category];
+  // Generate and cache if generator exists
+  const generator = registry[category];
   if (generator) {
     const map = createLookupMap(generator());
-    lazyMapCache[category] = map;
+    mapCache.set(category, map);
     return map;
   }
 
@@ -137,7 +106,7 @@ export function getLookupMapForCategory(category: Category): Map<string, any> | 
  * Check if a category has a registered lookup map
  */
 export function hasLookupMap(category: Category): boolean {
-  return category in staticMaps || category in lazyMapGenerators;
+  return category in registry;
 }
 
 // Re-export types for external use

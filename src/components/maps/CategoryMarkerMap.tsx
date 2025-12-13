@@ -10,7 +10,7 @@ import { memo } from 'react';
 import { Geographies, Geography } from '@vnedyalk0v/react19-simple-maps';
 import { useNameGetter, getMarkerSize, useCategoryMarkers } from '@/lib/hooks/useMapData';
 import { renderCategoryMarker } from '@/components/MapMarkers/registry';
-import { MarkerMapProps } from './types';
+import { MarkerMapProps, CategoryMarkerMapConfig } from './types';
 import InteractiveMapShell from './InteractiveMapShell';
 import MemoizedMarker from './MemoizedMarker';
 
@@ -38,20 +38,6 @@ const StaticBackground = memo(function StaticBackground({ geoUrl }: { geoUrl: st
     </Geographies>
   );
 });
-
-export interface CategoryMarkerMapConfig {
-  geoUrl: string;
-  projection: string;
-  projectionConfig: Record<string, unknown>;
-  width?: number;
-  height?: number;
-  viewBox?: string;
-  initialCenter?: [number, number];
-  maxZoom?: number;
-  showSphere?: boolean;
-  showGraticule?: boolean;
-  filterAlbersUsa?: boolean;
-}
 
 export interface CategoryMarkerMapProps extends MarkerMapProps {
   config: CategoryMarkerMapConfig;

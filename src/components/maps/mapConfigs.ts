@@ -5,8 +5,7 @@
  */
 import { GEO_URL_USA, GEO_URL_WORLD, fipsToAbbr, countryNameToISO } from '@/lib/mapConstants';
 import { UserSelections } from '@/lib/types';
-import { IdExtractor, SelectionGetter } from './RegionMap';
-import { CategoryMarkerMapConfig } from './CategoryMarkerMap';
+import { IdExtractor, SelectionGetter, CategoryMarkerMapConfig, RegionMapConfig } from './types';
 
 // =====================
 // ID Extractors (Strategy Pattern)
@@ -41,33 +40,33 @@ export const getCountrySelections: SelectionGetter = (selections: UserSelections
 // Region Map Configurations
 // =====================
 
-export const US_REGION_CONFIG = {
+export const US_REGION_CONFIG: RegionMapConfig = {
   geoUrl: GEO_URL_USA,
   projection: 'geoAlbersUsa',
   projectionConfig: { scale: 1000 },
   width: 800,
   height: 500,
   viewBox: '0 0 800 500',
-  initialCenter: [-97, 38] as [number, number],
+  initialCenter: [-97, 38],
   maxZoom: 8,
   getId: getUSStateId,
   getSelections: getStateSelections,
-} as const;
+};
 
-export const WORLD_REGION_CONFIG = {
+export const WORLD_REGION_CONFIG: RegionMapConfig = {
   geoUrl: GEO_URL_WORLD,
   projection: 'geoEqualEarth',
   projectionConfig: { scale: 140, center: [0, 0] },
   width: 800,
   height: 400,
   viewBox: '0 0 800 400',
-  initialCenter: [0, 0] as [number, number],
+  initialCenter: [0, 0],
   maxZoom: 8,
   showSphere: true,
   showGraticule: true,
   getId: getCountryId,
   getSelections: getCountrySelections,
-} as const;
+};
 
 // =====================
 // Category Marker Map Configurations
