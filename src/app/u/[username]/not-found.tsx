@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { MapPin } from 'lucide-react';
 
 export default function ProfileNotFound() {
@@ -23,27 +24,31 @@ export default function ProfileNotFound() {
       </header>
 
       {/* Content */}
-      <main className="max-w-2xl mx-auto px-4 py-16 text-center">
-        <div className="text-8xl mb-6">🔍</div>
-        <h2 className="text-3xl font-bold text-foreground mb-4">
-          Profile Not Found
-        </h2>
-        <p className="text-lg text-muted-foreground mb-8">
-          This profile doesn&apos;t exist or is set to private.
-        </p>
-
-        <div className="space-y-4">
-          <Button asChild size="lg">
-            <Link href="/">
-              <MapPin className="w-5 h-5 mr-2" />
-              Create Your Own Map
-            </Link>
-          </Button>
-
-          <p className="text-sm text-muted-foreground">
-            Start tracking your travel adventures for free
-          </p>
-        </div>
+      <main className="max-w-2xl mx-auto px-4 py-16 flex justify-center">
+        <Card className="w-full max-w-md text-center border-0 shadow-lg bg-background/80 backdrop-blur-sm">
+          <CardHeader>
+            <div className="text-8xl mb-4">🔍</div>
+            <CardTitle className="text-3xl font-bold">
+              Profile Not Found
+            </CardTitle>
+            <CardDescription className="text-lg">
+              This profile doesn&apos;t exist or is set to private.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button asChild size="lg">
+              <Link href="/">
+                <MapPin className="w-4 h-4" />
+                Create Your Own Map
+              </Link>
+            </Button>
+          </CardContent>
+          <CardFooter className="justify-center">
+            <p className="text-sm text-muted-foreground">
+              Start tracking your travel adventures for free
+            </p>
+          </CardFooter>
+        </Card>
       </main>
     </div>
   );
