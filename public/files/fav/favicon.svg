@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" width="512" height="512"><svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="256" cy="256" r="236" fill="#1C4E80" stroke="#F28B40" stroke-width="24"></circle>
+
+  <filter id="SvgjsFilter1005" x="130" y="100" width="252" height="360" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+    <feFlood flood-opacity="0" result="BackgroundImageFix"></feFlood>
+    <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"></feBlend>
+    <feGaussianBlur stdDeviation="15" result="effect1_foregroundBlur"></feGaussianBlur>
+  </filter>
+  <path d="M256 446C256 446 372 300 372 220C372 155.9 320.1 104 256 104C191.9 104 140 155.9 140 220C140 300 256 446 256 446Z" fill="black" fill-opacity="0.3" filter="url(#filter0_f)" transform="translate(8, 12)"></path>
+
+  <path d="M256 446C256 446 130 292 130 212C130 142.4 186.4 86 256 86V446Z" fill="#34D399"></path>
+
+  <path d="M256 446V86C325.6 86 382 142.4 382 212C382 292 256 446 256 446Z" fill="#10B981"></path>
+
+  <circle cx="256" cy="212" r="72" fill="#0F5B5B" fill-opacity="0.8"></circle>
+
+  <path d="M220 212L244 236L292 188" stroke="white" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg><style>@media (prefers-color-scheme: light) { :root { filter: none; } }
+@media (prefers-color-scheme: dark) { :root { filter: none; } }
+</style></svg>
