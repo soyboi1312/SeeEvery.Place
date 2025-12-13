@@ -10,7 +10,7 @@ import { ReactNode } from "react";
 export const CATEGORY_SCHEMA = {
   countries: { label: "Countries", icon: "🌍", group: "destinations", xp: 25, total: 197 },
   worldCities: { label: "World Cities", icon: "🌆", group: "destinations", xp: 10, total: 115 },
-  states: { label: "US States", icon: "🇺🇸", group: "destinations", xp: 15, total: 51 },
+  states: { label: "US States", icon: "🇺🇸", group: "destinations", xp: 15, total: 50 },
   territories: { label: "US Territories", icon: "🏝️", group: "destinations", xp: 20, total: 14 },
   usCities: { label: "US Cities", icon: "🏙️", group: "destinations", xp: 5, total: 75 },
   nationalParks: { label: "National Parks", icon: "🏞️", group: "nature", xp: 30, total: 63 },
