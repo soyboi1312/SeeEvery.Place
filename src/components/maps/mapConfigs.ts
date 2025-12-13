@@ -43,9 +43,10 @@ export const getCountrySelections: SelectionGetter = (selections: UserSelections
 const BASE_US_CONFIG = {
   geoUrl: GEO_URL_USA,
   projection: 'geoAlbersUsa',
-  projectionConfig: { scale: 1000 },  width: 800,
-  height: 400,
+  projectionConfig: { scale: 800 },
   viewBox: '0 0 800 400',
+  width: 800,
+  height: 400,
   initialCenter: [-97, 38] as [number, number],
   maxZoom: 8,
 };
