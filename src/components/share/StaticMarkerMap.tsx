@@ -118,7 +118,7 @@ export default function StaticMarkerMap({
               <Geography
                 key={geo.rsmKey}
                 geography={geo}
-                fill="#cbd5e1"
+                fill="#64748b" 
                 stroke="#ffffff"
                 strokeWidth={0.5}
                 style={{
