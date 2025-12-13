@@ -70,10 +70,10 @@ export default function StaticMarkerMap({
     return (
       <ComposableMap
         projection="geoAlbersUsa"
-        projectionConfig={{ scale: 1000 }}
-        viewBox="0 0 800 530"
+        projectionConfig={{ scale: 800 }}
+        viewBox="0 0 800 400"
         width={800}
-        height={530}
+        height={400}
         style={{ width: '100%', height: 'auto', maxWidth: '100%' }}
       >
         <Geographies geography={GEO_URL_USA}>
