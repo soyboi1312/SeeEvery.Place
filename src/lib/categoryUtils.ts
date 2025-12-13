@@ -97,6 +97,16 @@ export const categoryTotals: Record<Category, number> = new Proxy(
       }
       return 0;
     },
+    // Required for Object.keys(), Object.entries(), etc.
+    ownKeys() {
+      return Object.keys(CATEGORY_SCHEMA);
+    },
+    getOwnPropertyDescriptor(_, prop: string) {
+      if (prop in CATEGORY_SCHEMA) {
+        return { enumerable: true, configurable: true, value: getCategoryTotal(prop as Category) };
+      }
+      return undefined;
+    },
   }
 );
 
