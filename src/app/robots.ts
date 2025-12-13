@@ -31,7 +31,7 @@ export default function robots(): MetadataRoute.Robots {
       },
       {
         // Block AI training crawlers
-        userAgent: ['GPTBot', 'ChatGPT-User', 'CCBot', 'anthropic-ai', 'Claude-Web'],
+        userAgent: ['GPTBot', 'ChatGPT-User', 'CCBot', 'anthropic-ai'],
         disallow: ['/'],
       },
     ],
