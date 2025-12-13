@@ -48,7 +48,9 @@ export type AchievementRequirement =
   | { type: 'total_visited'; count: number }  // Across all categories
   | { type: 'categories_started'; count: number }  // Number of categories with at least 1 visit
   | { type: 'completionist'; category: Category }  // 100% a category
-  | { type: 'level'; level: number };
+  | { type: 'level'; level: number }
+  | { type: 'login_streak'; count: number }  // Login streak days
+  | { type: 'season_streak'; count: number };  // Season streak months
 
 export interface UnlockedAchievement {
   id: string;
@@ -648,6 +650,80 @@ export const ACHIEVEMENTS: AchievementDefinition[] = [
   },
 
   // ============================================
+  // STREAK ACHIEVEMENTS
+  // ============================================
+  {
+    id: 'login_streak_7',
+    name: 'Weekly Wanderer',
+    description: 'Log in 7 days in a row',
+    category: 'global',
+    tier: 'bronze',
+    xpReward: 100,
+    requirement: { type: 'login_streak', count: 7 },
+    icon: '🗓️',
+  },
+  {
+    id: 'login_streak_30',
+    name: 'Monthly Mapper',
+    description: 'Log in 30 days in a row',
+    category: 'global',
+    tier: 'silver',
+    xpReward: 400,
+    requirement: { type: 'login_streak', count: 30 },
+    icon: '🗺️',
+  },
+  {
+    id: 'login_streak_90',
+    name: 'Quarterly Quest',
+    description: 'Log in 90 days in a row',
+    category: 'global',
+    tier: 'gold',
+    xpReward: 1000,
+    requirement: { type: 'login_streak', count: 90 },
+    icon: '🏆',
+  },
+  {
+    id: 'login_streak_365',
+    name: 'Year of Exploration',
+    description: 'Log in 365 days in a row',
+    category: 'global',
+    tier: 'legendary',
+    xpReward: 3000,
+    requirement: { type: 'login_streak', count: 365 },
+    icon: '👑',
+  },
+  {
+    id: 'season_streak_3',
+    name: 'Seasonal Traveler',
+    description: 'Visit at least one place for 3 months in a row',
+    category: 'global',
+    tier: 'bronze',
+    xpReward: 150,
+    requirement: { type: 'season_streak', count: 3 },
+    icon: '🌱',
+  },
+  {
+    id: 'season_streak_6',
+    name: 'Half-Year Hero',
+    description: 'Visit at least one place for 6 months in a row',
+    category: 'global',
+    tier: 'silver',
+    xpReward: 350,
+    requirement: { type: 'season_streak', count: 6 },
+    icon: '🌻',
+  },
+  {
+    id: 'season_streak_12',
+    name: 'Year-Round Adventurer',
+    description: 'Visit at least one place every month for a year',
+    category: 'global',
+    tier: 'gold',
+    xpReward: 800,
+    requirement: { type: 'season_streak', count: 12 },
+    icon: '🎄',
+  },
+
+  // ============================================
   // SECRET ACHIEVEMENTS (Hidden until unlocked)
   // ============================================
   {
@@ -766,12 +842,23 @@ export function calculateTotalXp(selections: UserSelections): number {
 }
 
 /**
+ * Streak data interface for achievement checking
+ */
+export interface StreakData {
+  currentLoginStreak: number;
+  longestLoginStreak: number;
+  currentSeasonStreak: number;
+  longestSeasonStreak: number;
+}
+
+/**
  * Check if an achievement requirement is met
  */
 export function isAchievementUnlocked(
   achievement: AchievementDefinition,
   selections: UserSelections,
-  currentLevel: number
+  currentLevel: number,
+  streaks?: StreakData
 ): boolean {
   const req = achievement.requirement;
 
@@ -805,6 +892,16 @@ export function isAchievementUnlocked(
       return currentLevel >= req.level;
     }
 
+    case 'login_streak': {
+      if (!streaks) return false;
+      return streaks.longestLoginStreak >= req.count;
+    }
+
+    case 'season_streak': {
+      if (!streaks) return false;
+      return streaks.longestSeasonStreak >= req.count;
+    }
+
     default:
       return false;
   }
@@ -816,7 +913,8 @@ export function isAchievementUnlocked(
 export function getAchievementProgress(
   achievement: AchievementDefinition,
   selections: UserSelections,
-  currentLevel: number
+  currentLevel: number,
+  streaks?: StreakData
 ): { current: number; target: number; percentage: number } {
   const req = achievement.requirement;
 
@@ -876,6 +974,24 @@ export function getAchievementProgress(
       };
     }
 
+    case 'login_streak': {
+      const current = streaks?.currentLoginStreak || 0;
+      return {
+        current,
+        target: req.count,
+        percentage: Math.min(100, (current / req.count) * 100),
+      };
+    }
+
+    case 'season_streak': {
+      const current = streaks?.currentSeasonStreak || 0;
+      return {
+        current,
+        target: req.count,
+        percentage: Math.min(100, (current / req.count) * 100),
+      };
+    }
+
     default:
       return { current: 0, target: 0, percentage: 0 };
   }
@@ -886,7 +1002,8 @@ export function getAchievementProgress(
  */
 export function getUnlockedAchievements(
   selections: UserSelections,
-  alreadyUnlocked: string[]
+  alreadyUnlocked: string[],
+  streaks?: StreakData
 ): AchievementDefinition[] {
   const totalXp = calculateTotalXp(selections);
   const currentLevel = calculateLevel(totalXp);
@@ -895,7 +1012,7 @@ export function getUnlockedAchievements(
     // Skip already unlocked
     if (alreadyUnlocked.includes(achievement.id)) return false;
 
-    return isAchievementUnlocked(achievement, selections, currentLevel);
+    return isAchievementUnlocked(achievement, selections, currentLevel, streaks);
   });
 }
 
