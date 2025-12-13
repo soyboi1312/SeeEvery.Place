@@ -35,7 +35,7 @@ import { US_REGION_CONFIG, WORLD_REGION_CONFIG, US_MARKER_CONFIG, WORLD_MARKER_C
 
 // Categories that use US map (Albers USA projection)
 const US_MARKER_CATEGORIES = new Set<Category>([
-  'nationalParks', 'nationalMonuments', 'stateParks', 'fourteeners', 'weirdAmericana'
+  'nationalParks', 'nationalMonuments', 'stateParks', 'fourteeners', 'weirdAmericana', 'usCities'
 ]);
 
 // Check if category uses region coloring (countries/states) vs markers (other categories)
