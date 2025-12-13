@@ -73,24 +73,28 @@ export function detectMilestones(
 }
 
 export const gradients = [
-  // Vibrant themes
+  // Blues & Indigos
   'from-blue-600 to-purple-700',
-  'from-green-500 to-teal-600',
-  'from-orange-500 to-red-600',
-  'from-pink-500 to-purple-600',
-  'from-indigo-600 to-blue-700',
-  // Premium: Midnight Collection
-  'from-gray-900 via-slate-800 to-black',          // Obsidian
-  'from-slate-900 via-indigo-950 to-slate-900',    // Deep Space
-  'from-indigo-950 via-purple-950 to-fuchsia-950', // Royal Velvet
-  // Premium: Metallic Collection
-  'from-yellow-600 via-amber-500 to-yellow-700',   // Gold
-  'from-slate-500 via-gray-400 to-slate-600',      // Platinum
-  'from-rose-400 via-orange-300 to-rose-500',      // Rose Gold
-  // Premium: Nature Collection
-  'from-emerald-900 via-green-800 to-teal-900',    // Forest
   'from-cyan-900 via-blue-900 to-indigo-900',      // Oceanic
+  'from-slate-900 via-indigo-950 to-slate-900',    // Deep Space
+  
+  // Purples & Pinks
+  'from-pink-500 to-purple-600',
+  'from-indigo-950 via-purple-950 to-fuchsia-950', // Royal Velvet
+  
+  // Greens & Teals
+  'from-green-500 to-teal-600',
+  'from-emerald-900 via-green-800 to-teal-900',    // Forest
+  
+  // Warm & Gold
+  'from-orange-500 to-red-600',
   'from-orange-500 via-rose-500 to-violet-600',    // Sunset
+  'from-rose-400 via-orange-300 to-rose-500',      // Rose Gold
+  'from-yellow-600 via-amber-500 to-yellow-700',   // Gold
+  
+  // Monochrome
+  'from-gray-900 via-slate-800 to-black',          // Obsidian
+  'from-slate-500 via-gray-400 to-slate-600',      // Platinum
 ];
 
 // Check if category uses colored regions (countries/states) vs markers (other categories)
