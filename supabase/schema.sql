@@ -270,3 +270,91 @@ create index if not exists suggestions_vote_count_idx on public.suggestions(vote
 create index if not exists suggestions_ip_created_idx on public.suggestions(submitter_ip, created_at desc);
 create index if not exists suggestion_votes_suggestion_id_idx on public.suggestion_votes(suggestion_id);
 create index if not exists suggestion_votes_voter_id_idx on public.suggestion_votes(voter_id);
+
+-- ============================================
+-- Social Layer: Follows, Activity Feed, Leaderboards
+-- ============================================
+-- See migration: 20241217_social_layer.sql for full implementation
+
+-- Follows table for user-to-user following
+create table if not exists public.follows (
+  id uuid default gen_random_uuid() primary key,
+  follower_id uuid references auth.users(id) on delete cascade not null,
+  following_id uuid references auth.users(id) on delete cascade not null,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null,
+  constraint no_self_follow check (follower_id != following_id),
+  unique(follower_id, following_id)
+);
+
+alter table public.follows enable row level security;
+
+create policy "Users can view own follows"
+  on public.follows for select
+  using (
+    auth.uid() = follower_id or
+    auth.uid() = following_id or
+    exists (
+      select 1 from public.profiles
+      where profiles.id = follows.following_id
+      and profiles.is_public = true
+    )
+  );
+
+create policy "Users can follow others"
+  on public.follows for insert
+  with check (auth.uid() = follower_id);
+
+create policy "Users can unfollow"
+  on public.follows for delete
+  using (auth.uid() = follower_id);
+
+create index if not exists follows_follower_id_idx on public.follows(follower_id);
+create index if not exists follows_following_id_idx on public.follows(following_id);
+create index if not exists follows_created_at_idx on public.follows(created_at desc);
+
+-- Activity feed table for storing events
+create table if not exists public.activity_feed (
+  id uuid default gen_random_uuid() primary key,
+  user_id uuid references auth.users(id) on delete cascade not null,
+  activity_type text not null,
+  category text,
+  place_id text,
+  place_name text,
+  achievement_id text,
+  achievement_name text,
+  old_level integer,
+  new_level integer,
+  challenge_id uuid,
+  challenge_name text,
+  xp_earned integer,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+alter table public.activity_feed enable row level security;
+
+create policy "Users can view relevant activities"
+  on public.activity_feed for select
+  using (
+    auth.uid() = user_id or
+    exists (
+      select 1 from public.follows f
+      join public.profiles p on p.id = activity_feed.user_id
+      where f.follower_id = auth.uid()
+      and f.following_id = activity_feed.user_id
+      and p.is_public = true
+    ) or
+    exists (
+      select 1 from public.profiles
+      where profiles.id = activity_feed.user_id
+      and profiles.is_public = true
+    )
+  );
+
+create policy "Users can create own activities"
+  on public.activity_feed for insert
+  with check (auth.uid() = user_id);
+
+create index if not exists activity_feed_user_id_idx on public.activity_feed(user_id);
+create index if not exists activity_feed_created_at_idx on public.activity_feed(created_at desc);
+create index if not exists activity_feed_type_idx on public.activity_feed(activity_type);
+create index if not exists activity_feed_user_created_idx on public.activity_feed(user_id, created_at desc);
