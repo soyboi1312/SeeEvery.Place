@@ -5,7 +5,7 @@
  */
 'use client';
 
-import { ReactNode, memo, useState, useRef, useEffect, useCallback } from 'react';
+import { ReactNode, memo, useState, useRef, useEffect } from 'react';
 import { ComposableMap, ZoomableGroup, Sphere, Graticule } from '@vnedyalk0v/react19-simple-maps';
 import { useMapZoom, MapPosition } from './useMapZoom';
 import ZoomControls from './ZoomControls';
@@ -92,20 +92,6 @@ const InteractiveMapShell = memo(function InteractiveMapShell({
     setIsScrollZoomEnabled(false);
   };
 
-  // Filter zoom events - only allow scroll zoom after hover delay
-  const filterZoomEvent = useCallback((event: Event): boolean => {
-    // Always allow pinch-zoom on touch devices
-    if (event.type === 'touchstart' || event.type === 'touchmove') {
-      return true;
-    }
-    // For wheel events, only allow if hover delay has passed
-    if (event.type === 'wheel') {
-      return isScrollZoomEnabled;
-    }
-    // Allow all other events (like programmatic zoom)
-    return true;
-  }, [isScrollZoomEnabled]);
-
   // Cleanup timer on unmount
   useEffect(() => {
     return () => {
@@ -138,7 +124,8 @@ const InteractiveMapShell = memo(function InteractiveMapShell({
           // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Library uses branded Longitude/Latitude types
           center={position.coordinates as any}
           onMoveEnd={handleMoveEnd}
-          filterZoomEvent={filterZoomEvent}
+          // Only allow scrolling if the timer has completed
+          disableScrolling={!isScrollZoomEnabled}
         >
           {/* Optional world map decorations */}
           {showSphere && (
