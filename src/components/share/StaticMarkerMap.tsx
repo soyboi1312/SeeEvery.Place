@@ -47,8 +47,9 @@ export default function StaticMarkerMap({
 }: StaticMarkerMapProps) {
   const allMarkers = getCategoryMarkers(category, selections, subcategory);
 
-  // US-only categories: National Parks, National Monuments, State Parks, Fourteeners, and Weird Americana
-  const isUSOnly = category === 'nationalParks' || category === 'nationalMonuments' || category === 'stateParks' || category === 'fourteeners' || category === 'weirdAmericana';
+  // US-only categories: National Parks, National Monuments, State Parks, Fourteeners, Weird Americana, and US Cities
+  const isUSOnly = category === 'nationalParks' || category === 'nationalMonuments' || category === 'stateParks' || category === 'fourteeners' || category === 'weirdAmericana' || category === 'usCities';
+  
   const markers = isUSOnly
     ? allMarkers.filter(marker => !unsupportedUSTerritoriesParks.includes(marker.id))
     : allMarkers;
@@ -106,9 +107,9 @@ export default function StaticMarkerMap({
       <ComposableMap
         projection="geoAlbersUsa"
         projectionConfig={{ scale: 1000 }}
-        viewBox="0 40 800 530"
+        viewBox="0 0 800 600"
         width={800}
-        height={530}
+        height={600}
         style={{ width: '100%', height: 'auto', maxWidth: '100%' }}
       >
         <Geographies geography={GEO_URL_USA}>
