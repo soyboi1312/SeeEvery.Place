@@ -9,6 +9,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ArrowRight, ChevronRight, ChevronDown } from 'lucide-react';
+import { TravelerStats } from '@/components/TravelerStats';
+import { ChallengesCard } from '@/components/ChallengesCard';
 import { mountains } from '@/data/mountains';
 import { mlbStadiums } from '@/data/stadiums/mlb';
 import { nflStadiums } from '@/data/stadiums/nfl';
@@ -901,6 +903,21 @@ export default async function CategoryLandingPage({ params }: Props) {
               </Card>
             ))}
           </div>
+        </section>
+
+        {/* Community Stats - Dynamic traveler statistics */}
+        <section className="mb-12">
+          <h2 className="text-lg font-semibold text-muted-foreground text-center mb-6">Community Stats</h2>
+          <Card>
+            <CardContent className="p-6">
+              <TravelerStats category={category as Category} />
+            </CardContent>
+          </Card>
+        </section>
+
+        {/* Active Challenges */}
+        <section className="mb-12">
+          <ChallengesCard filterCategory={category as Category} />
         </section>
 
         <div className="text-center">
