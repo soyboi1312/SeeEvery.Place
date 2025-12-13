@@ -40,3 +40,43 @@ export interface MapVisualizationProps {
   subcategory?: string;
   items?: ItemWithName[]; // Items for name lookups (optional, falls back to ID)
 }
+
+// =====================
+// Configuration Interfaces (DRY - centralized)
+// =====================
+
+export interface CategoryMarkerMapConfig {
+  geoUrl: string;
+  projection: string;
+  projectionConfig: Record<string, unknown>;
+  width?: number;
+  height?: number;
+  viewBox?: string;
+  initialCenter?: [number, number];
+  maxZoom?: number;
+  showSphere?: boolean;
+  showGraticule?: boolean;
+  filterAlbersUsa?: boolean;
+}
+
+// Strategy pattern: function to extract ID from geography properties
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type IdExtractor = (geo: any) => string;
+
+// Strategy pattern: function to get selection list from user selections
+export type SelectionGetter = (selections: UserSelections) => import('@/lib/types').Selection[] | undefined;
+
+export interface RegionMapConfig {
+  geoUrl: string;
+  projection: string;
+  projectionConfig: Record<string, unknown>;
+  width: number;
+  height: number;
+  viewBox: string;
+  initialCenter: [number, number];
+  maxZoom: number;
+  showSphere?: boolean;
+  showGraticule?: boolean;
+  getId: IdExtractor;
+  getSelections: SelectionGetter;
+}

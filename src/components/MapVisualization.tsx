@@ -21,11 +21,7 @@ const MapLoadingPlaceholder = () => (
 
 // Dynamic imports for map components - reduces initial bundle size
 // Maps are heavy due to react-simple-maps and topojson data
-const WorldMap = dynamic(() => import('./maps/WorldMap'), {
-  loading: MapLoadingPlaceholder,
-  ssr: false,
-});
-const USMap = dynamic(() => import('./maps/USMap'), {
+const RegionMap = dynamic(() => import('./maps/RegionMap'), {
   loading: MapLoadingPlaceholder,
   ssr: false,
 });
@@ -37,6 +33,9 @@ const WorldMarkerMap = dynamic(() => import('./maps/WorldMarkerMap'), {
   loading: MapLoadingPlaceholder,
   ssr: false,
 });
+
+// Import configs directly (no wrapper components needed - DRY)
+import { US_REGION_CONFIG, WORLD_REGION_CONFIG } from './maps/mapConfigs';
 
 // Check if category uses region coloring (countries/states) vs markers (other categories)
 function usesRegionMap(category: Category): boolean {
@@ -60,9 +59,11 @@ function getMapComponent(
 
   switch (category) {
     case 'countries':
-      return <WorldMap key="world" selections={selections} onToggle={onToggle} tooltip={handlers} />;
+      // Use RegionMap directly with WORLD config (DRY - no wrapper component)
+      return <RegionMap key="world" selections={selections} onToggle={onToggle} tooltip={handlers} {...WORLD_REGION_CONFIG} />;
     case 'states':
-      return <USMap key="us" selections={selections} onToggle={onToggle} tooltip={handlers} />;
+      // Use RegionMap directly with US config (DRY - no wrapper component)
+      return <RegionMap key="us" selections={selections} onToggle={onToggle} tooltip={handlers} {...US_REGION_CONFIG} />;
     case 'nationalParks':
       return <USMarkerMap key="us-parks" category={category} selections={selections} onToggle={onToggle} tooltip={handlers} items={items} />;
     case 'nationalMonuments':

@@ -36,8 +36,9 @@ import {
 } from './other';
 import type { Stadium } from './types';
 
-// Combined stadiums array (for backwards compatibility)
-export const stadiums: Stadium[] = [
+// Combined stadiums getter (lazy evaluation - only built when called)
+// For backwards compatibility, use getAllStadiums() instead of stadiums
+export const getAllStadiums = (): Stadium[] => [
   ...mlbStadiums,
   ...nflStadiums,
   ...nbaStadiums,
@@ -49,6 +50,10 @@ export const stadiums: Stadium[] = [
   ...tennisStadiums,
   ...motorsportStadiums,
 ];
+
+// Backwards compatibility alias (deprecated - use getAllStadiums())
+/** @deprecated Use getAllStadiums() instead for lazy evaluation */
+export const stadiums: Stadium[] = getAllStadiums();
 
 // Sport and league constants
 export const sports = ["Baseball", "American Football", "Basketball", "Hockey", "Football", "Cricket", "Rugby", "Tennis", "Motorsport"];
