@@ -25,17 +25,18 @@ const RegionMap = dynamic(() => import('./maps/RegionMap'), {
   loading: MapLoadingPlaceholder,
   ssr: false,
 });
-const USMarkerMap = dynamic(() => import('./maps/USMarkerMap'), {
-  loading: MapLoadingPlaceholder,
-  ssr: false,
-});
-const WorldMarkerMap = dynamic(() => import('./maps/WorldMarkerMap'), {
+const CategoryMarkerMap = dynamic(() => import('./maps/CategoryMarkerMap'), {
   loading: MapLoadingPlaceholder,
   ssr: false,
 });
 
 // Import configs directly (no wrapper components needed - DRY)
-import { US_REGION_CONFIG, WORLD_REGION_CONFIG } from './maps/mapConfigs';
+import { US_REGION_CONFIG, WORLD_REGION_CONFIG, US_MARKER_CONFIG, WORLD_MARKER_CONFIG } from './maps/mapConfigs';
+
+// Categories that use US map (Albers USA projection)
+const US_MARKER_CATEGORIES = new Set<Category>([
+  'nationalParks', 'nationalMonuments', 'stateParks', 'fourteeners', 'weirdAmericana'
+]);
 
 // Check if category uses region coloring (countries/states) vs markers (other categories)
 function usesRegionMap(category: Category): boolean {
@@ -57,26 +58,31 @@ function getMapComponent(
     onMouseMove: () => {},
   };
 
-  switch (category) {
-    case 'countries':
-      // Use RegionMap directly with WORLD config (DRY - no wrapper component)
-      return <RegionMap key="world" selections={selections} onToggle={onToggle} tooltip={handlers} {...WORLD_REGION_CONFIG} />;
-    case 'states':
-      // Use RegionMap directly with US config (DRY - no wrapper component)
-      return <RegionMap key="us" selections={selections} onToggle={onToggle} tooltip={handlers} {...US_REGION_CONFIG} />;
-    case 'nationalParks':
-      return <USMarkerMap key="us-parks" category={category} selections={selections} onToggle={onToggle} tooltip={handlers} items={items} />;
-    case 'nationalMonuments':
-      return <USMarkerMap key="us-monuments" category={category} selections={selections} onToggle={onToggle} tooltip={handlers} items={items} />;
-    case 'stateParks':
-      return <USMarkerMap key="us-state-parks" category={category} selections={selections} onToggle={onToggle} tooltip={handlers} items={items} />;
-    case 'fourteeners':
-      return <USMarkerMap key="us-14ers" category={category} selections={selections} onToggle={onToggle} tooltip={handlers} items={items} />;
-    case 'weirdAmericana':
-      return <USMarkerMap key="us-weird" category={category} selections={selections} onToggle={onToggle} tooltip={handlers} items={items} />;
-    default:
-      return <WorldMarkerMap key="world-markers" category={category} selections={selections} onToggle={onToggle} subcategory={subcategory} tooltip={handlers} items={items} />;
+  // Region maps for countries and states (colored polygons)
+  if (category === 'countries') {
+    return <RegionMap key="world" selections={selections} onToggle={onToggle} tooltip={handlers} {...WORLD_REGION_CONFIG} />;
   }
+  if (category === 'states') {
+    return <RegionMap key="us" selections={selections} onToggle={onToggle} tooltip={handlers} {...US_REGION_CONFIG} />;
+  }
+
+  // Marker maps for all other categories (DRY - use CategoryMarkerMap directly with config)
+  const isUSCategory = US_MARKER_CATEGORIES.has(category);
+  const config = isUSCategory ? US_MARKER_CONFIG : WORLD_MARKER_CONFIG;
+  const mapKey = isUSCategory ? `us-${category}` : `world-${category}`;
+
+  return (
+    <CategoryMarkerMap
+      key={mapKey}
+      category={category}
+      selections={selections}
+      onToggle={onToggle}
+      subcategory={subcategory}
+      tooltip={handlers}
+      items={items}
+      config={config}
+    />
+  );
 }
 
 const MapVisualization = memo(function MapVisualization({ category, selections, onToggle, subcategory, items }: MapVisualizationProps) {

@@ -37,60 +37,59 @@ export const getStateSelections: SelectionGetter = (selections: UserSelections) 
 export const getCountrySelections: SelectionGetter = (selections: UserSelections) => selections.countries;
 
 // =====================
-// Region Map Configurations
+// Base Configurations (DRY - shared geography settings)
 // =====================
 
-export const US_REGION_CONFIG: RegionMapConfig = {
+const BASE_US_CONFIG = {
   geoUrl: GEO_URL_USA,
   projection: 'geoAlbersUsa',
   projectionConfig: { scale: 1000 },
+  initialCenter: [-97, 38] as [number, number],
+  maxZoom: 8,
+};
+
+const BASE_WORLD_CONFIG = {
+  geoUrl: GEO_URL_WORLD,
+  projection: 'geoEqualEarth',
+  projectionConfig: { scale: 140, center: [0, 0] },
+  width: 800,
+  height: 400,
+  viewBox: '0 0 800 400',
+  initialCenter: [0, 0] as [number, number],
+  maxZoom: 8,
+  showSphere: true,
+  showGraticule: true,
+};
+
+// =====================
+// Region Map Configurations (extends base configs)
+// =====================
+
+export const US_REGION_CONFIG: RegionMapConfig = {
+  ...BASE_US_CONFIG,
   width: 800,
   height: 500,
   viewBox: '0 0 800 500',
-  initialCenter: [-97, 38],
-  maxZoom: 8,
   getId: getUSStateId,
   getSelections: getStateSelections,
 };
 
 export const WORLD_REGION_CONFIG: RegionMapConfig = {
-  geoUrl: GEO_URL_WORLD,
-  projection: 'geoEqualEarth',
-  projectionConfig: { scale: 140, center: [0, 0] },
-  width: 800,
-  height: 400,
-  viewBox: '0 0 800 400',
-  initialCenter: [0, 0],
-  maxZoom: 8,
-  showSphere: true,
-  showGraticule: true,
+  ...BASE_WORLD_CONFIG,
   getId: getCountryId,
   getSelections: getCountrySelections,
 };
 
 // =====================
-// Category Marker Map Configurations
+// Category Marker Map Configurations (extends base configs)
 // =====================
 
 export const US_MARKER_CONFIG: CategoryMarkerMapConfig = {
-  geoUrl: GEO_URL_USA,
-  projection: 'geoAlbersUsa',
-  projectionConfig: { scale: 1000 },
-  initialCenter: [-97, 38],
-  maxZoom: 8,
+  ...BASE_US_CONFIG,
   filterAlbersUsa: true,
 };
 
 export const WORLD_MARKER_CONFIG: CategoryMarkerMapConfig = {
-  geoUrl: GEO_URL_WORLD,
-  projection: 'geoEqualEarth',
-  projectionConfig: { scale: 140, center: [0, 0] },
-  width: 800,
-  height: 400,
-  viewBox: '0 0 800 400',
-  initialCenter: [0, 0],
-  maxZoom: 8,
-  showSphere: true,
-  showGraticule: true,
+  ...BASE_WORLD_CONFIG,
   filterAlbersUsa: false,
 };
