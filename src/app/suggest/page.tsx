@@ -19,6 +19,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
 import {
   Form,
   FormControl,
@@ -428,12 +429,13 @@ export default function SuggestPage() {
                   <Card key={suggestion.id} className="overflow-hidden">
                     <div className="flex">
                       {/* Vote Button */}
-                      <button
+                      <Button
+                        variant="ghost"
                         onClick={() => handleVote(suggestion.id)}
                         className={`
-                          w-16 flex flex-col items-center justify-center cursor-pointer transition-colors border-r
+                          w-16 h-auto flex flex-col items-center justify-center rounded-none border-r py-4
                           ${votedIds.has(suggestion.id)
-                            ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600'
+                            ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900/30'
                             : 'bg-muted/30 hover:bg-muted text-muted-foreground'}
                         `}
                         aria-label={`${votedIds.has(suggestion.id) ? 'Remove vote from' : 'Vote for'} ${suggestion.title}`}
@@ -441,7 +443,7 @@ export default function SuggestPage() {
                       >
                         <ChevronUp className={`w-6 h-6 ${votedIds.has(suggestion.id) ? 'stroke-[3px]' : ''}`} />
                         <span className="font-bold">{suggestion.vote_count}</span>
-                      </button>
+                      </Button>
 
                       {/* Content */}
                       <div className="flex-1 p-4 min-w-0">
@@ -507,13 +509,13 @@ export default function SuggestPage() {
       {/* Footer */}
       <footer className="border-t border-black/5 dark:border-white/10 bg-white/50 dark:bg-slate-900/50">
         <div className="max-w-4xl mx-auto px-4 py-6 text-center text-sm text-muted-foreground">
-          <div className="flex justify-center gap-4 mb-2">
+          <div className="flex justify-center items-center gap-4 mb-2">
             <Link href="/about" className="hover:text-primary transition-colors">About</Link>
-            <span>•</span>
+            <Separator orientation="vertical" className="h-4" />
             <Link href="/suggest" className="hover:text-primary transition-colors font-medium">Suggest</Link>
-            <span>•</span>
+            <Separator orientation="vertical" className="h-4" />
             <Link href="/privacy" className="hover:text-primary transition-colors">Privacy</Link>
-            <span>•</span>
+            <Separator orientation="vertical" className="h-4" />
             <Link href="/terms" className="hover:text-primary transition-colors">Terms</Link>
           </div>
           <p>See Every Place - Free Travel Tracker</p>

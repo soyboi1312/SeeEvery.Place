@@ -14,6 +14,23 @@ import { categoryLabels, categoryIcons, ALL_CATEGORIES } from '@/lib/types';
 import ProfileIconSelector from '@/components/ProfileIconSelector';
 import { PROFILE_ICONS } from '@/components/ProfileIcons';
 
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import { Separator } from '@/components/ui/separator';
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { Sun, Moon, ArrowLeft, Download, Upload, Trash2, ChevronRight, Check, Loader2 } from 'lucide-react';
+
 interface Profile {
   id: string;
   email: string;
@@ -432,6 +449,33 @@ export default function SettingsPage() {
     }
   };
 
+  const handleCancelEdit = () => {
+    setIsEditingProfile(false);
+    setDisplayName(profile?.full_name || '');
+    setUsername(profile?.username || '');
+    setBio(profile?.bio || '');
+    setIsPublic(profile?.is_public || false);
+    setUsernameError(null);
+    // Reset social links
+    setWebsiteUrl(profile?.website_url || '');
+    setInstagramHandle(profile?.instagram_handle || '');
+    setTwitterHandle(profile?.twitter_handle || '');
+    // Reset home base
+    setHomeCity(profile?.home_city || '');
+    setHomeState(profile?.home_state || '');
+    setHomeCountry(profile?.home_country || '');
+    setShowHomeBase(profile?.show_home_base || false);
+    // Reset privacy settings
+    const privacySettings = profile?.privacy_settings || {};
+    setHiddenCategories(privacySettings.hide_categories || []);
+    setHideBucketList(privacySettings.hide_bucket_list || false);
+    // Reset preferences
+    setDefaultMapView(profile?.default_map_view || 'world');
+    // Reset travel badge
+    const savedIcon = profile?.avatar_url && PROFILE_ICONS[profile.avatar_url] ? profile.avatar_url : 'compass';
+    setSelectedIcon(savedIcon);
+  };
+
   // Calculate XP and level from selections
   const totalXp = selections ? calculateTotalXp(selections) : 0;
   const currentLevel = calculateLevel(totalXp);
@@ -440,7 +484,7 @@ export default function SettingsPage() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-primary-50 to-white dark:from-slate-900 dark:to-slate-800 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -466,12 +510,9 @@ export default function SettingsPage() {
         <main className="max-w-2xl mx-auto px-4 py-16 text-center">
           <h2 className="text-2xl font-bold text-primary-900 dark:text-white mb-4">Sign in required</h2>
           <p className="text-primary-600 dark:text-primary-300 mb-6">You need to be signed in to access settings.</p>
-          <Link
-            href="/"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-primary-700 hover:bg-primary-800 text-white rounded-xl font-semibold hover:shadow-lg transition-all"
-          >
-            Go Home
-          </Link>
+          <Button asChild size="lg">
+            <Link href="/">Go Home</Link>
+          </Button>
         </main>
       </div>
     );
@@ -496,28 +537,21 @@ export default function SettingsPage() {
             </div>
           </Link>
           <div className="flex items-center gap-2">
-            <button
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={toggleDarkMode}
-              className="p-2 rounded-lg bg-primary-50 dark:bg-slate-800 text-primary-600 dark:text-primary-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
               title={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
               aria-label={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
             >
-              {isDarkMode ? (
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-                </svg>
-              ) : (
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-                </svg>
-              )}
-            </button>
-            <Link
-              href="/"
-              className="px-4 py-2 bg-primary-700 hover:bg-primary-800 text-white rounded-lg font-medium hover:shadow-lg transition-all text-sm"
-            >
-              Back to Map
-            </Link>
+              {isDarkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+            </Button>
+            <Button asChild>
+              <Link href="/">
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back to Map
+              </Link>
+            </Button>
           </div>
         </div>
       </header>
@@ -528,557 +562,495 @@ export default function SettingsPage() {
         <p className="text-primary-600 dark:text-primary-300 mb-8">Manage your profile, account, and data</p>
 
         {/* Profile Card with XP */}
-        <section className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-premium border border-black/5 dark:border-white/10 mb-6">
-          <div className="flex items-start justify-between mb-4">
-            <h3 className="text-lg font-semibold text-primary-900 dark:text-white">Profile</h3>
+        <Card className="mb-6">
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle>Profile</CardTitle>
             {!isEditingProfile && (
-              <button
-                onClick={() => setIsEditingProfile(true)}
-                className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
-              >
+              <Button variant="link" onClick={() => setIsEditingProfile(true)} className="p-0 h-auto">
                 Edit
-              </button>
+              </Button>
             )}
-          </div>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {profileSaveSuccess && (
+              <div className="p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg text-green-700 dark:text-green-300 text-sm flex items-center gap-2">
+                <Check className="h-4 w-4" />
+                Profile saved successfully!
+              </div>
+            )}
 
-          {profileSaveSuccess && (
-            <div className="mb-4 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg text-green-700 dark:text-green-300 text-sm">
-              Profile saved successfully!
-            </div>
-          )}
-
-          <div className="flex items-center gap-4 mb-4">
-            {/* Travel Badge Avatar */}
-            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white shadow-lg">
-              {(() => {
-                const Icon = PROFILE_ICONS[selectedIcon] || PROFILE_ICONS['compass'];
-                return <Icon className="w-8 h-8" />;
-              })()}
-            </div>
-            <div className="flex-1">
-              {isEditingProfile ? (
-                <input
-                  type="text"
-                  value={displayName}
-                  onChange={(e) => setDisplayName(e.target.value)}
-                  placeholder="Display Name"
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white mb-2"
-                />
-              ) : (
-                <p className="font-medium text-primary-900 dark:text-white text-lg">
-                  {profile?.full_name || 'Set your display name'}
+            <div className="flex items-center gap-4">
+              {/* Travel Badge Avatar */}
+              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white shadow-lg">
+                {(() => {
+                  const Icon = PROFILE_ICONS[selectedIcon] || PROFILE_ICONS['compass'];
+                  return <Icon className="w-8 h-8" />;
+                })()}
+              </div>
+              <div className="flex-1">
+                {isEditingProfile ? (
+                  <Input
+                    value={displayName}
+                    onChange={(e) => setDisplayName(e.target.value)}
+                    placeholder="Display Name"
+                    className="mb-2"
+                  />
+                ) : (
+                  <p className="font-medium text-primary-900 dark:text-white text-lg">
+                    {profile?.full_name || 'Set your display name'}
+                  </p>
+                )}
+                <p className="text-sm text-primary-500 dark:text-primary-400">{user.email}</p>
+                <p className="text-xs text-primary-400 dark:text-primary-500">
+                  Member since {new Date(user.created_at).toLocaleDateString()}
                 </p>
-              )}
-              <p className="text-sm text-primary-500 dark:text-primary-400">{user.email}</p>
-              <p className="text-xs text-primary-400 dark:text-primary-500">
-                Member since {new Date(user.created_at).toLocaleDateString()}
-              </p>
-            </div>
-          </div>
-
-          {/* XP and Level Display */}
-          <div className="bg-gradient-to-r from-purple-500/10 to-blue-500/10 dark:from-purple-500/20 dark:to-blue-500/20 rounded-lg p-4 mb-4">
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center gap-2">
-                <span className="text-2xl">🎖️</span>
-                <span className="font-bold text-primary-900 dark:text-white">Level {currentLevel}</span>
               </div>
-              <span className="text-sm text-primary-600 dark:text-primary-300">{totalXp.toLocaleString()} XP</span>
             </div>
-            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-              <div
-                className="bg-gradient-to-r from-purple-500 to-blue-500 h-2 rounded-full transition-all duration-500"
-                style={{ width: `${levelProgress.progress}%` }}
-              />
-            </div>
-            <p className="text-xs text-primary-500 dark:text-primary-400 mt-1">
-              {levelProgress.current.toLocaleString()} / {levelProgress.needed.toLocaleString()} XP to Level {currentLevel + 1}
-            </p>
-            <Link
-              href="/achievements"
-              className="inline-flex items-center gap-1 text-sm text-blue-600 dark:text-blue-400 hover:underline mt-2"
-            >
-              View Achievements
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </Link>
-          </div>
 
-          {isEditingProfile && (
-            <>
-              {/* Travel Badge Selection */}
-              <div className="mb-6">
-                <label className="block text-sm font-medium text-primary-700 dark:text-primary-300 mb-3">
-                  Choose your Travel Badge
-                </label>
-                <ProfileIconSelector
-                  selectedIcon={selectedIcon}
-                  onSelect={setSelectedIcon}
+            {/* XP and Level Display */}
+            <div className="bg-gradient-to-r from-purple-500/10 to-blue-500/10 dark:from-purple-500/20 dark:to-blue-500/20 rounded-lg p-4">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-2xl">🎖️</span>
+                  <span className="font-bold text-primary-900 dark:text-white">Level {currentLevel}</span>
+                </div>
+                <span className="text-sm text-primary-600 dark:text-primary-300">{totalXp.toLocaleString()} XP</span>
+              </div>
+              <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                <div
+                  className="bg-gradient-to-r from-purple-500 to-blue-500 h-2 rounded-full transition-all duration-500"
+                  style={{ width: `${levelProgress.progress}%` }}
                 />
               </div>
+              <p className="text-xs text-primary-500 dark:text-primary-400 mt-1">
+                {levelProgress.current.toLocaleString()} / {levelProgress.needed.toLocaleString()} XP to Level {currentLevel + 1}
+              </p>
+              <Link
+                href="/achievements"
+                className="inline-flex items-center gap-1 text-sm text-blue-600 dark:text-blue-400 hover:underline mt-2"
+              >
+                View Achievements
+                <ChevronRight className="h-4 w-4" />
+              </Link>
+            </div>
 
-              {/* Username */}
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-primary-700 dark:text-primary-300 mb-1">
-                  Username
-                </label>
-                <div className="flex items-center gap-2">
-                  <span className="text-primary-500 dark:text-primary-400">seeevery.place/u/</span>
-                  <input
-                    type="text"
-                    value={username}
-                    onChange={(e) => handleUsernameChange(e.target.value.toLowerCase())}
-                    placeholder="username"
-                    className={`flex-1 px-3 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white ${
-                      usernameError ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
-                    }`}
+            {isEditingProfile && (
+              <>
+                {/* Travel Badge Selection */}
+                <div>
+                  <Label className="mb-3 block">Choose your Travel Badge</Label>
+                  <ProfileIconSelector
+                    selectedIcon={selectedIcon}
+                    onSelect={setSelectedIcon}
                   />
                 </div>
-                {usernameError && (
-                  <p className="text-sm text-red-500 mt-1">{usernameError}</p>
-                )}
-                <p className="text-xs text-primary-500 dark:text-primary-400 mt-1">
-                  This will be your public profile URL (if enabled)
-                </p>
-              </div>
 
-              {/* Bio */}
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-primary-700 dark:text-primary-300 mb-1">
-                  Bio
-                </label>
-                <textarea
-                  value={bio}
-                  onChange={(e) => setBio(e.target.value)}
-                  placeholder="Tell us about your travels..."
-                  maxLength={160}
-                  rows={2}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                />
-                <p className="text-xs text-primary-500 dark:text-primary-400 mt-1">
-                  {bio.length}/160 characters
-                </p>
-              </div>
-
-              {/* Public Profile Toggle */}
-              <div className="mb-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-                <label className="flex items-center justify-between cursor-pointer">
-                  <div>
-                    <span className="font-medium text-primary-900 dark:text-white">Public Profile</span>
-                    <p className="text-sm text-primary-600 dark:text-primary-400">
-                      Allow others to view your travel map and achievements
-                    </p>
-                  </div>
-                  <div className="relative">
-                    <input
-                      type="checkbox"
-                      checked={isPublic}
-                      onChange={(e) => setIsPublic(e.target.checked)}
-                      className="sr-only"
+                {/* Username */}
+                <div>
+                  <Label htmlFor="username">Username</Label>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className="text-primary-500 dark:text-primary-400 text-sm">seeevery.place/u/</span>
+                    <Input
+                      id="username"
+                      value={username}
+                      onChange={(e) => handleUsernameChange(e.target.value.toLowerCase())}
+                      placeholder="username"
+                      className={usernameError ? 'border-red-500' : ''}
                     />
-                    <div className={`w-11 h-6 rounded-full transition-colors ${isPublic ? 'bg-blue-600' : 'bg-gray-300 dark:bg-gray-600'}`}>
-                      <div className={`w-5 h-5 bg-white rounded-full shadow-md transform transition-transform absolute top-0.5 ${isPublic ? 'translate-x-5.5 right-0.5' : 'left-0.5'}`} />
+                  </div>
+                  {usernameError && (
+                    <p className="text-sm text-red-500 mt-1">{usernameError}</p>
+                  )}
+                  <p className="text-xs text-primary-500 dark:text-primary-400 mt-1">
+                    This will be your public profile URL (if enabled)
+                  </p>
+                </div>
+
+                {/* Bio */}
+                <div>
+                  <Label htmlFor="bio">Bio</Label>
+                  <Textarea
+                    id="bio"
+                    value={bio}
+                    onChange={(e) => setBio(e.target.value)}
+                    placeholder="Tell us about your travels..."
+                    maxLength={160}
+                    rows={2}
+                    className="mt-1"
+                  />
+                  <p className="text-xs text-primary-500 dark:text-primary-400 mt-1">
+                    {bio.length}/160 characters
+                  </p>
+                </div>
+
+                {/* Public Profile Toggle */}
+                <Card className="bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium text-primary-900 dark:text-white">Public Profile</p>
+                        <p className="text-sm text-primary-600 dark:text-primary-400">
+                          Allow others to view your travel map and achievements
+                        </p>
+                      </div>
+                      <Switch
+                        checked={isPublic}
+                        onCheckedChange={setIsPublic}
+                      />
                     </div>
-                  </div>
-                </label>
-                {isPublic && username && (
-                  <p className="text-sm text-blue-600 dark:text-blue-400 mt-2">
-                    Your profile will be visible at: seeevery.place/u/{username}
-                  </p>
-                )}
-                {isPublic && !username && (
-                  <p className="text-sm text-amber-600 dark:text-amber-400 mt-2">
-                    Set a username above to enable your public profile URL
-                  </p>
-                )}
-              </div>
+                    {isPublic && username && (
+                      <p className="text-sm text-blue-600 dark:text-blue-400 mt-2">
+                        Your profile will be visible at: seeevery.place/u/{username}
+                      </p>
+                    )}
+                    {isPublic && !username && (
+                      <p className="text-sm text-amber-600 dark:text-amber-400 mt-2">
+                        Set a username above to enable your public profile URL
+                      </p>
+                    )}
+                  </CardContent>
+                </Card>
 
-              {/* Social Media Links */}
-              <div className="mb-4 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700">
-                <h4 className="font-medium text-primary-900 dark:text-white mb-3">Social Links</h4>
-                <div className="space-y-3">
-                  <div>
-                    <label className="block text-sm font-medium text-primary-700 dark:text-primary-300 mb-1">
-                      Website
-                    </label>
-                    <input
-                      type="url"
-                      value={websiteUrl}
-                      onChange={(e) => setWebsiteUrl(e.target.value)}
-                      placeholder="https://yourblog.com"
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
-                    />
-                  </div>
-                  <div className="grid grid-cols-2 gap-3">
+                {/* Social Media Links */}
+                <Card className="bg-muted/50">
+                  <CardContent className="p-4 space-y-3">
+                    <h4 className="font-medium text-primary-900 dark:text-white">Social Links</h4>
                     <div>
-                      <label className="block text-sm font-medium text-primary-700 dark:text-primary-300 mb-1">
-                        Instagram
-                      </label>
-                      <div className="flex items-center">
-                        <span className="text-gray-400 dark:text-gray-500 mr-1">@</span>
-                        <input
-                          type="text"
-                          value={instagramHandle}
-                          onChange={(e) => setInstagramHandle(e.target.value.replace(/^@/, ''))}
-                          placeholder="username"
-                          className="flex-1 px-2 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+                      <Label htmlFor="website">Website</Label>
+                      <Input
+                        id="website"
+                        type="url"
+                        value={websiteUrl}
+                        onChange={(e) => setWebsiteUrl(e.target.value)}
+                        placeholder="https://yourblog.com"
+                        className="mt-1"
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <Label htmlFor="instagram">Instagram</Label>
+                        <div className="flex items-center mt-1">
+                          <span className="text-muted-foreground mr-1">@</span>
+                          <Input
+                            id="instagram"
+                            value={instagramHandle}
+                            onChange={(e) => setInstagramHandle(e.target.value.replace(/^@/, ''))}
+                            placeholder="username"
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <Label htmlFor="twitter">Twitter / X</Label>
+                        <div className="flex items-center mt-1">
+                          <span className="text-muted-foreground mr-1">@</span>
+                          <Input
+                            id="twitter"
+                            value={twitterHandle}
+                            onChange={(e) => setTwitterHandle(e.target.value.replace(/^@/, ''))}
+                            placeholder="username"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Home Base */}
+                <Card className="bg-muted/50">
+                  <CardContent className="p-4 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-medium text-primary-900 dark:text-white">Home Base</h4>
+                      <div className="flex items-center gap-2">
+                        <Label htmlFor="show-home" className="text-xs text-primary-600 dark:text-primary-400">
+                          Show on profile
+                        </Label>
+                        <Switch
+                          id="show-home"
+                          checked={showHomeBase}
+                          onCheckedChange={setShowHomeBase}
                         />
                       </div>
                     </div>
-                    <div>
-                      <label className="block text-sm font-medium text-primary-700 dark:text-primary-300 mb-1">
-                        Twitter / X
-                      </label>
-                      <div className="flex items-center">
-                        <span className="text-gray-400 dark:text-gray-500 mr-1">@</span>
-                        <input
-                          type="text"
-                          value={twitterHandle}
-                          onChange={(e) => setTwitterHandle(e.target.value.replace(/^@/, ''))}
-                          placeholder="username"
-                          className="flex-1 px-2 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+                    <div className="grid grid-cols-3 gap-3">
+                      <div>
+                        <Label htmlFor="city" className="text-xs">City</Label>
+                        <Input
+                          id="city"
+                          value={homeCity}
+                          onChange={(e) => setHomeCity(e.target.value)}
+                          placeholder="Denver"
+                          className="mt-1"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="state" className="text-xs">State</Label>
+                        <Input
+                          id="state"
+                          value={homeState}
+                          onChange={(e) => setHomeState(e.target.value)}
+                          placeholder="Colorado"
+                          className="mt-1"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="country" className="text-xs">Country</Label>
+                        <Input
+                          id="country"
+                          value={homeCountry}
+                          onChange={(e) => setHomeCountry(e.target.value)}
+                          placeholder="USA"
+                          className="mt-1"
                         />
                       </div>
                     </div>
-                  </div>
-                </div>
-              </div>
+                  </CardContent>
+                </Card>
 
-              {/* Home Base */}
-              <div className="mb-4 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700">
-                <div className="flex items-center justify-between mb-3">
-                  <h4 className="font-medium text-primary-900 dark:text-white">Home Base</h4>
-                  <label className="flex items-center cursor-pointer">
-                    <span className="text-xs text-primary-600 dark:text-primary-400 mr-2">Show on profile</span>
-                    <input
-                      type="checkbox"
-                      checked={showHomeBase}
-                      onChange={(e) => setShowHomeBase(e.target.checked)}
-                      className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
-                    />
-                  </label>
-                </div>
-                <div className="grid grid-cols-3 gap-3">
-                  <div>
-                    <label className="block text-xs font-medium text-primary-700 dark:text-primary-300 mb-1">
-                      City
-                    </label>
-                    <input
-                      type="text"
-                      value={homeCity}
-                      onChange={(e) => setHomeCity(e.target.value)}
-                      placeholder="Denver"
-                      className="w-full px-2 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-medium text-primary-700 dark:text-primary-300 mb-1">
-                      State
-                    </label>
-                    <input
-                      type="text"
-                      value={homeState}
-                      onChange={(e) => setHomeState(e.target.value)}
-                      placeholder="Colorado"
-                      className="w-full px-2 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-medium text-primary-700 dark:text-primary-300 mb-1">
-                      Country
-                    </label>
-                    <input
-                      type="text"
-                      value={homeCountry}
-                      onChange={(e) => setHomeCountry(e.target.value)}
-                      placeholder="USA"
-                      className="w-full px-2 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Privacy Settings (only show if public profile is enabled) */}
-              {isPublic && (
-                <div className="mb-4 p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-800">
-                  <h4 className="font-medium text-primary-900 dark:text-white mb-3">Privacy Controls</h4>
-                  <p className="text-xs text-primary-600 dark:text-primary-400 mb-3">
-                    Choose which categories to hide from your public profile
-                  </p>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-4">
-                    {ALL_CATEGORIES.slice(0, 12).map((category) => (
-                      <label
-                        key={category}
-                        className="flex items-center gap-2 p-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700"
-                      >
+                {/* Privacy Settings (only show if public profile is enabled) */}
+                {isPublic && (
+                  <Card className="bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800">
+                    <CardContent className="p-4 space-y-3">
+                      <h4 className="font-medium text-primary-900 dark:text-white">Privacy Controls</h4>
+                      <p className="text-xs text-primary-600 dark:text-primary-400">
+                        Choose which categories to hide from your public profile
+                      </p>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                        {ALL_CATEGORIES.slice(0, 12).map((category) => (
+                          <label
+                            key={category}
+                            className="flex items-center gap-2 p-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700"
+                          >
+                            <input
+                              type="checkbox"
+                              checked={hiddenCategories.includes(category)}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setHiddenCategories([...hiddenCategories, category]);
+                                } else {
+                                  setHiddenCategories(hiddenCategories.filter(c => c !== category));
+                                }
+                              }}
+                              className="w-4 h-4 text-amber-600 rounded border-gray-300 focus:ring-amber-500"
+                            />
+                            <span className="text-sm">{categoryIcons[category]}</span>
+                            <span className="text-xs text-primary-700 dark:text-primary-300 truncate">
+                              {categoryLabels[category]}
+                            </span>
+                          </label>
+                        ))}
+                      </div>
+                      <label className="flex items-center gap-2 cursor-pointer">
                         <input
                           type="checkbox"
-                          checked={hiddenCategories.includes(category)}
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              setHiddenCategories([...hiddenCategories, category]);
-                            } else {
-                              setHiddenCategories(hiddenCategories.filter(c => c !== category));
-                            }
-                          }}
+                          checked={hideBucketList}
+                          onChange={(e) => setHideBucketList(e.target.checked)}
                           className="w-4 h-4 text-amber-600 rounded border-gray-300 focus:ring-amber-500"
                         />
-                        <span className="text-sm">{categoryIcons[category]}</span>
-                        <span className="text-xs text-primary-700 dark:text-primary-300 truncate">
-                          {categoryLabels[category]}
-                        </span>
+                        <span className="text-sm text-primary-700 dark:text-primary-300">Hide bucket list items from public profile</span>
                       </label>
-                    ))}
-                  </div>
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={hideBucketList}
-                      onChange={(e) => setHideBucketList(e.target.checked)}
-                      className="w-4 h-4 text-amber-600 rounded border-gray-300 focus:ring-amber-500"
-                    />
-                    <span className="text-sm text-primary-700 dark:text-primary-300">Hide bucket list items from public profile</span>
-                  </label>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Preferences */}
+                <Card className="bg-muted/50">
+                  <CardContent className="p-4 space-y-3">
+                    <h4 className="font-medium text-primary-900 dark:text-white">Preferences</h4>
+                    <div>
+                      <Label className="mb-2 block">Default Map View</Label>
+                      <div className="flex gap-2">
+                        <Button
+                          type="button"
+                          variant={defaultMapView === 'world' ? 'default' : 'outline'}
+                          onClick={() => setDefaultMapView('world')}
+                          className="flex-1"
+                        >
+                          World Map
+                        </Button>
+                        <Button
+                          type="button"
+                          variant={defaultMapView === 'usa' ? 'default' : 'outline'}
+                          onClick={() => setDefaultMapView('usa')}
+                          className="flex-1"
+                        >
+                          USA Map
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Save/Cancel buttons */}
+                <div className="flex gap-3">
+                  <Button
+                    onClick={handleSaveProfile}
+                    disabled={!!usernameError || isSavingProfile}
+                    className="flex-1"
+                  >
+                    {isSavingProfile && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                    {isSavingProfile ? 'Saving...' : 'Save Profile'}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={handleCancelEdit}
+                  >
+                    Cancel
+                  </Button>
                 </div>
-              )}
+              </>
+            )}
 
-              {/* Preferences */}
-              <div className="mb-4 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700">
-                <h4 className="font-medium text-primary-900 dark:text-white mb-3">Preferences</h4>
-                <div>
-                  <label className="block text-sm font-medium text-primary-700 dark:text-primary-300 mb-2">
-                    Default Map View
-                  </label>
-                  <div className="flex gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setDefaultMapView('world')}
-                      className={`flex-1 px-4 py-2 rounded-lg font-medium text-sm transition-colors ${
-                        defaultMapView === 'world'
-                          ? 'bg-blue-600 text-white'
-                          : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600'
-                      }`}
-                    >
-                      World Map
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setDefaultMapView('usa')}
-                      className={`flex-1 px-4 py-2 rounded-lg font-medium text-sm transition-colors ${
-                        defaultMapView === 'usa'
-                          ? 'bg-blue-600 text-white'
-                          : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600'
-                      }`}
-                    >
-                      USA Map
-                    </button>
-                  </div>
-                </div>
+            {!isEditingProfile && profile?.is_public && profile?.username && (
+              <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+                <p className="text-sm text-green-700 dark:text-green-300">
+                  Your public profile is live at:{' '}
+                  <Link href={`/u/${profile.username}`} className="font-medium hover:underline">
+                    seeevery.place/u/{profile.username}
+                  </Link>
+                </p>
               </div>
-
-              {/* Save/Cancel buttons */}
-              <div className="flex gap-3">
-                <button
-                  onClick={handleSaveProfile}
-                  disabled={!!usernameError || isSavingProfile}
-                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {isSavingProfile ? 'Saving...' : 'Save Profile'}
-                </button>
-                <button
-                  onClick={() => {
-                    setIsEditingProfile(false);
-                    setDisplayName(profile?.full_name || '');
-                    setUsername(profile?.username || '');
-                    setBio(profile?.bio || '');
-                    setIsPublic(profile?.is_public || false);
-                    setUsernameError(null);
-                    // Reset social links
-                    setWebsiteUrl(profile?.website_url || '');
-                    setInstagramHandle(profile?.instagram_handle || '');
-                    setTwitterHandle(profile?.twitter_handle || '');
-                    // Reset home base
-                    setHomeCity(profile?.home_city || '');
-                    setHomeState(profile?.home_state || '');
-                    setHomeCountry(profile?.home_country || '');
-                    setShowHomeBase(profile?.show_home_base || false);
-                    // Reset privacy settings
-                    const privacySettings = profile?.privacy_settings || {};
-                    setHiddenCategories(privacySettings.hide_categories || []);
-                    setHideBucketList(privacySettings.hide_bucket_list || false);
-                    // Reset preferences
-                    setDefaultMapView(profile?.default_map_view || 'world');
-                    // Reset travel badge
-                    const savedIcon = profile?.avatar_url && PROFILE_ICONS[profile.avatar_url] ? profile.avatar_url : 'compass';
-                    setSelectedIcon(savedIcon);
-                  }}
-                  className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-lg font-medium hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
-                >
-                  Cancel
-                </button>
-              </div>
-            </>
-          )}
-
-          {!isEditingProfile && profile?.is_public && profile?.username && (
-            <div className="mt-4 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
-              <p className="text-sm text-green-700 dark:text-green-300">
-                Your public profile is live at:{' '}
-                <Link href={`/u/${profile.username}`} className="font-medium hover:underline">
-                  seeevery.place/u/{profile.username}
-                </Link>
-              </p>
-            </div>
-          )}
-        </section>
+            )}
+          </CardContent>
+        </Card>
 
         {/* Data & Privacy */}
-        <section className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-premium border border-black/5 dark:border-white/10 mb-6">
-          <h3 className="text-lg font-semibold text-primary-900 dark:text-white mb-4">Data & Privacy</h3>
-
-          {/* Export Data */}
-          <div className="mb-6 pb-6 border-b border-gray-200 dark:border-gray-700">
-            <h4 className="font-medium text-primary-900 dark:text-white mb-2">Export Your Data</h4>
-            <p className="text-sm text-primary-600 dark:text-primary-300 mb-3">
-              Download all your travel selections as a JSON file. This includes all countries, states, parks, and other locations you&apos;ve marked.
-            </p>
-            <button
-              onClick={handleExportData}
-              disabled={exportStatus !== 'idle'}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {exportStatus === 'exporting' ? (
-                <>
-                  <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                  </svg>
-                  Exporting...
-                </>
-              ) : exportStatus === 'done' ? (
-                <>
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  Downloaded!
-                </>
-              ) : (
-                <>
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                  </svg>
-                  Export Data
-                </>
-              )}
-            </button>
-          </div>
-
-          {/* Import Data */}
-          <div className="mb-6 pb-6 border-b border-gray-200 dark:border-gray-700">
-            <h4 className="font-medium text-primary-900 dark:text-white mb-2">Import Data</h4>
-            <p className="text-sm text-primary-600 dark:text-primary-300 mb-3">
-              Restore your data from a previously exported JSON file. New entries will be added, and existing entries will be updated if the import has newer data.
-            </p>
-
-            {importStatus === 'success' && importStats && (
-              <div className="mb-3 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg text-green-700 dark:text-green-300 text-sm">
-                Import successful! Added {importStats.added} new entries, updated {importStats.updated} existing entries.
-              </div>
-            )}
-
-            {importStatus === 'error' && importError && (
-              <div className="mb-3 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-700 dark:text-red-300 text-sm">
-                {importError}
-              </div>
-            )}
-
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept=".json"
-              onChange={handleImportData}
-              className="hidden"
-            />
-            <button
-              onClick={() => fileInputRef.current?.click()}
-              disabled={importStatus === 'importing'}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-600 rounded-lg font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {importStatus === 'importing' ? (
-                <>
-                  <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                  </svg>
-                  Importing...
-                </>
-              ) : (
-                <>
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m4-8l-4-4m0 0L16 8m4-4v12" />
-                  </svg>
-                  Import Data
-                </>
-              )}
-            </button>
-          </div>
-
-          {/* Reset Progress */}
-          <div className="mb-6 pb-6 border-b border-gray-200 dark:border-gray-700">
-            <h4 className="font-medium text-primary-900 dark:text-white mb-2">Reset Progress</h4>
-            <p className="text-sm text-primary-600 dark:text-primary-300 mb-3">
-              Clear your progress for a specific category without losing other data. This cannot be undone.
-            </p>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-              {ALL_CATEGORIES.slice(0, 12).map((category) => {
-                const categorySelections = selections?.[category as keyof UserSelections] || [];
-                const visitedCount = categorySelections.filter(s => s.status === 'visited').length;
-                if (visitedCount === 0) return null;
-                return (
-                  <button
-                    key={category}
-                    onClick={() => {
-                      setResetCategory(category);
-                      setShowResetModal(true);
-                    }}
-                    className="flex items-center gap-2 p-2 text-left rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors border border-gray-200 dark:border-gray-600"
-                  >
-                    <span className="text-sm">{categoryIcons[category as Category]}</span>
-                    <div className="flex-1 min-w-0">
-                      <span className="text-xs font-medium text-primary-900 dark:text-white truncate block">
-                        {categoryLabels[category as Category]}
-                      </span>
-                      <span className="text-xs text-primary-500 dark:text-primary-400">
-                        {visitedCount} visited
-                      </span>
-                    </div>
-                  </button>
-                );
-              })}
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle>Data & Privacy</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {/* Export Data */}
+            <div>
+              <h4 className="font-medium text-primary-900 dark:text-white mb-2">Export Your Data</h4>
+              <p className="text-sm text-primary-600 dark:text-primary-300 mb-3">
+                Download all your travel selections as a JSON file. This includes all countries, states, parks, and other locations you&apos;ve marked.
+              </p>
+              <Button
+                onClick={handleExportData}
+                disabled={exportStatus !== 'idle'}
+                variant={exportStatus === 'done' ? 'outline' : 'default'}
+              >
+                {exportStatus === 'exporting' ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Exporting...
+                  </>
+                ) : exportStatus === 'done' ? (
+                  <>
+                    <Check className="h-4 w-4 mr-2" />
+                    Downloaded!
+                  </>
+                ) : (
+                  <>
+                    <Download className="h-4 w-4 mr-2" />
+                    Export Data
+                  </>
+                )}
+              </Button>
             </div>
-          </div>
 
-          {/* Privacy Policy Link */}
-          <div>
-            <h4 className="font-medium text-primary-900 dark:text-white mb-2">Privacy Policy</h4>
-            <p className="text-sm text-primary-600 dark:text-primary-300 mb-3">
-              Learn how we handle your data and protect your privacy.
-            </p>
-            <Link
-              href="/privacy"
-              className="text-primary-700 dark:text-primary-400 hover:underline text-sm font-medium"
-            >
-              Read Privacy Policy
-            </Link>
-          </div>
-        </section>
+            <Separator />
+
+            {/* Import Data */}
+            <div>
+              <h4 className="font-medium text-primary-900 dark:text-white mb-2">Import Data</h4>
+              <p className="text-sm text-primary-600 dark:text-primary-300 mb-3">
+                Restore your data from a previously exported JSON file. New entries will be added, and existing entries will be updated if the import has newer data.
+              </p>
+
+              {importStatus === 'success' && importStats && (
+                <div className="mb-3 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg text-green-700 dark:text-green-300 text-sm flex items-center gap-2">
+                  <Check className="h-4 w-4" />
+                  Import successful! Added {importStats.added} new entries, updated {importStats.updated} existing entries.
+                </div>
+              )}
+
+              {importStatus === 'error' && importError && (
+                <div className="mb-3 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-700 dark:text-red-300 text-sm">
+                  {importError}
+                </div>
+              )}
+
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".json"
+                onChange={handleImportData}
+                className="hidden"
+              />
+              <Button
+                variant="outline"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={importStatus === 'importing'}
+              >
+                {importStatus === 'importing' ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Importing...
+                  </>
+                ) : (
+                  <>
+                    <Upload className="h-4 w-4 mr-2" />
+                    Import Data
+                  </>
+                )}
+              </Button>
+            </div>
+
+            <Separator />
+
+            {/* Reset Progress */}
+            <div>
+              <h4 className="font-medium text-primary-900 dark:text-white mb-2">Reset Progress</h4>
+              <p className="text-sm text-primary-600 dark:text-primary-300 mb-3">
+                Clear your progress for a specific category without losing other data. This cannot be undone.
+              </p>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                {ALL_CATEGORIES.slice(0, 12).map((category) => {
+                  const categorySelections = selections?.[category as keyof UserSelections] || [];
+                  const visitedCount = categorySelections.filter(s => s.status === 'visited').length;
+                  if (visitedCount === 0) return null;
+                  return (
+                    <Button
+                      key={category}
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setResetCategory(category);
+                        setShowResetModal(true);
+                      }}
+                      className="justify-start"
+                    >
+                      <span className="mr-2">{categoryIcons[category as Category]}</span>
+                      <span className="truncate text-xs">{categoryLabels[category as Category]}</span>
+                      <span className="ml-auto text-xs text-muted-foreground">({visitedCount})</span>
+                    </Button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <Separator />
+
+            {/* Privacy Policy Link */}
+            <div>
+              <h4 className="font-medium text-primary-900 dark:text-white mb-2">Privacy Policy</h4>
+              <p className="text-sm text-primary-600 dark:text-primary-300 mb-3">
+                Learn how we handle your data and protect your privacy.
+              </p>
+              <Button variant="link" asChild className="p-0 h-auto">
+                <Link href="/privacy">Read Privacy Policy</Link>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Danger Zone */}
-        <section className="bg-red-50 dark:bg-red-900/20 rounded-xl p-6 border border-red-200 dark:border-red-800">
-          <h3 className="text-lg font-semibold text-red-700 dark:text-red-400 mb-4">Danger Zone</h3>
-
-          <div>
+        <Card className="border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20">
+          <CardHeader>
+            <CardTitle className="text-red-700 dark:text-red-400">Danger Zone</CardTitle>
+          </CardHeader>
+          <CardContent>
             <h4 className="font-medium text-red-900 dark:text-red-300 mb-2">Delete Account</h4>
             <p className="text-sm text-red-700 dark:text-red-400 mb-4">
               Permanently delete your account and all associated data. This action cannot be undone.
@@ -1086,63 +1058,63 @@ export default function SettingsPage() {
             </p>
 
             {!showDeleteConfirm ? (
-              <button
+              <Button
+                variant="destructive"
                 onClick={() => setShowDeleteConfirm(true)}
-                className="inline-flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-colors"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                </svg>
+                <Trash2 className="h-4 w-4 mr-2" />
                 Delete My Account
-              </button>
+              </Button>
             ) : (
-              <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-red-300 dark:border-red-700">
-                <p className="text-sm text-gray-700 dark:text-gray-300 mb-3">
-                  Type <strong>DELETE</strong> to confirm:
-                </p>
-                <input
-                  type="text"
-                  value={deleteConfirmText}
-                  onChange={(e) => setDeleteConfirmText(e.target.value)}
-                  placeholder="Type DELETE"
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg mb-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                />
-                <div className="flex gap-3">
-                  <button
-                    onClick={handleDeleteAccount}
-                    disabled={deleteConfirmText !== 'DELETE' || isDeleting}
-                    className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {isDeleting ? 'Deleting...' : 'Confirm Delete'}
-                  </button>
-                  <button
-                    onClick={() => {
-                      setShowDeleteConfirm(false);
-                      setDeleteConfirmText('');
-                    }}
-                    className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-lg font-medium hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </div>
+              <Card className="bg-white dark:bg-gray-800 border-red-300 dark:border-red-700">
+                <CardContent className="p-4 space-y-3">
+                  <p className="text-sm text-gray-700 dark:text-gray-300">
+                    Type <strong>DELETE</strong> to confirm:
+                  </p>
+                  <Input
+                    value={deleteConfirmText}
+                    onChange={(e) => setDeleteConfirmText(e.target.value)}
+                    placeholder="Type DELETE"
+                  />
+                  <div className="flex gap-3">
+                    <Button
+                      variant="destructive"
+                      onClick={handleDeleteAccount}
+                      disabled={deleteConfirmText !== 'DELETE' || isDeleting}
+                      className="flex-1"
+                    >
+                      {isDeleting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                      {isDeleting ? 'Deleting...' : 'Confirm Delete'}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        setShowDeleteConfirm(false);
+                        setDeleteConfirmText('');
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
             )}
-          </div>
-        </section>
+          </CardContent>
+        </Card>
       </main>
 
       {/* Footer */}
       <footer className="border-t border-black/5 dark:border-white/10 bg-white/50 dark:bg-slate-900/50">
         <div className="max-w-4xl mx-auto px-4 py-6 text-center text-sm text-primary-500 dark:text-primary-400">
-          <div className="flex justify-center gap-4 mb-2">
+          <div className="flex justify-center items-center gap-4 mb-2">
             <Link href="/about" className="hover:text-primary-700 dark:hover:text-primary-200 transition-colors">About</Link>
-            <span>|</span>
+            <Separator orientation="vertical" className="h-4" />
             <Link href="/achievements" className="hover:text-primary-700 dark:hover:text-primary-200 transition-colors">Achievements</Link>
-            <span>|</span>
+            <Separator orientation="vertical" className="h-4" />
             <Link href="/suggest" className="hover:text-primary-700 dark:hover:text-primary-200 transition-colors">Suggest</Link>
-            <span>|</span>
+            <Separator orientation="vertical" className="h-4" />
             <Link href="/privacy" className="hover:text-primary-700 dark:hover:text-primary-200 transition-colors">Privacy</Link>
-            <span>|</span>
+            <Separator orientation="vertical" className="h-4" />
             <Link href="/terms" className="hover:text-primary-700 dark:hover:text-primary-200 transition-colors">Terms</Link>
           </div>
           <p>See Every Place - Free Travel Tracker</p>
@@ -1150,48 +1122,49 @@ export default function SettingsPage() {
       </footer>
 
       {/* Reset Category Modal */}
-      {showResetModal && resetCategory && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-slate-800 rounded-xl p-6 max-w-md w-full shadow-2xl">
-            <h3 className="text-lg font-bold text-primary-900 dark:text-white mb-2">
-              Reset {categoryLabels[resetCategory as Category]}?
-            </h3>
-            <p className="text-sm text-primary-600 dark:text-primary-300 mb-4">
-              This will permanently clear all your progress for {categoryLabels[resetCategory as Category]}.
+      <AlertDialog open={showResetModal} onOpenChange={setShowResetModal}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              Reset {resetCategory ? categoryLabels[resetCategory as Category] : ''}?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently clear all your progress for {resetCategory ? categoryLabels[resetCategory as Category] : ''}.
               This action cannot be undone.
-            </p>
-            <p className="text-sm text-gray-700 dark:text-gray-300 mb-3">
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="space-y-3">
+            <p className="text-sm text-gray-700 dark:text-gray-300">
               Type <strong>RESET</strong> to confirm:
             </p>
-            <input
-              type="text"
+            <Input
               value={resetConfirmText}
               onChange={(e) => setResetConfirmText(e.target.value)}
               placeholder="Type RESET"
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg mb-4 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             />
-            <div className="flex gap-3">
-              <button
-                onClick={() => handleResetCategory(resetCategory)}
-                disabled={resetConfirmText !== 'RESET' || isResetting}
-                className="flex-1 px-4 py-2 bg-amber-600 text-white rounded-lg font-medium hover:bg-amber-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isResetting ? 'Resetting...' : 'Reset Progress'}
-              </button>
-              <button
-                onClick={() => {
-                  setShowResetModal(false);
-                  setResetCategory(null);
-                  setResetConfirmText('');
-                }}
-                className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-lg font-medium hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
-              >
-                Cancel
-              </button>
-            </div>
           </div>
-        </div>
-      )}
+          <AlertDialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowResetModal(false);
+                setResetCategory(null);
+                setResetConfirmText('');
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => resetCategory && handleResetCategory(resetCategory)}
+              disabled={resetConfirmText !== 'RESET' || isResetting}
+            >
+              {isResetting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              {isResetting ? 'Resetting...' : 'Reset Progress'}
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
