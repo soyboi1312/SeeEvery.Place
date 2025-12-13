@@ -22,11 +22,11 @@ const MapLoadingPlaceholder = () => (
 // Dynamic imports for map components - reduces initial bundle size
 // Maps are heavy due to react-simple-maps and topojson data
 const RegionMap = dynamic(() => import('./maps/RegionMap'), {
-  loading: MapLoadingPlaceholder,
+  loading: () => <MapLoadingPlaceholder />,
   ssr: false,
 });
 const CategoryMarkerMap = dynamic(() => import('./maps/CategoryMarkerMap'), {
-  loading: MapLoadingPlaceholder,
+  loading: () => <MapLoadingPlaceholder />,
   ssr: false,
 });
 
