@@ -43,7 +43,9 @@ export const getCountrySelections: SelectionGetter = (selections: UserSelections
 const BASE_US_CONFIG = {
   geoUrl: GEO_URL_USA,
   projection: 'geoAlbersUsa',
-  projectionConfig: { scale: 1000 },
+  projectionConfig: { scale: 1000 },  width: 800,
+  height: 400,
+  viewBox: '0 0 800 400',
   initialCenter: [-97, 38] as [number, number],
   maxZoom: 8,
 };
@@ -67,9 +69,6 @@ const BASE_WORLD_CONFIG = {
 
 export const US_REGION_CONFIG: RegionMapConfig = {
   ...BASE_US_CONFIG,
-  width: 800,
-  height: 500,
-  viewBox: '0 0 800 500',
   getId: getUSStateId,
   getSelections: getStateSelections,
 };
