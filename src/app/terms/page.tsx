@@ -68,8 +68,9 @@ export default function TermsPage() {
           <section className="mb-10">
             <h2 className="text-2xl font-bold text-foreground mb-4">2. Description of Service</h2>
             <p className="text-muted-foreground mb-4">
-              See Every Place™ is a free travel tracking application that allows users to track visited locations,
-              create bucket lists, earn achievements, and optionally share their travel progress. The Service includes:
+              See Every Place™ is a free travel tracking application focused on map-based exploration and statistics.
+              Unlike social media platforms, our Service is designed for tracking visited locations and achievements, not for hosting or sharing user photo galleries.
+              The Service includes:
             </p>
             <ul className="text-muted-foreground space-y-2">
               <li className="flex items-start gap-2">

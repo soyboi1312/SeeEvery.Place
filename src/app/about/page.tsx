@@ -80,10 +80,10 @@ export default function AboutPage() {
                 Memories fade faster than we&apos;d like. We wanted a way to hold onto the places we&apos;ve seen, not just the countries, but the mountain peaks and the random roadside attractions that made the trip special.
               </p>
               <p>
-                Existing tools felt too generic. They didn&apos;t capture the detail of the journey, or they locked everything behind a login screen and wanted our email, credit card, or to post on our behalf.
+                Existing tools felt like they were trying to be social networks first—demanding photos, feeds, and curation. We didn&apos;t want the pressure of posting the perfect picture. We just wanted to track the <strong>action</strong> of exploration.
               </p>
               <p>
-                We wanted something simple, a visual way to see where we&apos;d been and dream about where we&apos;d go next. Just a beautiful map that showed our journey.
+                We wanted something simple: a visual way to see where we&apos;d been based on <em>data</em>, not media. A platform dedicated to the map itself.
               </p>
               <p>
                 <strong className="text-foreground">So we built one.</strong> And now we&apos;re sharing it with you.
@@ -134,8 +134,8 @@ export default function AboutPage() {
                   <User className="w-8 h-8 text-purple-500 mb-3" />
                   <h3 className="font-bold text-foreground mb-2">Public Profiles</h3>
                   <p className="text-muted-foreground text-sm">
-                    Create a unique shareable profile at seeevery.place/u/yourname. Show off your travels,
-                    achievements, and stats. Privacy controls let you choose what to share.
+                    Create a unique shareable profile at seeevery.place/u/yourname. Show off your map and stats.
+                    No photo feeds, just pure exploration data.
                   </p>
                 </CardContent>
               </Card>

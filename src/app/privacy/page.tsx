@@ -60,10 +60,9 @@ export default function PrivacyPage() {
               how we use it, and your rights regarding your personal information.
             </p>
             <p className="text-muted-foreground">
-              <strong className="text-foreground">The short version:</strong> Your travel data is stored locally
-              on your device by default and is private. If you create an account, your data is encrypted and synced securely.
-              You can optionally enable a public profile to share your travels with others.
-              We never sell your data to third parties.
+              <strong className="text-foreground">The short version:</strong> We are an exploration-first platform.
+              We store your travel selections (places you visited) and statistics. We do not host or store personal media libraries (photos or videos).
+              Your data is stored locally on your device by default and is private. If you create an account, your data is encrypted and synced securely.
             </p>
           </section>
 
