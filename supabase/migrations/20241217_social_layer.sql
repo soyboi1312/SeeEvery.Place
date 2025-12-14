@@ -25,6 +25,11 @@ CREATE TABLE IF NOT EXISTS public.follows (
 -- Enable RLS
 ALTER TABLE public.follows ENABLE ROW LEVEL SECURITY;
 
+-- Drop existing policies if they exist (for idempotency)
+DROP POLICY IF EXISTS "Users can view own follows" ON public.follows;
+DROP POLICY IF EXISTS "Users can follow others" ON public.follows;
+DROP POLICY IF EXISTS "Users can unfollow" ON public.follows;
+
 -- Users can view follows where they are involved or for public profiles
 CREATE POLICY "Users can view own follows"
   ON public.follows FOR SELECT
@@ -284,6 +289,10 @@ CREATE TABLE IF NOT EXISTS public.activity_feed (
 
 -- Enable RLS
 ALTER TABLE public.activity_feed ENABLE ROW LEVEL SECURITY;
+
+-- Drop existing policies if they exist (for idempotency)
+DROP POLICY IF EXISTS "Users can view relevant activities" ON public.activity_feed;
+DROP POLICY IF EXISTS "Users can create own activities" ON public.activity_feed;
 
 -- Users can view activities from people they follow or public profiles
 CREATE POLICY "Users can view relevant activities"
