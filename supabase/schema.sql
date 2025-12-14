@@ -18,21 +18,25 @@ create table if not exists public.user_selections (
 alter table public.user_selections enable row level security;
 
 -- Policy: Users can only see their own selections
+drop policy if exists "Users can view own selections" on public.user_selections;
 create policy "Users can view own selections"
   on public.user_selections for select
   using (auth.uid() = user_id);
 
 -- Policy: Users can insert their own selections
+drop policy if exists "Users can insert own selections" on public.user_selections;
 create policy "Users can insert own selections"
   on public.user_selections for insert
   with check (auth.uid() = user_id);
 
 -- Policy: Users can update their own selections
+drop policy if exists "Users can update own selections" on public.user_selections;
 create policy "Users can update own selections"
   on public.user_selections for update
   using (auth.uid() = user_id);
 
 -- Policy: Users can delete their own selections
+drop policy if exists "Users can delete own selections" on public.user_selections;
 create policy "Users can delete own selections"
   on public.user_selections for delete
   using (auth.uid() = user_id);
@@ -76,14 +80,17 @@ create unique index if not exists profiles_username_lower_idx on public.profiles
 alter table public.profiles enable row level security;
 
 -- Profiles policies
+drop policy if exists "Profiles are viewable by owner" on public.profiles;
 create policy "Profiles are viewable by owner"
   on public.profiles for select
   using (auth.uid() = id);
 
+drop policy if exists "Users can insert own profile" on public.profiles;
 create policy "Users can insert own profile"
   on public.profiles for insert
   with check (auth.uid() = id);
 
+drop policy if exists "Users can update own profile" on public.profiles;
 create policy "Users can update own profile"
   on public.profiles for update
   using (auth.uid() = id);
@@ -132,12 +139,14 @@ create table if not exists public.suggestions (
 alter table public.suggestions enable row level security;
 
 -- Anyone can view approved/pending suggestions
+drop policy if exists "Suggestions are viewable by everyone" on public.suggestions;
 create policy "Suggestions are viewable by everyone"
   on public.suggestions for select
   using (status in ('pending', 'approved', 'implemented'));
 
 -- Block direct client inserts - must go through API route with rate limiting
 -- Use service_role key in API to bypass this
+drop policy if exists "No direct inserts allowed" on public.suggestions;
 create policy "No direct inserts allowed"
   on public.suggestions for insert
   with check (false);
@@ -170,6 +179,7 @@ $$ language plpgsql security definer;
 -- Admin emails table policies
 -- Allow authenticated users to check if their own email is in the admin list
 -- (Required for middleware to verify admin status without circular dependency)
+drop policy if exists "Authenticated users can check own admin status" on public.admin_emails;
 create policy "Authenticated users can check own admin status"
   on public.admin_emails for select
   using (
@@ -177,20 +187,24 @@ create policy "Authenticated users can check own admin status"
     and email = lower(auth.jwt() ->> 'email')
   );
 
+drop policy if exists "Only admins can insert admin_emails" on public.admin_emails;
 create policy "Only admins can insert admin_emails"
   on public.admin_emails for insert
   with check (public.is_admin());
 
+drop policy if exists "Only admins can delete admin_emails" on public.admin_emails;
 create policy "Only admins can delete admin_emails"
   on public.admin_emails for delete
   using (public.is_admin());
 
 -- Only admin users can update suggestions (for approval/rejection)
+drop policy if exists "Only admins can update suggestions" on public.suggestions;
 create policy "Only admins can update suggestions"
   on public.suggestions for update
   using (public.is_admin());
 
 -- Authenticated users can view all suggestions (including rejected)
+drop policy if exists "Authenticated users can view all suggestions" on public.suggestions;
 create policy "Authenticated users can view all suggestions"
   on public.suggestions for select
   using (auth.role() = 'authenticated');
@@ -208,11 +222,13 @@ create table if not exists public.suggestion_votes (
 alter table public.suggestion_votes enable row level security;
 
 -- Anyone can view votes
+drop policy if exists "Votes are viewable by everyone" on public.suggestion_votes;
 create policy "Votes are viewable by everyone"
   on public.suggestion_votes for select
   using (true);
 
 -- Only authenticated users can insert votes, and voter_id must match their user id
+drop policy if exists "Authenticated users can vote" on public.suggestion_votes;
 create policy "Authenticated users can vote"
   on public.suggestion_votes for insert
   with check (
@@ -221,6 +237,7 @@ create policy "Authenticated users can vote"
   );
 
 -- Users can only delete their own votes (for unvoting)
+drop policy if exists "Users can unvote their own votes" on public.suggestion_votes;
 create policy "Users can unvote their own votes"
   on public.suggestion_votes for delete
   using (
