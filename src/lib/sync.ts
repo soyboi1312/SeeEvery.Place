@@ -26,6 +26,7 @@ export async function syncToCloud(selections: UserSelections): Promise<boolean> 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return false;
 
+  // 1. Sync selections
   const { error } = await supabase
     .from('user_selections')
     .upsert({
@@ -41,7 +42,28 @@ export async function syncToCloud(selections: UserSelections): Promise<boolean> 
     return false;
   }
 
-  // Sync achievements based on current selections
+  // 2. Sync total XP to profile
+  // This ensures the level and leaderboard are always up to date
+  // The database trigger 'on_xp_change' will automatically recalculate the 'level' column
+  try {
+    const totalXp = calculateTotalXp(selections);
+    const { error: profileError } = await supabase
+      .from('profiles')
+      .update({
+        total_xp: totalXp,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', user.id);
+
+    if (profileError) {
+      console.error('Failed to sync profile XP:', profileError);
+      // We don't return false here because the main data (selections) was synced successfully
+    }
+  } catch (err) {
+    console.error('Error calculating or syncing XP:', err);
+  }
+
+  // 3. Sync achievements based on current selections
   // This runs in the background and doesn't block the main sync
   syncAchievementsToCloud(selections).catch(err => {
     console.error('Failed to sync achievements:', err);
