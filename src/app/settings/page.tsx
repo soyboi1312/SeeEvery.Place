@@ -29,7 +29,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Sun, Moon, ArrowLeft, Download, Upload, Trash2, ChevronRight, Check, Loader2 } from 'lucide-react';
+import { Sun, Moon, ArrowLeft, Download, Upload, Trash2, ChevronRight, Check, Loader2, Users } from 'lucide-react';
 
 interface Profile {
   id: string;
@@ -537,6 +537,12 @@ export default function SettingsPage() {
             </div>
           </Link>
           <div className="flex items-center gap-2">
+            <Button variant="ghost" asChild className="hidden sm:flex gap-1.5 items-center">
+              <Link href="/community">
+                <Users className="w-4 h-4" />
+                Community
+              </Link>
+            </Button>
             <Button
               variant="ghost"
               size="icon"
@@ -645,6 +651,34 @@ export default function SettingsPage() {
                   />
                 </div>
 
+                {/* Public Profile Toggle - Moved above username for visibility */}
+                <Card className="bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium text-primary-900 dark:text-white">Public Profile</p>
+                        <p className="text-sm text-primary-600 dark:text-primary-400">
+                          Allow others to view your travel map and achievements
+                        </p>
+                      </div>
+                      <Switch
+                        checked={isPublic}
+                        onCheckedChange={setIsPublic}
+                      />
+                    </div>
+                    {isPublic && username && (
+                      <p className="text-sm text-blue-600 dark:text-blue-400 mt-2">
+                        Your profile will be visible at: seeevery.place/u/{username}
+                      </p>
+                    )}
+                    {isPublic && !username && (
+                      <p className="text-sm text-amber-600 dark:text-amber-400 mt-2">
+                        Set a username below to enable your public profile URL
+                      </p>
+                    )}
+                  </CardContent>
+                </Card>
+
                 {/* Username */}
                 <div>
                   <Label htmlFor="username">Username</Label>
@@ -682,34 +716,6 @@ export default function SettingsPage() {
                     {bio.length}/160 characters
                   </p>
                 </div>
-
-                {/* Public Profile Toggle */}
-                <Card className="bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-medium text-primary-900 dark:text-white">Public Profile</p>
-                        <p className="text-sm text-primary-600 dark:text-primary-400">
-                          Allow others to view your travel map and achievements
-                        </p>
-                      </div>
-                      <Switch
-                        checked={isPublic}
-                        onCheckedChange={setIsPublic}
-                      />
-                    </div>
-                    {isPublic && username && (
-                      <p className="text-sm text-blue-600 dark:text-blue-400 mt-2">
-                        Your profile will be visible at: seeevery.place/u/{username}
-                      </p>
-                    )}
-                    {isPublic && !username && (
-                      <p className="text-sm text-amber-600 dark:text-amber-400 mt-2">
-                        Set a username above to enable your public profile URL
-                      </p>
-                    )}
-                  </CardContent>
-                </Card>
 
                 {/* Social Media Links */}
                 <Card className="bg-muted/50">
