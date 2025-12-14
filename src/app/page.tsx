@@ -2,9 +2,9 @@
 
 import { useState, useEffect, useMemo, useCallback, useRef, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import Header from '@/components/Header';
+import Footer from '@/components/Footer';
 import CategoryTabs from '@/components/CategoryTabs';
 import SelectionList from '@/components/SelectionList';
 import QuickStats from '@/components/QuickStats';
@@ -246,7 +246,7 @@ function HomeContent() {
   );
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-900">
+    <div className="min-h-screen flex flex-col bg-white dark:bg-gray-900">
       <Header
         onSignIn={() => setShowAuthModal(true)}
         onSignOut={signOut}
@@ -259,7 +259,7 @@ function HomeContent() {
         onPreloadAuth={preloadAuthModal}
       />
 
-      <div className="max-w-6xl mx-auto px-4 py-6 space-y-6">
+      <div className="max-w-6xl mx-auto px-4 py-6 space-y-6 flex-grow">
         {/* Hero Section - NOW RENDERS IMMEDIATELY FOR FAST LCP */}
         <div className="text-center py-4 sm:py-8">
           <h1 className="text-3xl sm:text-4xl font-bold text-gray-800 dark:text-white mb-2">
@@ -326,67 +326,14 @@ function HomeContent() {
           <span>Share Map</span>
         </Button>
 
-        {/* Footer - pb-24 adds clearance for the floating Share Map button on mobile */}
-        <footer className="py-8 pb-24 text-gray-500 dark:text-gray-400 text-sm">
-          {/* Category Directory - Internal Links for SEO */}
-          <div className="border-t border-gray-200 dark:border-gray-700 pt-8 mb-8">
-            <h2 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-4 text-center">
-              Track Your Adventures
-            </h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 text-left">
-              {(Object.keys(categoryLabels) as Category[]).map((cat) => (
-                <Link
-                  key={cat}
-                  href={`/track/${cat}`}
-                  className="text-sm text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-                >
-                  Track {categoryLabels[cat]}
-                </Link>
-              ))}
-            </div>
-          </div>
-
-          <div className="text-center">
-            <p>
-              Made by people who really like maps.
-            </p>
-            <p className="mt-1">
-              {user ? (
-                <>Signed in as {user.email}. Your data syncs across devices.</>
-              ) : (
-                <>
-                  <button
-                    onClick={() => setShowAuthModal(true)}
-                    onMouseEnter={preloadAuthModal}
-                    onFocus={preloadAuthModal}
-                    className="text-blue-600 dark:text-blue-400 hover:underline"
-                  >
-                    Sign in
-                  </button>{' '}
-                  to sync across devices.
-                </>
-              )}
-            </p>
-            <div className="mt-3 flex justify-center gap-4">
-              <Link href="/about" className="text-blue-600 dark:text-blue-400 hover:underline">
-                About
-              </Link>
-              <span>•</span>
-              <Link href="/suggest" className="text-blue-600 dark:text-blue-400 hover:underline">
-                Suggest
-              </Link>
-              <span>•</span>
-              <Link href="/privacy" className="text-blue-600 dark:text-blue-400 hover:underline">
-                Privacy
-              </Link>
-              <span>•</span>
-              <Link href="/terms" className="text-blue-600 dark:text-blue-400 hover:underline">
-                Terms
-              </Link>
-            </div>
-          </div>
-        </footer>
       </div>
+
+      {/* Shared Footer */}
+      <Footer
+        user={user}
+        onSignIn={() => setShowAuthModal(true)}
+        onSignInHover={preloadAuthModal}
+      />
 
       {/* Share Card Modal */}
       {showShareCard && (
