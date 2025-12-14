@@ -385,11 +385,13 @@ create index if not exists activity_feed_user_created_idx on public.activity_fee
 -- Notifications System
 -- ============================================
 -- See migration: 20241218_notifications.sql for full implementation
+-- Type is extensible text field - no CHECK constraint for OCP compliance
+-- Currently supported: 'follow' (more types can be added without schema changes)
 
 create table if not exists public.notifications (
   id uuid default gen_random_uuid() primary key,
   user_id uuid references auth.users(id) on delete cascade not null,
-  type text not null check (type in ('follow', 'level_up', 'achievement', 'milestone')),
+  type text not null,
   title text not null,
   message text,
   actor_id uuid references auth.users(id) on delete set null,

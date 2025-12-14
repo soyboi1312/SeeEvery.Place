@@ -11,10 +11,12 @@
 -- 1. NOTIFICATIONS TABLE
 -- ============================================
 
+-- Type is extensible text field - no CHECK constraint for OCP compliance
+-- Currently supported: 'follow' (more types can be added without schema changes)
 CREATE TABLE IF NOT EXISTS public.notifications (
   id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id uuid REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
-  type text NOT NULL CHECK (type IN ('follow', 'level_up', 'achievement', 'milestone')),
+  type text NOT NULL,
   title text NOT NULL,
   message text,
   actor_id uuid REFERENCES auth.users(id) ON DELETE SET NULL,

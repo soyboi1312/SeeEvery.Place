@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -13,11 +12,12 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Bell, UserPlus, Trophy, Star, Check, Loader2 } from 'lucide-react';
+import { Bell, UserPlus, Check, Loader2 } from 'lucide-react';
+import { formatTimeAgo } from '@/lib/utils/formatTimeAgo';
 
 interface Notification {
   id: string;
-  type: 'follow' | 'level_up' | 'achievement' | 'milestone';
+  type: string;
   title: string;
   message: string;
   actor_id: string | null;
@@ -28,31 +28,12 @@ interface Notification {
   created_at: string;
 }
 
-function formatTimeAgo(dateString: string): string {
-  const date = new Date(dateString);
-  const now = new Date();
-  const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
-
-  if (seconds < 60) return 'just now';
-  if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
-  if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
-  if (seconds < 604800) return `${Math.floor(seconds / 86400)}d ago`;
-  return date.toLocaleDateString();
-}
-
 function getNotificationIcon(type: string) {
-  switch (type) {
-    case 'follow':
-      return <UserPlus className="w-4 h-4 text-blue-500" />;
-    case 'level_up':
-      return <Star className="w-4 h-4 text-yellow-500" />;
-    case 'achievement':
-      return <Trophy className="w-4 h-4 text-purple-500" />;
-    case 'milestone':
-      return <Trophy className="w-4 h-4 text-green-500" />;
-    default:
-      return <Bell className="w-4 h-4" />;
+  // Extensible: add new cases as notification types are implemented
+  if (type === 'follow') {
+    return <UserPlus className="w-4 h-4 text-blue-500" />;
   }
+  return <Bell className="w-4 h-4" />;
 }
 
 export function NotificationsDropdown() {
@@ -201,16 +182,6 @@ export function NotificationsDropdown() {
             ))
           )}
         </ScrollArea>
-        {notifications.length > 0 && (
-          <>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem asChild className="justify-center">
-              <Link href="/notifications" className="text-sm text-blue-500">
-                View all notifications
-              </Link>
-            </DropdownMenuItem>
-          </>
-        )}
       </DropdownMenuContent>
     </DropdownMenu>
   );
