@@ -288,6 +288,7 @@ create table if not exists public.follows (
 
 alter table public.follows enable row level security;
 
+drop policy if exists "Users can view own follows" on public.follows;
 create policy "Users can view own follows"
   on public.follows for select
   using (
@@ -300,10 +301,12 @@ create policy "Users can view own follows"
     )
   );
 
+drop policy if exists "Users can follow others" on public.follows;
 create policy "Users can follow others"
   on public.follows for insert
   with check (auth.uid() = follower_id);
 
+drop policy if exists "Users can unfollow" on public.follows;
 create policy "Users can unfollow"
   on public.follows for delete
   using (auth.uid() = follower_id);
@@ -332,6 +335,7 @@ create table if not exists public.activity_feed (
 
 alter table public.activity_feed enable row level security;
 
+drop policy if exists "Users can view relevant activities" on public.activity_feed;
 create policy "Users can view relevant activities"
   on public.activity_feed for select
   using (
@@ -350,6 +354,7 @@ create policy "Users can view relevant activities"
     )
   );
 
+drop policy if exists "Users can create own activities" on public.activity_feed;
 create policy "Users can create own activities"
   on public.activity_feed for insert
   with check (auth.uid() = user_id);
