@@ -54,8 +54,21 @@ import { useCloudSync } from '@/lib/hooks/useCloudSync';
 import { createClient } from '@/lib/supabase/client';
 import { categoryTotals, categoryTitles, getCategoryItemsAsync, type CategoryItem } from '@/lib/categoryUtils';
 
-function HomeContent() {
+// Isolated component for URL param syncing - allows SSR of main content
+function URLSync({ onCategoryChange }: { onCategoryChange: (cat: Category) => void }) {
   const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const category = searchParams.get('category');
+    if (category && category in categoryLabels) {
+      onCategoryChange(category as Category);
+    }
+  }, [searchParams, onCategoryChange]);
+
+  return null;
+}
+
+function HomeContent() {
   const [selections, setSelections] = useState<UserSelections>(emptySelections);
   const [activeCategory, setActiveCategory] = useState<Category>('countries');
   const [showShareCard, setShowShareCard] = useState(false);
@@ -77,14 +90,6 @@ function HomeContent() {
   const handleCategoryChange = useCallback((category: Category) => {
     setActiveCategory(category);
   }, []);
-
-  // Sync activeCategory with URL search params (for Explore dropdown navigation)
-  useEffect(() => {
-    const category = searchParams.get('category');
-    if (category && category in categoryLabels) {
-      setActiveCategory(category as Category);
-    }
-  }, [searchParams]);
 
   // Load selections from localStorage on mount (async for lazy-loaded migrations)
   useEffect(() => {
@@ -276,6 +281,11 @@ function HomeContent() {
           </p>
         </div>
 
+        {/* URL param sync - isolated in Suspense to allow SSR of Hero */}
+        <Suspense fallback={null}>
+          <URLSync onCategoryChange={handleCategoryChange} />
+        </Suspense>
+
         {/* Render Skeletons or Content */}
         {!isLoaded ? (
           <LoadingSkeletons />
@@ -355,13 +365,5 @@ function HomeContent() {
 }
 
 export default function Home() {
-  return (
-    <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-white dark:bg-gray-900">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 dark:border-blue-400" />
-      </div>
-    }>
-      <HomeContent />
-    </Suspense>
-  );
+  return <HomeContent />;
 }
