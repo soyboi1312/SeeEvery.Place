@@ -15,7 +15,7 @@ DROP POLICY IF EXISTS "Users can view own status" ON public.user_status;
 CREATE POLICY "User status viewable by owner or admin"
   ON public.user_status FOR SELECT
   USING (
-    (SELECT auth.uid()) = user_id
+    (SELECT auth.uid()) = id
     OR public.is_admin()
   );
 
