@@ -209,6 +209,12 @@ export default function Header({
                     <Link href="/admin">Admin Dashboard</Link>
                   </DropdownMenuItem>
                 )}
+                <DropdownMenuItem asChild className="sm:hidden">
+                  <Link href="/community">
+                    <Users className="w-4 h-4 mr-2" />
+                    Community
+                  </Link>
+                </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <Link href="/settings">My Profile</Link>
                 </DropdownMenuItem>
