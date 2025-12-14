@@ -7,6 +7,8 @@ import { useDarkMode } from '@/lib/hooks/useDarkMode';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { ActivityFeed } from '@/components/ActivityFeed';
 import { Leaderboard } from '@/components/Leaderboard';
+import { UserSearch } from '@/components/UserSearch';
+import { NotificationsDropdown } from '@/components/NotificationsDropdown';
 import AuthModal from '@/components/AuthModal';
 import { Button } from '@/components/ui/button';
 import { Sun, Moon, Users, LogIn } from 'lucide-react';
@@ -43,6 +45,7 @@ export default function CommunityPage() {
             >
               {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
             </Button>
+            {!loading && user && <NotificationsDropdown />}
             {!loading && !user && (
               <Button variant="outline" onClick={() => setShowAuthModal(true)}>
                 <LogIn className="w-4 h-4 mr-2" />
@@ -94,8 +97,15 @@ export default function CommunityPage() {
       {/* Content */}
       <div className="max-w-6xl mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main Column: Activity Feed */}
+          {/* Main Column: User Search + Activity Feed */}
           <div className="lg:col-span-2 space-y-6">
+            {/* User Search */}
+            <div>
+              <h2 className="text-lg font-semibold mb-3">Find Travelers</h2>
+              <UserSearch />
+            </div>
+
+            {/* Activity Feed */}
             <ActivityFeed
               defaultType="global"
               showTabs={true}
