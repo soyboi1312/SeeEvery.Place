@@ -14,6 +14,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Bell, UserPlus, Check, Loader2 } from 'lucide-react';
 import { formatTimeAgo } from '@/lib/utils/formatTimeAgo';
+import { PROFILE_ICONS } from '@/components/ProfileIcons';
 
 interface Notification {
   id: string;
@@ -152,18 +153,35 @@ export function NotificationsDropdown() {
                   }
                 }}
               >
-                {notification.actor_avatar_url ? (
-                  <Avatar className="w-8 h-8">
-                    <AvatarImage src={notification.actor_avatar_url} />
-                    <AvatarFallback>
-                      {notification.actor_username?.[0]?.toUpperCase() || '?'}
-                    </AvatarFallback>
-                  </Avatar>
-                ) : (
-                  <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center">
-                    {getNotificationIcon(notification.type)}
-                  </div>
-                )}
+                {(() => {
+                  const avatarUrl = notification.actor_avatar_url;
+                  // Check if avatarUrl is a profile icon name
+                  if (avatarUrl && PROFILE_ICONS[avatarUrl]) {
+                    const IconComponent = PROFILE_ICONS[avatarUrl];
+                    return (
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white flex-shrink-0">
+                        <IconComponent className="w-4 h-4" />
+                      </div>
+                    );
+                  }
+                  // Check if it's a URL (for backwards compatibility)
+                  if (avatarUrl && (avatarUrl.startsWith('http') || avatarUrl.startsWith('/'))) {
+                    return (
+                      <Avatar className="w-8 h-8">
+                        <AvatarImage src={avatarUrl} />
+                        <AvatarFallback>
+                          {notification.actor_username?.[0]?.toUpperCase() || '?'}
+                        </AvatarFallback>
+                      </Avatar>
+                    );
+                  }
+                  // Default fallback
+                  return (
+                    <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
+                      {getNotificationIcon(notification.type)}
+                    </div>
+                  );
+                })()}
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium truncate">
                     {notification.title}

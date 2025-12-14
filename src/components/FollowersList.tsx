@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Loader2, User, UserPlus, UserMinus } from 'lucide-react';
 import Link from 'next/link';
+import { PROFILE_ICONS } from '@/components/ProfileIcons';
 
 interface FollowUser {
   user_id: string;
@@ -143,17 +144,34 @@ export function FollowersList({
           >
             {/* User avatar */}
             <Link href={`/u/${user.username}`} className="flex-shrink-0">
-              {user.avatar_url ? (
-                <img
-                  src={user.avatar_url}
-                  alt={user.username}
-                  className="w-10 h-10 rounded-full object-cover"
-                />
-              ) : (
-                <div className="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center">
-                  <User className="w-5 h-5 text-slate-400" />
-                </div>
-              )}
+              {(() => {
+                const avatarUrl = user.avatar_url;
+                // Check if avatarUrl is a profile icon name
+                if (avatarUrl && PROFILE_ICONS[avatarUrl]) {
+                  const IconComponent = PROFILE_ICONS[avatarUrl];
+                  return (
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white">
+                      <IconComponent className="w-5 h-5" />
+                    </div>
+                  );
+                }
+                // Check if it's a URL (for backwards compatibility)
+                if (avatarUrl && (avatarUrl.startsWith('http') || avatarUrl.startsWith('/'))) {
+                  return (
+                    <img
+                      src={avatarUrl}
+                      alt={user.username}
+                      className="w-10 h-10 rounded-full object-cover"
+                    />
+                  );
+                }
+                // Default fallback
+                return (
+                  <div className="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center">
+                    <User className="w-5 h-5 text-slate-400" />
+                  </div>
+                );
+              })()}
             </Link>
 
             {/* User info */}

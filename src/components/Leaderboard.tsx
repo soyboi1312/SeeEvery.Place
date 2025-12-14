@@ -15,6 +15,7 @@ import {
   Users,
 } from 'lucide-react';
 import Link from 'next/link';
+import { PROFILE_ICONS } from '@/components/ProfileIcons';
 
 interface LeaderboardUser {
   id: string;
@@ -229,17 +230,34 @@ export function Leaderboard({
                   </div>
 
                   {/* User avatar */}
-                  {entry.user.avatarUrl ? (
-                    <img
-                      src={entry.user.avatarUrl}
-                      alt={entry.user.username}
-                      className="w-10 h-10 rounded-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center">
-                      <User className="w-5 h-5 text-slate-400" />
-                    </div>
-                  )}
+                  {(() => {
+                    const avatarUrl = entry.user.avatarUrl;
+                    // Check if avatarUrl is a profile icon name
+                    if (avatarUrl && PROFILE_ICONS[avatarUrl]) {
+                      const IconComponent = PROFILE_ICONS[avatarUrl];
+                      return (
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white">
+                          <IconComponent className="w-5 h-5" />
+                        </div>
+                      );
+                    }
+                    // Check if it's a URL (for backwards compatibility)
+                    if (avatarUrl && (avatarUrl.startsWith('http') || avatarUrl.startsWith('/'))) {
+                      return (
+                        <img
+                          src={avatarUrl}
+                          alt={entry.user.username}
+                          className="w-10 h-10 rounded-full object-cover"
+                        />
+                      );
+                    }
+                    // Default fallback
+                    return (
+                      <div className="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center">
+                        <User className="w-5 h-5 text-slate-400" />
+                      </div>
+                    );
+                  })()}
 
                   {/* User info */}
                   <div className="flex-1 min-w-0">
