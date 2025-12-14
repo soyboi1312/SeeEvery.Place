@@ -149,7 +149,7 @@ BEGIN
     p.full_name,
     p.avatar_url,
     p.bio,
-    COALESCE(p.level, 1) as level,
+    public.calculate_level(COALESCE(p.total_xp, 0)) as level,
     COALESCE(p.total_xp, 0) as total_xp,
     COALESCE(p.follower_count, 0) as follower_count,
     EXISTS (
