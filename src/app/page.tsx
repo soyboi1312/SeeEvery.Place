@@ -268,18 +268,18 @@ function HomeContent() {
       {/* CategoryTabs Skeleton - TWO levels like actual component */}
       <div className="space-y-4">
         {/* Level 1: Meta-Groups */}
-        <div className="flex justify-center">
+        <div className="flex justify-center overflow-x-auto">
           <div className="inline-flex bg-white dark:bg-gray-800 p-1.5 rounded-2xl border border-gray-100 dark:border-gray-700 gap-1">
             {[...Array(4)].map((_, i) => (
-              <div key={i} className="h-10 w-20 sm:w-28 bg-gray-100 dark:bg-gray-700 rounded-xl" />
+              <div key={i} className="h-10 w-10 sm:w-28 bg-gray-100 dark:bg-gray-700 rounded-xl shrink-0" />
             ))}
           </div>
         </div>
         {/* Level 2: Category Pills */}
         <div className="w-full overflow-x-auto py-2">
-          <div className="flex justify-start sm:justify-center gap-3 min-w-max px-4">
+          <div className="flex justify-start sm:justify-center gap-3 px-4">
             {[...Array(4)].map((_, i) => (
-              <div key={i} className="min-w-[100px] h-20 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700" />
+              <div key={i} className="w-[100px] shrink-0 h-20 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700" />
             ))}
           </div>
         </div>
@@ -298,9 +298,9 @@ function HomeContent() {
         {/* Controls area */}
         <div className="p-4 border-b bg-muted/30 space-y-4">
           <div className="h-10 w-full bg-gray-100 dark:bg-gray-800 rounded-md" />
-          <div className="flex gap-1.5 p-1 bg-muted rounded-lg w-fit">
+          <div className="flex gap-1.5 p-1 bg-muted rounded-lg w-full sm:w-fit overflow-x-auto">
             {[...Array(4)].map((_, i) => (
-              <div key={i} className="h-8 w-20 bg-gray-200 dark:bg-gray-700 rounded-md" />
+              <div key={i} className="h-8 w-16 sm:w-20 bg-gray-200 dark:bg-gray-700 rounded-md shrink-0" />
             ))}
           </div>
         </div>
@@ -317,7 +317,7 @@ function HomeContent() {
   );
 
   return (
-    <div className="min-h-screen flex flex-col bg-white dark:bg-gray-900">
+    <div className="min-h-screen flex flex-col bg-white dark:bg-gray-900 overflow-x-hidden">
       <Header
         onSignIn={() => setShowAuthModal(true)}
         onSignOut={signOut}
