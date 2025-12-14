@@ -19,8 +19,8 @@ CREATE OR REPLACE FUNCTION public.is_admin()
 RETURNS boolean AS $$
 BEGIN
   RETURN EXISTS (
-    SELECT 1 FROM public.admin_users
-    WHERE user_id = auth.uid()
+    SELECT 1 FROM public.admin_emails
+    WHERE email = lower(auth.jwt() ->> 'email')
   );
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = '';

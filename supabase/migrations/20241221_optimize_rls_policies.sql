@@ -190,10 +190,10 @@ BEGIN
     DROP POLICY IF EXISTS "Admins can update custom places" ON public.custom_places;
     DROP POLICY IF EXISTS "Anyone can view approved custom places" ON public.custom_places;
 
-    -- Admin check using optimized subquery
-    EXECUTE 'CREATE POLICY "Admins can view all custom places" ON public.custom_places FOR SELECT USING (EXISTS (SELECT 1 FROM public.admin_users WHERE user_id = (select auth.uid())))';
-    EXECUTE 'CREATE POLICY "Admins can insert custom places" ON public.custom_places FOR INSERT WITH CHECK (EXISTS (SELECT 1 FROM public.admin_users WHERE user_id = (select auth.uid())))';
-    EXECUTE 'CREATE POLICY "Admins can update custom places" ON public.custom_places FOR UPDATE USING (EXISTS (SELECT 1 FROM public.admin_users WHERE user_id = (select auth.uid())))';
+    -- Admin check using admin_emails table with optimized subquery
+    EXECUTE 'CREATE POLICY "Admins can view all custom places" ON public.custom_places FOR SELECT USING (EXISTS (SELECT 1 FROM public.admin_emails WHERE email = (SELECT email FROM auth.users WHERE id = (select auth.uid()))))';
+    EXECUTE 'CREATE POLICY "Admins can insert custom places" ON public.custom_places FOR INSERT WITH CHECK (EXISTS (SELECT 1 FROM public.admin_emails WHERE email = (SELECT email FROM auth.users WHERE id = (select auth.uid()))))';
+    EXECUTE 'CREATE POLICY "Admins can update custom places" ON public.custom_places FOR UPDATE USING (EXISTS (SELECT 1 FROM public.admin_emails WHERE email = (SELECT email FROM auth.users WHERE id = (select auth.uid()))))';
     EXECUTE 'CREATE POLICY "Anyone can view approved custom places" ON public.custom_places FOR SELECT USING (status = ''approved'')';
   END IF;
 END $$;
