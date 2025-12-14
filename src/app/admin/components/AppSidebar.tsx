@@ -13,6 +13,7 @@ import {
   ArrowLeft,
   Moon,
   Sun,
+  ShieldCheck,
 } from 'lucide-react';
 
 import { useDarkMode } from '@/lib/hooks/useDarkMode';
@@ -56,6 +57,11 @@ const navItems = [
     title: 'Settings',
     url: '/admin/settings',
     icon: Settings,
+  },
+  {
+    title: 'Admin Roles',
+    url: '/admin/roles',
+    icon: ShieldCheck,
   },
   {
     title: 'Newsletter',
