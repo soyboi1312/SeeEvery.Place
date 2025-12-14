@@ -15,7 +15,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuGroup,
 } from '@/components/ui/dropdown-menu';
-import { Moon, Sun, Cloud, CloudOff, Loader2, User, ChevronDown } from 'lucide-react';
+import { Moon, Sun, Cloud, CloudOff, Loader2, User, ChevronDown, Users } from 'lucide-react';
 
 // Group definitions
 const categoryGroups: Record<CategoryGroup, Category[]> = {
@@ -147,6 +147,14 @@ export default function Header({
               ))}
             </DropdownMenuContent>
           </DropdownMenu>
+
+          {/* Community Link */}
+          <Button variant="ghost" asChild className="hidden sm:flex gap-1.5 items-center font-medium">
+            <Link href="/community">
+              <Users className="w-4 h-4" />
+              Community
+            </Link>
+          </Button>
         </div>
 
         <div className="flex items-center gap-1 sm:gap-2">
