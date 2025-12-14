@@ -58,11 +58,11 @@ DROP POLICY IF EXISTS "Authenticated users can unvote" ON public.suggestion_vote
 -- Recreate with optimized (SELECT auth.uid()) pattern
 CREATE POLICY "Authenticated users can vote"
   ON public.suggestion_votes FOR INSERT
-  WITH CHECK ((SELECT auth.uid()) = user_id);
+  WITH CHECK ((SELECT auth.uid()) = voter_id);
 
 CREATE POLICY "Authenticated users can unvote"
   ON public.suggestion_votes FOR DELETE
-  USING ((SELECT auth.uid()) = user_id);
+  USING ((SELECT auth.uid()) = voter_id);
 
 -- ============================================
 -- 3. FIX admin_emails RLS POLICY
