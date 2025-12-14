@@ -1,15 +1,20 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useDarkMode } from '@/lib/hooks/useDarkMode';
+import { useAuth } from '@/lib/hooks/useAuth';
 import { ActivityFeed } from '@/components/ActivityFeed';
 import { Leaderboard } from '@/components/Leaderboard';
+import AuthModal from '@/components/AuthModal';
 import { Button } from '@/components/ui/button';
-import { Sun, Moon, Users } from 'lucide-react';
+import { Sun, Moon, Users, LogIn } from 'lucide-react';
 
 export default function CommunityPage() {
   const { isDarkMode, toggleDarkMode } = useDarkMode();
+  const { user, loading } = useAuth();
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white dark:from-slate-900 dark:to-slate-800">
@@ -38,6 +43,12 @@ export default function CommunityPage() {
             >
               {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
             </Button>
+            {!loading && !user && (
+              <Button variant="outline" onClick={() => setShowAuthModal(true)}>
+                <LogIn className="w-4 h-4 mr-2" />
+                Sign In
+              </Button>
+            )}
             <Button asChild>
               <Link href="/">Start Mapping</Link>
             </Button>
@@ -59,6 +70,26 @@ export default function CommunityPage() {
           </p>
         </div>
       </div>
+
+      {/* Login Prompt for non-authenticated users */}
+      {!loading && !user && (
+        <div className="max-w-6xl mx-auto px-4 pt-6">
+          <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-lg p-4 flex items-center justify-between">
+            <div>
+              <p className="font-medium text-blue-900 dark:text-blue-100">
+                Sign in to follow travelers and see your friends&apos; activity
+              </p>
+              <p className="text-sm text-blue-700 dark:text-blue-300">
+                Track your ranking, compete with friends, and join the community.
+              </p>
+            </div>
+            <Button onClick={() => setShowAuthModal(true)} className="shrink-0">
+              <LogIn className="w-4 h-4 mr-2" />
+              Sign In
+            </Button>
+          </div>
+        </div>
+      )}
 
       {/* Content */}
       <div className="max-w-6xl mx-auto px-4 py-8">
@@ -102,6 +133,11 @@ export default function CommunityPage() {
           <p>See Every Place - Free Travel Tracker</p>
         </div>
       </footer>
+
+      {/* Auth Modal */}
+      {showAuthModal && (
+        <AuthModal onClose={() => setShowAuthModal(false)} />
+      )}
     </div>
   );
 }
