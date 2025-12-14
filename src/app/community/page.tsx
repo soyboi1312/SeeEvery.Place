@@ -11,7 +11,7 @@ import { UserSearch } from '@/components/UserSearch';
 import { NotificationsDropdown } from '@/components/NotificationsDropdown';
 import AuthModal from '@/components/AuthModal';
 import { Button } from '@/components/ui/button';
-import { Sun, Moon, Users, LogIn } from 'lucide-react';
+import { Sun, Moon, Users, LogIn, Loader2, Lock } from 'lucide-react';
 
 export default function CommunityPage() {
   const { isDarkMode, toggleDarkMode } = useDarkMode();
@@ -74,60 +74,64 @@ export default function CommunityPage() {
         </div>
       </div>
 
-      {/* Login Prompt for non-authenticated users */}
-      {!loading && !user && (
-        <div className="max-w-6xl mx-auto px-4 pt-6">
-          <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-lg p-4 flex items-center justify-between">
-            <div>
-              <p className="font-medium text-blue-900 dark:text-blue-100">
-                Sign in to follow travelers and see your friends&apos; activity
-              </p>
-              <p className="text-sm text-blue-700 dark:text-blue-300">
-                Track your ranking, compete with friends, and join the community.
+      {/* Main Content */}
+      <div className="max-w-6xl mx-auto px-4 py-8">
+        {loading ? (
+          <div className="flex justify-center py-20">
+            <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+          </div>
+        ) : !user ? (
+          /* Locked State */
+          <div className="flex flex-col items-center justify-center py-20 text-center space-y-6 bg-white/50 dark:bg-slate-800/30 rounded-2xl border border-dashed border-slate-300 dark:border-slate-700">
+            <div className="bg-blue-100 dark:bg-blue-900/30 p-6 rounded-full ring-8 ring-blue-50 dark:ring-blue-900/10">
+              <Lock className="w-10 h-10 text-blue-500" />
+            </div>
+            <div className="space-y-2 max-w-md">
+              <h2 className="text-2xl font-bold">Community Access Locked</h2>
+              <p className="text-muted-foreground">
+                Sign in to view the global activity feed, search for other travelers, and see your ranking on the leaderboard.
               </p>
             </div>
-            <Button onClick={() => setShowAuthModal(true)} className="shrink-0">
+            <Button onClick={() => setShowAuthModal(true)} size="lg" className="px-8">
               <LogIn className="w-4 h-4 mr-2" />
-              Sign In
+              Sign In to View
             </Button>
           </div>
-        </div>
-      )}
+        ) : (
+          /* Authenticated Content */
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Main Column: User Search + Activity Feed */}
+            <div className="lg:col-span-2 space-y-6">
+              {/* User Search */}
+              <div>
+                <h2 className="text-lg font-semibold mb-3">Find Travelers</h2>
+                <UserSearch />
+              </div>
 
-      {/* Content */}
-      <div className="max-w-6xl mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main Column: User Search + Activity Feed */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* User Search */}
-            <div>
-              <h2 className="text-lg font-semibold mb-3">Find Travelers</h2>
-              <UserSearch />
-            </div>
-
-            {/* Activity Feed */}
-            <ActivityFeed
-              defaultType="global"
-              showTabs={true}
-            />
-          </div>
-
-          {/* Sidebar: Leaderboard */}
-          <div className="space-y-6">
-            <div className="lg:sticky lg:top-20">
-              <Leaderboard
-                limit={10}
+              {/* Activity Feed */}
+              <ActivityFeed
                 defaultType="global"
-                showPeriodTabs={true}
-                showTypeTabs={true}
+                showTabs={true}
               />
             </div>
+
+            {/* Sidebar: Leaderboard */}
+            <div className="space-y-6">
+              <div className="lg:sticky lg:top-20">
+                <Leaderboard
+                  limit={10}
+                  defaultType="global"
+                  showPeriodTabs={true}
+                  showTypeTabs={true}
+                />
+              </div>
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Footer */}
-      <footer className="border-t bg-background/50">
+      <footer className="border-t bg-background/50 mt-auto">
         <div className="max-w-6xl mx-auto px-4 py-6 text-center text-sm text-muted-foreground">
           <div className="flex justify-center gap-4 mb-2">
             <Link href="/" className="hover:text-foreground transition-colors">Home</Link>
