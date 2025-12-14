@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { formatTimeAgo } from '@/lib/utils/formatTimeAgo';
+import { PROFILE_ICONS } from '@/components/ProfileIcons';
 
 interface ActivityUser {
   id: string;
@@ -249,17 +250,34 @@ export function ActivityFeed({
                 >
                   {/* User avatar */}
                   <Link href={`/u/${activity.user.username}`} className="flex-shrink-0">
-                    {activity.user.avatarUrl ? (
-                      <img
-                        src={activity.user.avatarUrl}
-                        alt={activity.user.username}
-                        className="w-10 h-10 rounded-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center">
-                        <User className="w-5 h-5 text-slate-400" />
-                      </div>
-                    )}
+                    {(() => {
+                      const avatarUrl = activity.user.avatarUrl;
+                      // Check if avatarUrl is a profile icon name
+                      if (avatarUrl && PROFILE_ICONS[avatarUrl]) {
+                        const IconComponent = PROFILE_ICONS[avatarUrl];
+                        return (
+                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white">
+                            <IconComponent className="w-5 h-5" />
+                          </div>
+                        );
+                      }
+                      // Check if it's a URL (for backwards compatibility)
+                      if (avatarUrl && (avatarUrl.startsWith('http') || avatarUrl.startsWith('/'))) {
+                        return (
+                          <img
+                            src={avatarUrl}
+                            alt={activity.user.username}
+                            className="w-10 h-10 rounded-full object-cover"
+                          />
+                        );
+                      }
+                      // Default fallback
+                      return (
+                        <div className="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center">
+                          <User className="w-5 h-5 text-slate-400" />
+                        </div>
+                      );
+                    })()}
                   </Link>
 
                   {/* Activity content */}
