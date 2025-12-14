@@ -6,6 +6,30 @@
 -- ============================================
 
 -- ============================================
+-- DROP FUNCTIONS WITH PARAMETER NAME CONFLICTS
+-- ============================================
+-- Some functions have different parameter names in existing definitions
+-- so we must drop them first before recreating
+
+DROP FUNCTION IF EXISTS public.is_username_available(text);
+DROP FUNCTION IF EXISTS public.get_followers(uuid, integer, integer);
+DROP FUNCTION IF EXISTS public.get_following(uuid, integer, integer);
+DROP FUNCTION IF EXISTS public.get_public_profile(text);
+DROP FUNCTION IF EXISTS public.search_users(text, integer, integer);
+DROP FUNCTION IF EXISTS public.get_notifications(integer, integer, boolean);
+DROP FUNCTION IF EXISTS public.mark_notifications_read(uuid[], boolean);
+DROP FUNCTION IF EXISTS public.get_xp_leaderboard(text, integer, integer);
+DROP FUNCTION IF EXISTS public.get_friends_leaderboard(text);
+DROP FUNCTION IF EXISTS public.get_category_leaderboard(text, integer, integer);
+DROP FUNCTION IF EXISTS public.get_category_stats(text);
+DROP FUNCTION IF EXISTS public.check_challenge_progress(uuid, text, text, timestamp with time zone);
+DROP FUNCTION IF EXISTS public.record_user_activity(text);
+DROP FUNCTION IF EXISTS public.get_user_status(uuid);
+DROP FUNCTION IF EXISTS public.is_user_suspended(uuid);
+DROP FUNCTION IF EXISTS public.get_public_user_achievements(uuid);
+DROP FUNCTION IF EXISTS public.get_user_achievement_stats(uuid);
+
+-- ============================================
 -- UTILITY FUNCTIONS
 -- ============================================
 
