@@ -319,7 +319,7 @@ function HomeContent() {
         {/* Floating Share Button */}
         <Button
           onClick={() => setShowShareCard(true)}
-          className="fixed bottom-20 right-6 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-full shadow-lg hover:shadow-xl hover:scale-105 transition-all z-30 font-semibold h-auto"
+          className="fixed bottom-6 right-6 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-full shadow-lg hover:shadow-xl hover:scale-105 transition-all z-30 font-semibold h-auto"
           aria-label="Share or download your travel map"
         >
           <Share2 className="w-5 h-5" />
