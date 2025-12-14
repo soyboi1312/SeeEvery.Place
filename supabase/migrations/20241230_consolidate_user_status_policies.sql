@@ -39,3 +39,17 @@ CREATE POLICY "Users can view own streaks"
 
 COMMENT ON POLICY "Users can view own streaks" ON public.user_streaks
   IS 'Single consolidated SELECT policy for user streaks';
+
+-- Also optimize INSERT and UPDATE policies for user_streaks
+DROP POLICY IF EXISTS "Users can insert own streaks" ON public.user_streaks;
+DROP POLICY IF EXISTS "Users can insert their own streaks" ON public.user_streaks;
+DROP POLICY IF EXISTS "Users can update own streaks" ON public.user_streaks;
+DROP POLICY IF EXISTS "Users can update their own streaks" ON public.user_streaks;
+
+CREATE POLICY "Users can insert own streaks"
+  ON public.user_streaks FOR INSERT
+  WITH CHECK ((SELECT auth.uid()) = user_id);
+
+CREATE POLICY "Users can update own streaks"
+  ON public.user_streaks FOR UPDATE
+  USING ((SELECT auth.uid()) = user_id);
