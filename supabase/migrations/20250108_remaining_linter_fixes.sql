@@ -56,18 +56,19 @@ DROP POLICY IF EXISTS "Authenticated users can vote" ON public.suggestion_votes;
 DROP POLICY IF EXISTS "Authenticated users can unvote" ON public.suggestion_votes;
 
 -- Recreate with optimized (SELECT auth.uid()) pattern
+-- Use ::text casts for type safety
 CREATE POLICY "Authenticated users can vote"
   ON public.suggestion_votes FOR INSERT
-  WITH CHECK ((SELECT auth.uid()) = voter_id);
+  WITH CHECK ((SELECT auth.uid())::text = voter_id::text);
 
 CREATE POLICY "Authenticated users can unvote"
   ON public.suggestion_votes FOR DELETE
-  USING ((SELECT auth.uid()) = voter_id);
+  USING ((SELECT auth.uid())::text = voter_id::text);
 
 -- ============================================
 -- 3. FIX admin_emails RLS POLICY
 -- ============================================
--- The policy uses auth.role() and auth.jwt() without SELECT wrapper
+-- The policy uses auth.jwt() without SELECT wrapper
 
 DROP POLICY IF EXISTS "Admin emails viewable for status check or admin" ON public.admin_emails;
 DROP POLICY IF EXISTS "Admin emails viewable for status check or by admin" ON public.admin_emails;
@@ -77,7 +78,7 @@ CREATE POLICY "Admin emails viewable for status check or by admin"
   ON public.admin_emails FOR SELECT
   USING (
     -- Users can check if their own email is admin (using SELECT wrappers)
-    ((SELECT auth.role()) = 'authenticated' AND email = (SELECT auth.jwt()->>'email'))
+    ((SELECT auth.uid()) IS NOT NULL AND email = (SELECT auth.jwt()->>'email'))
     OR public.is_admin()
   );
 
