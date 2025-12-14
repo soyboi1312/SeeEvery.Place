@@ -199,3 +199,12 @@ body {
   max-width: 100%;
   height: auto;
 }
+
+/* Hide scrollbar utility - keeps overflow-auto/scroll functional but hides scrollbar */
+.no-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;  /* Chrome, Safari, Opera */
+}

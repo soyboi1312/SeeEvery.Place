@@ -53,7 +53,7 @@ export default function CategoryTabs({ activeCategory, onCategoryChange, stats }
 
       {/* Level 2: Specific Categories (The Pills) */}
       <div className="w-full overflow-x-auto no-scrollbar py-2">
-        <div className="flex justify-start sm:justify-center gap-3 min-w-max px-4">
+        <div className="flex justify-start sm:justify-center gap-3 px-4">
           {categoryGroups[activeGroup].categories.map((category) => {
             const isActive = category === activeCategory;
             const stat = stats[category];
@@ -64,7 +64,7 @@ export default function CategoryTabs({ activeCategory, onCategoryChange, stats }
                 key={category}
                 onClick={() => onCategoryChange(category)}
                 className={`
-                  relative flex flex-col items-center gap-1 px-5 py-3 rounded-2xl transition-all duration-200 border min-w-[100px]
+                  relative flex flex-col items-center gap-1 px-5 py-3 rounded-2xl transition-all duration-200 border min-w-[100px] shrink-0
                   ${isActive
                     ? 'border-blue-500/30 bg-blue-50/50 dark:bg-blue-900/20 dark:border-blue-500/50 shadow-sm transform scale-105'
                     : 'border-transparent bg-white dark:bg-gray-800 hover:border-gray-200 dark:hover:border-gray-700 hover:shadow-sm'
