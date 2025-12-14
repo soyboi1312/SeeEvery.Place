@@ -220,13 +220,44 @@ function HomeContent() {
   }, [selections]);
 
   // Skeletons to prevent Layout Shift (CLS)
+  // Heights and layouts must EXACTLY match actual components
   const LoadingSkeletons = () => (
     <div className="space-y-6 animate-pulse">
-      {/* QuickStats Skeleton */}
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-        {[...Array(6)].map((_, i) => (
-          <div key={i} className="h-24 bg-gray-100 dark:bg-slate-800/50 rounded-xl border border-gray-200 dark:border-slate-700/50" />
-        ))}
+      {/* QuickStats Skeleton - matches grid-cols-1 md:grid-cols-3 gap-4 mb-6 */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        {/* Card 1: Countries - taller due to expand button */}
+        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 overflow-hidden">
+          <div className="p-5">
+            <div className="flex justify-between items-start mb-2">
+              <div className="w-12 h-12 bg-blue-50 dark:bg-blue-900/20 rounded-lg" />
+              <div className="w-12 h-6 bg-gray-100 dark:bg-gray-700 rounded-full" />
+            </div>
+            <div className="h-4 w-28 bg-gray-200 dark:bg-gray-700 rounded mt-2" />
+            <div className="h-9 w-20 bg-gray-200 dark:bg-gray-700 rounded mt-2" />
+            <div className="h-1.5 w-full bg-gray-100 dark:bg-gray-700 rounded-full mt-3" />
+          </div>
+          <div className="h-9 border-t border-gray-100 dark:border-gray-700" />
+        </div>
+        {/* Card 2: States */}
+        <div className="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-100 dark:border-gray-700">
+          <div className="flex justify-between items-start mb-2">
+            <div className="w-12 h-12 bg-purple-50 dark:bg-purple-900/20 rounded-lg" />
+            <div className="w-12 h-6 bg-gray-100 dark:bg-gray-700 rounded-full" />
+          </div>
+          <div className="h-4 w-24 bg-gray-200 dark:bg-gray-700 rounded mt-2" />
+          <div className="h-9 w-20 bg-gray-200 dark:bg-gray-700 rounded mt-2" />
+          <div className="h-1.5 w-full bg-gray-100 dark:bg-gray-700 rounded-full mt-3" />
+        </div>
+        {/* Card 3: Points of Interest */}
+        <div className="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-100 dark:border-gray-700">
+          <div className="flex justify-between items-start mb-2">
+            <div className="w-12 h-12 bg-green-50 dark:bg-green-900/20 rounded-lg" />
+            <div className="w-12 h-6 bg-gray-100 dark:bg-gray-700 rounded-full" />
+          </div>
+          <div className="h-4 w-32 bg-gray-200 dark:bg-gray-700 rounded mt-2" />
+          <div className="h-9 w-20 bg-gray-200 dark:bg-gray-700 rounded mt-2" />
+          <div className="h-3 w-40 bg-gray-100 dark:bg-gray-700 rounded mt-3" />
+        </div>
       </div>
 
       {/* Map Skeleton */}
@@ -234,18 +265,53 @@ function HomeContent() {
         <div className="aspect-[16/9] w-full max-h-[500px] bg-blue-100/50 dark:bg-slate-700/50" />
       </div>
 
-      {/* Tabs Skeleton */}
-      <div className="flex gap-2 overflow-x-auto pb-2">
-        {[...Array(5)].map((_, i) => (
-          <div key={i} className="w-24 h-10 bg-gray-200 dark:bg-slate-700 rounded-lg shrink-0" />
-        ))}
+      {/* CategoryTabs Skeleton - TWO levels like actual component */}
+      <div className="space-y-4">
+        {/* Level 1: Meta-Groups */}
+        <div className="flex justify-center">
+          <div className="inline-flex bg-white dark:bg-gray-800 p-1.5 rounded-2xl border border-gray-100 dark:border-gray-700 gap-1">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="h-10 w-20 sm:w-28 bg-gray-100 dark:bg-gray-700 rounded-xl" />
+            ))}
+          </div>
+        </div>
+        {/* Level 2: Category Pills */}
+        <div className="w-full overflow-x-auto py-2">
+          <div className="flex justify-start sm:justify-center gap-3 min-w-max px-4">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="min-w-[100px] h-20 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700" />
+            ))}
+          </div>
+        </div>
       </div>
 
-      {/* List Skeleton */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
-        {[...Array(12)].map((_, i) => (
-          <div key={i} className="h-12 bg-gray-100 dark:bg-slate-800 rounded-lg" />
-        ))}
+      {/* SelectionList Skeleton - Card structure with header, controls, list */}
+      <div className="rounded-lg border-0 shadow-lg overflow-hidden bg-background">
+        {/* Header with gradient */}
+        <div className="px-6 py-5 bg-gradient-to-r from-blue-600 to-purple-600">
+          <div className="h-8 w-40 bg-white/20 rounded mb-3" />
+          <div className="flex gap-3">
+            <div className="h-6 w-28 bg-white/20 rounded-full" />
+            <div className="h-6 w-28 bg-white/20 rounded-full" />
+          </div>
+        </div>
+        {/* Controls area */}
+        <div className="p-4 border-b bg-muted/30 space-y-4">
+          <div className="h-10 w-full bg-gray-100 dark:bg-gray-800 rounded-md" />
+          <div className="flex gap-1.5 p-1 bg-muted rounded-lg w-fit">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="h-8 w-20 bg-gray-200 dark:bg-gray-700 rounded-md" />
+            ))}
+          </div>
+        </div>
+        {/* List items */}
+        <div className="p-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+            {[...Array(9)].map((_, i) => (
+              <div key={i} className="h-11 bg-gray-100 dark:bg-gray-800 rounded-lg" />
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );
