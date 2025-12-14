@@ -3,6 +3,11 @@
 -- Sets explicit search_path for all functions
 -- ============================================
 
+-- Drop functions that might have conflicting signatures
+DROP FUNCTION IF EXISTS public.follow_user(uuid);
+DROP FUNCTION IF EXISTS public.unfollow_user(uuid);
+DROP FUNCTION IF EXISTS public.get_user_rank(uuid);
+
 -- is_username_available
 CREATE OR REPLACE FUNCTION public.is_username_available(check_username text)
 RETURNS boolean AS $$
