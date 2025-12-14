@@ -1,51 +1,36 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { useDarkMode } from '@/lib/hooks/useDarkMode';
+import { useAuth } from '@/lib/hooks/useAuth';
+import Header from '@/components/Header';
+import Footer from '@/components/Footer';
+import AuthModal from '@/components/AuthModal';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Sun, Moon, ArrowRight, Globe, BarChart3, Trophy, User, Palette, Sparkles, Mail, Rocket } from 'lucide-react';
+import { ArrowRight, Globe, BarChart3, Trophy, User, Palette, Sparkles, Mail, Rocket } from 'lucide-react';
 
 export default function AboutPage() {
   const { isDarkMode, toggleDarkMode } = useDarkMode();
+  const { user, signOut, isAdmin } = useAuth();
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white dark:from-slate-900 dark:to-slate-800">
-      {/* Header */}
-      <header className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-border sticky top-0 z-40">
-        <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-3 group">
-            <div className="relative w-8 h-8 transition-transform group-hover:scale-110 duration-200">
-              <Image src="/logo.svg" alt="See Every Place Logo" fill className="object-contain" priority />
-            </div>
-            <div className="flex flex-col">
-              <h1 className="text-xl font-bold text-foreground leading-none">
-                SeeEvery<span className="text-blue-500">.</span>Place<span className="text-[10px] align-super text-muted-foreground">™</span>
-              </h1>
-              <span className="text-[10px] text-muted-foreground font-medium tracking-wider uppercase hidden sm:block">
-                Free Travel Tracker
-              </span>
-            </div>
-          </Link>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={toggleDarkMode}
-              title={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
-            >
-              {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-            </Button>
-            <Button asChild>
-              <Link href="/">Start Mapping</Link>
-            </Button>
-          </div>
-        </div>
-      </header>
+    <div className="min-h-screen flex flex-col bg-gradient-to-b from-blue-50 to-white dark:from-slate-900 dark:to-slate-800">
+      <Header
+        onSignIn={() => setShowAuthModal(true)}
+        onSignOut={signOut}
+        isSignedIn={!!user}
+        userEmail={user?.email}
+        isDarkMode={isDarkMode}
+        onToggleDarkMode={toggleDarkMode}
+        isAdmin={isAdmin}
+        syncStatus="idle"
+      />
 
       {/* Content */}
-      <div className="max-w-4xl mx-auto px-4 py-12">
+      <div className="max-w-4xl mx-auto px-4 py-12 flex-grow">
         <article className="prose prose-lg max-w-none">
           <h1 className="text-4xl font-bold text-foreground mb-6">About See Every Place</h1>
 
@@ -305,21 +290,9 @@ export default function AboutPage() {
         </article>
       </div>
 
-      {/* Footer */}
-      <footer className="border-t bg-background/50">
-        <div className="max-w-4xl mx-auto px-4 py-6 text-center text-sm text-muted-foreground">
-          <div className="flex justify-center gap-4 mb-2">
-            <Link href="/" className="hover:text-foreground transition-colors">Home</Link>
-            <span>•</span>
-            <Link href="/suggest" className="hover:text-foreground transition-colors">Suggest</Link>
-            <span>•</span>
-            <Link href="/privacy" className="hover:text-foreground transition-colors">Privacy</Link>
-            <span>•</span>
-            <Link href="/terms" className="hover:text-foreground transition-colors">Terms</Link>
-          </div>
-          <p>See Every Place - Free Travel Tracker</p>
-        </div>
-      </footer>
+      <Footer user={user} onSignIn={() => setShowAuthModal(true)} showCategoryDirectory={false} />
+
+      {showAuthModal && <AuthModal onClose={() => setShowAuthModal(false)} />}
     </div>
   );
 }

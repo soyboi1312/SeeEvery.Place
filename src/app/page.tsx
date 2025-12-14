@@ -274,7 +274,9 @@ function HomeContent() {
             </span>
           </h1>
           <p className="text-gray-600 dark:text-gray-300 max-w-xl mx-auto mt-3">
-            Track countries, parks, peaks, and more. Share your map and stats, not your photo gallery.
+            Track countries, parks, peaks, and more. Share your map and stats.
+            <br className="hidden sm:block" />
+            <span className="font-medium"> Not your photo gallery.</span>
           </p>
           <p className="text-gray-600 dark:text-gray-300 max-w-xl mx-auto mt-2">
             No account needed to get started!

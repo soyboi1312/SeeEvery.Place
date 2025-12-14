@@ -2,14 +2,15 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Search, Loader2, Moon, Sun, ChevronUp } from 'lucide-react';
+import { Search, Loader2, ChevronUp } from 'lucide-react';
 
 import { useDarkMode } from '@/lib/hooks/useDarkMode';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { createClient } from '@/lib/supabase/client';
+import Header from '@/components/Header';
+import Footer from '@/components/Footer';
 import AuthModal from '@/components/AuthModal';
 import InstallPWA from '@/components/InstallPWA';
 import { suggestionSchema, type SuggestionFormInput, type SuggestionFormData, toDbFormat } from '@/lib/validations/suggestion';
@@ -19,7 +20,6 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
 import {
   Form,
   FormControl,
@@ -46,7 +46,7 @@ type SortOption = 'popular' | 'newest';
 
 export default function SuggestPage() {
   const { isDarkMode, toggleDarkMode } = useDarkMode();
-  const { user } = useAuth();
+  const { user, signOut, isAdmin } = useAuth();
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [votedIds, setVotedIds] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
@@ -225,38 +225,20 @@ export default function SuggestPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-primary-50 to-white dark:from-slate-900 dark:to-slate-800">
-      {/* Header */}
-      <header className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-black/5 dark:border-white/10 sticky top-0 z-40">
-        <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-3 group">
-            <div className="relative w-8 h-8 transition-transform group-hover:scale-110 duration-200">
-              <Image src="/logo.svg" alt="See Every Place Logo" fill className="object-contain" priority />
-            </div>
-            <div className="flex flex-col">
-              <h1 className="text-xl font-bold text-primary-900 dark:text-white leading-none">
-                SeeEvery<span className="text-accent-500">.</span>Place<span className="text-[10px] align-super">™</span>
-              </h1>
-            </div>
-          </Link>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={toggleDarkMode}
-              title={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
-            >
-              {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-            </Button>
-            <Button asChild>
-              <Link href="/">Start Mapping</Link>
-            </Button>
-          </div>
-        </div>
-      </header>
+    <div className="min-h-screen flex flex-col bg-gradient-to-b from-primary-50 to-white dark:from-slate-900 dark:to-slate-800">
+      <Header
+        onSignIn={() => setShowAuthModal(true)}
+        onSignOut={signOut}
+        isSignedIn={!!user}
+        userEmail={user?.email}
+        isDarkMode={isDarkMode}
+        onToggleDarkMode={toggleDarkMode}
+        isAdmin={isAdmin}
+        syncStatus="idle"
+      />
 
       {/* Content */}
-      <div className="max-w-4xl mx-auto px-4 py-12">
+      <div className="max-w-4xl mx-auto px-4 py-12 flex-grow">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-primary-900 dark:text-white mb-4">Suggest a Category</h1>
           <p className="text-xl text-primary-600 dark:text-primary-300 max-w-2xl mx-auto">
@@ -506,21 +488,7 @@ export default function SuggestPage() {
         </div>
       </div>
 
-      {/* Footer */}
-      <footer className="border-t border-black/5 dark:border-white/10 bg-white/50 dark:bg-slate-900/50">
-        <div className="max-w-4xl mx-auto px-4 py-6 text-center text-sm text-muted-foreground">
-          <div className="flex justify-center items-center gap-4 mb-2">
-            <Link href="/about" className="hover:text-primary transition-colors">About</Link>
-            <Separator orientation="vertical" className="h-4" />
-            <Link href="/suggest" className="hover:text-primary transition-colors font-medium">Suggest</Link>
-            <Separator orientation="vertical" className="h-4" />
-            <Link href="/privacy" className="hover:text-primary transition-colors">Privacy</Link>
-            <Separator orientation="vertical" className="h-4" />
-            <Link href="/terms" className="hover:text-primary transition-colors">Terms</Link>
-          </div>
-          <p>See Every Place - Free Travel Tracker</p>
-        </div>
-      </footer>
+      <Footer user={user} onSignIn={() => setShowAuthModal(true)} showCategoryDirectory={false} />
 
       {showAuthModal && <AuthModal onClose={() => setShowAuthModal(false)} />}
       <InstallPWA />

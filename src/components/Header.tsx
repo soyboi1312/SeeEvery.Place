@@ -15,7 +15,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuGroup,
 } from '@/components/ui/dropdown-menu';
-import { Moon, Sun, Cloud, CloudOff, Loader2, User, ChevronDown, Users } from 'lucide-react';
+import { Moon, Sun, Cloud, CloudOff, Loader2, User, ChevronDown, Users, Lightbulb } from 'lucide-react';
 
 // Group definitions
 const categoryGroups: Record<CategoryGroup, Category[]> = {
@@ -217,6 +217,12 @@ export default function Header({
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <Link href="/settings">My Profile</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/suggest">
+                    <Lightbulb className="w-4 h-4 mr-2" />
+                    Suggestions
+                  </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
