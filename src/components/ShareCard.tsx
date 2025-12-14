@@ -9,7 +9,7 @@ import { Download, Share2, Copy, Check, Loader2, ExternalLink } from 'lucide-rea
 // Optimized Imports
 import { categoryTotals, getCategoryItemsAsync, type CategoryItem } from '@/lib/categoryUtils';
 import { useShareImage } from '@/lib/hooks/useShareImage';
-import { ShareableMapDesign, gradients, usesRegionMap, detectMilestones } from './share';
+import { ShareableMapDesign, gradients, usesRegionMap } from './share';
 import type { MarkerSize } from './MapMarkers';
 
 // Shadcn UI Components
@@ -88,10 +88,6 @@ export default function ShareCard({ selections, category, subcategory, onClose, 
       .filter((name): name is string => name !== undefined);
   }, [selections, category, categoryItems, isDataLoaded]);
 
-  const milestones = useMemo(
-    () => detectMilestones(stats.visited, stats.total, stats.percentage, category),
-    [stats.visited, stats.total, stats.percentage, category]
-  );
 
   const handleCopyLink = async () => {
     const link = `https://seeevery.place/u/${username}`;
@@ -195,7 +191,6 @@ export default function ShareCard({ selections, category, subcategory, onClose, 
                   selectedGradient={selectedGradient}
                   includeMap={includeMap}
                   iconSize={iconSize}
-                  milestones={milestones}
                 />
               </div>
             )}
