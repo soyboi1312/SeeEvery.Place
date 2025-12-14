@@ -26,7 +26,16 @@ import { PROFILE_ICONS } from '@/components/ProfileIcons';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Sun, Moon, MapPin, Globe, ArrowRight, Instagram } from 'lucide-react';
+import { Sun, Moon, MapPin, Globe, ArrowRight, Instagram, Users } from 'lucide-react';
+import { FollowButton } from '@/components/FollowButton';
+import { FollowersList } from '@/components/FollowersList';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 
 interface PublicProfile {
   id: string;
@@ -52,6 +61,10 @@ interface PublicProfile {
     hide_categories?: string[];
     hide_bucket_list?: boolean;
   } | null;
+  // Social stats (from get_public_profile RPC)
+  follower_count?: number;
+  following_count?: number;
+  is_following?: boolean;
 }
 
 interface UnlockedAchievement {
@@ -87,6 +100,15 @@ export default function PublicProfileClient({
 }: PublicProfileClientProps) {
   const { isDarkMode, toggleDarkMode } = useDarkMode();
   const [activeMap, setActiveMap] = useState<'world' | 'usa'>('world');
+
+  // Social state (so counts update instantly on follow/unfollow)
+  const [followerCount, setFollowerCount] = useState(profile.follower_count || 0);
+  const [isFollowing, setIsFollowing] = useState(profile.is_following || false);
+
+  const handleFollowChange = (newIsFollowing: boolean) => {
+    setIsFollowing(newIsFollowing);
+    setFollowerCount(prev => newIsFollowing ? prev + 1 : Math.max(0, prev - 1));
+  };
 
   // Parse selections safely
   const selections: UserSelections = useMemo(() => {
@@ -201,12 +223,70 @@ export default function PublicProfileClient({
 
               {/* Info */}
               <div className="flex-1 text-center md:text-left">
-                <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-1">
-                  {displayName}
-                </h1>
-                <p className="text-muted-foreground mb-3">
-                  @{username} | Member since {memberSince}
-                </p>
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 mb-2">
+                  <div>
+                    <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-1">
+                      {displayName}
+                    </h1>
+                    <p className="text-muted-foreground">
+                      @{username} | Member since {memberSince}
+                    </p>
+                  </div>
+                  {/* Follow Button (Desktop) */}
+                  <div className="hidden md:block">
+                    <FollowButton
+                      userId={profile.id}
+                      initialIsFollowing={isFollowing}
+                      onFollowChange={handleFollowChange}
+                    />
+                  </div>
+                </div>
+
+                {/* Social Stats Row */}
+                <div className="flex items-center justify-center md:justify-start gap-4 mb-4 text-sm">
+                  <Dialog>
+                    <DialogTrigger className="hover:opacity-70 transition-opacity cursor-pointer">
+                      <span className="font-bold text-foreground">{followerCount}</span>{' '}
+                      <span className="text-muted-foreground">Followers</span>
+                    </DialogTrigger>
+                    <DialogContent className="max-h-[80vh] overflow-y-auto">
+                      <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2">
+                          <Users className="w-5 h-5" />
+                          Followers
+                        </DialogTitle>
+                      </DialogHeader>
+                      <FollowersList userId={profile.id} type="followers" showFollowButtons />
+                    </DialogContent>
+                  </Dialog>
+
+                  <Dialog>
+                    <DialogTrigger className="hover:opacity-70 transition-opacity cursor-pointer">
+                      <span className="font-bold text-foreground">{profile.following_count || 0}</span>{' '}
+                      <span className="text-muted-foreground">Following</span>
+                    </DialogTrigger>
+                    <DialogContent className="max-h-[80vh] overflow-y-auto">
+                      <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2">
+                          <Users className="w-5 h-5" />
+                          Following
+                        </DialogTitle>
+                      </DialogHeader>
+                      <FollowersList userId={profile.id} type="following" showFollowButtons />
+                    </DialogContent>
+                  </Dialog>
+
+                  {/* Follow Button (Mobile) */}
+                  <div className="md:hidden">
+                    <FollowButton
+                      userId={profile.id}
+                      initialIsFollowing={isFollowing}
+                      onFollowChange={handleFollowChange}
+                      size="sm"
+                    />
+                  </div>
+                </div>
+
                 {profile.bio && (
                   <p className="text-muted-foreground mb-4 max-w-lg">
                     {profile.bio}
