@@ -71,6 +71,8 @@ export async function GET(request: NextRequest) {
       new_level: number | null;
       challenge_name: string | null;
       xp_earned: number | null;
+      reaction_count: number | null;
+      has_reacted: boolean | null;
       created_at: string;
     }) => ({
       id: activity.id,
@@ -93,6 +95,8 @@ export async function GET(request: NextRequest) {
         challengeName: activity.challenge_name,
         xpEarned: activity.xp_earned,
       },
+      reactionCount: activity.reaction_count || 0,
+      hasReacted: activity.has_reacted || false,
       createdAt: activity.created_at,
     }));
 
@@ -143,7 +147,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'activityType is required' }, { status: 400 });
     }
 
-    const validTypes = ['visit', 'achievement', 'level_up', 'challenge_complete', 'started_tracking'];
+    const validTypes = ['visit', 'achievement', 'level_up', 'challenge_complete', 'started_tracking', 'bucket_list'];
     if (!validTypes.includes(activityType)) {
       return NextResponse.json(
         { error: `Invalid activityType. Use: ${validTypes.join(', ')}` },

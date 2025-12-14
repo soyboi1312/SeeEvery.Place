@@ -14,6 +14,8 @@ import {
   Loader2,
   RefreshCw,
   User,
+  Heart,
+  Bookmark,
 } from 'lucide-react';
 import Link from 'next/link';
 import { formatTimeAgo } from '@/lib/utils/formatTimeAgo';
@@ -43,6 +45,8 @@ interface FeedActivity {
   user: ActivityUser;
   type: string;
   data: ActivityData;
+  reactionCount: number;
+  hasReacted: boolean;
   createdAt: string;
 }
 
@@ -63,6 +67,8 @@ function getActivityIcon(type: string) {
       return <TrendingUp className="w-4 h-4 text-green-500" />;
     case 'challenge_complete':
       return <Target className="w-4 h-4 text-purple-500" />;
+    case 'bucket_list':
+      return <Bookmark className="w-4 h-4 text-orange-500" />;
     default:
       return <Activity className="w-4 h-4 text-slate-500" />;
   }
@@ -83,6 +89,8 @@ function getActivityMessage(activity: FeedActivity): string {
       return `${name} completed "${data.challengeName}"`;
     case 'started_tracking':
       return `${name} started tracking ${data.category}`;
+    case 'bucket_list':
+      return `${name} added ${data.placeName || 'a place'} to their bucket list`;
     default:
       return `${name} did something`;
   }
@@ -157,6 +165,36 @@ export function ActivityFeed({
 
   const handleRefresh = () => {
     fetchActivities(true);
+  };
+
+  const handleReaction = async (activityId: string) => {
+    try {
+      const response = await fetch('/api/feed/reaction', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ activityId }),
+      });
+
+      if (!response.ok) return;
+
+      const data = await response.json();
+
+      // Optimistically update the UI
+      setActivities(prev => prev.map(activity => {
+        if (activity.id === activityId) {
+          return {
+            ...activity,
+            hasReacted: data.action === 'added',
+            reactionCount: data.action === 'added'
+              ? activity.reactionCount + 1
+              : Math.max(0, activity.reactionCount - 1),
+          };
+        }
+        return activity;
+      }));
+    } catch {
+      // Silently fail - user can retry
+    }
   };
 
   return (
@@ -250,10 +288,28 @@ export function ActivityFeed({
                     </div>
                   </div>
 
-                  {/* Level badge */}
-                  <Badge variant="outline" className="flex-shrink-0 text-xs">
-                    Lv {activity.user.level}
-                  </Badge>
+                  {/* Reaction button and level badge */}
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <button
+                      onClick={() => handleReaction(activity.id)}
+                      className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs transition-colors ${
+                        activity.hasReacted
+                          ? 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400'
+                          : 'bg-slate-100 dark:bg-slate-700 text-slate-500 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20'
+                      }`}
+                      title={activity.hasReacted ? 'Remove kudos' : 'Give kudos'}
+                    >
+                      <Heart
+                        className={`w-3.5 h-3.5 ${activity.hasReacted ? 'fill-current' : ''}`}
+                      />
+                      {activity.reactionCount > 0 && (
+                        <span>{activity.reactionCount}</span>
+                      )}
+                    </button>
+                    <Badge variant="outline" className="text-xs">
+                      Lv {activity.user.level}
+                    </Badge>
+                  </div>
                 </div>
               ))}
             </div>
