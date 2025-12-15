@@ -59,11 +59,13 @@ export async function POST(request: NextRequest) {
 
     // Generate magic link for impersonation
     // Note: This creates a temporary session for the target user
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
     const { data: magicLink, error: linkError } = await adminClient.auth.admin.generateLink({
       type: 'magiclink',
       email: targetUser.user.email || '',
       options: {
-        redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/?impersonated=true`,
+        // Must go through /auth/callback to properly exchange the code for a session
+        redirectTo: `${siteUrl}/auth/callback?next=${encodeURIComponent('/?impersonated=true')}`,
       },
     });
 
