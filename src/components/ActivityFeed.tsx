@@ -225,10 +225,11 @@ export function ActivityFeed({
   const parentRef = useRef<HTMLDivElement>(null);
 
   // Virtualizer for efficient rendering of large lists
+  // Uses measureElement for dynamic heights (handles text wrapping, long names, etc.)
   const rowVirtualizer = useVirtualizer({
     count: activities.length,
     getScrollElement: () => parentRef.current,
-    estimateSize: () => ACTIVITY_ITEM_HEIGHT,
+    estimateSize: () => ACTIVITY_ITEM_HEIGHT, // Fallback estimate
     overscan: 5, // Render 5 extra items above/below viewport
   });
 
@@ -373,12 +374,13 @@ export function ActivityFeed({
                   return (
                     <div
                       key={activity.id}
+                      data-index={virtualItem.index}
+                      ref={rowVirtualizer.measureElement}
                       style={{
                         position: 'absolute',
                         top: 0,
                         left: 0,
                         width: '100%',
-                        height: `${virtualItem.size}px`,
                         transform: `translateY(${virtualItem.start}px)`,
                       }}
                     >

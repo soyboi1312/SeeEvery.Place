@@ -87,8 +87,10 @@ function getMapComponent(
 
 const MapVisualization = memo(function MapVisualization({ category, selections, onToggle, subcategory, items }: MapVisualizationProps) {
   const isRegionMap = usesRegionMap(category);
-  const [tooltip, setTooltip] = useState<TooltipState | null>(null);
+  // Only store tooltip content in state - position is handled via ref for performance
+  const [tooltipContent, setTooltipContent] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const tooltipRef = useRef<HTMLDivElement>(null);
   const [showTwoFingerHint, setShowTwoFingerHint] = useState(false);
   const hintTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -152,9 +154,9 @@ const MapVisualization = memo(function MapVisualization({ category, selections, 
   // Dismiss tooltip on scroll or touch anywhere (mobile fix)
   // This handles cases where tooltip gets stuck on hybrid devices or when scrolling
   useEffect(() => {
-    if (!tooltip) return;
+    if (!tooltipContent) return;
 
-    const dismissTooltip = () => setTooltip(null);
+    const dismissTooltip = () => setTooltipContent(null);
 
     // Dismiss on scroll (user scrolling the page)
     window.addEventListener('scroll', dismissTooltip, true);
@@ -165,7 +167,7 @@ const MapVisualization = memo(function MapVisualization({ category, selections, 
       window.removeEventListener('scroll', dismissTooltip, true);
       window.removeEventListener('touchstart', dismissTooltip, true);
     };
-  }, [tooltip]);
+  }, [tooltipContent]);
 
   // Show two-finger hint on single-touch pan attempts (mobile UX)
   // This prevents the "scroll trap" where users get stuck trying to scroll past the map
@@ -231,23 +233,34 @@ const MapVisualization = memo(function MapVisualization({ category, selections, 
     return null;
   }, []);
 
+  // Update tooltip position via ref (no re-render) for smooth 60fps tracking
+  const updateTooltipPosition = useCallback((x: number, y: number) => {
+    if (tooltipRef.current) {
+      tooltipRef.current.style.left = `${x + 10}px`;
+      tooltipRef.current.style.top = `${y + 10}px`;
+    }
+  }, []);
+
   const onMouseEnter = useCallback((content: string, e: React.MouseEvent) => {
     const pos = getMousePosition(e);
     if (pos) {
-      setTooltip({ content, x: pos.x, y: pos.y });
+      setTooltipContent(content);
+      // Immediately position (will be applied when ref mounts)
+      requestAnimationFrame(() => updateTooltipPosition(pos.x, pos.y));
     }
-  }, [getMousePosition]);
+  }, [getMousePosition, updateTooltipPosition]);
 
   const onMouseLeave = useCallback(() => {
-    setTooltip(null);
+    setTooltipContent(null);
   }, []);
 
+  // Use ref-based positioning to avoid React re-renders at 60fps
   const onMouseMove = useCallback((e: React.MouseEvent) => {
     const pos = getMousePosition(e);
     if (pos) {
-      setTooltip(prev => prev ? { ...prev, x: pos.x, y: pos.y } : null);
+      updateTooltipPosition(pos.x, pos.y);
     }
-  }, [getMousePosition]);
+  }, [getMousePosition, updateTooltipPosition]);
 
   // Memoize the handlers object to prevent unnecessary re-renders of child maps
   const tooltipHandlers: TooltipHandlers = useMemo(() => ({
@@ -282,15 +295,14 @@ const MapVisualization = memo(function MapVisualization({ category, selections, 
       )}
 
       {/* Tooltip - rendered via portal to escape CSS transform stacking context */}
-      {tooltip && typeof document !== 'undefined' && createPortal(
+      {/* Position is updated via ref for smooth 60fps tracking without re-renders */}
+      {tooltipContent && typeof document !== 'undefined' && createPortal(
         <div
+          ref={tooltipRef}
           className="fixed z-50 px-2 py-1 text-sm font-medium text-white bg-gray-900 rounded shadow-lg pointer-events-none whitespace-nowrap"
-          style={{
-            left: tooltip.x + 10,
-            top: tooltip.y + 10,
-          }}
+          style={{ left: 0, top: 0 }}
         >
-          {tooltip.content}
+          {tooltipContent}
         </div>,
         document.body
       )}
