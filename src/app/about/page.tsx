@@ -65,7 +65,7 @@ export default function AboutPage() {
                 Memories fade faster than we&apos;d like. We wanted a way to hold onto the places we&apos;ve seen, not just the countries, but the mountain peaks and the random roadside attractions that made the trip special.
               </p>
               <p>
-                Existing tools felt like they were trying to be social networks first—demanding photos, feeds, and curation. We didn&apos;t want the pressure of posting the perfect picture. We just wanted to track the <strong>action</strong> of exploration.
+                Most travel apps focus on social feeds and photos. We wanted a tool dedicated purely to the map itself—no pressure to curate the perfect post. Just the <strong>action</strong> of exploration.
               </p>
               <p>
                 We wanted something simple: a visual way to see where we&apos;d been based on <em>data</em>, not media. A platform dedicated to the map itself.

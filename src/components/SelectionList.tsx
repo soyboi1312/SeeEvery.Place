@@ -2,13 +2,14 @@
 
 import { useState, useMemo } from 'react';
 import { Status, Category } from '@/lib/types';
-import { Search, Check, Star, Circle, Trash2, X, AlertCircle } from 'lucide-react';
+import { Search, Check, Star, Circle, Trash2, X, AlertCircle, Calendar as CalendarIcon } from 'lucide-react';
 
 // Shadcn Imports
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { Label } from '@/components/ui/label';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,6 +21,12 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import {
   ContextMenu,
   ContextMenuContent,
@@ -39,8 +46,9 @@ interface Item {
 interface SelectionListProps {
   items: Item[];
   getStatus: (id: string) => Status;
+  getVisitedDate?: (id: string) => string | undefined;
   onToggle: (id: string, currentStatus: Status) => void;
-  onSetStatus: (id: string, status: Status | null) => void;
+  onSetStatus: (id: string, status: Status | null, visitedDate?: string) => void;
   onClearAll?: () => void;
   groupBy?: 'group' | 'none';
   showSearch?: boolean;
@@ -186,6 +194,7 @@ const emptyStateContent: Record<Category, { icon: string; title: string; subtitl
 export default function SelectionList({
   items,
   getStatus,
+  getVisitedDate,
   onToggle,
   onSetStatus,
   onClearAll,
@@ -197,8 +206,16 @@ export default function SelectionList({
 }: SelectionListProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterMode, setFilterMode] = useState<'all' | 'visited' | 'bucketList' | 'unvisited'>('all');
+  const [dateEditItem, setDateEditItem] = useState<{ id: string; name: string } | null>(null);
 
   const hasSelections = stats.visited > 0 || stats.bucketList > 0;
+
+  const handleDateSave = (date: string) => {
+    if (dateEditItem) {
+      onSetStatus(dateEditItem.id, 'visited', date);
+      setDateEditItem(null);
+    }
+  };
 
   const filteredItems = useMemo(() => {
     return items.filter(item => {
@@ -336,8 +353,10 @@ export default function SelectionList({
                     key={item.id}
                     item={item}
                     status={getStatus(item.id)}
+                    visitedDate={getVisitedDate?.(item.id)}
                     onToggle={onToggle}
                     onSetStatus={onSetStatus}
+                    onEditDate={() => setDateEditItem({ id: item.id, name: item.name })}
                   />
                 ))}
               </div>
@@ -391,6 +410,35 @@ export default function SelectionList({
           )}
         </div>
       </div>
+
+      {/* Date Selection Dialog */}
+      <Dialog open={!!dateEditItem} onOpenChange={(open) => !open && setDateEditItem(null)}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>When did you visit{dateEditItem ? ` ${dateEditItem.name}` : ''}?</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="visit-date">Date Visited</Label>
+              <Input
+                id="visit-date"
+                type="date"
+                className="w-full"
+                defaultValue={dateEditItem ? getVisitedDate?.(dateEditItem.id) : undefined}
+                max={new Date().toISOString().split('T')[0]}
+                onChange={(e) => {
+                  if (e.target.value) {
+                    handleDateSave(e.target.value);
+                  }
+                }}
+              />
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Select a date to mark this location as visited.
+            </p>
+          </div>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }
@@ -398,11 +446,13 @@ export default function SelectionList({
 interface ItemCardProps {
   item: Item;
   status: Status;
+  visitedDate?: string;
   onToggle: (id: string, currentStatus: Status) => void;
-  onSetStatus: (id: string, status: Status | null) => void;
+  onSetStatus: (id: string, status: Status | null, visitedDate?: string) => void;
+  onEditDate: () => void;
 }
 
-function ItemCard({ item, status, onToggle, onSetStatus }: ItemCardProps) {
+function ItemCard({ item, status, visitedDate, onToggle, onSetStatus, onEditDate }: ItemCardProps) {
   // Styles based on status
   const getStyles = (s: Status) => {
     switch (s) {
@@ -436,8 +486,14 @@ function ItemCard({ item, status, onToggle, onSetStatus }: ItemCardProps) {
               {getIcon(status)}
             </span>
             <span className="truncate font-medium">{item.name}</span>
+            {/* Year badge when visited with a date */}
+            {visitedDate && status === 'visited' && (
+              <span className="text-[10px] bg-green-200/50 dark:bg-green-800/50 px-1.5 py-0.5 rounded-sm shrink-0">
+                {visitedDate.split('-')[0]}
+              </span>
+            )}
             {item.code && (
-              <span className="ml-auto text-xs opacity-50 font-mono hidden sm:inline-block">
+              <span className="ml-auto text-xs opacity-50 font-mono hidden sm:inline-block shrink-0">
                 {item.code}
               </span>
             )}
@@ -449,6 +505,10 @@ function ItemCard({ item, status, onToggle, onSetStatus }: ItemCardProps) {
         <ContextMenuItem onClick={() => onSetStatus(item.id, 'visited')}>
           <Check className="w-4 h-4 mr-2 text-green-500" />
           Mark Visited
+        </ContextMenuItem>
+        <ContextMenuItem onClick={onEditDate}>
+          <CalendarIcon className="w-4 h-4 mr-2 text-blue-500" />
+          {visitedDate ? 'Edit Visit Date' : 'Mark Visited on Date...'}
         </ContextMenuItem>
         <ContextMenuItem onClick={() => onSetStatus(item.id, 'bucketList')}>
           <Star className="w-4 h-4 mr-2 text-amber-500" />

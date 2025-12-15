@@ -176,11 +176,11 @@ function HomeContent() {
     }
   }, [activeCategory]);
 
-  // Updated handleSetStatus to support lazy loaded city data
-  const handleSetStatus = useCallback(async (id: string, status: Status | null) => {
+  // Updated handleSetStatus to support lazy loaded city data and visited dates
+  const handleSetStatus = useCallback(async (id: string, status: Status | null, visitedDate?: string) => {
     // 1. Immediate update
     setSelections(prev => {
-      return setSelectionStatus(prev, activeCategory, id, status);
+      return setSelectionStatus(prev, activeCategory, id, status, visitedDate);
     });
 
     // 2. City logic
@@ -192,6 +192,12 @@ function HomeContent() {
 
   const getStatus = useCallback((id: string): Status => {
     return getSelectionStatus(selections, activeCategory, id);
+  }, [selections, activeCategory]);
+
+  const getVisitedDate = useCallback((id: string): string | undefined => {
+    const categorySelections = selections[activeCategory] || [];
+    const selection = categorySelections.find(s => s.id === id);
+    return selection?.visitedDate;
   }, [selections, activeCategory]);
 
   const handleClearAll = useCallback(() => {
@@ -316,6 +322,7 @@ function HomeContent() {
             <SelectionList
               items={currentItems}
               getStatus={getStatus}
+              getVisitedDate={getVisitedDate}
               onToggle={handleToggle}
               onSetStatus={handleSetStatus}
               onClearAll={handleClearAll}
