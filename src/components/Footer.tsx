@@ -27,7 +27,7 @@ export default function Footer({ user, onSignIn, onSignInHover, showCategoryDire
                   href={`/track/${cat}`}
                   className="text-sm text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
                 >
-                  Track {categoryLabels[cat]}
+                  {categoryLabels[cat]}
                 </Link>
               ))}
             </div>
