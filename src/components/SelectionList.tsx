@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import { Status, Category } from '@/lib/types';
-import { Search, Check, Star, Circle, Trash2, X, AlertCircle, Calendar as CalendarIcon } from 'lucide-react';
+import { Search, Check, Star, Circle, Trash2, X, AlertCircle, Calendar as CalendarIcon, StickyNote } from 'lucide-react';
 
 // Shadcn Imports
 import { Card } from '@/components/ui/card';
@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -26,6 +27,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
 } from '@/components/ui/dialog';
 import {
   ContextMenu,
@@ -47,8 +49,9 @@ interface SelectionListProps {
   items: Item[];
   getStatus: (id: string) => Status;
   getVisitedDate?: (id: string) => string | undefined;
+  getNotes?: (id: string) => string | undefined;
   onToggle: (id: string, currentStatus: Status) => void;
-  onSetStatus: (id: string, status: Status | null, visitedDate?: string) => void;
+  onSetStatus: (id: string, status: Status | null, visitedDate?: string, notes?: string) => void;
   onClearAll?: () => void;
   groupBy?: 'group' | 'none';
   showSearch?: boolean;
@@ -196,6 +199,7 @@ export default function SelectionList({
   items,
   getStatus,
   getVisitedDate,
+  getNotes,
   onToggle,
   onSetStatus,
   onClearAll,
@@ -209,6 +213,8 @@ export default function SelectionList({
   const [searchQuery, setSearchQuery] = useState('');
   const [filterMode, setFilterMode] = useState<'all' | 'visited' | 'bucketList' | 'unvisited'>('all');
   const [dateEditItem, setDateEditItem] = useState<{ id: string; name: string } | null>(null);
+  const [noteEditItem, setNoteEditItem] = useState<{ id: string; name: string } | null>(null);
+  const [tempNote, setTempNote] = useState('');
 
   const hasSelections = stats.visited > 0 || stats.bucketList > 0;
 
@@ -216,6 +222,19 @@ export default function SelectionList({
     if (dateEditItem) {
       onSetStatus(dateEditItem.id, 'visited', date);
       setDateEditItem(null);
+    }
+  };
+
+  const openNoteDialog = (id: string, name: string, currentNote?: string) => {
+    setTempNote(currentNote || '');
+    setNoteEditItem({ id, name });
+  };
+
+  const handleNoteSave = () => {
+    if (noteEditItem) {
+      // Pass undefined for date to preserve it, pass the note
+      onSetStatus(noteEditItem.id, 'visited', undefined, tempNote);
+      setNoteEditItem(null);
     }
   };
 
@@ -356,9 +375,11 @@ export default function SelectionList({
                     item={item}
                     status={getStatus(item.id)}
                     visitedDate={getVisitedDate?.(item.id)}
+                    notes={getNotes?.(item.id)}
                     onToggle={onToggle}
                     onSetStatus={onSetStatus}
                     onEditDate={() => setDateEditItem({ id: item.id, name: item.name })}
+                    onEditNote={(currentNote) => openNoteDialog(item.id, item.name, currentNote)}
                     isAuthenticated={isAuthenticated}
                   />
                 ))}
@@ -442,6 +463,34 @@ export default function SelectionList({
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Note Dialog */}
+      <Dialog open={!!noteEditItem} onOpenChange={(open) => !open && setNoteEditItem(null)}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Personal Notes{noteEditItem ? ` - ${noteEditItem.name}` : ''}</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="note">Your Memory (max 280 chars)</Label>
+              <Textarea
+                id="note"
+                value={tempNote}
+                onChange={(e) => setTempNote(e.target.value)}
+                placeholder="Best ramen shop was nearby..."
+                maxLength={280}
+                className="resize-none h-32"
+              />
+              <div className="text-xs text-muted-foreground text-right">
+                {tempNote.length}/280
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button onClick={handleNoteSave}>Save Note</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }
@@ -450,13 +499,15 @@ interface ItemCardProps {
   item: Item;
   status: Status;
   visitedDate?: string;
+  notes?: string;
   onToggle: (id: string, currentStatus: Status) => void;
-  onSetStatus: (id: string, status: Status | null, visitedDate?: string) => void;
+  onSetStatus: (id: string, status: Status | null, visitedDate?: string, notes?: string) => void;
   onEditDate: () => void;
+  onEditNote: (currentNote?: string) => void;
   isAuthenticated?: boolean;
 }
 
-function ItemCard({ item, status, visitedDate, onToggle, onSetStatus, onEditDate, isAuthenticated }: ItemCardProps) {
+function ItemCard({ item, status, visitedDate, notes, onToggle, onSetStatus, onEditDate, onEditNote, isAuthenticated }: ItemCardProps) {
   // Styles based on status
   const getStyles = (s: Status) => {
     switch (s) {
@@ -496,6 +547,10 @@ function ItemCard({ item, status, visitedDate, onToggle, onSetStatus, onEditDate
                 {visitedDate.split('-')[0]}
               </span>
             )}
+            {/* Note indicator */}
+            {notes && (
+              <StickyNote className="w-3 h-3 text-indigo-500 fill-indigo-500/20 shrink-0" />
+            )}
             {item.code && (
               <span className="ml-auto text-xs opacity-50 font-mono hidden sm:inline-block shrink-0">
                 {item.code}
@@ -514,6 +569,12 @@ function ItemCard({ item, status, visitedDate, onToggle, onSetStatus, onEditDate
           <ContextMenuItem onClick={onEditDate}>
             <CalendarIcon className="w-4 h-4 mr-2 text-blue-500" />
             {visitedDate ? 'Edit Visit Date' : 'Mark Visited on Date...'}
+          </ContextMenuItem>
+        )}
+        {isAuthenticated && (
+          <ContextMenuItem onClick={() => onEditNote(notes)}>
+            <StickyNote className="w-4 h-4 mr-2 text-indigo-500" />
+            {notes ? 'Edit Note' : 'Add Note'}
           </ContextMenuItem>
         )}
         <ContextMenuItem onClick={() => onSetStatus(item.id, 'bucketList')}>
