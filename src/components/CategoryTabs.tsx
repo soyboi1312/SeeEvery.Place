@@ -53,7 +53,7 @@ export default function CategoryTabs({ activeCategory, onCategoryChange, stats }
 
       {/* Level 2: Specific Categories (The Pills) */}
       <div className="w-full overflow-x-auto no-scrollbar py-2">
-        <div className="flex justify-start sm:justify-center gap-3 px-4">
+        <div className="flex gap-3 px-4">
           {categoryGroups[activeGroup].categories.map((category) => {
             const isActive = category === activeCategory;
             const stat = stats[category];
