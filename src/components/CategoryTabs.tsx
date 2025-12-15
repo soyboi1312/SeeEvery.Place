@@ -21,7 +21,7 @@ export default function CategoryTabs({ activeCategory, onCategoryChange, stats }
   return (
     <div className="space-y-4">
       {/* Level 1: Meta-Groups (The Vibe) */}
-      <div className="flex justify-center">
+      <div className="w-full overflow-x-auto no-scrollbar pb-1 text-center">
         <div className="inline-flex bg-white dark:bg-gray-800 p-1.5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
           {(Object.keys(categoryGroups) as CategoryGroup[]).map((group) => {
             const isActive = group === activeGroup;
