@@ -251,7 +251,7 @@ function HomeContent() {
   );
 
   return (
-    <div className="min-h-screen flex flex-col bg-white dark:bg-gray-900 overflow-x-hidden">
+    <div className="min-h-screen flex flex-col bg-white dark:bg-gray-900">
       <Header
         onSignIn={() => setShowAuthModal(true)}
         onSignOut={signOut}
