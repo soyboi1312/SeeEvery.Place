@@ -10,6 +10,7 @@ import { ComposableMap, ZoomableGroup, Sphere, Graticule } from '@vnedyalk0v/rea
 import { useMapZoom, MapPosition } from './useMapZoom';
 import { useDebounce } from '@/lib/hooks/useDebounce';
 import ZoomControls from './ZoomControls';
+import { MarkerSymbolDefs } from '@/components/MapMarkers';
 
 // Zoom state passed to children via render prop
 export interface ZoomState {
@@ -136,6 +137,8 @@ const InteractiveMapShell = memo(function InteractiveMapShell({
         viewBox={viewBox}
         className={className}
       >
+        {/* SVG symbol definitions for markers - defined once, referenced by all markers */}
+        <MarkerSymbolDefs />
         <ZoomableGroup
           zoom={position.zoom}
           // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Library uses branded Longitude/Latitude types
