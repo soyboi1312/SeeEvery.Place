@@ -1,17 +1,13 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
+import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useDarkMode } from '@/lib/hooks/useDarkMode';
 import { useAuth } from '@/lib/hooks/useAuth';
 import {
-  calculateTotalXp,
-  calculateLevel,
-  getTotalVisited,
-  getCategoriesStarted,
-  getCategoryStats,
   getTierColor,
-  getUnlockedAchievements,
+  ACHIEVEMENTS,
   AchievementDefinition,
 } from '@/lib/achievements';
 import {
@@ -20,8 +16,27 @@ import {
   categoryLabels,
   categoryIcons,
   emptySelections,
+  CATEGORY_SCHEMA,
 } from '@/lib/types';
-import { StaticWorldMap, StaticUSMap } from '@/components/share';
+
+// Dynamic imports for maps - skip SSR to reduce Cloudflare Worker CPU usage
+const StaticWorldMap = dynamic(
+  () => import('@/components/share').then(mod => mod.StaticWorldMap),
+  { ssr: false, loading: () => <MapPlaceholder /> }
+);
+const StaticUSMap = dynamic(
+  () => import('@/components/share').then(mod => mod.StaticUSMap),
+  { ssr: false, loading: () => <MapPlaceholder /> }
+);
+
+// Lightweight placeholder during map loading
+function MapPlaceholder() {
+  return (
+    <div className="w-full h-full flex items-center justify-center bg-muted/50 animate-pulse">
+      <span className="text-muted-foreground">Loading map...</span>
+    </div>
+  );
+}
 import { PROFILE_ICONS } from '@/components/ProfileIcons';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -99,6 +114,7 @@ function MiniBadge({ achievement }: { achievement: AchievementDefinition }) {
 export default function PublicProfileClient({
   profile,
   selections: rawSelections,
+  achievements: dbAchievements,
   username,
 }: PublicProfileClientProps) {
   const { isDarkMode, toggleDarkMode } = useDarkMode();
@@ -127,18 +143,34 @@ export default function PublicProfileClient({
     } as UserSelections;
   }, [rawSelections]);
 
-  // Calculate stats
+  // Calculate stats using lightweight computations
+  // These use pre-computed profile data where possible
   const stats = useMemo(() => {
-    const totalXp = calculateTotalXp(selections);
-    return {
-      totalXp,
-      level: calculateLevel(totalXp),
-      totalVisited: getTotalVisited(selections),
-      categoriesStarted: getCategoriesStarted(selections),
-    };
-  }, [selections]);
+    // Count visited places across all categories
+    let totalVisited = 0;
+    let categoriesStarted = 0;
 
-  // Get category stats (respecting privacy settings)
+    for (const category of ALL_CATEGORIES) {
+      const categorySelections = selections[category] || [];
+      const visitedCount = categorySelections.filter(
+        (s) => s.status === 'visited' && !s.deleted
+      ).length;
+      if (visitedCount > 0) {
+        totalVisited += visitedCount;
+        categoriesStarted++;
+      }
+    }
+
+    return {
+      // Use pre-computed values from database where available
+      totalXp: profile.total_xp,
+      level: profile.level,
+      totalVisited,
+      categoriesStarted,
+    };
+  }, [selections, profile.total_xp, profile.level]);
+
+  // Get category stats (respecting privacy settings) - lightweight version
   const categoryStats = useMemo(() => {
     const hiddenCategories = profile.privacy_settings?.hide_categories || [];
     const hideBucketList = profile.privacy_settings?.hide_bucket_list || false;
@@ -146,19 +178,26 @@ export default function PublicProfileClient({
     return ALL_CATEGORIES.map((category) => {
       if (hiddenCategories.includes(category)) return null;
 
-      const stats = getCategoryStats(selections, category);
-      return {
-        category,
-        ...stats,
-        bucketList: hideBucketList ? 0 : stats.bucketList,
-      };
+      const categorySelections = selections[category] || [];
+      const visited = categorySelections.filter(
+        (s) => s.status === 'visited' && !s.deleted
+      ).length;
+      const bucketList = hideBucketList ? 0 : categorySelections.filter(
+        (s) => s.status === 'bucketList' && !s.deleted
+      ).length;
+      const total = CATEGORY_SCHEMA[category].total;
+      const percentage = total > 0 ? Math.round((visited / total) * 100) : 0;
+
+      return { category, visited, bucketList, total, percentage };
     }).filter((s): s is NonNullable<typeof s> => s !== null && (s.visited > 0 || s.bucketList > 0));
   }, [selections, profile.privacy_settings]);
 
-  // Get unlocked achievements by calculating from selections
+  // Use pre-fetched achievements from database instead of recalculating
+  // This avoids expensive getUnlockedAchievements() computation on SSR
   const unlockedAchievements = useMemo(() => {
-    return getUnlockedAchievements(selections, []);
-  }, [selections]);
+    const dbAchievementIds = new Set(dbAchievements.map(a => a.achievement_id));
+    return ACHIEVEMENTS.filter(a => dbAchievementIds.has(a.id));
+  }, [dbAchievements]);
 
   const displayName = profile.full_name || username;
   const memberSince = new Date(profile.created_at).toLocaleDateString('en-US', {
