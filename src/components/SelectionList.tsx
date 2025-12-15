@@ -1,7 +1,9 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef, useCallback, memo } from 'react';
+import { useVirtualizer } from '@tanstack/react-virtual';
 import { Status, Category } from '@/lib/types';
+import { useDebounce } from '@/lib/hooks/useDebounce';
 import { Search, Check, Star, Circle, Trash2, X, AlertCircle, Calendar as CalendarIcon, StickyNote, Lock } from 'lucide-react';
 
 // Shadcn Imports
@@ -216,6 +218,12 @@ export default function SelectionList({
   const [noteEditItem, setNoteEditItem] = useState<{ id: string; name: string } | null>(null);
   const [tempNote, setTempNote] = useState('');
 
+  // Debounce search query to prevent lag on large lists (300ms delay)
+  const debouncedSearchQuery = useDebounce(searchQuery, 300);
+
+  // Ref for virtualized list container
+  const parentRef = useRef<HTMLDivElement>(null);
+
   const hasSelections = stats.visited > 0 || stats.bucketList > 0;
 
   const handleDateSave = (date: string) => {
@@ -240,7 +248,8 @@ export default function SelectionList({
 
   const filteredItems = useMemo(() => {
     return items.filter(item => {
-      const query = searchQuery.toLowerCase().trim();
+      // Use debounced search query to prevent filtering on every keystroke
+      const query = debouncedSearchQuery.toLowerCase().trim();
       const matchesName = item.name.toLowerCase().includes(query);
       const matchesCode = item.code?.toLowerCase() === query;
       const matchesAlias = item.aliases?.some(alias => alias.toLowerCase() === query);
@@ -249,7 +258,7 @@ export default function SelectionList({
       const matchesFilter = filterMode === 'all' || status === filterMode;
       return matchesSearch && matchesFilter;
     });
-  }, [items, searchQuery, filterMode, getStatus]);
+  }, [items, debouncedSearchQuery, filterMode, getStatus]);
 
   const groupedItems = useMemo(() => {
     if (groupBy === 'none') {
@@ -264,6 +273,37 @@ export default function SelectionList({
     });
     return groups;
   }, [filteredItems, groupBy]);
+
+  // Flatten grouped items for virtualization
+  // Each row is either a group header or an item
+  type VirtualRow = { type: 'header'; group: string; count: number } | { type: 'item'; item: Item };
+
+  const virtualRows = useMemo<VirtualRow[]>(() => {
+    const rows: VirtualRow[] = [];
+    Object.entries(groupedItems).forEach(([group, groupItems]) => {
+      if (groupBy !== 'none') {
+        rows.push({ type: 'header', group, count: groupItems.length });
+      }
+      groupItems.forEach(item => {
+        rows.push({ type: 'item', item });
+      });
+    });
+    return rows;
+  }, [groupedItems, groupBy]);
+
+  // Use virtualization only when list is large (>50 items)
+  const shouldVirtualize = filteredItems.length > 50;
+
+  const rowVirtualizer = useVirtualizer({
+    count: virtualRows.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: useCallback((index: number) => {
+      const row = virtualRows[index];
+      // Headers are smaller than items
+      return row?.type === 'header' ? 40 : 52;
+    }, [virtualRows]),
+    overscan: 10, // Render 10 extra items outside viewport for smooth scrolling
+  });
 
   return (
     <Card className="border-0 shadow-lg overflow-hidden flex flex-col h-full bg-background">
@@ -353,42 +393,107 @@ export default function SelectionList({
       </div>
 
       {/* Main List Area */}
-      <div className="flex-1 overflow-y-auto max-h-[60vh] sm:max-h-[500px]">
-        <div className="p-4">
-          {Object.entries(groupedItems).map(([group, groupItems]) => (
-            <div key={group} className="mb-6 last:mb-0">
-              {groupBy !== 'none' && (
-                <div className="flex items-center gap-2 mb-3">
-                  <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                    {group}
-                  </h3>
-                  <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-muted text-muted-foreground font-medium">
-                    {groupItems.length}
-                  </span>
+      <div
+        ref={parentRef}
+        className="flex-1 overflow-y-auto max-h-[60vh] sm:max-h-[500px]"
+      >
+        {/* Virtualized list for large datasets */}
+        {shouldVirtualize && filteredItems.length > 0 ? (
+          <div
+            className="p-4 relative"
+            style={{ height: `${rowVirtualizer.getTotalSize()}px` }}
+          >
+            {rowVirtualizer.getVirtualItems().map((virtualRow) => {
+              const row = virtualRows[virtualRow.index];
+              if (!row) return null;
+
+              if (row.type === 'header') {
+                return (
+                  <div
+                    key={`header-${row.group}`}
+                    className="absolute top-0 left-0 right-0 px-4"
+                    style={{
+                      height: `${virtualRow.size}px`,
+                      transform: `translateY(${virtualRow.start}px)`,
+                    }}
+                  >
+                    <div className="flex items-center gap-2 h-full">
+                      <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                        {row.group}
+                      </h3>
+                      <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-muted text-muted-foreground font-medium">
+                        {row.count}
+                      </span>
+                    </div>
+                  </div>
+                );
+              }
+
+              return (
+                <div
+                  key={row.item.id}
+                  className="absolute top-0 left-0 right-0 px-4"
+                  style={{
+                    height: `${virtualRow.size}px`,
+                    transform: `translateY(${virtualRow.start}px)`,
+                  }}
+                >
+                  <div className="h-full flex items-center">
+                    <ItemCard
+                      item={row.item}
+                      status={getStatus(row.item.id)}
+                      visitedDate={getVisitedDate?.(row.item.id)}
+                      notes={getNotes?.(row.item.id)}
+                      onToggle={onToggle}
+                      onSetStatus={onSetStatus}
+                      onEditDate={() => setDateEditItem({ id: row.item.id, name: row.item.name })}
+                      onEditNote={(currentNote) => openNoteDialog(row.item.id, row.item.name, currentNote)}
+                      isAuthenticated={isAuthenticated}
+                    />
+                  </div>
                 </div>
-              )}
+              );
+            })}
+          </div>
+        ) : (
+          /* Non-virtualized list for small datasets (better UX for small lists) */
+          <div className="p-4">
+            {Object.entries(groupedItems).map(([group, groupItems]) => (
+              <div key={group} className="mb-6 last:mb-0">
+                {groupBy !== 'none' && (
+                  <div className="flex items-center gap-2 mb-3">
+                    <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                      {group}
+                    </h3>
+                    <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-muted text-muted-foreground font-medium">
+                      {groupItems.length}
+                    </span>
+                  </div>
+                )}
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-                {groupItems.map(item => (
-                  <ItemCard
-                    key={item.id}
-                    item={item}
-                    status={getStatus(item.id)}
-                    visitedDate={getVisitedDate?.(item.id)}
-                    notes={getNotes?.(item.id)}
-                    onToggle={onToggle}
-                    onSetStatus={onSetStatus}
-                    onEditDate={() => setDateEditItem({ id: item.id, name: item.name })}
-                    onEditNote={(currentNote) => openNoteDialog(item.id, item.name, currentNote)}
-                    isAuthenticated={isAuthenticated}
-                  />
-                ))}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                  {groupItems.map(item => (
+                    <ItemCard
+                      key={item.id}
+                      item={item}
+                      status={getStatus(item.id)}
+                      visitedDate={getVisitedDate?.(item.id)}
+                      notes={getNotes?.(item.id)}
+                      onToggle={onToggle}
+                      onSetStatus={onSetStatus}
+                      onEditDate={() => setDateEditItem({ id: item.id, name: item.name })}
+                      onEditNote={(currentNote) => openNoteDialog(item.id, item.name, currentNote)}
+                      isAuthenticated={isAuthenticated}
+                    />
+                  ))}
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
+        )}
 
-          {/* Empty States */}
-          {filteredItems.length === 0 && (
+        {/* Empty States */}
+        {filteredItems.length === 0 && (
             <div className="py-12 flex flex-col items-center text-center px-4 animate-in fade-in duration-300">
               {searchQuery ? (
                 <>
@@ -432,7 +537,6 @@ export default function SelectionList({
               ) : null}
             </div>
           )}
-        </div>
       </div>
 
       {/* Date Selection Dialog */}
@@ -507,7 +611,8 @@ interface ItemCardProps {
   isAuthenticated?: boolean;
 }
 
-function ItemCard({ item, status, visitedDate, notes, onToggle, onSetStatus, onEditDate, onEditNote, isAuthenticated }: ItemCardProps) {
+// Memoized ItemCard to prevent unnecessary re-renders during virtualization
+const ItemCard = memo(function ItemCard({ item, status, visitedDate, notes, onToggle, onSetStatus, onEditDate, onEditNote, isAuthenticated }: ItemCardProps) {
   // Styles based on status
   const getStyles = (s: Status) => {
     switch (s) {
@@ -594,4 +699,4 @@ function ItemCard({ item, status, visitedDate, notes, onToggle, onSetStatus, onE
       </ContextMenuContent>
     </ContextMenu>
   );
-}
+});

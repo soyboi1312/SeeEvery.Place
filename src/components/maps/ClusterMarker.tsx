@@ -1,0 +1,81 @@
+/**
+ * ClusterMarker Component
+ * Renders a cluster of markers showing the count and dominant status color
+ */
+'use client';
+
+import { memo } from 'react';
+import { Marker } from '@vnedyalk0v/react19-simple-maps';
+import { Status } from '@/lib/types';
+
+interface ClusterMarkerProps {
+  coordinates: [number, number];
+  pointCount: number;
+  dominantStatus: Status;
+  size?: 'small' | 'default';
+  onClick?: () => void;
+}
+
+const ClusterMarker = memo(function ClusterMarker({
+  coordinates,
+  pointCount,
+  dominantStatus,
+  size = 'default',
+  onClick,
+}: ClusterMarkerProps) {
+  // Calculate cluster size based on point count
+  const baseSize = size === 'small' ? 16 : 24;
+  const clusterSize = Math.min(baseSize + Math.log2(pointCount) * 4, baseSize * 2);
+
+  // Color based on dominant status
+  const fillColor = dominantStatus === 'visited' ? '#22c55e' :
+                    dominantStatus === 'bucketList' ? '#f59e0b' : '#94a3b8';
+
+  // Format count for display
+  const displayCount = pointCount > 99 ? '99+' : pointCount.toString();
+  const fontSize = pointCount > 99 ? 8 : 10;
+
+  return (
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Library uses branded Coordinates type
+    <Marker coordinates={coordinates as any}>
+      <g
+        onClick={onClick}
+        style={{ cursor: onClick ? 'pointer' : 'default' }}
+        className="transition-transform hover:scale-110"
+      >
+        {/* Outer ring */}
+        <circle
+          r={clusterSize / 2 + 3}
+          fill={fillColor}
+          fillOpacity={0.2}
+          stroke={fillColor}
+          strokeWidth={1.5}
+          strokeOpacity={0.5}
+        />
+        {/* Inner circle */}
+        <circle
+          r={clusterSize / 2}
+          fill={fillColor}
+          stroke="white"
+          strokeWidth={2}
+        />
+        {/* Count text */}
+        <text
+          textAnchor="middle"
+          y={fontSize / 3}
+          style={{
+            fontFamily: 'system-ui, -apple-system, sans-serif',
+            fontSize: `${fontSize}px`,
+            fontWeight: 600,
+            fill: 'white',
+            pointerEvents: 'none',
+          }}
+        >
+          {displayCount}
+        </text>
+      </g>
+    </Marker>
+  );
+});
+
+export default ClusterMarker;

@@ -3,16 +3,19 @@
  * Generic map with markers for category-specific locations
  * Follows DRY principle by unifying USMarkerMap and WorldMarkerMap logic
  * Follows ISP by using useCategoryMarkers hook for data fetching
+ * Uses supercluster for marker clustering on large datasets (100+ markers)
  */
 'use client';
 
-import { memo } from 'react';
+import { memo, useState, useCallback } from 'react';
 import { Geographies, Geography } from '@vnedyalk0v/react19-simple-maps';
 import { useNameGetter, getMarkerSize, useCategoryMarkers } from '@/lib/hooks/useMapData';
+import { useMarkerClustering, isCluster } from '@/lib/hooks/useMarkerClustering';
 import { renderCategoryMarker } from '@/components/MapMarkers/registry';
 import { MarkerMapProps, CategoryMarkerMapConfig } from './types';
 import InteractiveMapShell from './InteractiveMapShell';
 import MemoizedMarker from './MemoizedMarker';
+import ClusterMarker from './ClusterMarker';
 
 /**
  * Static background map component - memoized to prevent re-renders on zoom/pan
@@ -24,7 +27,7 @@ const StaticBackground = memo(function StaticBackground({ geoUrl }: { geoUrl: st
       {({ geographies }) =>
         geographies.map((geo) => (
           <Geography
-            key={geo.rsmKey}
+            key={(geo as unknown as { rsmKey: string }).rsmKey}
             geography={geo}
             className="region-path unvisited outline-none focus:outline-none"
             style={{
@@ -66,11 +69,28 @@ const CategoryMarkerMap = memo(function CategoryMarkerMap({
     filterAlbersUsa = false,
   } = config;
 
+  // Track current zoom level for clustering
+  const [currentZoom, setCurrentZoom] = useState(1);
+
   // Use extracted hook for data fetching - ISP/SRP
   const markers = useCategoryMarkers(category, selections, filterAlbersUsa, subcategory);
 
+  // Use marker clustering for large datasets (>100 markers)
+  // This significantly improves performance for categories like cities, weird americana
+  const { clusters, isClusteringEnabled, getClusterExpansionZoom } = useMarkerClustering(
+    markers,
+    currentZoom,
+    undefined, // Use world bounds
+    { enabled: markers.length > 100 }
+  );
+
   // Use extracted hook for name lookup - DRY principle
   const getItemName = useNameGetter(items);
+
+  // Handle zoom changes for clustering
+  const handleZoomChange = useCallback((zoom: number) => {
+    setCurrentZoom(zoom);
+  }, []);
 
   return (
     <InteractiveMapShell
@@ -84,6 +104,7 @@ const CategoryMarkerMap = memo(function CategoryMarkerMap({
       showSphere={showSphere}
       showGraticule={showGraticule}
       className="w-full h-full"
+      onZoomChange={handleZoomChange}
     >
       {({ zoom }) => {
         const markerSize = getMarkerSize(zoom);
@@ -91,26 +112,68 @@ const CategoryMarkerMap = memo(function CategoryMarkerMap({
         return (
           <>
             <StaticBackground geoUrl={geoUrl} />
-            {markers.map((marker) => {
-              const fillColor = marker.status === 'visited' ? '#22c55e' : '#f59e0b';
+            {isClusteringEnabled ? (
+              // Render clustered markers
+              clusters.map((feature, index) => {
+                const [lng, lat] = feature.geometry.coordinates;
 
-              return (
-                <MemoizedMarker
-                  key={marker.id}
-                  id={marker.id}
-                  coordinates={marker.coordinates}
-                  status={marker.status}
-                  name={getItemName(marker.id)}
-                  size={markerSize}
-                  onToggle={onToggle}
-                  onMouseEnter={tooltip.onMouseEnter}
-                  onMouseLeave={tooltip.onMouseLeave}
-                  onMouseMove={tooltip.onMouseMove}
-                >
-                  {renderCategoryMarker(category, fillColor, markerSize, marker.sport)}
-                </MemoizedMarker>
-              );
-            })}
+                if (isCluster(feature)) {
+                  // Render cluster marker
+                  return (
+                    <ClusterMarker
+                      key={`cluster-${feature.properties.cluster_id}`}
+                      coordinates={[lng, lat]}
+                      pointCount={feature.properties.point_count}
+                      dominantStatus={feature.properties.dominantStatus}
+                      size={markerSize}
+                    />
+                  );
+                }
+
+                // Render individual marker
+                const props = feature.properties;
+                const fillColor = props.status === 'visited' ? '#22c55e' : '#f59e0b';
+
+                return (
+                  <MemoizedMarker
+                    key={props.id}
+                    id={props.id}
+                    coordinates={[lng, lat]}
+                    status={props.status}
+                    name={getItemName(props.id)}
+                    size={markerSize}
+                    onToggle={onToggle}
+                    onMouseEnter={tooltip.onMouseEnter}
+                    onMouseLeave={tooltip.onMouseLeave}
+                    onMouseMove={tooltip.onMouseMove}
+                  >
+                    {renderCategoryMarker(category, fillColor, markerSize, props.sport)}
+                  </MemoizedMarker>
+                );
+              })
+            ) : (
+              // Render unclustered markers (original behavior for small datasets)
+              markers.map((marker) => {
+                const fillColor = marker.status === 'visited' ? '#22c55e' : '#f59e0b';
+
+                return (
+                  <MemoizedMarker
+                    key={marker.id}
+                    id={marker.id}
+                    coordinates={marker.coordinates}
+                    status={marker.status}
+                    name={getItemName(marker.id)}
+                    size={markerSize}
+                    onToggle={onToggle}
+                    onMouseEnter={tooltip.onMouseEnter}
+                    onMouseLeave={tooltip.onMouseLeave}
+                    onMouseMove={tooltip.onMouseMove}
+                  >
+                    {renderCategoryMarker(category, fillColor, markerSize, marker.sport)}
+                  </MemoizedMarker>
+                );
+              })
+            )}
           </>
         );
       }}

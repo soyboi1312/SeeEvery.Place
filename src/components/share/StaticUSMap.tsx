@@ -37,7 +37,7 @@ export default function StaticUSMap({ selections }: StaticUSMapProps) {
 
             return (
               <Geography
-                key={geo.rsmKey}
+                key={(geo as unknown as { rsmKey: string }).rsmKey}
                 geography={geo}
                 fill={fill}
                 stroke="#ffffff"

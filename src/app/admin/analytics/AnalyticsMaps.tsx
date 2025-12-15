@@ -80,7 +80,7 @@ export function AnalyticsUSMap({ data, isDarkMode = false }: HeatmapProps) {
 
             return (
               <Geography
-                key={geo.rsmKey}
+                key={(geo as unknown as { rsmKey: string }).rsmKey}
                 geography={geo}
                 fill={getHeatColor(value, maxValue, isDarkMode)}
                 stroke={isDarkMode ? '#475569' : '#d1d5db'}
@@ -140,16 +140,16 @@ export function AnalyticsWorldMap({ data, isDarkMode = false }: HeatmapProps) {
         {({ geographies }) =>
           geographies.map((geo) => {
             // Try multiple ways to match the country
-            const countryName = geo.properties.name;
-            const isoFromName = countryNameToISO[countryName];
-            const isoFromProps = geo.properties['ISO_A2'];
+            const countryName = geo.properties?.name as string | undefined;
+            const isoFromName = countryName ? countryNameToISO[countryName] : undefined;
+            const isoFromProps = geo.properties?.['ISO_A2'] as string | undefined;
             const countryCode = isoFromName || isoFromProps || String(geo.id);
 
             const value = countryCode ? (valueMap.get(countryCode) || 0) : 0;
 
             return (
               <Geography
-                key={geo.rsmKey}
+                key={(geo as unknown as { rsmKey: string }).rsmKey}
                 geography={geo}
                 fill={getHeatColor(value, maxValue, isDarkMode)}
                 stroke={isDarkMode ? '#475569' : '#d1d5db'}

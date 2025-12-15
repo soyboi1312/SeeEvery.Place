@@ -75,12 +75,12 @@ const RegionMap = memo(function RegionMap({
           {({ geographies }) =>
             geographies.map((geo) => {
               const id = getId(geo);
-              const name = geo.properties.name;
+              const name = (geo.properties?.name as string | undefined) || '';
               const status = id ? getStatus(id) : 'unvisited';
 
               return (
                 <TappableGeography
-                  key={geo.rsmKey}
+                  key={(geo as unknown as { rsmKey: string }).rsmKey}
                   geo={geo}
                   id={id}
                   status={status}

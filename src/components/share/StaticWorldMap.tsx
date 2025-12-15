@@ -32,8 +32,9 @@ export default function StaticWorldMap({ selections }: StaticWorldMapProps) {
       <Geographies geography={GEO_URL_WORLD}>
         {({ geographies }) =>
           geographies.map((geo) => {
-            const countryName = geo.properties.name;
-            const id = countryNameToISO[countryName] || geo.properties["ISO_A2"] || String(geo.id);
+            const countryName = geo.properties?.name as string | undefined;
+            const isoA2 = geo.properties?.["ISO_A2"] as string | undefined;
+            const id = (countryName ? countryNameToISO[countryName] : undefined) || isoA2 || String(geo.id);
             const status = id ? getSelectionStatus(selections, 'countries', id) : 'unvisited';
 
             let fill = '#94a3b8'; // unvisited - slate gray
@@ -42,7 +43,7 @@ export default function StaticWorldMap({ selections }: StaticWorldMapProps) {
 
             return (
               <Geography
-                key={geo.rsmKey}
+                key={(geo as unknown as { rsmKey: string }).rsmKey}
                 geography={geo}
                 fill={fill}
                 stroke="#ffffff"

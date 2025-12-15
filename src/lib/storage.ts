@@ -11,6 +11,91 @@ let availableCountryCodes: Set<string> | null = null;
 
 const STORAGE_KEY = 'travelmap_selections';
 
+/**
+ * Parse JSON using requestIdleCallback to avoid blocking the main thread
+ * during hydration. Falls back to synchronous parsing if requestIdleCallback
+ * is not available or if the deadline has passed.
+ */
+function parseJsonAsync<T>(jsonString: string): Promise<T> {
+  return new Promise((resolve, reject) => {
+    // If requestIdleCallback is available, use it to defer parsing
+    if (typeof requestIdleCallback !== 'undefined') {
+      requestIdleCallback(
+        (deadline) => {
+          try {
+            // If we have time remaining, parse synchronously
+            // Otherwise, fall back to setTimeout to yield to more critical work
+            if (deadline.timeRemaining() > 5) {
+              resolve(JSON.parse(jsonString));
+            } else {
+              // Break up the work with setTimeout
+              setTimeout(() => {
+                try {
+                  resolve(JSON.parse(jsonString));
+                } catch (e) {
+                  reject(e);
+                }
+              }, 0);
+            }
+          } catch (e) {
+            reject(e);
+          }
+        },
+        { timeout: 1000 } // Max 1 second delay before parsing anyway
+      );
+    } else {
+      // Fallback for browsers without requestIdleCallback (Safari < 16.4)
+      // Use setTimeout to at least yield to the event loop once
+      setTimeout(() => {
+        try {
+          resolve(JSON.parse(jsonString));
+        } catch (e) {
+          reject(e);
+        }
+      }, 0);
+    }
+  });
+}
+
+/**
+ * Stringify JSON using requestIdleCallback to avoid blocking during saves
+ * with large datasets
+ */
+function stringifyJsonAsync(data: unknown): Promise<string> {
+  return new Promise((resolve, reject) => {
+    if (typeof requestIdleCallback !== 'undefined') {
+      requestIdleCallback(
+        (deadline) => {
+          try {
+            if (deadline.timeRemaining() > 5) {
+              resolve(JSON.stringify(data));
+            } else {
+              setTimeout(() => {
+                try {
+                  resolve(JSON.stringify(data));
+                } catch (e) {
+                  reject(e);
+                }
+              }, 0);
+            }
+          } catch (e) {
+            reject(e);
+          }
+        },
+        { timeout: 500 }
+      );
+    } else {
+      setTimeout(() => {
+        try {
+          resolve(JSON.stringify(data));
+        } catch (e) {
+          reject(e);
+        }
+      }, 0);
+    }
+  });
+}
+
 // 365 days in milliseconds for cleanup of permanently deleted items
 // Must match sync.ts DELETED_RETENTION_MS to prevent zombie items during cloud sync
 const PERMANENT_DELETE_THRESHOLD_MS = 365 * 24 * 60 * 60 * 1000;
@@ -182,13 +267,16 @@ async function migrateMountainSelections(parsed: Record<string, Selection[]>): P
 }
 
 // Converted to async to support dynamic imports for migration
+// Uses requestIdleCallback for JSON parsing to improve TTI
 export async function loadSelections(): Promise<UserSelections> {
   if (typeof window === 'undefined') return emptySelections;
 
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
-      let parsed = JSON.parse(saved);
+      // Use async parsing to avoid blocking the main thread during hydration
+      // This improves Time To Interactive (TTI) for large datasets
+      let parsed = await parseJsonAsync<Record<string, Selection[]>>(saved);
 
       let needsSave = false;
 
@@ -210,9 +298,10 @@ export async function loadSelections(): Promise<UserSelections> {
         needsSave = true;
       }
 
-      // Save migrated/cleaned data back to localStorage
+      // Save migrated/cleaned data back to localStorage (async stringify)
       if (needsSave) {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
+        const jsonString = await stringifyJsonAsync(parsed);
+        localStorage.setItem(STORAGE_KEY, jsonString);
       }
 
       // Merge with emptySelections to ensure all categories exist
