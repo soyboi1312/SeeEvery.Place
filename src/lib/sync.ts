@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/client';
-import { UserSelections, emptySelections, Selection } from '@/lib/types';
+import { UserSelections, emptySelections, Selection, Category, CATEGORY_SCHEMA } from '@/lib/types';
 import {
   ACHIEVEMENTS,
   calculateTotalXp,
@@ -258,6 +258,106 @@ export async function syncAchievementsToCloud(selections: UserSelections): Promi
     return true;
   } catch (error) {
     console.error('Failed to sync achievements:', error);
+    return false;
+  }
+}
+
+/**
+ * Find new visits by comparing previous and current selections.
+ * Returns an array of { category, placeId } for items that changed to 'visited'.
+ */
+function findNewVisits(
+  previousSelections: UserSelections | null,
+  currentSelections: UserSelections
+): { category: Category; placeId: string }[] {
+  const newVisits: { category: Category; placeId: string }[] = [];
+  const categories = Object.keys(CATEGORY_SCHEMA) as Category[];
+
+  for (const category of categories) {
+    const currentItems = currentSelections[category] || [];
+    const previousItems = previousSelections?.[category] || [];
+
+    // Create a set of previously visited item IDs
+    const previouslyVisited = new Set(
+      previousItems
+        .filter(item => item.status === 'visited' && !item.deleted)
+        .map(item => item.id)
+    );
+
+    // Find items that are now visited but weren't before
+    for (const item of currentItems) {
+      if (item.status === 'visited' && !item.deleted && !previouslyVisited.has(item.id)) {
+        newVisits.push({ category, placeId: item.id });
+      }
+    }
+  }
+
+  return newVisits;
+}
+
+/**
+ * Syncs new visits to the activity feed.
+ * Creates activity_feed entries for places that were newly marked as visited.
+ * Only runs if user has a public profile.
+ */
+export async function syncActivityFeed(
+  previousSelections: UserSelections | null,
+  currentSelections: UserSelections
+): Promise<boolean> {
+  const supabase = createClient();
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return false;
+
+  try {
+    // Check if user has a public profile
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('is_public')
+      .eq('id', user.id)
+      .single();
+
+    if (!profile?.is_public) {
+      // Don't create activity items for private profiles
+      return true;
+    }
+
+    // Find new visits
+    const newVisits = findNewVisits(previousSelections, currentSelections);
+
+    if (newVisits.length === 0) {
+      return true; // Nothing to sync
+    }
+
+    // Limit to most recent 10 visits per sync to prevent spam
+    const visitsToSync = newVisits.slice(0, 10);
+
+    // Get XP values for each category
+    const activityRecords = visitsToSync.map(({ category, placeId }) => ({
+      user_id: user.id,
+      activity_type: 'visit',
+      category: category,
+      place_id: placeId,
+      place_name: placeId, // Frontend will look up pretty name
+      xp_earned: CATEGORY_SCHEMA[category]?.xp || 10,
+    }));
+
+    // Insert activity records (ignore conflicts/duplicates)
+    const { error } = await supabase
+      .from('activity_feed')
+      .insert(activityRecords);
+
+    if (error) {
+      // Ignore unique constraint violations (duplicate entries)
+      if (!error.message.includes('duplicate') && !error.message.includes('unique')) {
+        console.error('Failed to sync activity feed:', error);
+        return false;
+      }
+    }
+
+    return true;
+  } catch (error) {
+    console.error('Failed to sync activity feed:', error);
     return false;
   }
 }

@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { UserSelections } from '@/lib/types';
-import { loadFromCloud, mergeSelectionsFromCloud, syncToCloud, syncAchievementsToCloud } from '@/lib/sync';
+import { loadFromCloud, mergeSelectionsFromCloud, syncToCloud, syncAchievementsToCloud, syncActivityFeed } from '@/lib/sync';
 import type { User } from '@supabase/supabase-js';
 
 interface UseCloudSyncOptions {
@@ -118,13 +118,25 @@ export function useCloudSync({
     // when setSelections creates new object references with same content)
     if (lastSyncedData.current === currentData) return;
 
-    const debounceSync = setTimeout(() => {
-      syncToCloud(selections)
-        .then(() => {
-          // Update last synced data after successful sync
-          lastSyncedData.current = currentData;
-        })
-        .catch(err => console.error('Failed to sync changes to cloud:', err));
+    // Parse previous selections for activity feed comparison
+    const previousSelections = lastSyncedData.current
+      ? JSON.parse(lastSyncedData.current) as UserSelections
+      : null;
+
+    const debounceSync = setTimeout(async () => {
+      try {
+        await syncToCloud(selections);
+
+        // Sync activity feed with new visits (runs in background, non-blocking)
+        syncActivityFeed(previousSelections, selections).catch(err =>
+          console.error('Failed to sync activity feed:', err)
+        );
+
+        // Update last synced data after successful sync
+        lastSyncedData.current = currentData;
+      } catch (err) {
+        console.error('Failed to sync changes to cloud:', err);
+      }
     }, 2000); // 2 second debounce
 
     return () => clearTimeout(debounceSync);
