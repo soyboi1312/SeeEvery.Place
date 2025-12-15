@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef, memo } from 'react';
+import { useVirtualizer } from '@tanstack/react-virtual';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -18,6 +19,7 @@ import {
   Bookmark,
 } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { formatTimeAgo } from '@/lib/utils/formatTimeAgo';
 import { PROFILE_ICONS } from '@/components/ProfileIcons';
 
@@ -106,6 +108,106 @@ function formatCategory(category: string | null): string {
     .trim();
 }
 
+// Memoized activity item to prevent unnecessary re-renders during virtualization
+interface ActivityItemProps {
+  activity: FeedActivity;
+  onReaction: (activityId: string) => void;
+}
+
+const ActivityItem = memo(function ActivityItem({ activity, onReaction }: ActivityItemProps) {
+  const avatarUrl = activity.user.avatarUrl;
+
+  return (
+    <div className="flex items-start gap-3 p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+      {/* User avatar */}
+      <Link href={`/u/${activity.user.username}`} className="flex-shrink-0">
+        {(() => {
+          // Check if avatarUrl is a profile icon name
+          if (avatarUrl && PROFILE_ICONS[avatarUrl]) {
+            const IconComponent = PROFILE_ICONS[avatarUrl];
+            return (
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white">
+                <IconComponent className="w-5 h-5" />
+              </div>
+            );
+          }
+          // Check if it's a URL (for backwards compatibility) - use next/image for optimization
+          if (avatarUrl && (avatarUrl.startsWith('http') || avatarUrl.startsWith('/'))) {
+            return (
+              <Image
+                src={avatarUrl}
+                alt={activity.user.username}
+                width={40}
+                height={40}
+                className="rounded-full object-cover"
+                loading="lazy"
+              />
+            );
+          }
+          // Default fallback
+          return (
+            <div className="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center">
+              <User className="w-5 h-5 text-slate-400" />
+            </div>
+          );
+        })()}
+      </Link>
+
+      {/* Activity content */}
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2">
+          {getActivityIcon(activity.type)}
+          <p className="text-sm font-medium truncate">
+            {getActivityMessage(activity)}
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2 mt-1">
+          {activity.data.category && (
+            <Badge variant="secondary" className="text-xs">
+              {formatCategory(activity.data.category)}
+            </Badge>
+          )}
+          {activity.data.xpEarned && activity.data.xpEarned > 0 && (
+            <Badge variant="outline" className="text-xs text-green-600">
+              +{activity.data.xpEarned} XP
+            </Badge>
+          )}
+          <span className="text-xs text-slate-400">
+            {formatTimeAgo(activity.createdAt)}
+          </span>
+        </div>
+      </div>
+
+      {/* Reaction button and level badge */}
+      <div className="flex items-center gap-2 flex-shrink-0">
+        <button
+          onClick={() => onReaction(activity.id)}
+          className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs transition-colors ${
+            activity.hasReacted
+              ? 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400'
+              : 'bg-slate-100 dark:bg-slate-700 text-slate-500 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20'
+          }`}
+          title={activity.hasReacted ? 'Remove kudos' : 'Give kudos'}
+        >
+          <Heart
+            className={`w-3.5 h-3.5 ${activity.hasReacted ? 'fill-current' : ''}`}
+          />
+          {activity.reactionCount > 0 && (
+            <span>{activity.reactionCount}</span>
+          )}
+        </button>
+        <Badge variant="outline" className="text-xs">
+          Lv {activity.user.level}
+        </Badge>
+      </div>
+    </div>
+  );
+});
+
+// Fixed height per activity item for virtualization (p-3 + content)
+const ACTIVITY_ITEM_HEIGHT = 76;
+
 export function ActivityFeed({
   className = '',
   defaultType = 'global',
@@ -118,6 +220,17 @@ export function ActivityFeed({
   const [feedType, setFeedType] = useState<'friends' | 'global'>(defaultType);
   const [hasMore, setHasMore] = useState(false);
   const [offset, setOffset] = useState(0);
+
+  // Ref for virtualization scroll container
+  const parentRef = useRef<HTMLDivElement>(null);
+
+  // Virtualizer for efficient rendering of large lists
+  const rowVirtualizer = useVirtualizer({
+    count: activities.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => ACTIVITY_ITEM_HEIGHT,
+    overscan: 5, // Render 5 extra items above/below viewport
+  });
 
   const fetchActivities = useCallback(async (reset = false) => {
     setLoading(true);
@@ -242,100 +355,47 @@ export function ActivityFeed({
           </div>
         ) : (
           <>
-            <div className="space-y-3">
-              {activities.map((activity) => (
-                <div
-                  key={activity.id}
-                  className="flex items-start gap-3 p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-                >
-                  {/* User avatar */}
-                  <Link href={`/u/${activity.user.username}`} className="flex-shrink-0">
-                    {(() => {
-                      const avatarUrl = activity.user.avatarUrl;
-                      // Check if avatarUrl is a profile icon name
-                      if (avatarUrl && PROFILE_ICONS[avatarUrl]) {
-                        const IconComponent = PROFILE_ICONS[avatarUrl];
-                        return (
-                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white">
-                            <IconComponent className="w-5 h-5" />
-                          </div>
-                        );
-                      }
-                      // Check if it's a URL (for backwards compatibility)
-                      if (avatarUrl && (avatarUrl.startsWith('http') || avatarUrl.startsWith('/'))) {
-                        return (
-                          <img
-                            src={avatarUrl}
-                            alt={activity.user.username}
-                            className="w-10 h-10 rounded-full object-cover"
-                          />
-                        );
-                      }
-                      // Default fallback
-                      return (
-                        <div className="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center">
-                          <User className="w-5 h-5 text-slate-400" />
-                        </div>
-                      );
-                    })()}
-                  </Link>
-
-                  {/* Activity content */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      {getActivityIcon(activity.type)}
-                      <p className="text-sm font-medium truncate">
-                        {getActivityMessage(activity)}
-                      </p>
-                    </div>
-
-                    <div className="flex items-center gap-2 mt-1">
-                      {activity.data.category && (
-                        <Badge variant="secondary" className="text-xs">
-                          {formatCategory(activity.data.category)}
-                        </Badge>
-                      )}
-                      {activity.data.xpEarned && activity.data.xpEarned > 0 && (
-                        <Badge variant="outline" className="text-xs text-green-600">
-                          +{activity.data.xpEarned} XP
-                        </Badge>
-                      )}
-                      <span className="text-xs text-slate-400">
-                        {formatTimeAgo(activity.createdAt)}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Reaction button and level badge */}
-                  <div className="flex items-center gap-2 flex-shrink-0">
-                    <button
-                      onClick={() => handleReaction(activity.id)}
-                      className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs transition-colors ${
-                        activity.hasReacted
-                          ? 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400'
-                          : 'bg-slate-100 dark:bg-slate-700 text-slate-500 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20'
-                      }`}
-                      title={activity.hasReacted ? 'Remove kudos' : 'Give kudos'}
+            {/* Virtualized scrollable container */}
+            <div
+              ref={parentRef}
+              className="overflow-auto"
+              style={{ height: '400px' }} // Fixed height for virtualization
+            >
+              <div
+                style={{
+                  height: `${rowVirtualizer.getTotalSize()}px`,
+                  width: '100%',
+                  position: 'relative',
+                }}
+              >
+                {rowVirtualizer.getVirtualItems().map((virtualItem) => {
+                  const activity = activities[virtualItem.index];
+                  return (
+                    <div
+                      key={activity.id}
+                      style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        width: '100%',
+                        height: `${virtualItem.size}px`,
+                        transform: `translateY(${virtualItem.start}px)`,
+                      }}
                     >
-                      <Heart
-                        className={`w-3.5 h-3.5 ${activity.hasReacted ? 'fill-current' : ''}`}
+                      <ActivityItem
+                        activity={activity}
+                        onReaction={handleReaction}
                       />
-                      {activity.reactionCount > 0 && (
-                        <span>{activity.reactionCount}</span>
-                      )}
-                    </button>
-                    <Badge variant="outline" className="text-xs">
-                      Lv {activity.user.level}
-                    </Badge>
-                  </div>
-                </div>
-              ))}
+                    </div>
+                  );
+                })}
+              </div>
             </div>
 
             {hasMore && (
               <Button
                 variant="outline"
-                className="w-full"
+                className="w-full mt-4"
                 onClick={handleLoadMore}
                 disabled={loading}
               >

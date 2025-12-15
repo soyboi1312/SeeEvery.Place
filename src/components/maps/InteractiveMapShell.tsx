@@ -8,6 +8,7 @@
 import { ReactNode, memo, useState, useRef, useEffect } from 'react';
 import { ComposableMap, ZoomableGroup, Sphere, Graticule } from '@vnedyalk0v/react19-simple-maps';
 import { useMapZoom, MapPosition } from './useMapZoom';
+import { useDebounce } from '@/lib/hooks/useDebounce';
 import ZoomControls from './ZoomControls';
 
 // Zoom state passed to children via render prop
@@ -73,10 +74,14 @@ const InteractiveMapShell = memo(function InteractiveMapShell({
     initialZoom,
   });
 
-  // Notify parent of zoom changes for clustering
+  // Debounce zoom value to prevent excessive re-renders during zoom gestures
+  // 150ms delay balances responsiveness with performance
+  const debouncedZoom = useDebounce(position.zoom, 150);
+
+  // Notify parent of zoom changes for clustering (debounced)
   useEffect(() => {
-    onZoomChange?.(position.zoom);
-  }, [position.zoom, onZoomChange]);
+    onZoomChange?.(debouncedZoom);
+  }, [debouncedZoom, onZoomChange]);
 
   // --- Scroll Zoom Delay Logic ---
   // Prevents accidental zooming when scrolling past the map
