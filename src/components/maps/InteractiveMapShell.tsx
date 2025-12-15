@@ -40,6 +40,9 @@ interface InteractiveMapShellProps {
 
   // Optional className override
   className?: string;
+
+  // Optional callback when zoom changes (for marker clustering)
+  onZoomChange?: (zoom: number) => void;
 }
 
 const InteractiveMapShell = memo(function InteractiveMapShell({
@@ -55,6 +58,7 @@ const InteractiveMapShell = memo(function InteractiveMapShell({
   showGraticule = false,
   children,
   className = 'w-full h-full',
+  onZoomChange,
 }: InteractiveMapShellProps) {
   const {
     position,
@@ -68,6 +72,11 @@ const InteractiveMapShell = memo(function InteractiveMapShell({
     initialCenter,
     initialZoom,
   });
+
+  // Notify parent of zoom changes for clustering
+  useEffect(() => {
+    onZoomChange?.(position.zoom);
+  }, [position.zoom, onZoomChange]);
 
   // --- Scroll Zoom Delay Logic ---
   // Prevents accidental zooming when scrolling past the map

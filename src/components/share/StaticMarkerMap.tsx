@@ -80,7 +80,7 @@ export default function StaticMarkerMap({
           {({ geographies }) =>
             geographies.map((geo) => (
               <Geography
-                key={geo.rsmKey}
+                key={(geo as unknown as { rsmKey: string }).rsmKey}
                 geography={geo}
                 fill="#64748b" 
                 stroke="#ffffff"
@@ -119,7 +119,7 @@ export default function StaticMarkerMap({
         {({ geographies }) =>
           geographies.map((geo) => (
             <Geography
-              key={geo.rsmKey}
+              key={(geo as unknown as { rsmKey: string }).rsmKey}
               geography={geo}
               fill="#94a3b8"
               stroke="#ffffff"
