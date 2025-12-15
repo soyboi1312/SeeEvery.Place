@@ -1,7 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient, createAdminClient } from '@/lib/supabase/server';
+import { SignJWT } from 'jose';
 
-// Impersonate user - generate a magic link for the admin to log in as the user
+// Secret for signing impersonation tokens - in production, use a proper secret management
+const getImpersonationSecret = () => {
+  const secret = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!secret) throw new Error('Missing service role key');
+  return new TextEncoder().encode(secret);
+};
+
+// Impersonate user - generate a secure token for impersonation
 export async function POST(request: NextRequest) {
   try {
     const { userId } = await request.json();
@@ -57,23 +65,18 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Generate magic link for impersonation
-    // Note: This creates a temporary session for the target user
+    // Generate a short-lived JWT token for impersonation
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
-    const { data: magicLink, error: linkError } = await adminClient.auth.admin.generateLink({
-      type: 'magiclink',
-      email: targetUser.user.email || '',
-      options: {
-        // Must go through /auth/callback to properly exchange the code for a session
-        // Using simple path to avoid URL encoding issues with Cloudflare
-        redirectTo: `${siteUrl}/auth/callback`,
-      },
-    });
-
-    if (linkError || !magicLink?.properties?.action_link) {
-      console.error('Error generating magic link:', linkError);
-      return NextResponse.json({ error: 'Failed to generate impersonation link' }, { status: 500 });
-    }
+    const token = await new SignJWT({
+      targetUserId: userId,
+      targetEmail: targetUser.user.email,
+      adminEmail: user.email,
+      adminId: user.id,
+    })
+      .setProtectedHeader({ alg: 'HS256' })
+      .setIssuedAt()
+      .setExpirationTime('5m') // Token expires in 5 minutes
+      .sign(getImpersonationSecret());
 
     // Log the impersonation attempt
     const ip = request.headers.get('x-forwarded-for')?.split(',')[0] || 'unknown';
@@ -95,7 +98,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      link: magicLink.properties.action_link,
+      link: `${siteUrl}/api/admin/users/impersonate/verify?token=${token}`,
       email: targetUser.user.email,
     });
   } catch (error) {
