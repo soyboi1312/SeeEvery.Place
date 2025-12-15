@@ -72,11 +72,20 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'en_US',
     siteName: 'See Every Place',
+    images: [
+      {
+        url: '/files/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'See Every Place - Free Travel Tracker',
+      },
+    ],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'See Every Place - Track Your World Travels & Bucket List',
     description: 'Map countries, states, national parks, stadiums, and museums. Track where you have been and see every place you want to go.',
+    images: ['/files/og-image.png'],
   },
   category: 'travel',
   classification: 'Travel Tracking Application',
