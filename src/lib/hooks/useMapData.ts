@@ -5,8 +5,8 @@
 import { useMemo, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Category, Status, UserSelections } from '@/lib/types';
-import { MarkerData, getMarkersFromData } from '@/lib/markerUtils';
-import { loadCategoryData } from '@/lib/categoryUtils';
+import { MarkerData, MarkerableItem, getMarkersFromData } from '@/lib/markerUtils';
+import { loadCategoryData, CategoryDataItem } from '@/lib/categoryUtils';
 
 // Selection type used across map components
 interface Selection {
@@ -75,7 +75,7 @@ export function getMarkerSize(zoom: number): 'small' | 'default' {
  * The heavy JSON data is cached to prevent repeated network/parsing overhead
  */
 export function useCategoryData(category: Category) {
-  return useQuery({
+  return useQuery<CategoryDataItem[]>({
     queryKey: ['categoryData', category],
     queryFn: () => loadCategoryData(category),
     // Category data is static, can be cached indefinitely
@@ -102,10 +102,12 @@ export function useCategoryMarkers(
   const markers = useMemo(() => {
     if (!categoryData) return [];
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // CategoryDataItem is a union of all category types; MarkerableItem is the
+    // minimal interface needed for marker generation. Items without lat/lng
+    // (e.g., countries which use polygon rendering) are filtered out by getMarkersFromData.
     return getMarkersFromData(
       category,
-      categoryData as any[],
+      categoryData as MarkerableItem[],
       selections,
       filterAlbersUsa,
       subcategory

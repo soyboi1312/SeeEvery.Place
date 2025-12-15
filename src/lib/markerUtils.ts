@@ -16,22 +16,27 @@ export interface MarkerData {
   parkType?: string;
 }
 
-// Helper interface for raw data items (duck typing)
-interface CoordinateItem {
+/**
+ * Interface for items that can be rendered as map markers.
+ * Used by getMarkersFromData to filter and transform category data.
+ * Items without lat/lng (e.g., countries using polygon rendering) are filtered out.
+ */
+export interface MarkerableItem {
   id: string;
-  lat: number;
-  lng: number;
-  type?: string; // For parks
+  lat?: number;
+  lng?: number;
+  type?: string; // For parks with subcategory filtering
 }
 
 /**
  * Generate markers from loaded category data.
  * This is a pure function that processes data arrays into markers
  * without importing the data itself.
+ * Items without lat/lng coordinates are filtered out (e.g., countries use polygons).
  */
 export function getMarkersFromData(
   category: Category,
-  data: CoordinateItem[],
+  data: MarkerableItem[],
   selections: UserSelections,
   filterAlbersUsa = false,
   subcategory?: string
@@ -42,7 +47,7 @@ export function getMarkersFromData(
   // Create a quick lookup map for the current data
   // This is O(N) but N is small per category (max ~500 items)
   // and this runs only when that category is active
-  const dataMap = new Map<string, CoordinateItem>();
+  const dataMap = new Map<string, MarkerableItem>();
   for (const item of data) {
     dataMap.set(item.id, item);
   }
