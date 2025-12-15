@@ -17,7 +17,7 @@ export default function StaticUSMap({ selections }: StaticUSMapProps) {
   return (
     <ComposableMap
       projection="geoAlbersUsa"
-      projectionConfig={{ scale: 1000 }}
+      projectionConfig={{ scale: 800 }}
       viewBox="0 0 800 400"
       width={800}
       height={400}
