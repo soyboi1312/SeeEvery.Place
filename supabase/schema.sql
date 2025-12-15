@@ -95,6 +95,35 @@ create policy "Users can update own profile"
   on public.profiles for update
   using (auth.uid() = id);
 
+-- SECURITY: Prevent users from manually updating sensitive fields (XP, level)
+-- These fields should only be updated by server-side sync logic using service_role
+create or replace function public.protect_sensitive_profile_fields()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  -- Only enforce for authenticated users (not service_role)
+  if auth.role() = 'authenticated' then
+    -- Prevent XP manipulation
+    if NEW.total_xp is distinct from OLD.total_xp then
+      raise exception 'Cannot manually update total_xp';
+    end if;
+    -- Prevent level manipulation
+    if NEW.level is distinct from OLD.level then
+      raise exception 'Cannot manually update level';
+    end if;
+  end if;
+  return NEW;
+end;
+$$;
+
+drop trigger if exists protect_profile_fields on public.profiles;
+create trigger protect_profile_fields
+  before update on public.profiles
+  for each row execute function public.protect_sensitive_profile_fields();
+
 -- Trigger to create profile on user signup
 create or replace function public.handle_new_user()
 returns trigger as $$
@@ -371,10 +400,10 @@ create policy "Users can view relevant activities"
     )
   );
 
+-- NOTE: No INSERT policy for activity_feed.
+-- Activities should only be created by database triggers or server-side code,
+-- never directly from the client. This prevents users from faking achievements.
 drop policy if exists "Users can create own activities" on public.activity_feed;
-create policy "Users can create own activities"
-  on public.activity_feed for insert
-  with check (auth.uid() = user_id);
 
 create index if not exists activity_feed_user_id_idx on public.activity_feed(user_id);
 create index if not exists activity_feed_created_at_idx on public.activity_feed(created_at desc);
