@@ -145,8 +145,9 @@ const nextConfig = {
   },
   // Optimize package imports for better tree-shaking
   experimental: {
-    // NOTE: React Compiler requires babel-plugin-react-compiler to be installed
-    // To enable: npm install babel-plugin-react-compiler && add reactCompiler: true
+    // React Compiler for automatic memoization optimization
+    // Reduces manual memo/useCallback overhead and handles deep dependency comparisons
+    reactCompiler: true,
     // Inline critical CSS and defer non-critical to reduce render-blocking
     optimizeCss: true,
     optimizePackageImports: [
