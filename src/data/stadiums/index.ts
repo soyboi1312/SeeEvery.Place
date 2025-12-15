@@ -14,10 +14,11 @@ export { nflStadiums } from './nfl';
 export { nbaStadiums } from './nba';
 export { nhlStadiums } from './nhl';
 export { mlsStadiums, internationalSoccerStadiums, soccerStadiums } from './soccer';
+export { euroFootballStadiums, premierLeagueStadiums, laLigaStadiums, bundesligaStadiums, serieAStadiums, ligue1Stadiums } from './euroFootball';
+export { rugbyStadiums, sixNationsStadiums, premiershipRugbyStadiums, top14Stadiums, urcStadiums, superRugbyStadiums } from './rugby';
+export { cricketStadiums, australiaCricketStadiums, englandCricketStadiums, indiaCricketStadiums } from './cricket';
 export {
   internationalBaseballStadiums,
-  cricketStadiums,
-  rugbyStadiums,
   tennisStadiums,
   motorsportStadiums,
 } from './other';
@@ -46,4 +47,7 @@ export {
   getNbaStadiums,
   getNhlStadiums,
   getSoccerStadiums,
+  getEuroFootballStadiums,
+  getRugbyStadiums,
+  getCricketStadiums,
 } from './stadiumUtils';

@@ -54,6 +54,9 @@ export const SPORT_TYPES: Record<string, string> = {
   nbaStadiums: 'Basketball',
   nhlStadiums: 'Hockey',
   soccerStadiums: 'Football',
+  euroFootballStadiums: 'Football',
+  rugbyStadiums: 'Rugby',
+  cricketStadiums: 'Cricket',
 };
 
 // Check if category is a stadium type

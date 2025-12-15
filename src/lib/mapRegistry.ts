@@ -25,7 +25,7 @@ import { worldCities } from '@/data/worldCities';
 
 // Import lazy-loaded data generators
 import { get5000mPeaks, getUS14ers, Mountain } from '@/data/mountains';
-import { getMlbStadiums, getNflStadiums, getNbaStadiums, getNhlStadiums, getSoccerStadiums, Stadium } from '@/data/stadiums';
+import { getMlbStadiums, getNflStadiums, getNbaStadiums, getNhlStadiums, getSoccerStadiums, getEuroFootballStadiums, getRugbyStadiums, getCricketStadiums, Stadium } from '@/data/stadiums';
 
 // =====================
 // Unified Registry (OCP + Performance)
@@ -66,6 +66,9 @@ const registry: Partial<Record<Category, DataGenerator>> = {
   nbaStadiums: getNbaStadiums as DataGenerator,
   nhlStadiums: getNhlStadiums as DataGenerator,
   soccerStadiums: getSoccerStadiums as DataGenerator,
+  euroFootballStadiums: getEuroFootballStadiums as DataGenerator,
+  rugbyStadiums: getRugbyStadiums as DataGenerator,
+  cricketStadiums: getCricketStadiums as DataGenerator,
 };
 
 // Single cache for all lookup maps
