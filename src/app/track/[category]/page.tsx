@@ -131,6 +131,9 @@ const categoryKeywords: Record<Category, string[]> = {
   themeParks: ['theme park tracker', 'amusement parks visited', 'Disney checklist', 'roller coaster bucket list'],
   surfingReserves: ['surf spot tracker', 'waves surfed', 'surfing bucket list', 'beach breaks visited'],
   weirdAmericana: ['roadside attractions', 'quirky landmarks', 'weird museums', 'unusual USA sights', 'Americana bucket list'],
+  euroFootballStadiums: ['European football stadiums', 'Premier League stadiums', 'La Liga stadiums', 'Bundesliga stadiums', 'Serie A grounds', 'soccer grounds Europe'],
+  rugbyStadiums: ['rugby stadium tracker', 'rugby grounds visited', 'Six Nations stadiums', 'rugby world cup venues', 'Premiership Rugby grounds'],
+  cricketStadiums: ['cricket ground tracker', 'cricket stadiums visited', 'Test cricket venues', 'IPL stadiums', 'international cricket grounds'],
 };
 
 // FAQ content for each category
@@ -314,6 +317,9 @@ const categoryDescriptions: Record<Category, string> = {
   themeParks: 'Track theme parks and attractions. From Disney to Universal, check off every magical destination.',
   surfingReserves: 'Track World Surfing Reserves and legendary breaks. From Pipeline to Teahupo\'o, mark every wave you have ridden.',
   weirdAmericana: 'Track quirky roadside attractions across America. From giant balls of twine to mystery spots, collect the weird and wonderful!',
+  euroFootballStadiums: 'Track European football stadiums across top leagues. From the Premier League to La Liga, mark every ground you have visited.',
+  rugbyStadiums: 'Track professional rugby stadiums worldwide. From Six Nations to Super Rugby venues, record every ground you have experienced.',
+  cricketStadiums: 'Track international cricket grounds. From Lord\'s to the MCG, mark every Test and ODI venue you have visited.',
 };
 
 // Example places for each category with unique facts and reasons to visit
@@ -544,6 +550,21 @@ const categoryExamples: Record<Category, PlaceExample[]> = {
     { name: 'House on the Rock, Wisconsin', fact: 'Alex Jordan Jr. built this deranged dreamscape over 50 years, filling it with the world\'s largest carousel (269 animals, no horses), a 200-foot model sea creature, and collections too bizarre to categorize. Neil Gaiman featured it in "American Gods."', reason: 'Get lost in the most eccentric museum in America, where overwhelming excess is the point. Ride the world\'s largest carousel, gaze at the whale fighting a giant squid, play endless automated orchestras, and exit not quite sure what you just experienced.' },
     { name: 'Corn Palace, South Dakota', fact: 'The only palace in the world decorated with corn. Exterior murals made entirely from corn and grain are redesigned and reapplied every year. The building has served as the town\'s auditorium since 1892.', reason: 'See the world\'s only palace decorated with thousands of ears of corn in intricate designs that change annually. Watch artisans apply this year\'s corn mosaic, attend events in the auditorium, and appreciate the agricultural pride that keeps this tradition alive.' },
     { name: 'Mystery Spot, California', fact: 'This tourist attraction claims balls roll uphill and people change height due to gravitational anomalies. In reality, the tilted cabin creates optical illusions that fool your brain, but knowing the trick doesn\'t make it less fun.', reason: 'Experience mind-bending optical illusions in a tilted cabin that\'s delighted visitors since 1939. Lean at impossible angles, watch water "flow uphill," and appreciate this classic roadside attraction that reminds us our perception isn\'t always reality.' },
+  ],
+  euroFootballStadiums: [
+    { name: 'Old Trafford, Manchester', fact: 'Known as the "Theatre of Dreams," Old Trafford has been home to Manchester United since 1910. The stadium was rebuilt after WWII bombing and has hosted legends from George Best to Cristiano Ronaldo.', reason: 'Experience the atmosphere where Manchester United became the most valuable football club in England. Walk through the Munich Tunnel, see Sir Alex Ferguson\'s statue, and feel the weight of 20 league titles.' },
+    { name: 'Allianz Arena, Munich', fact: 'The exterior features 2,874 inflated panels that can display 16 million colors, glowing red for Bayern Munich matches. It\'s one of the most technologically advanced stadiums in the world.', reason: 'Watch Bayern Munich dominate the Bundesliga in a stadium that glows like a spaceship. Tour the museum, see countless trophies, and experience German football efficiency at its finest.' },
+    { name: 'San Siro, Milan', fact: 'The only major stadium shared by two fierce rivals: AC Milan and Inter Milan. The towering spiral ramps and iconic three-tier design make it one of football\'s most recognizable structures.', reason: 'Experience the Derby della Madonnina atmosphere where the same stadium hosts two of Europe\'s most successful clubs. Climb the iconic ramps and feel the passion of Italian calcio.' },
+  ],
+  rugbyStadiums: [
+    { name: 'Twickenham, London', fact: 'The home of English rugby and the largest dedicated rugby union stadium in the world with 82,000 capacity. Known as "HQ" or "Twickers," it has hosted Six Nations matches since 1910.', reason: 'Experience rugby at its spiritual home where England has played for over a century. Tour the World Rugby Museum, walk the hallowed turf, and feel why this ground is rugby\'s most iconic venue.' },
+    { name: 'Millennium Stadium, Cardiff', fact: 'The first stadium in the UK with a fully retractable roof, creating an intimidating cauldron of Welsh passion. The roof takes 20 minutes to close and can withstand 130mph winds.', reason: 'Hear 74,500 Welsh fans sing "Bread of Heaven" before a Six Nations match. The atmosphere when Wales plays at home is considered the most passionate in world rugby.' },
+    { name: 'Eden Park, Auckland', fact: 'New Zealand\'s largest stadium and the All Blacks\' fortress where they haven\'t lost since 1994. The ground has hosted two Rugby World Cup finals and countless Bledisloe Cup encounters.', reason: 'Visit the ground where the All Blacks are unbeatable and witness the haka performed by the world\'s greatest rugby team. No stadium on Earth has a better home winning record.' },
+  ],
+  cricketStadiums: [
+    { name: 'Lord\'s, London', fact: 'Known as the "Home of Cricket," Lord\'s has hosted matches since 1814 and is owned by the Marylebone Cricket Club (MCC). The famous slope from one side to the other affects bowling strategy.', reason: 'Visit cricket\'s most sacred ground where the Laws of the Game were written. See the Ashes urn in the museum, walk through the Long Room, and experience cricket at its historic best.' },
+    { name: 'Melbourne Cricket Ground', fact: 'The largest cricket stadium in the world with 100,024 capacity. The MCG has hosted the first-ever Test match (1877), AFL Grand Finals, and the 1956 and 2006 Olympic ceremonies.', reason: 'Experience the Boxing Day Test atmosphere with 90,000 fans creating one of sport\'s great traditions. The MCG is to Australian sport what Wembley is to English football.' },
+    { name: 'Eden Gardens, Kolkata', fact: 'India\'s most iconic cricket ground can hold 66,000 passionate fans and has hosted some of cricket\'s most dramatic matches, including India\'s famous 2001 victory over Australia after following on.', reason: 'Feel the electricity of 66,000 Indian cricket fans creating an atmosphere unmatched anywhere in world sport. Eden Gardens turns cricket into a religious experience.' },
   ],
 };
 

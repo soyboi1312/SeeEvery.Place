@@ -25,7 +25,8 @@ import { worldCities } from '@/data/worldCities';
 
 // Import lazy-loaded data generators
 import { get5000mPeaks, getUS14ers, Mountain } from '@/data/mountains';
-import { getMlbStadiums, getNflStadiums, getNbaStadiums, getNhlStadiums, getSoccerStadiums, getEuroFootballStadiums, getRugbyStadiums, getCricketStadiums, Stadium } from '@/data/stadiums';
+import { getMlbStadiums, getNflStadiums, getNbaStadiums, getNhlStadiums, getSoccerStadiums, getEuroFootballStadiums, getRugbyStadiums, getCricketStadiums } from '@/data/stadiums/stadiumUtils';
+import type { Stadium } from '@/data/stadiums';
 
 // =====================
 // Unified Registry (OCP + Performance)

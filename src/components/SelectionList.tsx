@@ -166,6 +166,21 @@ const emptyStateContent: Record<Category, { icon: string; title: string; subtitl
     title: 'Discover Weird America',
     subtitle: 'Giant twine balls, mystery spots, UFO museums - embrace the quirky!',
   },
+  euroFootballStadiums: {
+    icon: '⚽',
+    title: 'European Football',
+    subtitle: 'From the Premier League to La Liga - visit the greatest grounds in Europe!',
+  },
+  rugbyStadiums: {
+    icon: '🏉',
+    title: 'Rugby Grounds',
+    subtitle: 'Twickenham, Millennium Stadium, Eden Park - experience rugby worldwide!',
+  },
+  cricketStadiums: {
+    icon: '🏏',
+    title: 'Cricket Grounds',
+    subtitle: 'Lord\'s, the MCG, Eden Gardens - track the world\'s great cricket venues!',
+  },
 };
 
 export default function SelectionList({
