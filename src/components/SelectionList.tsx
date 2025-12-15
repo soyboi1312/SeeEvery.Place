@@ -733,7 +733,7 @@ const ItemCard = memo(function ItemCard({ item, status, visitedDate, notes, onTo
           <Button
             variant="ghost"
             size="icon"
-            className="h-8 w-8 shrink-0 text-muted-foreground/50 hover:text-blue-500 opacity-0 group-hover/row:opacity-100 transition-opacity"
+            className="h-8 w-8 shrink-0 text-muted-foreground/50 hover:text-blue-500 opacity-50 group-hover/row:opacity-100 transition-opacity"
             onClick={(e) => {
               e.stopPropagation();
               onShowInfo();
@@ -748,7 +748,7 @@ const ItemCard = memo(function ItemCard({ item, status, visitedDate, notes, onTo
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8 shrink-0 text-muted-foreground/50 hover:text-indigo-500 opacity-0 group-hover/row:opacity-100 transition-opacity"
+                className="h-8 w-8 shrink-0 text-muted-foreground/50 hover:text-indigo-500 opacity-50 group-hover/row:opacity-100 transition-opacity"
                 onClick={(e) => e.stopPropagation()}
               >
                 <Pencil className="w-3.5 h-3.5" />
