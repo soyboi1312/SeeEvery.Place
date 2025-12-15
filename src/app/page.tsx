@@ -264,7 +264,7 @@ function HomeContent() {
         onPreloadAuth={preloadAuthModal}
       />
 
-      <div className="max-w-6xl mx-auto px-4 py-6 space-y-6 flex-grow">
+      <div className="max-w-6xl mx-auto px-4 py-6 space-y-6 flex-grow w-full overflow-hidden">
         {/* Hero Section - NOW RENDERS IMMEDIATELY FOR FAST LCP */}
         <div className="text-center py-4 sm:py-8">
           <h1 className="text-3xl sm:text-4xl font-bold text-gray-800 dark:text-white mb-2">
