@@ -72,6 +72,8 @@ export interface Selection {
   updatedAt?: number;
   /** Soft-delete flag for tracking deletions across devices */
   deleted?: boolean;
+  /** Date the location was visited (ISO string YYYY-MM-DD) */
+  visitedDate?: string;
 }
 
 // Derive UserSelections type from Category (each category has Selection[])

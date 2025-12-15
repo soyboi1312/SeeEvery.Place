@@ -290,7 +290,8 @@ export function setSelectionStatus(
   selections: UserSelections,
   category: Category,
   id: string,
-  status: Status | null
+  status: Status | null,
+  visitedDate?: string
 ): UserSelections {
   const categorySelections = [...(selections[category] || [])];
   const existingIndex = categorySelections.findIndex(s => s.id === id);
@@ -308,10 +309,20 @@ export function setSelectionStatus(
     }
   } else {
     // Add or update with timestamp
+    // Use provided date, or preserve existing date if not provided
+    const existingDate = existingIndex !== -1 ? categorySelections[existingIndex].visitedDate : undefined;
+    const newItem = {
+      id,
+      status,
+      updatedAt: now,
+      deleted: false,
+      visitedDate: visitedDate !== undefined ? visitedDate : existingDate,
+    };
+
     if (existingIndex !== -1) {
-      categorySelections[existingIndex] = { id, status, updatedAt: now, deleted: false };
+      categorySelections[existingIndex] = newItem;
     } else {
-      categorySelections.push({ id, status, updatedAt: now, deleted: false });
+      categorySelections.push(newItem);
     }
   }
 
