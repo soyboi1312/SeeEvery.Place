@@ -9,7 +9,6 @@ import { createClient } from '@/lib/supabase/server';
 export async function GET(request: NextRequest) {
   try {
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
 
     const searchParams = request.nextUrl.searchParams;
     const type = searchParams.get('type') || 'global';
@@ -31,6 +30,22 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    // Parallelize auth check with global leaderboard fetch
+    // For global leaderboard, we don't need to wait for auth before fetching data
+    const userPromise = supabase.auth.getUser();
+    const leaderboardPromise = type === 'global'
+      ? supabase.rpc('get_xp_leaderboard', {
+          time_period: period,
+          page_limit: limit,
+          page_offset: offset,
+        })
+      : Promise.resolve({ data: null, error: null });
+
+    const [{ data: { user } }, leaderboardResult] = await Promise.all([
+      userPromise,
+      leaderboardPromise,
+    ]);
+
     // Friends leaderboard requires authentication
     if (type === 'friends' && !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -39,19 +54,16 @@ export async function GET(request: NextRequest) {
     let data, error;
 
     if (type === 'friends') {
+      // Fetch friends leaderboard now that we confirmed auth
       const result = await supabase.rpc('get_friends_leaderboard', {
         time_period: period,
       });
       data = result.data;
       error = result.error;
     } else {
-      const result = await supabase.rpc('get_xp_leaderboard', {
-        time_period: period,
-        page_limit: limit,
-        page_offset: offset,
-      });
-      data = result.data;
-      error = result.error;
+      // Use already-fetched global leaderboard
+      data = leaderboardResult.data;
+      error = leaderboardResult.error;
     }
 
     if (error) {
@@ -98,7 +110,7 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       type,
       period,
       leaderboard,
@@ -109,6 +121,14 @@ export async function GET(request: NextRequest) {
         hasMore: leaderboard.length === limit,
       } : null,
     });
+
+    // HTTP caching for global leaderboard (60s edge cache, 5min stale-while-revalidate)
+    // Friends leaderboard is user-specific so we don't cache it
+    if (type === 'global') {
+      response.headers.set('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300');
+    }
+
+    return response;
   } catch (error) {
     console.error('Leaderboard API error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

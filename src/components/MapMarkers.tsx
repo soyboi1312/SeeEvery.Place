@@ -1,8 +1,13 @@
 /**
  * src/components/MapMarkers.tsx
  * Shared map marker SVG components.
- * * UPDATE: All specific category markers now render the unified 'LogoMarker'
+ *
+ * UPDATE: All specific category markers now render the unified 'LogoMarker'
  * to enforce consistent brand styling (Pin with Checkmark) across the map.
+ *
+ * OPTIMIZATION: Uses SVG <symbol> and <use> to avoid duplicating SVG path data
+ * in the DOM for hundreds of markers. The symbols are defined once in
+ * MarkerSymbolDefs and referenced by each marker instance.
  */
 
 import { memo } from 'react';
@@ -20,15 +25,45 @@ interface SportMarkerProps extends MarkerProps {
 
 const STROKE_COLOR = "#ffffff";
 
+// SVG path data for the marker (512x512 viewBox)
+const PIN_PATH = "M256 32C158.8 32 80 110.8 80 208c0 40.3 13.7 78.6 38.3 112L256 480l137.7-160C418.3 286.6 432 248.3 432 208 432 110.8 353.2 32 256 32z";
+const CHECK_PATH = "M236 228l-20-20-12 12 32 32 64-64-12-12-52 52z";
+
+// -----------------------------------------------------------------------------
+// MARKER SYMBOL DEFINITIONS
+// Add this component inside ComposableMap to define reusable symbols
+// -----------------------------------------------------------------------------
+
+/**
+ * SVG symbol definitions for map markers.
+ * Must be rendered inside an SVG element (e.g., ComposableMap).
+ * These symbols are referenced by LogoMarker using <use href="#symbol-id">.
+ */
+export const MarkerSymbolDefs = memo(function MarkerSymbolDefs() {
+  return (
+    <defs>
+      {/* Pin outline symbol - the shape without fill for dynamic coloring */}
+      <symbol id="marker-pin-path" viewBox="0 0 512 512">
+        <path d={PIN_PATH} />
+      </symbol>
+      {/* Checkmark symbol */}
+      <symbol id="marker-check-path" viewBox="0 0 512 512">
+        <path d={CHECK_PATH} transform="translate(0, -10) scale(1.1)" />
+      </symbol>
+    </defs>
+  );
+});
+
 // -----------------------------------------------------------------------------
 // BRAND LOGO MARKER (Pin with Checkmark)
+// Uses <use> to reference symbols, reducing DOM size for many markers
 // -----------------------------------------------------------------------------
 
 function LogoMarkerBase({ fillColor, size = 'default' }: MarkerProps) {
   // Scale down the 512x512 paths to fit the map marker size
   // Small: ~14px, Default: ~24px
   const scale = size === 'small' ? 0.028 : 0.046;
-  
+
   // Calculate offsets to align the pin tip (256, 480) to the map coordinate (0, 0)
   // X: Center horizontally (-256 * scale)
   // Y: Align bottom tip (-480 * scale)
@@ -38,19 +73,22 @@ function LogoMarkerBase({ fillColor, size = 'default' }: MarkerProps) {
   return (
     <g transform={`translate(${xOffset}, ${yOffset})`}>
       <g transform={`scale(${scale})`}>
-        {/* Pin Shape - Tip is at 256, 480 */}
-        <path
-          d="M256 32C158.8 32 80 110.8 80 208c0 40.3 13.7 78.6 38.3 112L256 480l137.7-160C418.3 286.6 432 248.3 432 208 432 110.8 353.2 32 256 32z"
+        {/* Pin Shape - uses symbol reference */}
+        <use
+          href="#marker-pin-path"
           fill={fillColor}
           stroke={STROKE_COLOR}
           strokeWidth="25"
+          width="512"
+          height="512"
         />
         {/* Checkmark - White (Stroke Color) */}
-        <path
-          d="M236 228l-20-20-12 12 32 32 64-64-12-12-52 52z"
+        <use
+          href="#marker-check-path"
           fill={STROKE_COLOR}
-          transform="translate(0, -10) scale(1.1)"
           stroke="none"
+          width="512"
+          height="512"
         />
       </g>
     </g>
