@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import { Status, Category } from '@/lib/types';
-import { Search, Check, Star, Circle, Trash2, X, AlertCircle, Calendar as CalendarIcon, StickyNote } from 'lucide-react';
+import { Search, Check, Star, Circle, Trash2, X, AlertCircle, Calendar as CalendarIcon, StickyNote, Lock } from 'lucide-react';
 
 // Shadcn Imports
 import { Card } from '@/components/ui/card';
@@ -565,16 +565,21 @@ function ItemCard({ item, status, visitedDate, notes, onToggle, onSetStatus, onE
           <Check className="w-4 h-4 mr-2 text-green-500" />
           Mark Visited
         </ContextMenuItem>
-        {isAuthenticated && (
-          <ContextMenuItem onClick={onEditDate}>
-            <CalendarIcon className="w-4 h-4 mr-2 text-blue-500" />
-            {visitedDate ? 'Edit Visit Date' : 'Mark Visited on Date...'}
-          </ContextMenuItem>
-        )}
-        {isAuthenticated && (
-          <ContextMenuItem onClick={() => onEditNote(notes)}>
-            <StickyNote className="w-4 h-4 mr-2 text-indigo-500" />
-            {notes ? 'Edit Note' : 'Add Note'}
+        {isAuthenticated ? (
+          <>
+            <ContextMenuItem onClick={onEditDate}>
+              <CalendarIcon className="w-4 h-4 mr-2 text-blue-500" />
+              {visitedDate ? 'Edit Visit Date' : 'Mark Visited on Date...'}
+            </ContextMenuItem>
+            <ContextMenuItem onClick={() => onEditNote(notes)}>
+              <StickyNote className="w-4 h-4 mr-2 text-indigo-500" />
+              {notes ? 'Edit Note' : 'Add Note'}
+            </ContextMenuItem>
+          </>
+        ) : (
+          <ContextMenuItem disabled className="opacity-70 cursor-not-allowed">
+            <Lock className="w-4 h-4 mr-2 text-muted-foreground" />
+            <span className="text-muted-foreground">Sign in to add dates & notes</span>
           </ContextMenuItem>
         )}
         <ContextMenuItem onClick={() => onSetStatus(item.id, 'bucketList')}>
