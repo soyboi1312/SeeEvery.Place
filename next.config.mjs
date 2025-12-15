@@ -123,6 +123,13 @@ const withPWA = withPWAInit({
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  // Remove console.log in production builds (keeps warnings/errors for debugging)
+  // Reduces bundle size and cleans up client-side execution
+  compiler: {
+    removeConsole: process.env.NODE_ENV === "production" ? {
+      exclude: ["error", "warn"],
+    } : false,
+  },
   // Use Cloudflare Image Resizing instead of Next.js default optimizer
   // This offloads image processing to Cloudflare's edge, avoiding Node.js limits on Workers
   images: {
@@ -181,6 +188,12 @@ const nextConfig = {
           {
             key: 'Permissions-Policy',
             value: 'camera=(), microphone=(), geolocation=()',
+          },
+          {
+            // HSTS: Force HTTPS for 2 years, include subdomains, allow preload list inclusion
+            // Prevents downgrade attacks and saves RTT of HTTP->HTTPS redirect
+            key: 'Strict-Transport-Security',
+            value: 'max-age=63072000; includeSubDomains; preload',
           },
         ],
       },
