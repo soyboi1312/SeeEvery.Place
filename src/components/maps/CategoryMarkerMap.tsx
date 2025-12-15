@@ -10,7 +10,7 @@
 import { memo, useState, useCallback } from 'react';
 import { Geographies, Geography } from '@vnedyalk0v/react19-simple-maps';
 import { useNameGetter, getMarkerSize, useCategoryMarkers } from '@/lib/hooks/useMapData';
-import { useMarkerClustering, isCluster } from '@/lib/hooks/useMarkerClustering';
+import { useClusteringWorker, isCluster } from '@/lib/hooks/useClusteringWorker';
 import { renderCategoryMarker } from '@/components/MapMarkers/registry';
 import { MarkerMapProps, CategoryMarkerMapConfig } from './types';
 import InteractiveMapShell from './InteractiveMapShell';
@@ -76,8 +76,8 @@ const CategoryMarkerMap = memo(function CategoryMarkerMap({
   const markers = useCategoryMarkers(category, selections, filterAlbersUsa, subcategory);
 
   // Use marker clustering for large datasets (>100 markers)
-  // This significantly improves performance for categories like cities, weird americana
-  const { clusters, isClusteringEnabled, getClusterExpansionZoom } = useMarkerClustering(
+  // Web Worker offloads clustering to separate thread for better UI performance
+  const { clusters, isClusteringEnabled, getClusterExpansionZoom } = useClusteringWorker(
     markers,
     currentZoom,
     undefined, // Use world bounds

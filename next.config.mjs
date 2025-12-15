@@ -86,6 +86,36 @@ const withPWA = withPWAInit({
           },
         },
       },
+      {
+        // Cache clustering worker file - it rarely changes
+        urlPattern: /\/clustering-worker\.js$/i,
+        handler: "CacheFirst",
+        options: {
+          cacheName: "workers",
+          expiration: {
+            maxEntries: 5,
+            maxAgeSeconds: 7 * 24 * 60 * 60, // 7 days
+          },
+          cacheableResponse: {
+            statuses: [0, 200],
+          },
+        },
+      },
+      {
+        // Cache static JSON data files
+        urlPattern: /\/data\/.*\.json$/i,
+        handler: "CacheFirst",
+        options: {
+          cacheName: "static-data",
+          expiration: {
+            maxEntries: 30,
+            maxAgeSeconds: 365 * 24 * 60 * 60, // 1 year (data rarely changes)
+          },
+          cacheableResponse: {
+            statuses: [0, 200],
+          },
+        },
+      },
     ],
   },
 });
