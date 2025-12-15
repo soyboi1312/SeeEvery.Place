@@ -4,7 +4,8 @@ import { useState, useMemo, useRef, useCallback, memo } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { Status, Category } from '@/lib/types';
 import { useDebounce } from '@/lib/hooks/useDebounce';
-import { Search, Check, Star, Circle, Trash2, X, AlertCircle, Calendar as CalendarIcon, StickyNote, Lock, Info, Pencil } from 'lucide-react';
+import { Search, Check, Star, Circle, Trash2, X, AlertCircle, Calendar as CalendarIcon, StickyNote, Lock, Info, Pencil, Map } from 'lucide-react';
+import { AddToTripDialog } from '@/components/AddToTripDialog';
 
 // Shadcn Imports
 import { Card } from '@/components/ui/card';
@@ -228,6 +229,9 @@ export default function SelectionList({
   const [infoItem, setInfoItem] = useState<{ id: string; name: string } | null>(null);
   const [descriptions, setDescriptions] = useState<Record<string, string> | null>(null);
   const [isLoadingInfo, setIsLoadingInfo] = useState(false);
+
+  // Add to Trip Dialog state
+  const [tripDialogItem, setTripDialogItem] = useState<{ id: string; name: string } | null>(null);
 
   // Debounce search query to prevent lag on large lists (300ms delay)
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
@@ -482,6 +486,7 @@ export default function SelectionList({
                       onEditNote={(currentNote) => openNoteDialog(row.item.id, row.item.name, currentNote)}
                       isAuthenticated={isAuthenticated}
                       onShowInfo={() => handleShowInfo(row.item.id, row.item.name)}
+                      onAddToTrip={() => setTripDialogItem({ id: row.item.id, name: row.item.name })}
                     />
                   </div>
                 </div>
@@ -518,6 +523,7 @@ export default function SelectionList({
                       onEditNote={(currentNote) => openNoteDialog(item.id, item.name, currentNote)}
                       isAuthenticated={isAuthenticated}
                       onShowInfo={() => handleShowInfo(item.id, item.name)}
+                      onAddToTrip={() => setTripDialogItem({ id: item.id, name: item.name })}
                     />
                   ))}
                 </div>
@@ -659,6 +665,17 @@ export default function SelectionList({
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Add to Trip Dialog */}
+      {category && tripDialogItem && (
+        <AddToTripDialog
+          open={!!tripDialogItem}
+          onOpenChange={(open) => !open && setTripDialogItem(null)}
+          category={category}
+          placeId={tripDialogItem.id}
+          placeName={tripDialogItem.name}
+        />
+      )}
     </Card>
   );
 }
@@ -674,10 +691,11 @@ interface ItemCardProps {
   onEditNote: (currentNote?: string) => void;
   isAuthenticated?: boolean;
   onShowInfo: () => void;
+  onAddToTrip: () => void;
 }
 
 // Memoized ItemCard to prevent unnecessary re-renders during virtualization
-const ItemCard = memo(function ItemCard({ item, status, visitedDate, notes, onToggle, onSetStatus, onEditDate, onEditNote, isAuthenticated, onShowInfo }: ItemCardProps) {
+const ItemCard = memo(function ItemCard({ item, status, visitedDate, notes, onToggle, onSetStatus, onEditDate, onEditNote, isAuthenticated, onShowInfo, onAddToTrip }: ItemCardProps) {
   // Styles based on status
   const getStyles = (s: Status) => {
     switch (s) {
@@ -771,6 +789,13 @@ const ItemCard = memo(function ItemCard({ item, status, visitedDate, notes, onTo
                     <StickyNote className="w-4 h-4 mr-2 text-indigo-500" />
                     {notes ? 'Edit Note' : 'Add Note'}
                   </DropdownMenuItem>
+                  <DropdownMenuItem onClick={(e) => {
+                    e.stopPropagation();
+                    onAddToTrip();
+                  }}>
+                    <Map className="w-4 h-4 mr-2 text-emerald-500" />
+                    Add to Trip
+                  </DropdownMenuItem>
                 </>
               ) : (
                 <DropdownMenuItem disabled>
@@ -809,6 +834,12 @@ const ItemCard = memo(function ItemCard({ item, status, visitedDate, notes, onTo
           <Star className="w-4 h-4 mr-2 text-amber-500" />
           Add to Bucket List
         </ContextMenuItem>
+        {isAuthenticated && (
+          <ContextMenuItem onClick={onAddToTrip}>
+            <Map className="w-4 h-4 mr-2 text-emerald-500" />
+            Add to Trip
+          </ContextMenuItem>
+        )}
         <ContextMenuSeparator />
         <ContextMenuItem onClick={() => onSetStatus(item.id, null)}>
           <X className="w-4 h-4 mr-2" />

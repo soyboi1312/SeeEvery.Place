@@ -159,3 +159,74 @@ export interface UserProfile {
   createdAt: Date;
   updatedAt: Date;
 }
+
+// =====================
+// ITINERARY TYPES (Collaborative Trips)
+// =====================
+
+export type ItineraryStatus = 'draft' | 'planned' | 'in_progress' | 'completed';
+export type CollaboratorRole = 'owner' | 'editor' | 'viewer';
+
+export interface Itinerary {
+  id: string;
+  owner_id: string;
+  owner_username?: string;
+  owner_avatar_url?: string;
+  owner_full_name?: string;
+  title: string;
+  description?: string | null;
+  cover_image_url?: string | null;
+  start_date?: string | null; // ISO date string
+  end_date?: string | null;
+  is_public: boolean;
+  status: ItineraryStatus;
+  item_count?: number;
+  collaborator_count?: number;
+  is_owner?: boolean;
+  user_role?: CollaboratorRole;
+  can_edit?: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ItineraryItem {
+  id: string;
+  itinerary_id?: string;
+  category: Category;
+  place_id: string;
+  place_name: string;
+  notes?: string | null;
+  day_number?: number | null;
+  sort_order: number;
+  added_by?: string | null;
+  added_by_username?: string | null;
+  created_at: string;
+}
+
+export interface ItineraryCollaborator {
+  user_id: string;
+  username: string;
+  full_name?: string | null;
+  avatar_url?: string | null;
+  role: CollaboratorRole;
+  is_owner: boolean;
+  created_at: string;
+}
+
+export interface CreateItineraryInput {
+  title: string;
+  description?: string;
+  start_date?: string;
+  end_date?: string;
+  is_public?: boolean;
+  status?: ItineraryStatus;
+}
+
+export interface AddItineraryItemInput {
+  itinerary_id: string;
+  category: Category;
+  place_id: string;
+  place_name: string;
+  notes?: string;
+  day_number?: number;
+}
