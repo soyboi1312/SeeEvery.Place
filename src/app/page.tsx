@@ -331,6 +331,7 @@ function HomeContent() {
               title={categoryTitles[activeCategory]}
               stats={currentStats}
               category={activeCategory}
+              isAuthenticated={!!user}
             />
           </div>
         )}
