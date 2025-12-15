@@ -1,57 +1,22 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { createClient, createAdminClient } from '@/lib/supabase/server';
 import PublicProfileClient from './PublicProfileClient';
+import { getPublicProfile, getPublicSelections } from './getProfile';
 
 interface PageProps {
   params: Promise<{ username: string }>;
 }
 
-interface UnlockedAchievement {
-  id: string;
-  achievement_id: string;
-  unlocked_at: string;
-  category: string | null;
-}
-
-interface PublicProfile {
-  id: string;
-  username: string;
-  full_name: string | null;
-  avatar_url: string | null;
-  bio: string | null;
-  is_public: boolean;
-  total_xp: number;
-  level: number;
-  created_at: string;
-  // Social links
-  website_url: string | null;
-  instagram_handle: string | null;
-  twitter_handle: string | null;
-  // Home base
-  home_city: string | null;
-  home_state: string | null;
-  home_country: string | null;
-  show_home_base: boolean;
-  // Privacy settings
-  privacy_settings: {
-    hide_categories?: string[];
-    hide_bucket_list?: boolean;
-  } | null;
-  // Achievements (included from get_public_profile function)
-  achievements: UnlockedAchievement[] | null;
-}
+// Enable ISR - revalidate every 60 seconds to reduce database calls
+// This dramatically reduces Cloudflare Worker CPU usage
+export const revalidate = 60;
 
 // Generate metadata for SEO
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { username } = await params;
-  const supabase = await createClient();
 
-  const { data } = await supabase
-    .rpc('get_public_profile', { profile_username: username })
-    .single();
-
-  const profile = data as PublicProfile | null;
+  // Use cached function - deduplicates with page component call
+  const profile = await getPublicProfile(username);
 
   if (!profile) {
     return {
@@ -80,27 +45,17 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function PublicProfilePage({ params }: PageProps) {
   const { username } = await params;
-  const supabase = await createClient();
 
-  // Get the public profile
-  const { data, error } = await supabase
-    .rpc('get_public_profile', { profile_username: username })
-    .single();
+  // Use cached function - deduplicates with generateMetadata call
+  const profile = await getPublicProfile(username);
 
-  const profile = data as PublicProfile | null;
-
-  if (error || !profile) {
+  if (!profile) {
     notFound();
   }
 
-  // Get the user's selections using admin client to bypass RLS
+  // Get the user's selections using cached admin query
   // This is safe because we've already verified the profile is public
-  const adminClient = createAdminClient();
-  const { data: selectionsData } = await adminClient
-    .from('user_selections')
-    .select('selections')
-    .eq('user_id', profile.id)
-    .single();
+  const selections = await getPublicSelections(profile.id);
 
   // Achievements are now included in the profile from get_public_profile function
   const achievements = profile.achievements || [];
@@ -108,7 +63,7 @@ export default async function PublicProfilePage({ params }: PageProps) {
   return (
     <PublicProfileClient
       profile={profile}
-      selections={selectionsData?.selections || {}}
+      selections={selections}
       achievements={achievements}
       username={username}
     />

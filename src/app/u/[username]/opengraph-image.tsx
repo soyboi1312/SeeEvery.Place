@@ -1,23 +1,13 @@
 import { ImageResponse } from 'next/og';
-import { createClient } from '@supabase/supabase-js';
+import { getPublicProfile } from './getProfile';
 
 // Image metadata
 export const alt = 'User Travel Profile | SeeEvery.Place';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
-// Helper to create Supabase client at request time (not build time)
-function getSupabaseClient() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
-}
-
-interface ProfileData {
-  full_name?: string;
-  level?: number;
-}
+// Cache OG images for 60 seconds to reduce CPU usage
+export const revalidate = 60;
 
 interface Props {
   params: Promise<{ username: string }>;
@@ -26,15 +16,9 @@ interface Props {
 export default async function Image({ params }: Props) {
   const { username } = await params;
 
-  // Initialize Supabase client at request time (not build time)
-  const supabase = getSupabaseClient();
+  // Use cached profile function
+  const profile = await getPublicProfile(username);
 
-  // Fetch the public profile data
-  const { data } = await supabase
-    .rpc('get_public_profile', { profile_username: username })
-    .single();
-
-  const profile = data as ProfileData | null;
   const displayName = profile?.full_name || username;
   const level = profile?.level || 1;
 
