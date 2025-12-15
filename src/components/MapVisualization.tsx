@@ -69,7 +69,10 @@ function getMapComponent(
   // Marker maps for all other categories (DRY - use CategoryMarkerMap directly with config)
   const isUSCategory = US_MARKER_CATEGORIES.has(category);
   const config = isUSCategory ? US_MARKER_CONFIG : WORLD_MARKER_CONFIG;
-  const mapKey = isUSCategory ? `us-${category}` : `world-${category}`;
+  // Key by geography, not category, to avoid remounting the map when switching
+  // between categories that use the same base map (e.g., "National Parks" to "State Parks").
+  // This keeps the heavy StaticBackground component mounted and memoized.
+  const mapKey = isUSCategory ? 'us-marker-map' : 'world-marker-map';
 
   return (
     <CategoryMarkerMap

@@ -129,6 +129,14 @@ export default function RootLayout({
           as="fetch"
           type="application/json"
         />
+        {/* Prefetch US topology for fast category switching.
+            Many users click US-based categories shortly after load. */}
+        <link
+          rel="prefetch"
+          href="https://seeevery.place/geo/states-10m.json"
+          as="fetch"
+          type="application/json"
+        />
 
         {/* Prevent dark mode FOUC by setting class before React hydration */}
         <script
