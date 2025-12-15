@@ -4,7 +4,7 @@ import { useState, useMemo, useRef, useCallback, memo } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { Status, Category } from '@/lib/types';
 import { useDebounce } from '@/lib/hooks/useDebounce';
-import { Search, Check, Star, Circle, Trash2, X, AlertCircle, Calendar as CalendarIcon, StickyNote, Lock, Info } from 'lucide-react';
+import { Search, Check, Star, Circle, Trash2, X, AlertCircle, Calendar as CalendarIcon, StickyNote, Lock, Info, Pencil } from 'lucide-react';
 
 // Shadcn Imports
 import { Card } from '@/components/ui/card';
@@ -38,6 +38,12 @@ import {
   ContextMenuTrigger,
   ContextMenuSeparator,
 } from '@/components/ui/context-menu';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 interface Item {
   id: string;
@@ -735,6 +741,45 @@ const ItemCard = memo(function ItemCard({ item, status, visitedDate, notes, onTo
           >
             <Info className="w-4 h-4" />
           </Button>
+
+          {/* Edit Menu (Pencil) - Mobile-friendly alternative to right-click */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 shrink-0 text-muted-foreground/50 hover:text-indigo-500 opacity-0 group-hover/row:opacity-100 transition-opacity"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <Pencil className="w-3.5 h-3.5" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {isAuthenticated ? (
+                <>
+                  <DropdownMenuItem onClick={(e) => {
+                    e.stopPropagation();
+                    onEditDate();
+                  }}>
+                    <CalendarIcon className="w-4 h-4 mr-2 text-blue-500" />
+                    {visitedDate ? 'Change Date' : 'Mark Visited on Date...'}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={(e) => {
+                    e.stopPropagation();
+                    onEditNote(notes);
+                  }}>
+                    <StickyNote className="w-4 h-4 mr-2 text-indigo-500" />
+                    {notes ? 'Edit Note' : 'Add Note'}
+                  </DropdownMenuItem>
+                </>
+              ) : (
+                <DropdownMenuItem disabled>
+                  <Lock className="w-4 h-4 mr-2 text-muted-foreground" />
+                  <span>Sign in to edit</span>
+                </DropdownMenuItem>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </ContextMenuTrigger>
 
