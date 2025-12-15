@@ -192,6 +192,9 @@ export const stadiumCategoryToSport: Record<string, string> = {
   'nbaStadiums': 'Basketball',
   'nhlStadiums': 'Hockey',
   'soccerStadiums': 'Football',
+  'euroFootballStadiums': 'Football',
+  'rugbyStadiums': 'Rugby',
+  'cricketStadiums': 'Cricket',
 };
 
 // US territories that cannot be displayed on the Albers USA projection

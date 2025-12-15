@@ -11,10 +11,11 @@ import { nflStadiums } from './nfl';
 import { nbaStadiums } from './nba';
 import { nhlStadiums } from './nhl';
 import { soccerStadiums } from './soccer';
+import { euroFootballStadiums } from './euroFootball';
+import { rugbyStadiums } from './rugby';
+import { cricketStadiums } from './cricket';
 import {
   internationalBaseballStadiums,
-  cricketStadiums,
-  rugbyStadiums,
   tennisStadiums,
   motorsportStadiums,
 } from './other';
@@ -34,9 +35,10 @@ export function getAllStadiums(): Stadium[] {
       ...nbaStadiums,
       ...nhlStadiums,
       ...soccerStadiums,
-      ...internationalBaseballStadiums,
-      ...cricketStadiums,
+      ...euroFootballStadiums,
       ...rugbyStadiums,
+      ...cricketStadiums,
+      ...internationalBaseballStadiums,
       ...tennisStadiums,
       ...motorsportStadiums,
     ];
@@ -62,3 +64,6 @@ export const getNflStadiums = (): Stadium[] => nflStadiums;
 export const getNbaStadiums = (): Stadium[] => nbaStadiums;
 export const getNhlStadiums = (): Stadium[] => nhlStadiums;
 export const getSoccerStadiums = (): Stadium[] => soccerStadiums;
+export const getEuroFootballStadiums = (): Stadium[] => euroFootballStadiums;
+export const getRugbyStadiums = (): Stadium[] => rugbyStadiums;
+export const getCricketStadiums = (): Stadium[] => cricketStadiums;
