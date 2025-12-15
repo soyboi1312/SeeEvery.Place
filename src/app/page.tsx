@@ -37,11 +37,11 @@ const MapVisualization = dynamic(() => import('@/components/MapVisualization'), 
   ssr: false,
 });
 
-import { Category, UserSelections, emptySelections, Status, categoryLabels } from '@/lib/types';
+import { Category, UserSelections, emptySelections, Status, categoryLabels, Selection } from '@/lib/types';
 import {
   loadSelections,
   saveSelections,
-  getSelectionStatus,
+  saveSelectionsAsync,
   toggleSelection,
   setSelectionStatus,
   getStats,
@@ -129,11 +129,12 @@ function HomeContent() {
 
   // Save selections whenever they change (local storage)
   // DEBOUNCED: Waits 1000ms after last change to avoid freezing UI on rapid clicks
+  // Uses async version to avoid 20-50ms UI stutters during JSON stringification
   useEffect(() => {
     if (!isLoaded) return;
 
-    pendingSaveRef.current = setTimeout(() => {
-      saveSelections(selections);
+    pendingSaveRef.current = setTimeout(async () => {
+      await saveSelectionsAsync(selections);
       pendingSaveRef.current = null;
     }, 1000);
 
@@ -190,21 +191,34 @@ function HomeContent() {
     }
   }, [activeCategory]);
 
+  // Create O(1) lookup maps for the active category's selections
+  // This fixes O(N*M) complexity when filtering large lists (e.g., 2000 cities × 500 selections)
+  const selectionLookup = useMemo(() => {
+    const categorySelections = selections[activeCategory] || [];
+    const map = new Map<string, Selection>();
+    for (const sel of categorySelections) {
+      if (!sel.deleted) {
+        map.set(sel.id, sel);
+      }
+    }
+    return map;
+  }, [selections, activeCategory]);
+
+  // O(1) status lookup (was O(N) with array.find)
   const getStatus = useCallback((id: string): Status => {
-    return getSelectionStatus(selections, activeCategory, id);
-  }, [selections, activeCategory]);
+    const selection = selectionLookup.get(id);
+    return selection?.status || 'unvisited';
+  }, [selectionLookup]);
 
+  // O(1) visited date lookup
   const getVisitedDate = useCallback((id: string): string | undefined => {
-    const categorySelections = selections[activeCategory] || [];
-    const selection = categorySelections.find(s => s.id === id);
-    return selection?.visitedDate;
-  }, [selections, activeCategory]);
+    return selectionLookup.get(id)?.visitedDate;
+  }, [selectionLookup]);
 
+  // O(1) notes lookup
   const getNotes = useCallback((id: string): string | undefined => {
-    const categorySelections = selections[activeCategory] || [];
-    const selection = categorySelections.find(s => s.id === id);
-    return selection?.notes;
-  }, [selections, activeCategory]);
+    return selectionLookup.get(id)?.notes;
+  }, [selectionLookup]);
 
   const handleClearAll = useCallback(() => {
     setSelections(prev => ({
