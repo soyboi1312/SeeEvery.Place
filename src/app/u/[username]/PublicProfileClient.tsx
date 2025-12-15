@@ -260,6 +260,7 @@ export default function PublicProfileClient({
                   <div className="hidden md:block">
                     <FollowButton
                       userId={profile.id}
+                      currentUserId={user?.id}
                       initialIsFollowing={isFollowing}
                       onFollowChange={handleFollowChange}
                     />
@@ -304,6 +305,7 @@ export default function PublicProfileClient({
                   <div className="md:hidden">
                     <FollowButton
                       userId={profile.id}
+                      currentUserId={user?.id}
                       initialIsFollowing={isFollowing}
                       onFollowChange={handleFollowChange}
                       size="sm"

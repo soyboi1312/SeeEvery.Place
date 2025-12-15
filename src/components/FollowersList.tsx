@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Loader2, User, UserPlus, UserMinus } from 'lucide-react';
 import Link from 'next/link';
 import { PROFILE_ICONS } from '@/components/ProfileIcons';
+import { useAuth } from '@/lib/hooks/useAuth';
 
 interface FollowUser {
   user_id: string;
@@ -15,7 +16,7 @@ interface FollowUser {
   level: number;
   total_xp: number;
   followed_at: string;
-  is_following_back?: boolean;
+  is_following?: boolean;
 }
 
 interface FollowersListProps {
@@ -33,6 +34,7 @@ export function FollowersList({
   limit = 20,
   showFollowButtons = false,
 }: FollowersListProps) {
+  const { user: currentUser } = useAuth();
   const [users, setUsers] = useState<FollowUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -60,8 +62,8 @@ export function FollowersList({
         // Initialize following states from the data
         const initialStates: Record<string, boolean> = {};
         data.data.forEach((user: FollowUser) => {
-          if (user.is_following_back !== undefined) {
-            initialStates[user.user_id] = user.is_following_back;
+          if (user.is_following !== undefined) {
+            initialStates[user.user_id] = user.is_following;
           }
         });
         setFollowingStates(initialStates);
@@ -187,8 +189,8 @@ export function FollowersList({
               </div>
             </Link>
 
-            {/* Follow button */}
-            {showFollowButtons && (
+            {/* Follow button - don't show for current user */}
+            {showFollowButtons && currentUser?.id !== user.user_id && (
               <Button
                 variant={followingStates[user.user_id] ? 'outline' : 'default'}
                 size="sm"
