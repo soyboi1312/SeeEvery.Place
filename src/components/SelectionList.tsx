@@ -4,7 +4,7 @@ import { useState, useMemo, useRef, useCallback, memo } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { Status, Category } from '@/lib/types';
 import { useDebounce } from '@/lib/hooks/useDebounce';
-import { Search, Check, Star, Circle, Trash2, X, AlertCircle, Calendar as CalendarIcon, StickyNote, Lock } from 'lucide-react';
+import { Search, Check, Star, Circle, Trash2, X, AlertCircle, Calendar as CalendarIcon, StickyNote, Lock, Info } from 'lucide-react';
 
 // Shadcn Imports
 import { Card } from '@/components/ui/card';
@@ -218,6 +218,11 @@ export default function SelectionList({
   const [noteEditItem, setNoteEditItem] = useState<{ id: string; name: string } | null>(null);
   const [tempNote, setTempNote] = useState('');
 
+  // Info Dialog state
+  const [infoItem, setInfoItem] = useState<{ id: string; name: string } | null>(null);
+  const [descriptions, setDescriptions] = useState<Record<string, string> | null>(null);
+  const [isLoadingInfo, setIsLoadingInfo] = useState(false);
+
   // Debounce search query to prevent lag on large lists (300ms delay)
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
 
@@ -243,6 +248,27 @@ export default function SelectionList({
       // Pass undefined for date to preserve it, pass the note
       onSetStatus(noteEditItem.id, 'visited', undefined, tempNote);
       setNoteEditItem(null);
+    }
+  };
+
+  // Handler to fetch descriptions (lazy loaded) and show info dialog
+  const handleShowInfo = async (id: string, name: string) => {
+    setInfoItem({ id, name });
+
+    // Only fetch if we haven't already
+    if (!descriptions) {
+      setIsLoadingInfo(true);
+      try {
+        const res = await fetch('/data/descriptions.json');
+        if (!res.ok) throw new Error('Failed to load info');
+        const data = await res.json();
+        setDescriptions(data);
+      } catch (error) {
+        console.error("Could not load descriptions", error);
+        setDescriptions({});
+      } finally {
+        setIsLoadingInfo(false);
+      }
     }
   };
 
@@ -449,6 +475,7 @@ export default function SelectionList({
                       onEditDate={() => setDateEditItem({ id: row.item.id, name: row.item.name })}
                       onEditNote={(currentNote) => openNoteDialog(row.item.id, row.item.name, currentNote)}
                       isAuthenticated={isAuthenticated}
+                      onShowInfo={() => handleShowInfo(row.item.id, row.item.name)}
                     />
                   </div>
                 </div>
@@ -484,6 +511,7 @@ export default function SelectionList({
                       onEditDate={() => setDateEditItem({ id: item.id, name: item.name })}
                       onEditNote={(currentNote) => openNoteDialog(item.id, item.name, currentNote)}
                       isAuthenticated={isAuthenticated}
+                      onShowInfo={() => handleShowInfo(item.id, item.name)}
                     />
                   ))}
                 </div>
@@ -595,6 +623,36 @@ export default function SelectionList({
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Info Dialog */}
+      <Dialog open={!!infoItem} onOpenChange={(open) => !open && setInfoItem(null)}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Info className="w-5 h-5 text-blue-500" />
+              {infoItem?.name}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-4 text-sm leading-relaxed text-muted-foreground">
+            {isLoadingInfo ? (
+              <div className="flex items-center justify-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+              </div>
+            ) : (
+              descriptions?.[infoItem?.id || ''] || "No description available for this location yet. Go explore and write your own story!"
+            )}
+          </div>
+          <DialogFooter className="flex-col sm:flex-row gap-2">
+            <Button
+              variant="secondary"
+              onClick={() => window.open(`https://en.wikipedia.org/wiki/Special:Search?search=${encodeURIComponent(infoItem?.name || '')}`, '_blank')}
+            >
+              Read More on Wiki
+            </Button>
+            <Button onClick={() => setInfoItem(null)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }
@@ -609,10 +667,11 @@ interface ItemCardProps {
   onEditDate: () => void;
   onEditNote: (currentNote?: string) => void;
   isAuthenticated?: boolean;
+  onShowInfo: () => void;
 }
 
 // Memoized ItemCard to prevent unnecessary re-renders during virtualization
-const ItemCard = memo(function ItemCard({ item, status, visitedDate, notes, onToggle, onSetStatus, onEditDate, onEditNote, isAuthenticated }: ItemCardProps) {
+const ItemCard = memo(function ItemCard({ item, status, visitedDate, notes, onToggle, onSetStatus, onEditDate, onEditNote, isAuthenticated, onShowInfo }: ItemCardProps) {
   // Styles based on status
   const getStyles = (s: Status) => {
     switch (s) {
@@ -636,33 +695,47 @@ const ItemCard = memo(function ItemCard({ item, status, visitedDate, notes, onTo
   return (
     <ContextMenu>
       <ContextMenuTrigger>
-        <Button
-          variant="outline"
-          className={`w-full justify-start h-11 px-3 transition-all duration-200 border relative group ${getStyles(status)}`}
-          onClick={() => onToggle(item.id, status)}
-        >
-          <div className="flex items-center gap-3 w-full overflow-hidden">
-            <span className="shrink-0 flex items-center justify-center">
-              {getIcon(status)}
-            </span>
-            <span className="truncate font-medium">{item.name}</span>
-            {/* Year badge when visited with a date */}
-            {visitedDate && status === 'visited' && (
-              <span className="text-[10px] bg-green-200/50 dark:bg-green-800/50 px-1.5 py-0.5 rounded-sm shrink-0">
-                {visitedDate.split('-')[0]}
+        <div className="flex items-center gap-1 group/row w-full">
+          <Button
+            variant="outline"
+            className={`flex-1 justify-start h-11 px-3 transition-all duration-200 border relative group ${getStyles(status)}`}
+            onClick={() => onToggle(item.id, status)}
+          >
+            <div className="flex items-center gap-3 w-full overflow-hidden">
+              <span className="shrink-0 flex items-center justify-center">
+                {getIcon(status)}
               </span>
-            )}
-            {/* Note indicator */}
-            {notes && (
-              <StickyNote className="w-3 h-3 text-indigo-500 fill-indigo-500/20 shrink-0" />
-            )}
-            {item.code && (
-              <span className="ml-auto text-xs opacity-50 font-mono hidden sm:inline-block shrink-0">
-                {item.code}
-              </span>
-            )}
-          </div>
-        </Button>
+              <span className="truncate font-medium">{item.name}</span>
+              {/* Year badge when visited with a date */}
+              {visitedDate && status === 'visited' && (
+                <span className="text-[10px] bg-green-200/50 dark:bg-green-800/50 px-1.5 py-0.5 rounded-sm shrink-0">
+                  {visitedDate.split('-')[0]}
+                </span>
+              )}
+              {/* Note indicator */}
+              {notes && (
+                <StickyNote className="w-3 h-3 text-indigo-500 fill-indigo-500/20 shrink-0" />
+              )}
+              {item.code && (
+                <span className="ml-auto text-xs opacity-50 font-mono hidden sm:inline-block shrink-0">
+                  {item.code}
+                </span>
+              )}
+            </div>
+          </Button>
+          {/* Info Button - Placed outside main button to avoid toggling status */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 shrink-0 text-muted-foreground/50 hover:text-blue-500 opacity-0 group-hover/row:opacity-100 transition-opacity"
+            onClick={(e) => {
+              e.stopPropagation();
+              onShowInfo();
+            }}
+          >
+            <Info className="w-4 h-4" />
+          </Button>
+        </div>
       </ContextMenuTrigger>
 
       <ContextMenuContent className="w-48">
