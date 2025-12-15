@@ -1,5 +1,10 @@
 // next.config.mjs
 import withPWAInit from "@ducanh2912/next-pwa";
+import withBundleAnalyzer from '@next/bundle-analyzer';
+
+const bundleAnalyzer = withBundleAnalyzer({
+  enabled: process.env.ANALYZE === 'true',
+});
 
 const withPWA = withPWAInit({
   dest: "public",
@@ -71,7 +76,9 @@ const withPWA = withPWAInit({
         options: {
           cacheName: "geo-data",
           expiration: {
-            maxEntries: 10,
+            // Increased from 10 to cover full user exploration paths
+            // (World -> USA -> State -> Category maps without cache eviction)
+            maxEntries: 50,
             maxAgeSeconds: 30 * 24 * 60 * 60, // 30 days
           },
           cacheableResponse: {
@@ -86,6 +93,19 @@ const withPWA = withPWAInit({
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  // Use Cloudflare Image Resizing instead of Next.js default optimizer
+  // This offloads image processing to Cloudflare's edge, avoiding Node.js limits on Workers
+  images: {
+    loader: 'custom',
+    loaderFile: './src/lib/cloudflare-loader.ts',
+    // Allow images from Supabase storage
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: '**.supabase.co',
+      },
+    ],
+  },
   // Optimize package imports for better tree-shaking
   experimental: {
     // Inline critical CSS and defer non-critical to reduce render-blocking
@@ -138,4 +158,5 @@ const nextConfig = {
   },
 };
 
-export default withPWA(nextConfig);
+// Wrap with both PWA and Bundle Analyzer
+export default bundleAnalyzer(withPWA(nextConfig));
