@@ -2,7 +2,8 @@
  * Custom hooks for map data lookup
  * Extracted to follow DRY principle - used by all map components
  */
-import { useMemo, useCallback, useState, useEffect } from 'react';
+import { useMemo, useCallback } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { Category, Status, UserSelections } from '@/lib/types';
 import { MarkerData, getMarkersFromData } from '@/lib/markerUtils';
 import { loadCategoryData } from '@/lib/categoryUtils';
@@ -70,8 +71,23 @@ export function getMarkerSize(zoom: number): 'small' | 'default' {
 }
 
 /**
+ * Hook for loading category data with React Query caching
+ * The heavy JSON data is cached to prevent repeated network/parsing overhead
+ */
+export function useCategoryData(category: Category) {
+  return useQuery({
+    queryKey: ['categoryData', category],
+    queryFn: () => loadCategoryData(category),
+    // Category data is static, can be cached indefinitely
+    staleTime: Infinity,
+    gcTime: Infinity,
+  });
+}
+
+/**
  * Hook for loading category markers with async data fetching
  * Follows Interface Segregation Principle - separates data fetching from presentation
+ * Uses React Query for caching the heavy category data
  */
 export function useCategoryMarkers(
   category: Category,
@@ -79,31 +95,22 @@ export function useCategoryMarkers(
   filterAlbersUsa: boolean,
   subcategory?: string
 ): MarkerData[] {
-  const [markers, setMarkers] = useState<MarkerData[]>([]);
+  // Use React Query to cache the heavy category data
+  const { data: categoryData } = useCategoryData(category);
 
-  useEffect(() => {
-    let isMounted = true;
+  // Derive markers from cached data when selections change
+  const markers = useMemo(() => {
+    if (!categoryData) return [];
 
-    const loadMarkers = async () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const data = await loadCategoryData(category) as any[];
-
-      if (isMounted) {
-        const generatedMarkers = getMarkersFromData(
-          category,
-          data,
-          selections,
-          filterAlbersUsa,
-          subcategory
-        );
-        setMarkers(generatedMarkers);
-      }
-    };
-
-    loadMarkers();
-
-    return () => { isMounted = false; };
-  }, [category, selections, subcategory, filterAlbersUsa]);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return getMarkersFromData(
+      category,
+      categoryData as any[],
+      selections,
+      filterAlbersUsa,
+      subcategory
+    );
+  }, [category, categoryData, selections, filterAlbersUsa, subcategory]);
 
   return markers;
 }
