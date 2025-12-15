@@ -102,11 +102,12 @@ export default function Header({
           : 'bg-transparent border-b border-transparent'
       }`}
     >
-      <div className="max-w-6xl mx-auto px-4 h-14 sm:h-16 flex items-center justify-between">
+      {/* Reduced px-4 to px-2 on mobile to prevent overflow on very small screens */}
+      <div className="max-w-6xl mx-auto px-2 sm:px-4 h-14 sm:h-16 flex items-center justify-between">
         <div className="flex items-center gap-2 sm:gap-6">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 group">
-            <div className="relative w-8 h-8 transition-transform group-hover:scale-110">
+            <div className="relative w-8 h-8 transition-transform group-hover:scale-110 shrink-0">
               <Image src="/logo.svg" alt="See Every Place" fill className="object-contain" priority />
             </div>
             <div className="flex flex-col leading-none">
@@ -183,7 +184,8 @@ export default function Header({
               className="gap-2"
             >
               <User className="w-4 h-4" />
-              Sign In
+              {/* Hide 'Sign In' text on mobile to save space */}
+              <span className="hidden sm:inline">Sign In</span>
             </Button>
           ) : (
             <DropdownMenu>

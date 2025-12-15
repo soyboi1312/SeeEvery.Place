@@ -296,7 +296,8 @@ const MapVisualization = memo(function MapVisualization({ category, selections, 
       )}
 
       {/* Legend */}
-      <div className="flex justify-center flex-wrap gap-x-6 gap-y-2 pb-4 px-4 text-sm text-primary-600 dark:text-primary-300">
+      {/* Added flex-wrap to prevent overflow on small screens */}
+      <div className="flex justify-center flex-wrap gap-x-6 gap-y-2 pb-4 text-sm text-primary-600 dark:text-primary-300 px-2">
         <div className="flex items-center gap-2">
           <span className="w-3 h-3 rounded-full bg-green-500"></span>
           <span>Visited</span>
