@@ -291,7 +291,8 @@ export function setSelectionStatus(
   category: Category,
   id: string,
   status: Status | null,
-  visitedDate?: string
+  visitedDate?: string,
+  notes?: string
 ): UserSelections {
   const categorySelections = [...(selections[category] || [])];
   const existingIndex = categorySelections.findIndex(s => s.id === id);
@@ -309,14 +310,15 @@ export function setSelectionStatus(
     }
   } else {
     // Add or update with timestamp
-    // Use provided date, or preserve existing date if not provided
-    const existingDate = existingIndex !== -1 ? categorySelections[existingIndex].visitedDate : undefined;
+    // Preserve existing data if new data isn't provided
+    const existingItem = existingIndex !== -1 ? categorySelections[existingIndex] : null;
     const newItem = {
       id,
       status,
       updatedAt: now,
       deleted: false,
-      visitedDate: visitedDate !== undefined ? visitedDate : existingDate,
+      visitedDate: visitedDate !== undefined ? visitedDate : existingItem?.visitedDate,
+      notes: notes !== undefined ? notes : existingItem?.notes,
     };
 
     if (existingIndex !== -1) {

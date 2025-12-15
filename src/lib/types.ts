@@ -74,6 +74,8 @@ export interface Selection {
   deleted?: boolean;
   /** Date the location was visited (ISO string YYYY-MM-DD) */
   visitedDate?: string;
+  /** Private notes about the location (max 280 chars) */
+  notes?: string;
 }
 
 // Derive UserSelections type from Category (each category has Selection[])
