@@ -145,6 +145,9 @@ const nextConfig = {
   },
   // Optimize package imports for better tree-shaking
   experimental: {
+    // Enable the React Compiler for automatic memoization optimization
+    // Reduces manual memo/useCallback overhead and handles deep dependency comparisons
+    reactCompiler: true,
     // Inline critical CSS and defer non-critical to reduce render-blocking
     optimizeCss: true,
     optimizePackageImports: [
@@ -167,6 +170,17 @@ const nextConfig = {
   },
   async headers() {
     return [
+      {
+        // GeoJSON and static geo data files - immutable with long-term caching
+        // These files rarely change and are critical for map rendering performance
+        source: '/geo/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
       {
         // Apply security headers to all routes
         source: '/:path*',

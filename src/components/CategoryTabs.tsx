@@ -1,7 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { Category, categoryLabels, categoryIcons, categoryGroups, getGroupForCategory, CategoryGroup } from '@/lib/types';
+import { loadCategoryData } from '@/lib/categoryUtils';
 
 interface CategoryTabsProps {
   activeCategory: Category;
@@ -10,6 +12,8 @@ interface CategoryTabsProps {
 }
 
 export default function CategoryTabs({ activeCategory, onCategoryChange, stats }: CategoryTabsProps) {
+  const queryClient = useQueryClient();
+
   // Initialize with the group of the currently active category
   const [activeGroup, setActiveGroup] = useState<CategoryGroup>(() => getGroupForCategory(activeCategory));
 
@@ -17,6 +21,16 @@ export default function CategoryTabs({ activeCategory, onCategoryChange, stats }
   useEffect(() => {
     setActiveGroup(getGroupForCategory(activeCategory));
   }, [activeCategory]);
+
+  // Prefetch category data on hover to reduce perceived latency
+  // Data loads in the background before user clicks, making selection feel instant
+  const prefetchCategory = useCallback((category: Category) => {
+    queryClient.prefetchQuery({
+      queryKey: ['categoryData', category],
+      queryFn: () => loadCategoryData(category),
+      staleTime: Infinity,
+    });
+  }, [queryClient]);
 
   return (
     <div className="space-y-4">
@@ -35,6 +49,10 @@ export default function CategoryTabs({ activeCategory, onCategoryChange, stats }
                   setActiveGroup(group);
                   // Select first category in group immediately
                   onCategoryChange(config.categories[0]);
+                }}
+                onMouseEnter={() => {
+                  // Prefetch all categories in this group for instant switching
+                  config.categories.forEach(prefetchCategory);
                 }}
                 className={`
                   flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all duration-200 whitespace-nowrap
@@ -64,6 +82,7 @@ export default function CategoryTabs({ activeCategory, onCategoryChange, stats }
               <button
                 key={category}
                 onClick={() => onCategoryChange(category)}
+                onMouseEnter={() => prefetchCategory(category)}
                 className={`
                   relative flex flex-col items-center gap-1 px-5 py-3 rounded-2xl transition-all duration-200 border min-w-[100px] shrink-0
                   ${isActive
