@@ -55,6 +55,7 @@ interface SelectionListProps {
   title: string;
   stats: { visited: number; bucketList: number; total: number; percentage: number };
   category?: Category;
+  isAuthenticated?: boolean;
 }
 
 // Empty state content by category
@@ -203,6 +204,7 @@ export default function SelectionList({
   title,
   stats,
   category,
+  isAuthenticated = false,
 }: SelectionListProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterMode, setFilterMode] = useState<'all' | 'visited' | 'bucketList' | 'unvisited'>('all');
@@ -357,6 +359,7 @@ export default function SelectionList({
                     onToggle={onToggle}
                     onSetStatus={onSetStatus}
                     onEditDate={() => setDateEditItem({ id: item.id, name: item.name })}
+                    isAuthenticated={isAuthenticated}
                   />
                 ))}
               </div>
@@ -450,9 +453,10 @@ interface ItemCardProps {
   onToggle: (id: string, currentStatus: Status) => void;
   onSetStatus: (id: string, status: Status | null, visitedDate?: string) => void;
   onEditDate: () => void;
+  isAuthenticated?: boolean;
 }
 
-function ItemCard({ item, status, visitedDate, onToggle, onSetStatus, onEditDate }: ItemCardProps) {
+function ItemCard({ item, status, visitedDate, onToggle, onSetStatus, onEditDate, isAuthenticated }: ItemCardProps) {
   // Styles based on status
   const getStyles = (s: Status) => {
     switch (s) {
@@ -506,10 +510,12 @@ function ItemCard({ item, status, visitedDate, onToggle, onSetStatus, onEditDate
           <Check className="w-4 h-4 mr-2 text-green-500" />
           Mark Visited
         </ContextMenuItem>
-        <ContextMenuItem onClick={onEditDate}>
-          <CalendarIcon className="w-4 h-4 mr-2 text-blue-500" />
-          {visitedDate ? 'Edit Visit Date' : 'Mark Visited on Date...'}
-        </ContextMenuItem>
+        {isAuthenticated && (
+          <ContextMenuItem onClick={onEditDate}>
+            <CalendarIcon className="w-4 h-4 mr-2 text-blue-500" />
+            {visitedDate ? 'Edit Visit Date' : 'Mark Visited on Date...'}
+          </ContextMenuItem>
+        )}
         <ContextMenuItem onClick={() => onSetStatus(item.id, 'bucketList')}>
           <Star className="w-4 h-4 mr-2 text-amber-500" />
           Add to Bucket List
