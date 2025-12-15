@@ -124,6 +124,9 @@ const InteractiveMapShell = memo(function InteractiveMapShell({
       className="relative w-full h-full group"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
+      // CSS containment optimization: isolates map paint/layout from the rest of the page
+      // Prevents expensive layout recalculations when map DOM updates (e.g., marker changes)
+      style={{ contain: 'strict', contentVisibility: 'auto' }}
     >
       <ComposableMap
         projection={projection}
