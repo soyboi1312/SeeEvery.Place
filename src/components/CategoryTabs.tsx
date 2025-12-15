@@ -21,9 +21,9 @@ export default function CategoryTabs({ activeCategory, onCategoryChange, stats }
   return (
     <div className="space-y-4">
       {/* Level 1: Meta-Groups (The Vibe) */}
-      {/* Fixed: text-center on parent + inline-flex on child handles "center if fits, scroll if not" perfectly */}
-      <div className="w-full overflow-x-auto no-scrollbar pb-1 text-center">
-        <div className="inline-flex bg-white dark:bg-gray-800 p-1.5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 text-left align-middle">
+      {/* ADDED: w-full, overflow-x-auto, and mx-auto on child to handle mobile overflow properly */}
+      <div className="flex w-full overflow-x-auto no-scrollbar pb-1">
+        <div className="mx-auto inline-flex bg-white dark:bg-gray-800 p-1.5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 shrink-0">
           {(Object.keys(categoryGroups) as CategoryGroup[]).map((group) => {
             const isActive = group === activeGroup;
             const config = categoryGroups[group];
