@@ -218,7 +218,10 @@ export default function Header({
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link href="/settings">My Profile</Link>
+                  <Link href="/settings">
+                    <User className="w-4 h-4 mr-2" />
+                    My Profile
+                  </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <Link href="/suggest">
