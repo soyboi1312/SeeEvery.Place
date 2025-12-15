@@ -65,7 +65,8 @@ export async function POST(request: NextRequest) {
       email: targetUser.user.email || '',
       options: {
         // Must go through /auth/callback to properly exchange the code for a session
-        redirectTo: `${siteUrl}/auth/callback?next=${encodeURIComponent('/?impersonated=true')}`,
+        // Using simple path to avoid URL encoding issues with Cloudflare
+        redirectTo: `${siteUrl}/auth/callback`,
       },
     });
 
