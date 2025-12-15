@@ -328,6 +328,24 @@ export function saveSelections(selections: UserSelections): void {
   }
 }
 
+/**
+ * Async version of saveSelections that uses requestIdleCallback for stringification.
+ * Use this for debounced auto-saves to avoid UI stutters with large datasets.
+ * The synchronous version should still be used for beforeunload handlers.
+ */
+export async function saveSelectionsAsync(selections: UserSelections): Promise<void> {
+  if (typeof window === 'undefined') return;
+
+  try {
+    // Use non-blocking stringifier to avoid 20-50ms UI freezes
+    const jsonString = await stringifyJsonAsync(selections);
+    localStorage.setItem(STORAGE_KEY, jsonString);
+    window.dispatchEvent(new Event('selections-updated'));
+  } catch (e) {
+    console.error('Failed to save selections async:', e);
+  }
+}
+
 export function toggleSelection(
   selections: UserSelections,
   category: Category,
