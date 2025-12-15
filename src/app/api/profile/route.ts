@@ -81,11 +81,12 @@ export async function PUT(request: NextRequest) {
       }
 
       // Check if username is available (case-insensitive)
-      // This is for a better UI error message; the DB constraint is the hard stop
+      // Uses lowercase comparison to match the lower(username) index for optimal performance
+      // The DB constraint is the hard stop; this provides a better UI error message
       const { data: existingUser } = await supabase
         .from('profiles')
         .select('id')
-        .ilike('username', username)
+        .eq('username', username.toLowerCase())
         .neq('id', user.id)
         .single();
 
@@ -103,7 +104,8 @@ export async function PUT(request: NextRequest) {
     };
 
     if (full_name !== undefined) updateData.full_name = full_name || null;
-    if (username !== undefined) updateData.username = username || null;
+    // Store username as lowercase to match the lower(username) index
+    if (username !== undefined) updateData.username = username ? username.toLowerCase() : null;
     if (bio !== undefined) updateData.bio = bio || null;
     if (is_public !== undefined) updateData.is_public = is_public;
 

@@ -31,16 +31,20 @@ export async function GET(request: NextRequest) {
 
     let data, error;
 
+    // Fetch limit + 1 to determine if there are more items without an extra request
+    // This prevents the "off-by-one" issue where exactly N items triggers a wasted fetch
+    const fetchLimit = limit + 1;
+
     if (type === 'friends') {
       const result = await supabase.rpc('get_friends_activity_feed', {
-        page_limit: limit,
+        page_limit: fetchLimit,
         page_offset: offset,
       });
       data = result.data;
       error = result.error;
     } else {
       const result = await supabase.rpc('get_global_activity_feed', {
-        page_limit: limit,
+        page_limit: fetchLimit,
         page_offset: offset,
         filter_type: filter,
       });
@@ -53,8 +57,13 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
+    // Determine hasMore based on whether we got the extra item
+    const hasMore = (data || []).length > limit;
+    // Only return the requested number of items
+    const trimmedData = hasMore ? (data || []).slice(0, limit) : (data || []);
+
     // Transform the data to a more frontend-friendly format
-    const activities = (data || []).map((activity: {
+    const activities = trimmedData.map((activity: {
       id: string;
       user_id: string;
       username: string;
@@ -106,7 +115,7 @@ export async function GET(request: NextRequest) {
       pagination: {
         limit,
         offset,
-        hasMore: activities.length === limit,
+        hasMore,
       },
     });
   } catch (error) {
