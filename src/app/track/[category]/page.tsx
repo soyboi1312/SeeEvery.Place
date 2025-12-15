@@ -9,18 +9,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ArrowRight, ChevronRight, ChevronDown } from 'lucide-react';
-import { TravelerStats } from '@/components/TravelerStats';
+import { TravelerStats, TravelerStatsData } from '@/components/TravelerStats';
 import { ChallengesCard } from '@/components/ChallengesCard';
-import { mountains } from '@/data/mountains';
-import { mlbStadiums } from '@/data/stadiums/mlb';
-import { nflStadiums } from '@/data/stadiums/nfl';
-import { nbaStadiums } from '@/data/stadiums/nba';
-import { nhlStadiums } from '@/data/stadiums/nhl';
-import { soccerStadiums } from '@/data/stadiums/soccer';
-import { nationalParks } from '@/data/nationalParks';
-import { nationalMonuments } from '@/data/nationalMonuments';
-import { stateParks } from '@/data/stateParks';
-import { weirdAmericana } from '@/data/weirdAmericana';
 import { usStates } from '@/data/usStates';
 
 // Categories that support state-level filtering for SEO pages
@@ -37,24 +27,32 @@ usStates.forEach(s => {
   stateNames[s.code] = s.name;
 });
 
-// Get unique states for a category with counts
-function getStatesWithCounts(category: Category): Array<{ code: string; name: string; count: number }> {
+// Get unique states for a category with counts (async with dynamic imports)
+async function getStatesWithCounts(category: Category): Promise<Array<{ code: string; name: string; count: number }>> {
   const stateCounts: Record<string, number> = {};
 
   let items: { state: string }[] = [];
   switch (category) {
-    case 'nationalParks':
+    case 'nationalParks': {
+      const { nationalParks } = await import('@/data/nationalParks');
       items = nationalParks;
       break;
-    case 'nationalMonuments':
+    }
+    case 'nationalMonuments': {
+      const { nationalMonuments } = await import('@/data/nationalMonuments');
       items = nationalMonuments;
       break;
-    case 'stateParks':
+    }
+    case 'stateParks': {
+      const { stateParks } = await import('@/data/stateParks');
       items = stateParks;
       break;
-    case 'weirdAmericana':
+    }
+    case 'weirdAmericana': {
+      const { weirdAmericana } = await import('@/data/weirdAmericana');
       items = weirdAmericana;
       break;
+    }
     default:
       return [];
   }
@@ -615,12 +613,13 @@ interface CategoryStat {
 }
 
 // Helper to generate dynamic stats based on category
-function getCategoryStats(category: Category, items: CategoryItem[]): CategoryStat[] {
+async function getCategoryStats(category: Category, items: CategoryItem[]): Promise<CategoryStat[]> {
   const total = items.length;
   const stats: CategoryStat[] = [];
 
-  // Category-specific stats
+  // Category-specific stats with dynamic imports
   if (category === 'fiveKPeaks') {
+    const { mountains } = await import('@/data/mountains');
     const peaks = mountains.filter(m => m.elevation >= 5000);
     const totalElevation = peaks.reduce((acc, curr) => acc + curr.elevation, 0);
     const highest = Math.max(...peaks.map(m => m.elevation));
@@ -629,6 +628,7 @@ function getCategoryStats(category: Category, items: CategoryItem[]): CategorySt
     stats.push({ label: 'Combined Elevation', value: `${(totalElevation / 1000).toFixed(0)}km`, icon: '📐' });
     stats.push({ label: 'Highest Peak', value: `${highest.toLocaleString()}m`, icon: '⬆️' });
   } else if (category === 'fourteeners') {
+    const { mountains } = await import('@/data/mountains');
     const peaks = mountains.filter(m => m.elevation >= 4267 && m.elevation < 5000 && m.countryCode === 'US');
     const totalElevation = peaks.reduce((acc, curr) => acc + curr.elevation, 0);
     const avgElevation = Math.round(totalElevation / peaks.length);
@@ -637,6 +637,7 @@ function getCategoryStats(category: Category, items: CategoryItem[]): CategorySt
     stats.push({ label: 'Avg Elevation', value: `${avgElevation.toLocaleString()}m`, icon: '📊' });
     stats.push({ label: 'Total Vertical', value: `${(totalElevation / 1000).toFixed(0)}km`, icon: '📐' });
   } else if (category === 'mlbStadiums') {
+    const { mlbStadiums } = await import('@/data/stadiums/mlb');
     const totalCapacity = mlbStadiums.reduce((acc, curr) => acc + curr.capacity, 0);
     const oldest = 'Fenway Park (1912)';
 
@@ -644,24 +645,28 @@ function getCategoryStats(category: Category, items: CategoryItem[]): CategorySt
     stats.push({ label: 'Total Capacity', value: `${(totalCapacity / 1000000).toFixed(1)}M`, icon: '👥' });
     stats.push({ label: 'Oldest Stadium', value: oldest, icon: '🏛️' });
   } else if (category === 'nflStadiums') {
+    const { nflStadiums } = await import('@/data/stadiums/nfl');
     const totalCapacity = nflStadiums.reduce((acc, curr) => acc + curr.capacity, 0);
 
     stats.push({ label: 'Stadiums', value: total, icon: '🏈' });
     stats.push({ label: 'Total Capacity', value: `${(totalCapacity / 1000000).toFixed(1)}M`, icon: '👥' });
     stats.push({ label: 'Largest', value: 'AT&T Stadium', icon: '🏟️' });
   } else if (category === 'nbaStadiums') {
+    const { nbaStadiums } = await import('@/data/stadiums/nba');
     const totalCapacity = nbaStadiums.reduce((acc, curr) => acc + curr.capacity, 0);
 
     stats.push({ label: 'Arenas', value: total, icon: '🏀' });
     stats.push({ label: 'Total Capacity', value: `${(totalCapacity / 1000).toFixed(0)}K`, icon: '👥' });
     stats.push({ label: 'Iconic Venue', value: 'MSG', icon: '🏟️' });
   } else if (category === 'nhlStadiums') {
+    const { nhlStadiums } = await import('@/data/stadiums/nhl');
     const totalCapacity = nhlStadiums.reduce((acc, curr) => acc + curr.capacity, 0);
 
     stats.push({ label: 'Arenas', value: total, icon: '🏒' });
     stats.push({ label: 'Total Capacity', value: `${(totalCapacity / 1000).toFixed(0)}K`, icon: '👥' });
     stats.push({ label: 'Most Cups', value: 'Bell Centre', icon: '🏆' });
   } else if (category === 'soccerStadiums') {
+    const { soccerStadiums } = await import('@/data/stadiums/soccer');
     const totalCapacity = soccerStadiums.reduce((acc, curr) => acc + curr.capacity, 0);
 
     stats.push({ label: 'Stadiums', value: total, icon: '⚽' });
@@ -759,6 +764,20 @@ function getBiggestRegion(distribution: Record<string, number>): [string, number
   return entries.sort(([, a], [, b]) => b - a)[0];
 }
 
+// Helper to fetch traveler stats server-side for instant render
+async function getTravelerStatsData(category: string): Promise<TravelerStatsData | null> {
+  try {
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+    const res = await fetch(`${baseUrl}/api/stats/${category}`, {
+      next: { revalidate: 3600 }, // Cache for 1 hour
+    });
+    if (!res.ok) return null;
+    return res.json();
+  } catch {
+    return null;
+  }
+}
+
 // Challenge descriptions by category
 const challengeDescriptions: Partial<Record<Category, (region: string, count: number) => string>> = {
   countries: (region, count) => `There are ${count} countries in ${region}. Can you visit them all?`,
@@ -831,10 +850,18 @@ export default async function CategoryLandingPage({ params }: Props) {
 
   // Fetch items for dynamic stats
   const items = await getCategoryItemsAsync(category as Category);
-  const stats = getCategoryStats(category as Category, items);
+  const stats = await getCategoryStats(category as Category, items);
   const distribution = getDistribution(items);
   const biggestRegion = getBiggestRegion(distribution);
   const challengeDesc = challengeDescriptions[category as Category];
+
+  // Pre-compute states with counts for state-filterable categories
+  const statesWithCounts = stateFilterableCategories.includes(category as Category)
+    ? await getStatesWithCounts(category as Category)
+    : [];
+
+  // Fetch traveler stats server-side for instant render
+  const travelerStatsData = await getTravelerStatsData(category);
 
   return (
     <>
@@ -934,7 +961,7 @@ export default async function CategoryLandingPage({ params }: Props) {
           <h2 className="text-lg font-semibold text-muted-foreground text-center mb-6">Community Stats</h2>
           <Card>
             <CardContent className="p-6">
-              <TravelerStats category={category as Category} />
+              <TravelerStats category={category as Category} initialData={travelerStatsData} />
             </CardContent>
           </Card>
         </section>
@@ -975,7 +1002,7 @@ export default async function CategoryLandingPage({ params }: Props) {
         </section>
 
         {/* Browse by State - for state-filterable categories */}
-        {stateFilterableCategories.includes(category as Category) && (
+        {statesWithCounts.length > 0 && (
           <section className="my-12">
             <h3 className="font-bold text-center text-foreground mb-2">
               Browse {label} by State
@@ -984,7 +1011,7 @@ export default async function CategoryLandingPage({ params }: Props) {
               Click a state to see all {label.toLowerCase()} in that state
             </p>
             <div className="flex flex-wrap justify-center gap-1.5">
-              {getStatesWithCounts(category as Category).slice(0, 20).map(({ code, name, count }) => (
+              {statesWithCounts.slice(0, 20).map(({ code, name, count }) => (
                 <Link
                   key={code}
                   href={`/track/${category}/${code.toLowerCase()}`}
@@ -998,9 +1025,9 @@ export default async function CategoryLandingPage({ params }: Props) {
                 </Link>
               ))}
             </div>
-            {getStatesWithCounts(category as Category).length > 20 && (
+            {statesWithCounts.length > 20 && (
               <p className="text-center mt-4 text-sm text-muted-foreground">
-                + {getStatesWithCounts(category as Category).length - 20} more states
+                + {statesWithCounts.length - 20} more states
               </p>
             )}
           </section>
