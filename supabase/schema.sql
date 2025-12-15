@@ -419,10 +419,10 @@ create policy "Users can delete own notifications"
   on public.notifications for delete
   using (auth.uid() = user_id);
 
+-- NOTE: No INSERT policy needed for notifications.
+-- System-generated notifications are created server-side using service_role key,
+-- which bypasses RLS. This prevents malicious users from spoofing notifications.
 drop policy if exists "System can create notifications" on public.notifications;
-create policy "System can create notifications"
-  on public.notifications for insert
-  with check (true);
 
 create index if not exists notifications_user_id_idx on public.notifications(user_id);
 create index if not exists notifications_user_unread_idx on public.notifications(user_id, read) where read = false;
