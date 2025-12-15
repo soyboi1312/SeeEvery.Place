@@ -11,7 +11,7 @@ interface PlaceStat {
   visitPercentage: number;
 }
 
-interface TravelerStatsData {
+export interface TravelerStatsData {
   totalUsersTracking: number;
   placeStats: PlaceStat[];
 }
@@ -20,18 +20,22 @@ interface TravelerStatsProps {
   category: Category;
   placeId?: string; // Optional: show stats for a specific place
   className?: string;
+  initialData?: TravelerStatsData | null; // Server-side pre-fetched data
 }
 
 /**
  * Displays community statistics for a category or specific place
  * e.g., "X% of SeeEveryPlace users have visited this"
  */
-export function TravelerStats({ category, placeId, className = '' }: TravelerStatsProps) {
-  const [stats, setStats] = useState<TravelerStatsData | null>(null);
-  const [loading, setLoading] = useState(true);
+export function TravelerStats({ category, placeId, className = '', initialData }: TravelerStatsProps) {
+  const [stats, setStats] = useState<TravelerStatsData | null>(initialData ?? null);
+  const [loading, setLoading] = useState(!initialData);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    // Skip fetch if we have initialData
+    if (initialData) return;
+
     async function fetchStats() {
       try {
         const response = await fetch(`/api/stats/${category}`);
@@ -48,7 +52,7 @@ export function TravelerStats({ category, placeId, className = '' }: TravelerSta
     }
 
     fetchStats();
-  }, [category]);
+  }, [category, initialData]);
 
   if (loading) {
     return (
