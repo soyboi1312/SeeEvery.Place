@@ -415,6 +415,9 @@ create index if not exists activity_feed_user_id_idx on public.activity_feed(use
 create index if not exists activity_feed_created_at_idx on public.activity_feed(created_at desc);
 create index if not exists activity_feed_type_idx on public.activity_feed(activity_type);
 create index if not exists activity_feed_user_created_idx on public.activity_feed(user_id, created_at desc);
+-- Composite index for efficient activity type + time queries (covers filter + sort)
+-- Allows Postgres to scan in correct order without memory sort
+create index if not exists activity_feed_type_time_idx on public.activity_feed(activity_type, created_at desc);
 
 -- ============================================
 -- Notifications System
