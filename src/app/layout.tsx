@@ -115,6 +115,11 @@ export default function RootLayout({
         <meta name="format-detection" content="telephone=no" />
         <meta name="mobile-web-app-capable" content="yes" />
 
+        {/* Preconnect to Supabase for faster auth/API handshakes */}
+        {process.env.NEXT_PUBLIC_SUPABASE_URL && (
+          <link rel="preconnect" href={process.env.NEXT_PUBLIC_SUPABASE_URL} />
+        )}
+
         {/* Preload the world map data to improve LCP.
             Must use same absolute URL as GEO_URL_WORLD in mapUtils.ts for cache hit.
             Same-origin URL avoids CORS issues. */}
