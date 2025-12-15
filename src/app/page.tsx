@@ -146,6 +146,8 @@ function HomeContent() {
   }, [selections, isLoaded]);
 
   // Save immediately on page unload to prevent data loss
+  // Uses both beforeunload (desktop) and visibilitychange (mobile) for reliability
+  // Mobile Safari and other browsers often terminate without firing beforeunload
   useEffect(() => {
     const handleBeforeUnload = () => {
       if (pendingSaveRef.current) {
@@ -154,8 +156,19 @@ function HomeContent() {
       }
     };
 
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') {
+        handleBeforeUnload();
+      }
+    };
+
     window.addEventListener('beforeunload', handleBeforeUnload);
-    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
   }, []);
 
   // Updated handleToggle to support lazy loaded city data

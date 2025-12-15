@@ -19,7 +19,8 @@ import type { USCity } from '@/data/usCities';
 import type { WorldCity } from '@/data/worldCities';
 
 // Union type for all category data items
-type CategoryDataItem =
+// Exported for type-safe usage in map data hooks
+export type CategoryDataItem =
   | Country
   | USState
   | USTerritory

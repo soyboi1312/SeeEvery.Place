@@ -76,6 +76,12 @@ create table if not exists public.profiles (
 create unique index if not exists profiles_username_lower_idx on public.profiles (lower(username))
   where username is not null;
 
+-- Composite index for efficient RLS policy checks on public profiles
+-- Optimizes the correlated subquery in follows policies: profiles.id + is_public
+-- This creates a covering index that avoids table lookups for visibility checks
+create index if not exists profiles_id_is_public_idx on public.profiles (id, is_public)
+  where is_public = true;
+
 -- Enable RLS on profiles
 alter table public.profiles enable row level security;
 
