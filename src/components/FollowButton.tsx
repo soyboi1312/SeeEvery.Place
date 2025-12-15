@@ -6,6 +6,7 @@ import { UserPlus, UserMinus, Loader2 } from 'lucide-react';
 
 interface FollowButtonProps {
   userId: string;
+  currentUserId?: string | null;
   initialIsFollowing?: boolean;
   onFollowChange?: (isFollowing: boolean) => void;
   className?: string;
@@ -15,6 +16,7 @@ interface FollowButtonProps {
 
 export function FollowButton({
   userId,
+  currentUserId,
   initialIsFollowing = false,
   onFollowChange,
   className = '',
@@ -23,6 +25,11 @@ export function FollowButton({
 }: FollowButtonProps) {
   const [isFollowing, setIsFollowing] = useState(initialIsFollowing);
   const [isLoading, setIsLoading] = useState(false);
+
+  // Don't render follow button for own profile
+  if (currentUserId && currentUserId === userId) {
+    return null;
+  }
 
   const handleClick = async () => {
     setIsLoading(true);

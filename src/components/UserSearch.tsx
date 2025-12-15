@@ -10,6 +10,7 @@ import { FollowButton } from '@/components/FollowButton';
 import { Search, Loader2, Users, User } from 'lucide-react';
 import { useDebounce } from '@/lib/hooks/useDebounce';
 import { PROFILE_ICONS } from '@/components/ProfileIcons';
+import { useAuth } from '@/lib/hooks/useAuth';
 
 interface SearchUser {
   id: string;
@@ -24,6 +25,7 @@ interface SearchUser {
 }
 
 export function UserSearch() {
+  const { user: currentUser } = useAuth();
   const [query, setQuery] = useState('');
   const [users, setUsers] = useState<SearchUser[]>([]);
   const [loading, setLoading] = useState(false);
@@ -151,6 +153,7 @@ export function UserSearch() {
                 </Link>
                 <FollowButton
                   userId={user.id}
+                  currentUserId={currentUser?.id}
                   initialIsFollowing={user.isFollowing}
                   onFollowChange={(isFollowing) =>
                     handleFollowChange(user.id, isFollowing)
