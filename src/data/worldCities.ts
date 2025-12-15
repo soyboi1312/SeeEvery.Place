@@ -115,8 +115,6 @@ export const worldCities: WorldCity[] = [
   { id: "riyadh", name: "Riyadh", country: "Saudi Arabia", countryCode: "SA", continent: "Middle East", population: 7676000, lat: 24.7136, lng: 46.6753 },
   { id: "tehran", name: "Tehran", country: "Iran", countryCode: "IR", continent: "Middle East", population: 9034000, lat: 35.6892, lng: 51.3890 },
   { id: "baghdad", name: "Baghdad", country: "Iraq", countryCode: "IQ", continent: "Middle East", population: 8126000, lat: 33.3152, lng: 44.3661 },
-  { id: "tel-aviv", name: "Tel Aviv", country: "Israel", countryCode: "IL", continent: "Middle East", population: 4181000, lat: 32.0853, lng: 34.7818 },
-  { id: "jerusalem", name: "Jerusalem", country: "Israel", countryCode: "IL", continent: "Middle East", population: 936000, lat: 31.7683, lng: 35.2137 },
   { id: "doha", name: "Doha", country: "Qatar", countryCode: "QA", continent: "Middle East", population: 2382000, lat: 25.2854, lng: 51.5310 },
   { id: "abu-dhabi", name: "Abu Dhabi", country: "UAE", countryCode: "AE", continent: "Middle East", population: 1483000, lat: 24.4539, lng: 54.3773 },
   { id: "beirut", name: "Beirut", country: "Lebanon", countryCode: "LB", continent: "Middle East", population: 2424000, lat: 33.8938, lng: 35.5018 },
