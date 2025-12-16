@@ -15,9 +15,8 @@
 
 -- Index to support efficient cleanup queries by date
 -- This allows quick identification of old records without full table scan
-create index if not exists activity_feed_cleanup_idx
-  on public.activity_feed (created_at)
-  where created_at < now() - interval '90 days';
+create index if not exists activity_feed_created_at_idx
+  on public.activity_feed (created_at);
 
 -- Function to cleanup old activity feed items
 -- Returns the number of deleted rows for monitoring
