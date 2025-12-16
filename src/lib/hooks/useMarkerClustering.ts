@@ -102,24 +102,33 @@ export function useMarkerClustering(
     return index;
   }, [markers, enabled, radius, maxZoom, minPoints]);
 
+  // OPTIMIZATION: Pre-compute unclustered features only when needed
+  // This avoids redundant O(N) mapping in the clusters memo
+  const unclusteredFeatures = useMemo<ClusterOrPoint[]>(() => {
+    // Skip if clustering is enabled (supercluster will handle it)
+    if (enabled) return [];
+
+    return markers.map(marker => ({
+      type: 'Feature' as const,
+      geometry: {
+        type: 'Point' as const,
+        coordinates: marker.coordinates,
+      },
+      properties: {
+        cluster: false as const,
+        id: marker.id,
+        status: marker.status,
+        sport: marker.sport,
+        parkType: marker.parkType,
+      },
+    }));
+  }, [markers, enabled]);
+
   // Get clusters for current viewport
   const clusters = useMemo<ClusterOrPoint[]>(() => {
     if (!enabled || !superclusterIndex) {
-      // Return original markers as point features when clustering is disabled
-      return markers.map(marker => ({
-        type: 'Feature' as const,
-        geometry: {
-          type: 'Point' as const,
-          coordinates: marker.coordinates,
-        },
-        properties: {
-          cluster: false as const,
-          id: marker.id,
-          status: marker.status,
-          sport: marker.sport,
-          parkType: marker.parkType,
-        },
-      }));
+      // Return pre-computed unclustered features (already memoized above)
+      return unclusteredFeatures;
     }
 
     // Use provided bounds or world bounds
@@ -167,7 +176,7 @@ export function useMarkerClustering(
       // It's a regular point
       return feature as PointFeature;
     });
-  }, [markers, superclusterIndex, zoom, bounds, enabled]);
+  }, [unclusteredFeatures, superclusterIndex, zoom, bounds, enabled]);
 
   // Function to get children of a cluster (for drill-down)
   const getClusterExpansionZoom = useMemo(() => {

@@ -52,9 +52,13 @@ export function useClusteringWorker(
   const [clusters, setClusters] = useState<ClusterOrPoint[]>([]);
   const [isInitialized, setIsInitialized] = useState(false);
 
-  // Fallback to main-thread clustering
+  // OPTIMIZATION: Only pass markers to fallback if worker is NOT supported
+  // This prevents the fallback hook from doing expensive O(N) mapping when worker handles it
+  const fallbackMarkers = workerSupported ? [] : markers;
+
+  // Fallback to main-thread clustering (only runs expensive ops when worker unavailable)
   const fallback = useFallbackClustering(
-    markers,
+    fallbackMarkers,
     zoom,
     bounds,
     { enabled: !workerSupported && enabled, radius, maxZoom, minPoints }
@@ -163,8 +167,12 @@ export function useClusteringWorker(
     return (result as number) || 16;
   }, [isInitialized, sendMessage]);
 
-  // Provide unclustered markers when clustering is disabled
+  // OPTIMIZATION: Only compute unclustered features when clustering is disabled
+  // Avoids expensive O(N) mapping when worker is handling clustering
   const unclustered = useMemo<ClusterOrPoint[]>(() => {
+    // Skip expensive mapping if clustering is enabled (worker will handle it)
+    if (enabled) return [];
+
     return markers.map(marker => ({
       type: 'Feature' as const,
       geometry: {
@@ -179,7 +187,7 @@ export function useClusteringWorker(
         parkType: marker.parkType,
       },
     }));
-  }, [markers]);
+  }, [markers, enabled]);
 
   // Use fallback if worker not supported
   if (!workerSupported) {
