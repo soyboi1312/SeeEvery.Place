@@ -44,10 +44,9 @@ import AuthModal from '@/components/AuthModal';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { MapPin, Globe, ArrowRight, Instagram, Users, Map } from 'lucide-react';
+import { MapPin, Globe, ArrowRight, Instagram, Users } from 'lucide-react';
 import { FollowButton } from '@/components/FollowButton';
 import { FollowersList } from '@/components/FollowersList';
-import { ItineraryList } from '@/components/ItineraryList';
 import {
   Dialog,
   DialogContent,
@@ -475,23 +474,6 @@ export default function PublicProfileClient({
             </CardContent>
           </Card>
         )}
-
-        {/* Trips Section */}
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Map className="w-5 h-5" />
-              Trips
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ItineraryList
-              userId={profile.id}
-              showCreateButton={user?.id === profile.id}
-              limit={4}
-            />
-          </CardContent>
-        </Card>
 
         {/* Category Progress */}
         {categoryStats.length > 0 && (
