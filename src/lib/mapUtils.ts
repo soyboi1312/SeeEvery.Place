@@ -8,10 +8,10 @@
 import { Category, UserSelections, Status } from '@/lib/types';
 import { getLookupMapForCategory } from './mapRegistry';
 
-// Map Data URLs - using unpkg CDN for reliable delivery (permissive CORS)
+// Map Data URLs - using our own API proxy to avoid CORS issues
 // Must be absolute for react-simple-maps URL parsing (uses new URL() internally)
-export const GEO_URL_WORLD = "https://unpkg.com/world-atlas@2/countries-110m.json";
-export const GEO_URL_USA = "https://unpkg.com/us-atlas@3/states-10m.json";
+export const GEO_URL_WORLD = "https://seeevery.place/api/geo/countries-110m.json";
+export const GEO_URL_USA = "https://seeevery.place/api/geo/states-10m.json";
 
 // Mapping FIPS codes (from US topojson) to Postal Codes
 export const fipsToAbbr: Record<string, string> = {
