@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState, useEffect, useCallback } from 'react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useDarkMode } from '@/lib/hooks/useDarkMode';
@@ -17,6 +17,7 @@ import {
   categoryIcons,
   emptySelections,
   CATEGORY_SCHEMA,
+  Itinerary,
 } from '@/lib/types';
 
 // Dynamic imports for maps - skip SSR to reduce Cloudflare Worker CPU usage
@@ -44,7 +45,7 @@ import AuthModal from '@/components/AuthModal';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { MapPin, Globe, ArrowRight, Instagram, Users } from 'lucide-react';
+import { MapPin, Globe, ArrowRight, Instagram, Users, Calendar, Loader2 } from 'lucide-react';
 import { FollowButton } from '@/components/FollowButton';
 import { FollowersList } from '@/components/FollowersList';
 import {
@@ -125,6 +126,29 @@ export default function PublicProfileClient({
   // Social state (so counts update instantly on follow/unfollow)
   const [followerCount, setFollowerCount] = useState(profile.follower_count || 0);
   const [isFollowing, setIsFollowing] = useState(profile.is_following || false);
+
+  // Trips state
+  const [publicTrips, setPublicTrips] = useState<Itinerary[]>([]);
+  const [isLoadingTrips, setIsLoadingTrips] = useState(true);
+
+  // Fetch public trips for this user
+  const fetchPublicTrips = useCallback(async () => {
+    try {
+      const response = await fetch(`/api/itineraries/public/${profile.id}?limit=6`);
+      if (response.ok) {
+        const data = await response.json();
+        setPublicTrips(data.itineraries || []);
+      }
+    } catch (error) {
+      console.error('Error fetching trips:', error);
+    } finally {
+      setIsLoadingTrips(false);
+    }
+  }, [profile.id]);
+
+  useEffect(() => {
+    fetchPublicTrips();
+  }, [fetchPublicTrips]);
 
   const handleFollowChange = (newIsFollowing: boolean) => {
     setIsFollowing(newIsFollowing);
@@ -470,6 +494,56 @@ export default function PublicProfileClient({
                     +{unlockedAchievements.length - 12}
                   </div>
                 )}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Public Trips */}
+        {!isLoadingTrips && publicTrips.length > 0 && (
+          <Card className="mb-6">
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle>Trip Plans ({publicTrips.length})</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-3 sm:grid-cols-2">
+                {publicTrips.map((trip) => {
+                  const dateRange = (() => {
+                    if (!trip.start_date && !trip.end_date) return null;
+                    const options: Intl.DateTimeFormatOptions = { month: 'short', year: 'numeric' };
+                    const start = trip.start_date ? new Date(trip.start_date).toLocaleDateString('en-US', options) : '';
+                    const end = trip.end_date ? new Date(trip.end_date).toLocaleDateString('en-US', options) : '';
+                    if (start && end && start !== end) return `${start} - ${end}`;
+                    return start || end;
+                  })();
+
+                  return (
+                    <Link
+                      key={trip.id}
+                      href={`/trips/${trip.id}`}
+                      className="flex items-start gap-3 p-3 rounded-lg border hover:bg-muted/50 transition-colors"
+                    >
+                      <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white text-xl shrink-0">
+                        🗺️
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="font-medium truncate">{trip.title}</div>
+                        <div className="text-sm text-muted-foreground flex items-center gap-2">
+                          <span className="flex items-center gap-1">
+                            <MapPin className="w-3 h-3" />
+                            {trip.item_count || 0} places
+                          </span>
+                          {dateRange && (
+                            <span className="flex items-center gap-1">
+                              <Calendar className="w-3 h-3" />
+                              {dateRange}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </Link>
+                  );
+                })}
               </div>
             </CardContent>
           </Card>

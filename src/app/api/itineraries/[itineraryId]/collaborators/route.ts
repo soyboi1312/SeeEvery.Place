@@ -1,0 +1,190 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { createClient } from '@/lib/supabase/server';
+
+interface RouteParams {
+  params: Promise<{ itineraryId: string }>;
+}
+
+/**
+ * GET /api/itineraries/[itineraryId]/collaborators
+ * Get all collaborators for an itinerary
+ */
+export async function GET(request: NextRequest, { params }: RouteParams) {
+  try {
+    const { itineraryId } = await params;
+    const supabase = await createClient();
+
+    const { data, error } = await supabase.rpc('get_itinerary_collaborators', {
+      itinerary_uuid: itineraryId,
+    });
+
+    if (error) {
+      console.error('Error fetching collaborators:', error);
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    return NextResponse.json({ collaborators: data || [] });
+  } catch (error) {
+    console.error('Get collaborators API error:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
+}
+
+/**
+ * POST /api/itineraries/[itineraryId]/collaborators
+ * Add a collaborator to an itinerary
+ * Body: { userId: string, role?: 'editor' | 'viewer' }
+ */
+export async function POST(request: NextRequest, { params }: RouteParams) {
+  try {
+    const { itineraryId } = await params;
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const body = await request.json();
+    const { userId, role = 'editor' } = body;
+
+    if (!userId) {
+      return NextResponse.json({ error: 'userId is required' }, { status: 400 });
+    }
+
+    if (!['editor', 'viewer'].includes(role)) {
+      return NextResponse.json({ error: 'Invalid role. Must be "editor" or "viewer"' }, { status: 400 });
+    }
+
+    // Cannot add yourself as collaborator
+    if (userId === user.id) {
+      return NextResponse.json({ error: 'Cannot add yourself as a collaborator' }, { status: 400 });
+    }
+
+    // Check if user exists
+    const { data: targetUser } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('id', userId)
+      .single();
+
+    if (!targetUser) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    }
+
+    const { data, error } = await supabase
+      .from('itinerary_collaborators')
+      .insert({
+        itinerary_id: itineraryId,
+        user_id: userId,
+        role,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error adding collaborator:', error);
+      if (error.code === '23505') {
+        return NextResponse.json({ error: 'User is already a collaborator' }, { status: 409 });
+      }
+      if (error.code === '42501') {
+        return NextResponse.json({ error: 'Only the owner can add collaborators' }, { status: 403 });
+      }
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    return NextResponse.json({ collaborator: data }, { status: 201 });
+  } catch (error) {
+    console.error('Add collaborator API error:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
+}
+
+/**
+ * DELETE /api/itineraries/[itineraryId]/collaborators
+ * Remove a collaborator from an itinerary
+ * Body: { userId: string }
+ */
+export async function DELETE(request: NextRequest, { params }: RouteParams) {
+  try {
+    const { itineraryId } = await params;
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const body = await request.json();
+    const { userId } = body;
+
+    if (!userId) {
+      return NextResponse.json({ error: 'userId is required' }, { status: 400 });
+    }
+
+    const { error } = await supabase
+      .from('itinerary_collaborators')
+      .delete()
+      .eq('itinerary_id', itineraryId)
+      .eq('user_id', userId);
+
+    if (error) {
+      console.error('Error removing collaborator:', error);
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error('Remove collaborator API error:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
+}
+
+/**
+ * PUT /api/itineraries/[itineraryId]/collaborators
+ * Update a collaborator's role
+ * Body: { userId: string, role: 'editor' | 'viewer' }
+ */
+export async function PUT(request: NextRequest, { params }: RouteParams) {
+  try {
+    const { itineraryId } = await params;
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const body = await request.json();
+    const { userId, role } = body;
+
+    if (!userId || !role) {
+      return NextResponse.json({ error: 'userId and role are required' }, { status: 400 });
+    }
+
+    if (!['editor', 'viewer'].includes(role)) {
+      return NextResponse.json({ error: 'Invalid role. Must be "editor" or "viewer"' }, { status: 400 });
+    }
+
+    const { data, error } = await supabase
+      .from('itinerary_collaborators')
+      .update({ role })
+      .eq('itinerary_id', itineraryId)
+      .eq('user_id', userId)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error updating collaborator role:', error);
+      if (error.code === 'PGRST116') {
+        return NextResponse.json({ error: 'Collaborator not found' }, { status: 404 });
+      }
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    return NextResponse.json({ collaborator: data });
+  } catch (error) {
+    console.error('Update collaborator API error:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
+}

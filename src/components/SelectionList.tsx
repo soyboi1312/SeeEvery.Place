@@ -4,7 +4,14 @@ import { useState, useMemo, useRef, useCallback, memo } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { Status, Category } from '@/lib/types';
 import { useDebounce } from '@/lib/hooks/useDebounce';
-import { Search, Check, Star, Circle, Trash2, X, AlertCircle, Calendar as CalendarIcon, StickyNote, Lock, Info, Pencil } from 'lucide-react';
+import { Search, Check, Star, Circle, Trash2, X, AlertCircle, Calendar as CalendarIcon, StickyNote, Lock, Info, Pencil, MapPin } from 'lucide-react';
+import dynamic from 'next/dynamic';
+
+// Lazy load the AddToTripModal to avoid initial bundle bloat
+const AddToTripModal = dynamic(
+  () => import('@/components/itineraries/AddToTripModal'),
+  { ssr: false }
+);
 
 // Shadcn Imports
 import { Card } from '@/components/ui/card';
@@ -228,6 +235,9 @@ export default function SelectionList({
   const [infoItem, setInfoItem] = useState<{ id: string; name: string } | null>(null);
   const [descriptions, setDescriptions] = useState<Record<string, string> | null>(null);
   const [isLoadingInfo, setIsLoadingInfo] = useState(false);
+
+  // Add to Trip modal state
+  const [tripModalItem, setTripModalItem] = useState<{ id: string; name: string } | null>(null);
 
   // Debounce search query to prevent lag on large lists (300ms delay)
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
@@ -482,6 +492,7 @@ export default function SelectionList({
                       onEditNote={(currentNote) => openNoteDialog(row.item.id, row.item.name, currentNote)}
                       isAuthenticated={isAuthenticated}
                       onShowInfo={() => handleShowInfo(row.item.id, row.item.name)}
+                      onAddToTrip={() => setTripModalItem({ id: row.item.id, name: row.item.name })}
                     />
                   </div>
                 </div>
@@ -518,6 +529,7 @@ export default function SelectionList({
                       onEditNote={(currentNote) => openNoteDialog(item.id, item.name, currentNote)}
                       isAuthenticated={isAuthenticated}
                       onShowInfo={() => handleShowInfo(item.id, item.name)}
+                      onAddToTrip={() => setTripModalItem({ id: item.id, name: item.name })}
                     />
                   ))}
                 </div>
@@ -659,6 +671,17 @@ export default function SelectionList({
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Add to Trip Modal */}
+      {tripModalItem && category && (
+        <AddToTripModal
+          isOpen={!!tripModalItem}
+          onClose={() => setTripModalItem(null)}
+          category={category}
+          placeId={tripModalItem.id}
+          placeName={tripModalItem.name}
+        />
+      )}
     </Card>
   );
 }
@@ -674,10 +697,11 @@ interface ItemCardProps {
   onEditNote: (currentNote?: string) => void;
   isAuthenticated?: boolean;
   onShowInfo: () => void;
+  onAddToTrip: () => void;
 }
 
 // Memoized ItemCard to prevent unnecessary re-renders during virtualization
-const ItemCard = memo(function ItemCard({ item, status, visitedDate, notes, onToggle, onSetStatus, onEditDate, onEditNote, isAuthenticated, onShowInfo }: ItemCardProps) {
+const ItemCard = memo(function ItemCard({ item, status, visitedDate, notes, onToggle, onSetStatus, onEditDate, onEditNote, isAuthenticated, onShowInfo, onAddToTrip }: ItemCardProps) {
   // Styles based on status
   const getStyles = (s: Status) => {
     switch (s) {
@@ -771,6 +795,13 @@ const ItemCard = memo(function ItemCard({ item, status, visitedDate, notes, onTo
                     <StickyNote className="w-4 h-4 mr-2 text-indigo-500" />
                     {notes ? 'Edit Note' : 'Add Note'}
                   </DropdownMenuItem>
+                  <DropdownMenuItem onClick={(e) => {
+                    e.stopPropagation();
+                    onAddToTrip();
+                  }}>
+                    <MapPin className="w-4 h-4 mr-2 text-purple-500" />
+                    Add to Trip
+                  </DropdownMenuItem>
                 </>
               ) : (
                 <DropdownMenuItem disabled>
@@ -797,6 +828,10 @@ const ItemCard = memo(function ItemCard({ item, status, visitedDate, notes, onTo
             <ContextMenuItem onClick={() => onEditNote(notes)}>
               <StickyNote className="w-4 h-4 mr-2 text-indigo-500" />
               {notes ? 'Edit Note' : 'Add Note'}
+            </ContextMenuItem>
+            <ContextMenuItem onClick={onAddToTrip}>
+              <MapPin className="w-4 h-4 mr-2 text-purple-500" />
+              Add to Trip
             </ContextMenuItem>
           </>
         ) : (
