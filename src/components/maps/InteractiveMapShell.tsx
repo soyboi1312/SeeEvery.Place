@@ -127,7 +127,18 @@ const InteractiveMapShell = memo(function InteractiveMapShell({
       onMouseLeave={handleMouseLeave}
       // CSS containment optimization: isolates map paint/layout from the rest of the page
       // Prevents expensive layout recalculations when map DOM updates (e.g., marker changes)
-      style={{ contain: 'strict', contentVisibility: 'auto' }}
+      //
+      // IMPORTANT: containIntrinsicSize prevents CLS (Cumulative Layout Shift) when using
+      // contentVisibility: 'auto'. Without it, the element can collapse to 0 height before
+      // the browser calculates the actual size, causing layout shifts. The '0 auto' value
+      // means: width is 0 (auto-calculated), height is auto (uses natural/intrinsic height).
+      // The minHeight ensures a fallback even before content renders.
+      style={{
+        contain: 'strict',
+        contentVisibility: 'auto',
+        containIntrinsicSize: '0 auto',
+        minHeight: '300px', // Prevent collapse before content loads
+      }}
     >
       <ComposableMap
         projection={projection}

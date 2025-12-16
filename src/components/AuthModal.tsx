@@ -147,7 +147,7 @@ export default function AuthModal({ onClose }: AuthModalProps) {
         {/* Footer */}
         <div className="p-4 border-t bg-muted/50">
           <p className="text-xs text-center text-muted-foreground">
-            Your data is saved locally and syncs when you sign in.
+            Your current selections are saved locally and will be merged with your account when you sign in.
           </p>
         </div>
       </DialogContent>
