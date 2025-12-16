@@ -34,7 +34,43 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: 'Itinerary not found' }, { status: 404 });
     }
 
-    return NextResponse.json({ itinerary: data });
+    // Fetch owner profile
+    const { data: ownerProfile } = await supabase
+      .from('profiles')
+      .select('username, display_name, avatar_url')
+      .eq('id', data.owner_id)
+      .single();
+
+    // Get current user's role if authenticated
+    const { data: { user } } = await supabase.auth.getUser();
+    let userRole: 'owner' | 'editor' | 'viewer' | null = null;
+
+    if (user) {
+      if (user.id === data.owner_id) {
+        userRole = 'owner';
+      } else {
+        const { data: collab } = await supabase
+          .from('itinerary_collaborators')
+          .select('role')
+          .eq('itinerary_id', itineraryId)
+          .eq('user_id', user.id)
+          .single();
+
+        if (collab) {
+          userRole = collab.role as 'editor' | 'viewer';
+        }
+      }
+    }
+
+    const itinerary = {
+      ...data,
+      owner_username: ownerProfile?.username || null,
+      owner_display_name: ownerProfile?.display_name || null,
+      owner_avatar_url: ownerProfile?.avatar_url || null,
+      user_role: userRole,
+    };
+
+    return NextResponse.json({ itinerary });
   } catch (error) {
     console.error('Get itinerary API error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

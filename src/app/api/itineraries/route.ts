@@ -113,15 +113,7 @@ export async function POST(request: NextRequest) {
 
     if (error) {
       console.error('Error creating itinerary:', error);
-      console.error('Error code:', error.code);
-      console.error('Error details:', error.details);
-      console.error('Error hint:', error.hint);
-      return NextResponse.json({
-        error: error.message,
-        code: error.code,
-        details: error.details,
-        hint: error.hint
-      }, { status: 500 });
+      return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
     return NextResponse.json({ itinerary: data }, { status: 201 });
