@@ -129,21 +129,21 @@ export default function RootLayout({
           <link rel="preconnect" href={process.env.NEXT_PUBLIC_SUPABASE_URL} />
         )}
 
-        {/* Preload the world map data to improve LCP.
-            Must use same absolute URL as GEO_URL_WORLD in mapConstants.ts for cache hit. */}
+        {/* Preload the world map data to improve LCP */}
         <link
           rel="preload"
-          href="https://seeevery.place/api/geo/countries-110m.json"
+          href="/geo/countries-110m.json"
           as="fetch"
           type="application/json"
+          crossOrigin="anonymous"
         />
-        {/* Prefetch US topology for fast category switching.
-            Many users click US-based categories shortly after load. */}
+        {/* Prefetch US topology for fast category switching */}
         <link
           rel="prefetch"
-          href="https://seeevery.place/api/geo/states-10m.json"
+          href="/geo/states-10m.json"
           as="fetch"
           type="application/json"
+          crossOrigin="anonymous"
         />
 
         {/* Prevent dark mode FOUC by setting class before React hydration */}

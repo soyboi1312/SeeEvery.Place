@@ -8,11 +8,10 @@
 import { Category, UserSelections, Status } from '@/lib/types';
 import { getLookupMapForCategory } from './mapRegistry';
 
-// Map Data URLs - must be absolute for react-simple-maps URL parsing.
-// The library uses new URL() internally which requires absolute URLs.
-// Use API routes to serve geo data reliably on Cloudflare Workers.
-export const GEO_URL_WORLD = "https://seeevery.place/api/geo/countries-110m.json";
-export const GEO_URL_USA = "https://seeevery.place/api/geo/states-10m.json";
+// Map Data URLs - relative paths to static files in public/geo/
+// These files are copied from node_modules by scripts/copy-geo-assets.js
+export const GEO_URL_WORLD = "/geo/countries-110m.json";
+export const GEO_URL_USA = "/geo/states-10m.json";
 
 // Mapping FIPS codes (from US topojson) to Postal Codes
 export const fipsToAbbr: Record<string, string> = {
