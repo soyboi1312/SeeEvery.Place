@@ -76,7 +76,7 @@ function HomeContent() {
   const [isLoaded, setIsLoaded] = useState(false);
   const [currentItems, setCurrentItems] = useState<CategoryItem[]>([]);
   const [profileData, setProfileData] = useState<{ isPublic: boolean; username: string | null }>({ isPublic: false, username: null });
-  const { user, signOut, isAdmin } = useAuth();
+  const { user, signOut, isAdmin, username } = useAuth();
   const { isDarkMode, toggleDarkMode } = useDarkMode();
 
   // Cloud sync hook - handles all sync logic
@@ -296,6 +296,7 @@ function HomeContent() {
         onSignOut={signOut}
         isSignedIn={!!user}
         userEmail={user?.email}
+        username={username}
         isDarkMode={isDarkMode}
         onToggleDarkMode={toggleDarkMode}
         isAdmin={isAdmin}

@@ -15,7 +15,7 @@ import { Users, LogIn, Loader2, Lock } from 'lucide-react';
 
 export default function CommunityPage() {
   const { isDarkMode, toggleDarkMode } = useDarkMode();
-  const { user, loading, signOut, isAdmin } = useAuth();
+  const { user, loading, signOut, isAdmin, username } = useAuth();
   const [showAuthModal, setShowAuthModal] = useState(false);
 
   return (
@@ -26,6 +26,7 @@ export default function CommunityPage() {
         onSignOut={signOut}
         isSignedIn={!!user}
         userEmail={user?.email}
+        username={username}
         isDarkMode={isDarkMode}
         onToggleDarkMode={toggleDarkMode}
         isAdmin={isAdmin}

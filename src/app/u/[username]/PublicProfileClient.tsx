@@ -119,7 +119,7 @@ export default function PublicProfileClient({
   username,
 }: PublicProfileClientProps) {
   const { isDarkMode, toggleDarkMode } = useDarkMode();
-  const { user, signOut, isAdmin } = useAuth();
+  const { user, signOut, isAdmin, username: currentUserUsername } = useAuth();
   const [activeMap, setActiveMap] = useState<'world' | 'usa'>('world');
   const [showAuthModal, setShowAuthModal] = useState(false);
 
@@ -237,6 +237,7 @@ export default function PublicProfileClient({
         onSignOut={signOut}
         isSignedIn={!!user}
         userEmail={user?.email}
+        username={currentUserUsername}
         isDarkMode={isDarkMode}
         onToggleDarkMode={toggleDarkMode}
         isAdmin={isAdmin}
