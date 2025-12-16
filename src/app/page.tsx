@@ -312,7 +312,7 @@ function HomeContent() {
             See Every Place
           </h1>
           <p className="mt-6 text-lg leading-8 text-gray-600 dark:text-gray-300">
-            Track countries, parks, peaks, and more. Plan collaborative quests with friends.
+            Track countries, parks, peaks, and more. Plan collaborative trips with friends.
             Share your map and stats. <strong className="font-semibold text-gray-900 dark:text-white">Not your photo gallery.</strong>
           </p>
           <div className="mt-10 flex items-center justify-center gap-x-6">
