@@ -129,13 +129,13 @@ export default function RootLayout({
           <link rel="preconnect" href={process.env.NEXT_PUBLIC_SUPABASE_URL} />
         )}
 
-        {/* Preconnect to jsDelivr CDN for geo data */}
-        <link rel="preconnect" href="https://cdn.jsdelivr.net" crossOrigin="anonymous" />
+        {/* Preconnect to unpkg CDN for geo data */}
+        <link rel="preconnect" href="https://unpkg.com" crossOrigin="anonymous" />
 
         {/* Preload the world map data to improve LCP */}
         <link
           rel="preload"
-          href="https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json"
+          href="https://unpkg.com/world-atlas@2/countries-110m.json"
           as="fetch"
           type="application/json"
           crossOrigin="anonymous"
@@ -143,7 +143,7 @@ export default function RootLayout({
         {/* Prefetch US topology for fast category switching */}
         <link
           rel="prefetch"
-          href="https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json"
+          href="https://unpkg.com/us-atlas@3/states-10m.json"
           as="fetch"
           type="application/json"
           crossOrigin="anonymous"
