@@ -130,11 +130,10 @@ export default function RootLayout({
         )}
 
         {/* Preload the world map data to improve LCP.
-            Must use same absolute URL as GEO_URL_WORLD in mapUtils.ts for cache hit.
-            Same-origin URL avoids CORS issues. */}
+            Must use same absolute URL as GEO_URL_WORLD in mapConstants.ts for cache hit. */}
         <link
           rel="preload"
-          href="https://seeevery.place/geo/countries-110m.json"
+          href="https://seeevery.place/api/geo/countries-110m.json"
           as="fetch"
           type="application/json"
         />
@@ -142,7 +141,7 @@ export default function RootLayout({
             Many users click US-based categories shortly after load. */}
         <link
           rel="prefetch"
-          href="https://seeevery.place/geo/states-10m.json"
+          href="https://seeevery.place/api/geo/states-10m.json"
           as="fetch"
           type="application/json"
         />
