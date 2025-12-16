@@ -9,7 +9,7 @@ import Footer from '@/components/Footer';
 import AuthModal from '@/components/AuthModal';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowRight, Globe, BarChart3, Trophy, User, Palette, Sparkles, Mail, Rocket, MapPin } from 'lucide-react';
+import { ArrowRight, Globe, Trophy, Users, Flame, Share2, MapPin, Sparkles, Mail, Rocket } from 'lucide-react';
 
 export default function AboutPage() {
   const { isDarkMode, toggleDarkMode } = useDarkMode();
@@ -43,13 +43,10 @@ export default function AboutPage() {
           <section className="mb-12">
             <h2 className="text-2xl font-bold text-foreground mb-4">What is See Every Place?</h2>
             <p className="text-muted-foreground mb-4">
-              See Every Place is the video game for real-world travel. Think of it as a quest log for explorers—track your conquests,
-              unlock achievements, and see exactly how much of the world you&apos;ve checked off. No itineraries, no booking links.
-              Just pure progress tracking.
+              See Every Place is the massive multiplayer game for real-world travel. It transforms your travel history into a living RPG character sheet—complete with stats, levels, and achievements.
             </p>
             <p className="text-muted-foreground">
-              Track far more than just countries. From national parks and mountain peaks to stadiums and weird
-              roadside attractions, we help you capture the full detail of your journey. Every place visited is a quest completed.
+              Unlike traditional travel apps that focus on booking flights or perfect Instagram photos, we focus on <strong>the conquest</strong>. Did you actually visit all 50 states? Have you seen every MLB stadium? Track your progress, maintain your monthly adventure streak, and compete with friends to see who can explore the most.
             </p>
           </section>
 
@@ -89,71 +86,60 @@ export default function AboutPage() {
             <div className="grid md:grid-cols-2 gap-6">
               <Card>
                 <CardContent className="pt-6">
-                  <Globe className="w-8 h-8 text-blue-500 mb-3" />
-                  <h3 className="font-bold text-foreground mb-2">Watch Your Progress</h3>
+                  <Users className="w-8 h-8 text-blue-500 mb-3" />
+                  <h3 className="font-bold text-foreground mb-2">Social Competition</h3>
                   <p className="text-muted-foreground text-sm">
-                    See your conquests come to life on beautiful interactive world and US maps.
-                    Watch regions fill in as you complete each category.
+                    Follow friends and track their travels in real-time on the Activity Feed. Compete on global and category-specific Leaderboards to prove you&apos;re the ultimate explorer.
                   </p>
                 </CardContent>
               </Card>
+
               <Card>
                 <CardContent className="pt-6">
-                  <BarChart3 className="w-8 h-8 text-green-500 mb-3" />
-                  <h3 className="font-bold text-foreground mb-2">Complete the Set</h3>
+                  <MapPin className="w-8 h-8 text-purple-500 mb-3" />
+                  <h3 className="font-bold text-foreground mb-2">Collaborative Quests</h3>
                   <p className="text-muted-foreground text-sm">
-                    Go beyond countries—track parks, mountains, museums,
-                    stadiums, airports, ski resorts, theme parks, and surf spots. How many can you 100%?
+                    Planning a road trip? Create a custom Quest and invite friends to collaborate. Map out your route, set dates, and check off locations together.
                   </p>
                 </CardContent>
               </Card>
+
+              <Card>
+                <CardContent className="pt-6">
+                  <Flame className="w-8 h-8 text-orange-500 mb-3" />
+                  <h3 className="font-bold text-foreground mb-2">Streaks & Challenges</h3>
+                  <p className="text-muted-foreground text-sm">
+                    Keep your momentum alive with Login and Season Streaks. Participate in time-limited events like &quot;Summer of Parks&quot; to earn exclusive badges and bonus XP.
+                  </p>
+                </CardContent>
+              </Card>
+
               <Card>
                 <CardContent className="pt-6">
                   <Trophy className="w-8 h-8 text-yellow-500 mb-3" />
                   <h3 className="font-bold text-foreground mb-2">Achievements & XP</h3>
                   <p className="text-muted-foreground text-sm">
-                    Unlock achievements as you explore. Earn XP, level up, and collect badges from bronze
-                    to legendary tier. Discover secret achievements along the way.
+                    Every new place earns you XP. Level up your profile from a &quot;Novice Explorer&quot; to a &quot;World Traveler&quot; and unlock hundreds of hidden achievements.
                   </p>
                 </CardContent>
               </Card>
+
               <Card>
                 <CardContent className="pt-6">
-                  <User className="w-8 h-8 text-purple-500 mb-3" />
-                  <h3 className="font-bold text-foreground mb-2">Public Profiles</h3>
+                  <Globe className="w-8 h-8 text-green-500 mb-3" />
+                  <h3 className="font-bold text-foreground mb-2">Complete the Set</h3>
                   <p className="text-muted-foreground text-sm">
-                    Create a unique shareable profile at seeevery.place/u/yourname. Show off your map and stats.
-                    No photo feeds, just pure exploration data.
+                    Go beyond countries. Track progress across 25+ categories including National Parks, Ski Resorts, Michelin Cities, and Weird Americana.
                   </p>
                 </CardContent>
               </Card>
+
               <Card>
                 <CardContent className="pt-6">
-                  <Palette className="w-8 h-8 text-pink-500 mb-3" />
-                  <h3 className="font-bold text-foreground mb-2">Shareable Graphics</h3>
+                  <Share2 className="w-8 h-8 text-pink-500 mb-3" />
+                  <h3 className="font-bold text-foreground mb-2">Shareable Stats</h3>
                   <p className="text-muted-foreground text-sm">
-                    Generate beautiful, customizable graphics to share your travel stats on social media
-                    or with friends.
-                  </p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="pt-6">
-                  <Sparkles className="w-8 h-8 text-cyan-500 mb-3" />
-                  <h3 className="font-bold text-foreground mb-2">Bucket List</h3>
-                  <p className="text-muted-foreground text-sm">
-                    Plan your future adventures by adding destinations to your bucket list and watch
-                    your dreams become reality.
-                  </p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="pt-6">
-                  <MapPin className="w-8 h-8 text-orange-500 mb-3" />
-                  <h3 className="font-bold text-foreground mb-2">Custom Quests</h3>
-                  <p className="text-muted-foreground text-sm">
-                    Create your own quests—national parks to conquer, stadiums to visit,
-                    or road trip routes. Share with friends and track progress together.
+                    Generate beautiful, instant visualizations of your travel map. Share your 100% completion status or your public profile link with the world.
                   </p>
                 </CardContent>
               </Card>
