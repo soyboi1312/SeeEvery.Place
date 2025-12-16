@@ -10,10 +10,9 @@
 -- ============================================
 
 -- ============================================
--- 1. CREATE ALL TABLES FIRST (no RLS policies yet)
+-- 1. ITINERARIES TABLE
 -- ============================================
 
--- Itineraries table
 CREATE TABLE IF NOT EXISTS public.itineraries (
   id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
   owner_id uuid REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
@@ -28,43 +27,8 @@ CREATE TABLE IF NOT EXISTS public.itineraries (
   updated_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
--- Itinerary collaborators table (must exist before policies that reference it)
-CREATE TABLE IF NOT EXISTS public.itinerary_collaborators (
-  itinerary_id uuid REFERENCES public.itineraries(id) ON DELETE CASCADE NOT NULL,
-  user_id uuid REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
-  role text DEFAULT 'viewer' CHECK (role IN ('editor', 'viewer')),
-  created_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
-  invited_by uuid REFERENCES auth.users(id) ON DELETE SET NULL,
-  PRIMARY KEY (itinerary_id, user_id)
-);
-
--- Itinerary items table
-CREATE TABLE IF NOT EXISTS public.itinerary_items (
-  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
-  itinerary_id uuid REFERENCES public.itineraries(id) ON DELETE CASCADE NOT NULL,
-  category text NOT NULL, -- matches CATEGORY_SCHEMA keys
-  place_id text NOT NULL, -- matches the IDs in data files
-  place_name text NOT NULL, -- Denormalized for display
-  notes text,
-  day_number integer, -- Optional: which day of the trip
-  sort_order integer DEFAULT 0,
-  added_by uuid REFERENCES auth.users(id) ON DELETE SET NULL,
-  created_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
-  -- Prevent duplicate places in same itinerary
-  UNIQUE(itinerary_id, category, place_id)
-);
-
--- ============================================
--- 2. ENABLE RLS ON ALL TABLES
--- ============================================
-
+-- Enable RLS
 ALTER TABLE public.itineraries ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.itinerary_collaborators ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.itinerary_items ENABLE ROW LEVEL SECURITY;
-
--- ============================================
--- 3. RLS POLICIES FOR ITINERARIES
--- ============================================
 
 -- Drop existing policies if they exist (for idempotency)
 DROP POLICY IF EXISTS "View itineraries" ON public.itineraries;
@@ -105,64 +69,33 @@ CREATE POLICY "Delete itineraries"
   ON public.itineraries FOR DELETE
   USING (auth.uid() = owner_id);
 
--- ============================================
--- 4. RLS POLICIES FOR ITINERARY COLLABORATORS
--- ============================================
-
--- Drop existing policies if they exist (for idempotency)
-DROP POLICY IF EXISTS "View collaborators" ON public.itinerary_collaborators;
-DROP POLICY IF EXISTS "Add collaborators" ON public.itinerary_collaborators;
-DROP POLICY IF EXISTS "Update collaborators" ON public.itinerary_collaborators;
-DROP POLICY IF EXISTS "Remove collaborators" ON public.itinerary_collaborators;
-
--- View Policy: Can view if owner, a collaborator, or itinerary is public
-CREATE POLICY "View collaborators"
-  ON public.itinerary_collaborators FOR SELECT
-  USING (
-    EXISTS (
-      SELECT 1 FROM public.itineraries i
-      WHERE i.id = itinerary_id AND (
-        i.owner_id = auth.uid() OR
-        i.is_public = true OR
-        user_id = auth.uid()
-      )
-    )
-  );
-
--- Add Policy: Only owners can add collaborators
-CREATE POLICY "Add collaborators"
-  ON public.itinerary_collaborators FOR INSERT
-  WITH CHECK (
-    EXISTS (
-      SELECT 1 FROM public.itineraries i
-      WHERE i.id = itinerary_id AND i.owner_id = auth.uid()
-    )
-  );
-
--- Update Policy: Only owners can update roles
-CREATE POLICY "Update collaborators"
-  ON public.itinerary_collaborators FOR UPDATE
-  USING (
-    EXISTS (
-      SELECT 1 FROM public.itineraries i
-      WHERE i.id = itinerary_id AND i.owner_id = auth.uid()
-    )
-  );
-
--- Remove Policy: Owners can remove anyone, users can remove themselves
-CREATE POLICY "Remove collaborators"
-  ON public.itinerary_collaborators FOR DELETE
-  USING (
-    user_id = auth.uid() OR
-    EXISTS (
-      SELECT 1 FROM public.itineraries i
-      WHERE i.id = itinerary_id AND i.owner_id = auth.uid()
-    )
-  );
+-- Indexes for efficient queries
+CREATE INDEX IF NOT EXISTS itineraries_owner_id_idx ON public.itineraries(owner_id);
+CREATE INDEX IF NOT EXISTS itineraries_is_public_idx ON public.itineraries(is_public) WHERE is_public = true;
+CREATE INDEX IF NOT EXISTS itineraries_start_date_idx ON public.itineraries(start_date);
+CREATE INDEX IF NOT EXISTS itineraries_created_at_idx ON public.itineraries(created_at DESC);
 
 -- ============================================
--- 5. RLS POLICIES FOR ITINERARY ITEMS
+-- 2. ITINERARY ITEMS TABLE
 -- ============================================
+
+CREATE TABLE IF NOT EXISTS public.itinerary_items (
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  itinerary_id uuid REFERENCES public.itineraries(id) ON DELETE CASCADE NOT NULL,
+  category text NOT NULL, -- matches CATEGORY_SCHEMA keys
+  place_id text NOT NULL, -- matches the IDs in data files
+  place_name text NOT NULL, -- Denormalized for display
+  notes text,
+  day_number integer, -- Optional: which day of the trip
+  sort_order integer DEFAULT 0,
+  added_by uuid REFERENCES auth.users(id) ON DELETE SET NULL,
+  created_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
+  -- Prevent duplicate places in same itinerary
+  UNIQUE(itinerary_id, category, place_id)
+);
+
+-- Enable RLS
+ALTER TABLE public.itinerary_items ENABLE ROW LEVEL SECURITY;
 
 -- Drop existing policies if they exist (for idempotency)
 DROP POLICY IF EXISTS "View itinerary items" ON public.itinerary_items;
@@ -235,27 +168,84 @@ CREATE POLICY "Delete itinerary items"
     )
   );
 
--- ============================================
--- 6. INDEXES FOR EFFICIENT QUERIES
--- ============================================
-
--- Itineraries indexes
-CREATE INDEX IF NOT EXISTS itineraries_owner_id_idx ON public.itineraries(owner_id);
-CREATE INDEX IF NOT EXISTS itineraries_is_public_idx ON public.itineraries(is_public) WHERE is_public = true;
-CREATE INDEX IF NOT EXISTS itineraries_start_date_idx ON public.itineraries(start_date);
-CREATE INDEX IF NOT EXISTS itineraries_created_at_idx ON public.itineraries(created_at DESC);
-
--- Itinerary items indexes
+-- Indexes for efficient queries
 CREATE INDEX IF NOT EXISTS itinerary_items_itinerary_id_idx ON public.itinerary_items(itinerary_id);
 CREATE INDEX IF NOT EXISTS itinerary_items_category_idx ON public.itinerary_items(category);
 CREATE INDEX IF NOT EXISTS itinerary_items_sort_order_idx ON public.itinerary_items(itinerary_id, day_number, sort_order);
 
--- Itinerary collaborators indexes
+-- ============================================
+-- 3. ITINERARY COLLABORATORS TABLE
+-- ============================================
+
+CREATE TABLE IF NOT EXISTS public.itinerary_collaborators (
+  itinerary_id uuid REFERENCES public.itineraries(id) ON DELETE CASCADE NOT NULL,
+  user_id uuid REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+  role text DEFAULT 'viewer' CHECK (role IN ('editor', 'viewer')),
+  created_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
+  invited_by uuid REFERENCES auth.users(id) ON DELETE SET NULL,
+  PRIMARY KEY (itinerary_id, user_id)
+);
+
+-- Enable RLS
+ALTER TABLE public.itinerary_collaborators ENABLE ROW LEVEL SECURITY;
+
+-- Drop existing policies if they exist (for idempotency)
+DROP POLICY IF EXISTS "View collaborators" ON public.itinerary_collaborators;
+DROP POLICY IF EXISTS "Add collaborators" ON public.itinerary_collaborators;
+DROP POLICY IF EXISTS "Update collaborators" ON public.itinerary_collaborators;
+DROP POLICY IF EXISTS "Remove collaborators" ON public.itinerary_collaborators;
+
+-- View Policy: Can view if owner, a collaborator, or itinerary is public
+CREATE POLICY "View collaborators"
+  ON public.itinerary_collaborators FOR SELECT
+  USING (
+    EXISTS (
+      SELECT 1 FROM public.itineraries i
+      WHERE i.id = itinerary_id AND (
+        i.owner_id = auth.uid() OR
+        i.is_public = true OR
+        user_id = auth.uid()
+      )
+    )
+  );
+
+-- Add Policy: Only owners can add collaborators
+CREATE POLICY "Add collaborators"
+  ON public.itinerary_collaborators FOR INSERT
+  WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM public.itineraries i
+      WHERE i.id = itinerary_id AND i.owner_id = auth.uid()
+    )
+  );
+
+-- Update Policy: Only owners can update roles
+CREATE POLICY "Update collaborators"
+  ON public.itinerary_collaborators FOR UPDATE
+  USING (
+    EXISTS (
+      SELECT 1 FROM public.itineraries i
+      WHERE i.id = itinerary_id AND i.owner_id = auth.uid()
+    )
+  );
+
+-- Remove Policy: Owners can remove anyone, users can remove themselves
+CREATE POLICY "Remove collaborators"
+  ON public.itinerary_collaborators FOR DELETE
+  USING (
+    user_id = auth.uid() OR
+    EXISTS (
+      SELECT 1 FROM public.itineraries i
+      WHERE i.id = itinerary_id AND i.owner_id = auth.uid()
+    )
+  );
+
+-- Indexes for efficient queries
 CREATE INDEX IF NOT EXISTS itinerary_collaborators_user_id_idx ON public.itinerary_collaborators(user_id);
 CREATE INDEX IF NOT EXISTS itinerary_collaborators_itinerary_id_idx ON public.itinerary_collaborators(itinerary_id);
 
 -- ============================================
--- 7. RPC FUNCTIONS FOR ITINERARY OPERATIONS
+-- 4. RPC FUNCTIONS FOR ITINERARY OPERATIONS
 -- ============================================
 
 -- Function to get itineraries for a user (owned + collaborating)
@@ -672,22 +662,17 @@ BEGIN
   VALUES (p_itinerary_id, p_user_id, p_role, v_user_id)
   ON CONFLICT (itinerary_id, user_id) DO UPDATE SET role = EXCLUDED.role;
 
-  -- Send notification (only if notifications table exists)
-  BEGIN
-    INSERT INTO public.notifications (user_id, type, title, message, actor_id, actor_username, data)
-    VALUES (
-      p_user_id,
-      'trip_invite',
-      'Trip Invitation',
-      v_inviter_username || ' invited you to collaborate on "' || v_itinerary_title || '"',
-      v_user_id,
-      v_inviter_username,
-      jsonb_build_object('itinerary_id', p_itinerary_id, 'role', p_role)
-    );
-  EXCEPTION WHEN undefined_table THEN
-    -- notifications table doesn't exist, skip
-    NULL;
-  END;
+  -- Send notification
+  INSERT INTO public.notifications (user_id, type, title, message, actor_id, actor_username, data)
+  VALUES (
+    p_user_id,
+    'trip_invite',
+    'Trip Invitation',
+    v_inviter_username || ' invited you to collaborate on "' || v_itinerary_title || '"',
+    v_user_id,
+    v_inviter_username,
+    jsonb_build_object('itinerary_id', p_itinerary_id, 'role', p_role)
+  );
 
   RETURN jsonb_build_object('success', true);
 END;
@@ -781,7 +766,7 @@ SET search_path = public;
 GRANT EXECUTE ON FUNCTION public.get_public_itineraries(integer, integer, text) TO authenticated, anon;
 
 -- ============================================
--- 8. TRIGGER FOR UPDATED_AT
+-- 5. TRIGGER FOR UPDATED_AT
 -- ============================================
 
 CREATE OR REPLACE FUNCTION public.update_itinerary_updated_at()
@@ -798,7 +783,7 @@ CREATE TRIGGER update_itinerary_updated_at
   FOR EACH ROW EXECUTE FUNCTION public.update_itinerary_updated_at();
 
 -- ============================================
--- 9. COMMENTS FOR DOCUMENTATION
+-- 6. COMMENTS FOR DOCUMENTATION
 -- ============================================
 
 COMMENT ON TABLE public.itineraries IS 'Trip containers for collaborative trip planning';
