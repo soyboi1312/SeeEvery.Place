@@ -12,7 +12,7 @@
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage",
     "preview": "opennextjs-cloudflare build && wrangler dev",
-    "deploy": "opennextjs-cloudflare build && wrangler deploy --minify",
+    "deploy": "opennextjs-cloudflare build && wrangler deploy",
     "deploy:workflow": "wrangler deploy --config wrangler.workflow.jsonc",
     "deploy:all": "npm run deploy:workflow && npm run deploy",
     "postinstall": "node scripts/copy-geo-assets.js"
