@@ -1,8 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getCloudflareContext } from '@opennextjs/cloudflare';
 
-// Allowed geo files to prevent directory traversal
-const ALLOWED_FILES = new Set(['states-10m.json', 'countries-110m.json']);
+// Import JSON files directly - they'll be bundled into the worker
+import statesData from '../../../../../public/geo/states-10m.json';
+import countriesData from '../../../../../public/geo/countries-110m.json';
+
+// Map file names to imported data
+const GEO_FILES: Record<string, unknown> = {
+  'states-10m.json': statesData,
+  'countries-110m.json': countriesData,
+};
 
 export async function GET(
   request: NextRequest,
@@ -10,39 +16,20 @@ export async function GET(
 ) {
   const { file } = await params;
 
-  // Security: only allow specific files
-  if (!ALLOWED_FILES.has(file)) {
+  const data = GEO_FILES[file];
+
+  if (!data) {
     return NextResponse.json({ error: 'File not found' }, { status: 404 });
   }
 
-  try {
-    // Try to fetch from Cloudflare ASSETS binding
-    const ctx = getCloudflareContext();
-    const assets = ctx.env.ASSETS;
-
-    if (assets) {
-      const assetUrl = new URL(`/geo/${file}`, 'https://assets.local');
-      const response = await assets.fetch(assetUrl.toString());
-
-      if (response.ok) {
-        const data = await response.text();
-        return new NextResponse(data, {
-          status: 200,
-          headers: {
-            'Content-Type': 'application/json',
-            'Cache-Control': 'public, max-age=31536000, immutable',
-          },
-        });
-      }
-    }
-
-    // Fallback: return 404 if asset not found
-    return NextResponse.json({ error: 'Asset not found' }, { status: 404 });
-  } catch (error) {
-    console.error('Error fetching geo asset:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
-  }
+  return new NextResponse(JSON.stringify(data), {
+    status: 200,
+    headers: {
+      'Content-Type': 'application/json',
+      'Cache-Control': 'public, max-age=31536000, immutable',
+    },
+  });
 }
 
-// Dynamic route - geo files are served from ASSETS binding
+// Dynamic route
 export const dynamic = 'force-dynamic';
