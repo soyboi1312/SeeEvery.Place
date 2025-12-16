@@ -333,8 +333,9 @@ export default function SelectionList({
     return rows;
   }, [groupedItems, groupBy]);
 
-  // Use virtualization only when list is large (>50 items)
-  const shouldVirtualize = filteredItems.length > 50;
+  // Use virtualization only when list is very large (>500 items)
+  // This keeps multi-column grid for most categories while still virtualizing huge lists like worldCities
+  const shouldVirtualize = filteredItems.length > 500;
 
   const rowVirtualizer = useVirtualizer({
     count: virtualRows.length,
