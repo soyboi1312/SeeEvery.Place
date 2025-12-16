@@ -244,6 +244,13 @@ USING (
 -- 7. HELPER FUNCTIONS
 -- ============================================
 
+-- Drop existing functions if they exist (to handle return type changes)
+DROP FUNCTION IF EXISTS public.get_user_itineraries(integer, integer);
+DROP FUNCTION IF EXISTS public.get_itinerary_details(uuid);
+DROP FUNCTION IF EXISTS public.get_itinerary_items(uuid);
+DROP FUNCTION IF EXISTS public.get_itinerary_collaborators(uuid);
+DROP FUNCTION IF EXISTS public.get_user_public_itineraries(uuid, integer, integer);
+
 -- Function to get user's itineraries (owned + collaborating)
 CREATE OR REPLACE FUNCTION public.get_user_itineraries(
   page_limit integer DEFAULT 20,
