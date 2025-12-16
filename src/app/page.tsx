@@ -311,14 +311,10 @@ function HomeContent() {
           <h1 className="text-3xl sm:text-4xl font-bold text-gray-800 dark:text-white mb-2">
             Turn the World Into Your Quest Log.
             <span className="block text-lg sm:text-xl font-normal text-gray-600 dark:text-gray-300 mt-2">
-              Compete with friends, track your streaks, and conquer the map.
+              Track countries, parks, peaks, and more. Plan collaborative quests with friends.
+              <p>Share your map and stats. <strong>Not your photo gallery.</strong></p>
             </span>
           </h1>
-          <p className="text-gray-600 dark:text-gray-300 max-w-xl mx-auto mt-3">
-            Join the ultimate game for travelers. Track countries, stadiums, and peaks to earn XP and climb the leaderboard. Plan collaborative quests with friends or take on seasonal challenges.
-            <br className="hidden sm:block" />
-            <span className="font-medium"> It&apos;s not just travel—it&apos;s a high score.</span>
-          </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center mt-4">
             <Button asChild variant="default" className="gap-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white border-0">
               <Link href="/community">
