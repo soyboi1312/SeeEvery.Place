@@ -4,7 +4,7 @@ import { useState, useMemo, useRef, useCallback, memo } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { Status, Category } from '@/lib/types';
 import { useDebounce } from '@/lib/hooks/useDebounce';
-import { Search, Check, Star, Circle, Trash2, X, AlertCircle, Calendar as CalendarIcon, StickyNote, Lock, Info, Pencil, MapPin } from 'lucide-react';
+import { Search, Check, Star, Circle, Trash2, X, AlertCircle, Calendar as CalendarIcon, StickyNote, Lock, Info, Pencil, MapPin, Plus } from 'lucide-react';
 import dynamic from 'next/dynamic';
 
 // Lazy load the AddToTripModal to avoid initial bundle bloat
@@ -569,14 +569,18 @@ export default function SelectionList({
                   <p className="text-muted-foreground max-w-sm mb-6">
                     {emptyStateContent[category].subtitle}
                   </p>
-                  <div className="flex gap-4 text-xs font-medium text-muted-foreground">
+                  <div className="flex flex-wrap justify-center gap-4 text-xs font-medium text-muted-foreground">
                     <div className="flex items-center gap-1.5">
                       <span className="w-2 h-2 rounded-full bg-green-500" />
                       Tap to Visit
                     </div>
                     <div className="flex items-center gap-1.5">
                       <span className="w-2 h-2 rounded-full bg-amber-500" />
-                      Right-click to Bucket List
+                      Right-click for Options
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <Plus className="w-3 h-3 text-purple-500" />
+                      Add to Trip
                     </div>
                   </div>
                 </>
@@ -753,6 +757,22 @@ const ItemCard = memo(function ItemCard({ item, status, visitedDate, notes, onTo
               )}
             </div>
           </Button>
+          {/* Add to Trip Button - Visible on hover for quick access */}
+          {isAuthenticated && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 shrink-0 text-purple-500 hover:text-purple-600 hover:bg-purple-100 dark:hover:bg-purple-900/30 opacity-0 group-hover/row:opacity-100 transition-opacity"
+              onClick={(e) => {
+                e.stopPropagation();
+                onAddToTrip();
+              }}
+              title="Add to Trip"
+            >
+              <Plus className="w-4 h-4" />
+            </Button>
+          )}
+
           {/* Info Button - Placed outside main button to avoid toggling status */}
           <Button
             variant="ghost"
