@@ -77,6 +77,40 @@ export interface CategoryItem {
 // Cache for loaded data to avoid re-importing (moved up for getCategoryTotal)
 const dataCache: Partial<Record<Category, CategoryDataItem[]>> = {};
 
+/**
+ * Fetch JSON data from the public data directory.
+ * Used for large datasets to avoid bundling in JavaScript.
+ * Returns null if the file doesn't exist or fetch fails.
+ *
+ * OPTIMIZATION: Using fetch() instead of dynamic imports moves data from
+ * the JavaScript bundle to a network request that can be:
+ * - Cached by the service worker (/data/*.json rule in next.config.mjs)
+ * - Loaded in parallel with other resources
+ * - Smaller in size (JSON vs JS module overhead)
+ */
+async function fetchJsonData<T>(filename: string): Promise<T | null> {
+  try {
+    const response = await fetch(`/data/categories/${filename}`);
+    if (!response.ok) return null;
+    return response.json();
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Try to load data from JSON first (for better caching), fall back to dynamic import.
+ * This allows gradual migration to JSON files without breaking existing code.
+ */
+async function loadWithJsonFallback<T>(
+  jsonFile: string,
+  fallbackLoader: () => Promise<T[]>
+): Promise<T[]> {
+  const jsonData = await fetchJsonData<T[]>(jsonFile);
+  if (jsonData) return jsonData;
+  return fallbackLoader();
+}
+
 // Dynamic getter that uses cached data when available, falls back to schema values
 export function getCategoryTotal(category: Category): number {
   const cachedData = dataCache[category];
@@ -291,19 +325,26 @@ const transforms: Record<Category, TransformFn> = {
 // DATA LOADERS MAP (OCP - Open for extension, closed for modification)
 // =====================
 // To add a new category: add entry here and in CATEGORY_SCHEMA (types.ts)
+//
+// Large datasets use loadWithJsonFallback() to prefer fetching from /data/categories/*.json
+// which enables service worker caching and reduces initial bundle size (FCP/LCP optimization).
+// Fallback to dynamic imports ensures backwards compatibility if JSON files are missing.
+//
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const DATA_LOADERS: Record<Category, () => Promise<any[]>> = {
+  // Countries is small enough to keep as dynamic import
   countries: () => import('@/data/countries').then(m => m.countries),
-  worldCities: () => import('@/data/worldCities').then(m => m.worldCities),
+  // Large datasets - prefer JSON fetch for better caching
+  worldCities: () => loadWithJsonFallback('worldCities.json', () => import('@/data/worldCities').then(m => m.worldCities)),
   states: () => import('@/data/usStates').then(m => m.usStates),
   territories: () => import('@/data/usTerritories').then(m => m.usTerritories),
-  usCities: () => import('@/data/usCities').then(m => m.usCities),
-  nationalParks: () => import('@/data/nationalParks').then(m => m.nationalParks),
-  nationalMonuments: () => import('@/data/nationalMonuments').then(m => m.nationalMonuments),
-  stateParks: () => import('@/data/stateParks').then(m => m.stateParks),
+  usCities: () => loadWithJsonFallback('usCities.json', () => import('@/data/usCities').then(m => m.usCities)),
+  nationalParks: () => loadWithJsonFallback('nationalParks.json', () => import('@/data/nationalParks').then(m => m.nationalParks)),
+  nationalMonuments: () => loadWithJsonFallback('nationalMonuments.json', () => import('@/data/nationalMonuments').then(m => m.nationalMonuments)),
+  stateParks: () => loadWithJsonFallback('stateParks.json', () => import('@/data/stateParks').then(m => m.stateParks)),
   fiveKPeaks: () => import('@/data/mountains').then(m => m.get5000mPeaks()),
   fourteeners: () => import('@/data/mountains').then(m => m.getUS14ers()),
-  museums: () => import('@/data/museums').then(m => m.museums),
+  museums: () => loadWithJsonFallback('museums.json', () => import('@/data/museums').then(m => m.museums)),
   mlbStadiums: () => import('@/data/stadiums').then(m => m.getMlbStadiums()),
   nflStadiums: () => import('@/data/stadiums').then(m => m.getNflStadiums()),
   nbaStadiums: () => import('@/data/stadiums').then(m => m.getNbaStadiums()),
@@ -314,11 +355,11 @@ const DATA_LOADERS: Record<Category, () => Promise<any[]>> = {
   cricketStadiums: () => import('@/data/stadiums/stadiumUtils').then(m => m.getCricketStadiums()),
   f1Tracks: () => import('@/data/f1Tracks').then(m => m.f1Tracks),
   marathons: () => import('@/data/marathons').then(m => m.marathons),
-  airports: () => import('@/data/airports').then(m => m.airports),
-  skiResorts: () => import('@/data/skiResorts').then(m => m.skiResorts),
-  themeParks: () => import('@/data/themeParks').then(m => m.themeParks),
+  airports: () => loadWithJsonFallback('airports.json', () => import('@/data/airports').then(m => m.airports)),
+  skiResorts: () => loadWithJsonFallback('skiResorts.json', () => import('@/data/skiResorts').then(m => m.skiResorts)),
+  themeParks: () => loadWithJsonFallback('themeParks.json', () => import('@/data/themeParks').then(m => m.themeParks)),
   surfingReserves: () => import('@/data/surfingReserves').then(m => m.surfingReserves),
-  weirdAmericana: () => import('@/data/weirdAmericana').then(m => m.weirdAmericana),
+  weirdAmericana: () => loadWithJsonFallback('weirdAmericana.json', () => import('@/data/weirdAmericana').then(m => m.weirdAmericana)),
 };
 
 // Dynamic data loaders - only load when needed
