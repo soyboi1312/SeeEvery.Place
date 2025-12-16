@@ -129,19 +129,7 @@ export default function RootLayout({
           <link rel="preconnect" href={process.env.NEXT_PUBLIC_SUPABASE_URL} />
         )}
 
-        {/* Preload geo data from our API proxy */}
-        <link
-          rel="preload"
-          href="/api/geo/countries-110m.json"
-          as="fetch"
-          type="application/json"
-        />
-        <link
-          rel="prefetch"
-          href="/api/geo/states-10m.json"
-          as="fetch"
-          type="application/json"
-        />
+        {/* Note: preload/prefetch for API routes removed - Cloudflare Workers refuse prefetch requests */}
 
         {/* Prevent dark mode FOUC by setting class before React hydration */}
         <script
