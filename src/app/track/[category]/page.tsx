@@ -927,15 +927,122 @@ export default async function CategoryLandingPage({ params }: Props) {
           </ol>
         </nav>
 
-        <div className="text-center mb-12">
-          <span className="text-6xl mb-4 block">{icon}</span>
-          <h1 className="text-4xl font-bold text-foreground mb-4">
-            Track {label} You&apos;ve Visited
-          </h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            {description}
-          </p>
-        </div>
+        {/* Split Hero Section */}
+        <section className="mb-16">
+          <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-12">
+            {/* Left Side: Text Content */}
+            <div className="flex-1 text-center lg:text-left">
+              <Badge variant="outline" className="mb-4 py-1.5 px-3 text-sm bg-background/50 backdrop-blur">
+                Free {label} Tracker
+              </Badge>
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight mb-4 text-foreground">
+                Track Every{' '}
+                <span className={`text-transparent bg-clip-text bg-gradient-to-r ${accent}`}>
+                  {label.split(' ')[0]}
+                </span>
+              </h1>
+              <p className="text-lg md:text-xl text-muted-foreground mb-6 max-w-xl mx-auto lg:mx-0 leading-relaxed">
+                {description} Join thousands of travelers building their ultimate visual bucket list.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
+                <Button asChild size="lg" className="text-base h-12 px-6 shadow-lg hover:scale-105 transition-all">
+                  <Link href={`/?category=${category}`}>
+                    Start Tracking Now
+                    <ArrowRight className="w-4 h-4 ml-2" />
+                  </Link>
+                </Button>
+                <Button asChild variant="outline" size="lg" className="h-12 px-6 bg-background/50 backdrop-blur">
+                  <Link href="#examples">
+                    View Full List
+                  </Link>
+                </Button>
+              </div>
+
+              {/* Social Proof / Mini Stats */}
+              <div className="mt-6 pt-6 border-t border-border/50 flex flex-wrap gap-6 justify-center lg:justify-start text-sm font-medium text-muted-foreground">
+                <div className="flex items-center gap-2">
+                  <span className="text-foreground font-bold">FREE</span> Forever
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-foreground font-bold">NO</span> Account Needed
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-foreground font-bold">{stats[0]?.value || '?'}</span> {stats[0]?.label?.split(' ').slice(1).join(' ') || 'Places'}
+                </div>
+              </div>
+            </div>
+
+            {/* Right Side: Map Preview */}
+            <div className="flex-1 relative w-full max-w-lg lg:max-w-xl">
+              <div className="absolute inset-0 bg-gradient-to-tr from-primary/20 to-secondary/20 rounded-full blur-3xl opacity-30" />
+              <div className="relative bg-card/80 backdrop-blur-sm border border-border/50 rounded-2xl p-4 shadow-2xl transform lg:rotate-1 hover:rotate-0 transition-transform duration-500">
+                {/* Map Placeholder */}
+                <div className="aspect-[4/3] bg-gradient-to-br from-muted/50 to-muted rounded-xl flex items-center justify-center border border-border/30 overflow-hidden">
+                  <div className="text-center p-6">
+                    <span className="text-6xl mb-3 block drop-shadow-lg">{icon}</span>
+                    <span className="text-muted-foreground font-medium">Your {label} Map</span>
+                    <p className="text-xs text-muted-foreground/70 mt-1">Track visited & bucket list</p>
+                  </div>
+                </div>
+
+                {/* Floating Progress Card */}
+                <div className="absolute -bottom-4 -left-4 bg-card border border-border p-3 rounded-xl shadow-xl flex items-center gap-3">
+                  <div className="bg-green-100 dark:bg-green-900/30 p-2 rounded-full text-green-600">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <div>
+                    <div className="text-[10px] text-muted-foreground uppercase tracking-wide">Progress</div>
+                    <div className="font-bold text-sm text-foreground">0 / {stats[0]?.value || '?'} Visited</div>
+                  </div>
+                </div>
+
+                {/* Floating Bucket List Card */}
+                <div className="absolute -top-3 -right-3 bg-card border border-border p-2.5 rounded-lg shadow-xl">
+                  <div className="flex items-center gap-2">
+                    <span className="text-amber-500">⭐</span>
+                    <span className="text-xs font-medium text-foreground">Bucket List</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* How It Works Section */}
+        <section className="mb-16 py-8 border-y border-border/50 bg-muted/30 -mx-4 px-4 rounded-none md:rounded-2xl md:mx-0 md:px-8">
+          <h2 className="text-lg font-semibold text-center text-muted-foreground mb-8">How It Works</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+            <div className="text-center">
+              <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-3">
+                <svg className="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <h3 className="font-semibold text-foreground mb-1">1. Select Places</h3>
+              <p className="text-sm text-muted-foreground">Click to mark {label.toLowerCase()} as visited or add to your bucket list</p>
+            </div>
+            <div className="text-center">
+              <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-3">
+                <svg className="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+              </div>
+              <h3 className="font-semibold text-foreground mb-1">2. Track Progress</h3>
+              <p className="text-sm text-muted-foreground">Watch your map fill with color as you explore more places</p>
+            </div>
+            <div className="text-center">
+              <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-3">
+                <svg className="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                </svg>
+              </div>
+              <h3 className="font-semibold text-foreground mb-1">3. Share Your Journey</h3>
+              <p className="text-sm text-muted-foreground">Generate beautiful images to share on social media</p>
+            </div>
+          </div>
+        </section>
 
         {/* By the Numbers Section */}
         <section className="mb-12">
@@ -954,6 +1061,56 @@ export default async function CategoryLandingPage({ params }: Props) {
               </Card>
             ))}
           </div>
+        </section>
+
+        {/* Gamification Teaser - Your Journey Card */}
+        <section className="mb-12">
+          <Card className="bg-gradient-to-br from-card to-muted/50 border-2 border-primary/20 overflow-hidden">
+            <CardContent className="p-6 md:p-8">
+              <div className="flex flex-col md:flex-row items-center gap-6">
+                {/* Left: Progress Visualization */}
+                <div className="flex-1 w-full">
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="font-bold text-foreground">Your {label} Journey</h3>
+                    <Badge variant="outline" className="bg-primary/10 text-primary border-primary/30">
+                      Rank: Novice
+                    </Badge>
+                  </div>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Start tracking to unlock achievements and climb the ranks!
+                  </p>
+                  {/* Progress Bar */}
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-xs text-muted-foreground">
+                      <span>Progress</span>
+                      <span>0 / {stats[0]?.value || '?'} (0%)</span>
+                    </div>
+                    <div className="h-3 bg-muted rounded-full overflow-hidden">
+                      <div className="h-full w-0 bg-gradient-to-r from-primary to-primary/70 rounded-full transition-all duration-500" />
+                    </div>
+                    <div className="flex justify-between text-[10px] text-muted-foreground/70">
+                      <span>Novice</span>
+                      <span>Explorer</span>
+                      <span>Expert</span>
+                      <span>Master</span>
+                    </div>
+                  </div>
+                </div>
+                {/* Right: CTA */}
+                <div className="text-center md:text-right shrink-0">
+                  <Button asChild size="lg" className="shadow-lg">
+                    <Link href={`/?category=${category}`}>
+                      Start Now
+                      <ArrowRight className="w-4 h-4 ml-2" />
+                    </Link>
+                  </Button>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Join travelers worldwide
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </section>
 
         {/* Community Stats - Dynamic traveler statistics */}
@@ -1054,7 +1211,7 @@ export default async function CategoryLandingPage({ params }: Props) {
         )}
 
         {/* Examples Section */}
-        <section className="mt-16">
+        <section id="examples" className="mt-16 scroll-mt-20">
           <h2 className="text-2xl font-bold text-foreground mb-2 text-center">
             {label} to Explore
           </h2>
@@ -1134,7 +1291,7 @@ export default async function CategoryLandingPage({ params }: Props) {
         </section>
       </main>
 
-      <footer className="border-t border-border bg-muted/50">
+      <footer className="border-t border-border bg-muted/50 pb-20 md:pb-0">
         <div className="max-w-4xl mx-auto px-4 py-6 text-center text-sm text-muted-foreground">
           <div className="flex justify-center gap-4 mb-2">
             <Link href="/about" className="hover:text-foreground transition-colors">About</Link>
@@ -1148,6 +1305,16 @@ export default async function CategoryLandingPage({ params }: Props) {
           <p>See Every Place - Free Travel Tracker</p>
         </div>
       </footer>
+
+      {/* Sticky Mobile Footer CTA */}
+      <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/95 backdrop-blur-md border-t border-border z-50 md:hidden">
+        <Button asChild className="w-full shadow-lg h-12 text-base font-semibold">
+          <Link href={`/?category=${category}`}>
+            Start Tracking {label}
+            <ArrowRight className="w-4 h-4 ml-2" />
+          </Link>
+        </Button>
+      </div>
     </div>
     </>
   );

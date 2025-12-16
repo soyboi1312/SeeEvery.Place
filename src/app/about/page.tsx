@@ -17,9 +17,9 @@ export default function AboutPage() {
               <Image src="/logo.svg" alt="See Every Place Logo" fill className="object-contain" priority />
             </div>
             <div className="flex flex-col">
-              <h1 className="text-xl font-bold text-primary-900 dark:text-white leading-none">
+              <span className="text-xl font-bold text-primary-900 dark:text-white leading-none">
                 SeeEvery<span className="text-accent-500">.</span>Place<span className="text-[10px] align-super text-primary-400">™</span>
-              </h1>
+              </span>
               <span className="text-[10px] text-primary-500 dark:text-primary-400 font-medium tracking-wider uppercase hidden sm:block">
                 Free Travel Tracker
               </span>
