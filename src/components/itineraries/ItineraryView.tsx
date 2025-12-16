@@ -147,7 +147,7 @@ export default function ItineraryView({
                   <Input
                     value={editTitle}
                     onChange={(e) => setEditTitle(e.target.value)}
-                    placeholder="List title"
+                    placeholder="Quest name"
                     className="text-xl font-bold"
                     maxLength={100}
                   />
@@ -278,12 +278,12 @@ export default function ItineraryView({
                           className="text-destructive focus:text-destructive"
                         >
                           <Trash2 className="w-4 h-4 mr-2" />
-                          Delete List
+                          Delete Quest
                         </DropdownMenuItem>
                       </AlertDialogTrigger>
                       <AlertDialogContent>
                         <AlertDialogHeader>
-                          <AlertDialogTitle>Delete this list?</AlertDialogTitle>
+                          <AlertDialogTitle>Delete this quest?</AlertDialogTitle>
                           <AlertDialogDescription>
                             This will permanently delete &quot;{itinerary.title}&quot; and all its places.
                             This action cannot be undone.
@@ -317,7 +317,7 @@ export default function ItineraryView({
             </div>
             <h3 className="font-semibold mb-1">No places yet</h3>
             <p className="text-sm text-muted-foreground">
-              Start adding places to your list from the tracking pages!
+              Start adding places to your quest from the tracking pages!
             </p>
           </CardContent>
         </Card>
@@ -413,9 +413,9 @@ function ItemRow({ item, canEdit, onEdit, onDelete }: ItemRowProps) {
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
-                <AlertDialogTitle>Remove from list?</AlertDialogTitle>
+                <AlertDialogTitle>Remove from quest?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  Remove &quot;{item.place_name}&quot; from this list?
+                  Remove &quot;{item.place_name}&quot; from this quest?
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>

@@ -36,20 +36,20 @@ export default function AboutPage() {
           <h1 className="text-4xl font-bold text-foreground mb-6">About See Every Place</h1>
 
           <p className="text-xl text-muted-foreground mb-8">
-            Track your adventures, build custom lists, and share beautiful maps with friends and family.
+            Turn exploration into a game. Track progress, unlock achievements, and complete your bucket list—one destination at a time.
           </p>
 
           {/* What is it */}
           <section className="mb-12">
             <h2 className="text-2xl font-bold text-foreground mb-4">What is See Every Place?</h2>
             <p className="text-muted-foreground mb-4">
-              See Every Place is a free travel tracking app that helps you visualize everywhere you&apos;ve been
-              and everywhere you want to go. Whether you&apos;re a seasoned globetrotter or just starting your
-              travel journey, See Every Place makes it easy to keep track of your adventures.
+              See Every Place is the video game for real-world travel. Think of it as a quest log for explorers—track your conquests,
+              unlock achievements, and see exactly how much of the world you&apos;ve checked off. No itineraries, no booking links.
+              Just pure progress tracking.
             </p>
             <p className="text-muted-foreground">
               Track far more than just countries. From national parks and mountain peaks to stadiums and weird
-              roadside attractions, we help you capture the full detail of your journey.
+              roadside attractions, we help you capture the full detail of your journey. Every place visited is a quest completed.
             </p>
           </section>
 
@@ -63,16 +63,18 @@ export default function AboutPage() {
             </CardHeader>
             <CardContent className="space-y-4 text-muted-foreground">
               <p>
-                Memories fade faster than we&apos;d like. We wanted a way to hold onto the places we&apos;ve seen, not just the countries, but the mountain peaks and the random roadside attractions that made the trip special.
+                Remember completing your Pokédex? Or 100%-ing a video game? We wanted that same satisfying feeling—but for real-world travel.
+                Not just checking off countries, but the mountain peaks, the weird roadside attractions, the stadiums that made the trip special.
               </p>
               <p>
-                Most travel apps focus on social feeds and photos. We wanted a tool dedicated purely to the map itself—no pressure to curate the perfect post. Just the <strong>action</strong> of exploration.
+                Most travel apps focus on social feeds and photos. We wanted a tool dedicated purely to <strong>progress</strong>—no pressure to curate the perfect post.
+                Just the thrill of watching your map fill in, one conquest at a time.
               </p>
               <p>
-                We wanted something simple: a visual way to see where we&apos;d been based on <em>data</em>, not media. A platform dedicated to the map itself.
+                We built See Every Place as a quest log for explorers. Simple data-driven tracking. Visual progress bars. Achievements that actually mean something.
               </p>
               <p>
-                <strong className="text-foreground">So we built one.</strong> And now we&apos;re sharing it with you.
+                <strong className="text-foreground">It&apos;s the video game for real-world travel.</strong> And now we&apos;re sharing it with you.
               </p>
               <p className="text-sm text-muted-foreground pt-2 border-t">
                 See Every Place is free and works offline. Your data stays private by default.
@@ -88,20 +90,20 @@ export default function AboutPage() {
               <Card>
                 <CardContent className="pt-6">
                   <Globe className="w-8 h-8 text-blue-500 mb-3" />
-                  <h3 className="font-bold text-foreground mb-2">Interactive Maps</h3>
+                  <h3 className="font-bold text-foreground mb-2">Watch Your Progress</h3>
                   <p className="text-muted-foreground text-sm">
-                    See your travels come to life on beautiful interactive world and US maps with countries
-                    and states colored by visit status.
+                    See your conquests come to life on beautiful interactive world and US maps.
+                    Watch regions fill in as you complete each category.
                   </p>
                 </CardContent>
               </Card>
               <Card>
                 <CardContent className="pt-6">
                   <BarChart3 className="w-8 h-8 text-green-500 mb-3" />
-                  <h3 className="font-bold text-foreground mb-2">Track Everything</h3>
+                  <h3 className="font-bold text-foreground mb-2">Complete the Set</h3>
                   <p className="text-muted-foreground text-sm">
-                    Go beyond countries - track parks, mountains, museums,
-                    stadiums, airports, ski resorts, theme parks, and surf spots.
+                    Go beyond countries—track parks, mountains, museums,
+                    stadiums, airports, ski resorts, theme parks, and surf spots. How many can you 100%?
                   </p>
                 </CardContent>
               </Card>
@@ -148,10 +150,10 @@ export default function AboutPage() {
               <Card>
                 <CardContent className="pt-6">
                   <MapPin className="w-8 h-8 text-orange-500 mb-3" />
-                  <h3 className="font-bold text-foreground mb-2">Custom Lists</h3>
+                  <h3 className="font-bold text-foreground mb-2">Custom Quests</h3>
                   <p className="text-muted-foreground text-sm">
-                    Create place collections for any goal—national parks to conquer, stadiums to visit,
-                    or road trip routes. Share with friends and track together.
+                    Create your own quests—national parks to conquer, stadiums to visit,
+                    or road trip routes. Share with friends and track progress together.
                   </p>
                 </CardContent>
               </Card>
@@ -273,19 +275,19 @@ export default function AboutPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Rocket className="w-6 h-6 text-amber-500" />
-                What&apos;s Next?
+                New Quests Coming Soon
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4 text-muted-foreground">
               <p>
-                I&apos;m constantly adding new maps and markers, and I let the community decide what comes first.
+                I&apos;m constantly adding new categories to conquer, and the community decides what comes first.
               </p>
               <p>
                 Visit the{' '}
                 <Link href="/suggest" className="text-primary hover:underline font-medium">
                   Suggestions Page
                 </Link>{' '}
-                to see what I&apos;m working on, vote for your favorite categories, or submit a new idea. If enough people want it, I&apos;ll build it.
+                to see what&apos;s in development, vote for your favorite categories, or submit a new quest idea. If enough explorers want it, I&apos;ll build it.
               </p>
             </CardContent>
           </Card>
@@ -293,7 +295,7 @@ export default function AboutPage() {
           <section className="text-center py-8">
             <Button asChild size="lg" className="gap-2">
               <Link href="/">
-                Start Tracking Your Travels
+                Start Your Adventure
                 <ArrowRight className="w-5 h-5" />
               </Link>
             </Button>

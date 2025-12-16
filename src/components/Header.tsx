@@ -235,8 +235,8 @@ export default function Header({
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <Link href="/trips">
-                    <MapPin className="w-4 h-4 mr-2" />
-                    My Lists
+                    <Trophy className="w-4 h-4 mr-2" />
+                    My Quests
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>

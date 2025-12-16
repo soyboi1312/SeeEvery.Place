@@ -162,14 +162,14 @@ export default function TripsPage() {
         {/* Page Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">My Lists</h1>
+            <h1 className="text-3xl font-bold text-foreground">My Quests</h1>
             <p className="text-muted-foreground mt-1">
-              Create and track your place collections
+              Create custom quests and track your conquests
             </p>
           </div>
           <Button onClick={() => setShowCreateDialog(true)} className="gap-2">
             <Plus className="w-4 h-4" />
-            New List
+            New Quest
           </Button>
         </div>
 
@@ -179,7 +179,7 @@ export default function TripsPage() {
             <Card className="bg-gradient-to-br from-blue-500/10 to-purple-500/10 border-blue-200 dark:border-blue-800">
               <CardContent className="py-4 text-center">
                 <div className="text-3xl font-bold text-blue-600 dark:text-blue-400">{listStats.total}</div>
-                <div className="text-sm text-muted-foreground">Lists</div>
+                <div className="text-sm text-muted-foreground">Quests</div>
               </CardContent>
             </Card>
             <Card className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 border-purple-200 dark:border-purple-800">
@@ -210,11 +210,11 @@ export default function TripsPage() {
               </div>
               <h2 className="text-xl font-bold mb-2">Start Your Quest</h2>
               <p className="text-muted-foreground mb-6 max-w-sm mx-auto">
-                Create your first list to start tracking places. Build a bucket list, plan a road trip route, or collect stadiums to visit.
+                Create your first quest to start tracking places. Conquer national parks, collect stadiums, or plan an epic road trip.
               </p>
               <Button onClick={() => setShowCreateDialog(true)} className="gap-2">
                 <Plus className="w-4 h-4" />
-                Create Your First List
+                Create Your First Quest
               </Button>
             </CardContent>
           </Card>
@@ -233,7 +233,7 @@ export default function TripsPage() {
 
       <Footer user={user} onSignIn={() => setShowAuthModal(true)} />
 
-      {/* Create List Dialog */}
+      {/* Create Quest Dialog */}
       <Dialog
         open={showCreateDialog}
         onOpenChange={(open) => {
@@ -245,16 +245,16 @@ export default function TripsPage() {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Target className="w-5 h-5 text-primary" />
-              Create New List
+              Create New Quest
             </DialogTitle>
           </DialogHeader>
 
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="list-title">List Name *</Label>
+              <Label htmlFor="list-title">Quest Name *</Label>
               <Input
                 id="list-title"
-                placeholder="e.g., National Parks Quest, Stadiums to Visit"
+                placeholder="e.g., National Parks Quest, Stadiums to Conquer"
                 value={newTitle}
                 onChange={(e) => setNewTitle(e.target.value)}
                 maxLength={100}
@@ -265,7 +265,7 @@ export default function TripsPage() {
               <Label htmlFor="list-description">Description (optional)</Label>
               <Textarea
                 id="list-description"
-                placeholder="What's this list about?"
+                placeholder="What's this quest about?"
                 value={newDescription}
                 onChange={(e) => setNewDescription(e.target.value)}
                 maxLength={500}
@@ -287,7 +287,7 @@ export default function TripsPage() {
               ) : (
                 <>
                   <Plus className="w-4 h-4 mr-2" />
-                  Create List
+                  Create Quest
                 </>
               )}
             </Button>

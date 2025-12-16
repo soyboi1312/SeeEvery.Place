@@ -200,14 +200,14 @@ export default function TripDetailPage({ params }: PageProps) {
             <div className="w-20 h-20 rounded-full bg-muted/50 flex items-center justify-center mx-auto mb-6 text-4xl">
               🔍
             </div>
-            <h1 className="text-2xl font-bold mb-2">{error || 'List not found'}</h1>
+            <h1 className="text-2xl font-bold mb-2">{error || 'Quest not found'}</h1>
             <p className="text-muted-foreground mb-6">
-              This list may have been deleted or you don&apos;t have access to it.
+              This quest may have been deleted or you don&apos;t have access to it.
             </p>
             <Button asChild>
               <Link href="/trips">
                 <ArrowLeft className="w-4 h-4 mr-2" />
-                Back to Lists
+                Back to Quests
               </Link>
             </Button>
           </div>
@@ -238,7 +238,7 @@ export default function TripDetailPage({ params }: PageProps) {
           <Button variant="ghost" asChild className="gap-2 -ml-2">
             <Link href="/trips">
               <ArrowLeft className="w-4 h-4" />
-              All Lists
+              All Quests
             </Link>
           </Button>
         </div>
