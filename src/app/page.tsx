@@ -3,7 +3,6 @@
 import { useState, useEffect, useMemo, useCallback, useRef, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
-import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import CategoryTabs from '@/components/CategoryTabs';
@@ -309,22 +308,17 @@ function HomeContent() {
         {/* Hero Section - NOW RENDERS IMMEDIATELY FOR FAST LCP */}
         <div className="text-center py-8 sm:py-12">
           <h1 className="text-4xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-6xl">
-            See Every Place
+            Travel Map & Tracker
           </h1>
           <p className="mt-6 text-lg leading-8 text-gray-600 dark:text-gray-300">
-            Track countries, parks, peaks, and more. Plan collaborative trips with friends.
+            Where have you been? Track countries, parks, peaks, and more.
+          </p>
+          <p className="mt-2 text-lg leading-8 text-gray-600 dark:text-gray-300">
+            Challenge friends with travel quests.
+          </p>
+          <p className="mt-2 text-lg leading-8 text-gray-600 dark:text-gray-300">
             Share your map and stats. <strong className="font-semibold text-gray-900 dark:text-white">Not your photo gallery.</strong>
           </p>
-          <div className="mt-10 flex items-center justify-center gap-x-6">
-            <Button asChild className="rounded-md bg-blue-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-500">
-              <Link href="#map">
-                Start Mapping
-              </Link>
-            </Button>
-            <Link href="/about" className="text-sm font-semibold leading-6 text-gray-900 dark:text-white hover:text-gray-600 dark:hover:text-gray-300">
-              Learn more <span aria-hidden="true">→</span>
-            </Link>
-          </div>
         </div>
 
         {/* URL param sync - isolated in Suspense to allow SSR of Hero */}
