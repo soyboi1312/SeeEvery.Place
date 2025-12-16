@@ -35,7 +35,6 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import {
-  Calendar,
   MapPin,
   Globe,
   Lock,
@@ -43,11 +42,11 @@ import {
   Trash2,
   MoreVertical,
   StickyNote,
-  GripVertical,
   Loader2,
   Share2,
   Link as LinkIcon,
   Check,
+  Target,
 } from 'lucide-react';
 
 interface ItineraryViewProps {
@@ -90,33 +89,10 @@ export default function ItineraryView({
   const isOwner = itinerary.owner_id === currentUserId;
   const canEdit = isOwner || itinerary.user_role === 'editor';
 
-  // Group items by day
-  const itemsByDay = useMemo(() => {
-    const grouped: Record<number | 'unassigned', ItineraryItem[]> = { unassigned: [] };
-
-    items.forEach((item) => {
-      const day = item.day_number ?? 'unassigned';
-      if (!grouped[day]) grouped[day] = [];
-      grouped[day].push(item);
-    });
-
-    // Sort items within each day by sort_order
-    Object.keys(grouped).forEach((key) => {
-      const dayKey = key === 'unassigned' ? 'unassigned' : parseInt(key);
-      grouped[dayKey].sort((a, b) => a.sort_order - b.sort_order);
-    });
-
-    return grouped;
+  // Sort items by sort_order
+  const sortedItems = useMemo(() => {
+    return [...items].sort((a, b) => a.sort_order - b.sort_order);
   }, [items]);
-
-  const formatDateRange = (startDate?: string, endDate?: string) => {
-    if (!startDate && !endDate) return null;
-    const options: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric', year: 'numeric' };
-    const start = startDate ? new Date(startDate).toLocaleDateString('en-US', options) : '';
-    const end = endDate ? new Date(endDate).toLocaleDateString('en-US', options) : '';
-    if (start && end) return `${start} - ${end}`;
-    return start || end;
-  };
 
   const handleSaveDetails = async () => {
     setIsSaving(true);
@@ -171,7 +147,7 @@ export default function ItineraryView({
                   <Input
                     value={editTitle}
                     onChange={(e) => setEditTitle(e.target.value)}
-                    placeholder="Trip title"
+                    placeholder="List title"
                     className="text-xl font-bold"
                     maxLength={100}
                   />
@@ -212,17 +188,11 @@ export default function ItineraryView({
                 </>
               )}
 
-              {/* Date & Stats */}
+              {/* Stats */}
               <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
-                {formatDateRange(itinerary.start_date, itinerary.end_date) && (
-                  <div className="flex items-center gap-1.5">
-                    <Calendar className="w-4 h-4" />
-                    {formatDateRange(itinerary.start_date, itinerary.end_date)}
-                  </div>
-                )}
                 <div className="flex items-center gap-1.5">
-                  <MapPin className="w-4 h-4" />
-                  {items.length} places
+                  <Target className="w-4 h-4 text-purple-500" />
+                  <span className="font-medium">{items.length} {items.length === 1 ? 'place' : 'places'}</span>
                 </div>
               </div>
             </div>
@@ -308,12 +278,12 @@ export default function ItineraryView({
                           className="text-destructive focus:text-destructive"
                         >
                           <Trash2 className="w-4 h-4 mr-2" />
-                          Delete Trip
+                          Delete List
                         </DropdownMenuItem>
                       </AlertDialogTrigger>
                       <AlertDialogContent>
                         <AlertDialogHeader>
-                          <AlertDialogTitle>Delete this trip?</AlertDialogTitle>
+                          <AlertDialogTitle>Delete this list?</AlertDialogTitle>
                           <AlertDialogDescription>
                             This will permanently delete &quot;{itinerary.title}&quot; and all its places.
                             This action cannot be undone.
@@ -338,67 +308,37 @@ export default function ItineraryView({
         </CardHeader>
       </Card>
 
-      {/* Places List */}
+      {/* Places Checklist */}
       {items.length === 0 ? (
         <Card>
           <CardContent className="py-12 text-center">
-            <div className="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center mx-auto mb-4 text-3xl">
-              🗺️
+            <div className="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center mx-auto mb-4">
+              <Target className="w-8 h-8 text-purple-500" />
             </div>
             <h3 className="font-semibold mb-1">No places yet</h3>
             <p className="text-sm text-muted-foreground">
-              Start adding places to your trip from the tracking pages!
+              Start adding places to your list from the tracking pages!
             </p>
           </CardContent>
         </Card>
       ) : (
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Places ({items.length})</CardTitle>
+            <CardTitle className="text-lg">Checklist ({items.length})</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            {/* Unassigned items */}
-            {itemsByDay.unassigned?.length > 0 && (
-              <div className="space-y-2">
-                {Object.keys(itemsByDay).filter(k => k !== 'unassigned').length > 0 && (
-                  <h4 className="text-sm font-medium text-muted-foreground">Unassigned</h4>
-                )}
-                {itemsByDay.unassigned.map((item) => (
-                  <ItemRow
-                    key={item.id}
-                    item={item}
-                    canEdit={canEdit}
-                    onEdit={() => {
-                      setEditingItemId(item.id);
-                      setEditItemNotes(item.notes || '');
-                    }}
-                    onDelete={() => onDeleteItem(item.id)}
-                  />
-                ))}
-              </div>
-            )}
-
-            {/* Grouped by day */}
-            {Object.entries(itemsByDay)
-              .filter(([key]) => key !== 'unassigned')
-              .sort(([a], [b]) => parseInt(a) - parseInt(b))
-              .map(([day, dayItems]) => (
-                <div key={day} className="space-y-2">
-                  <h4 className="text-sm font-medium text-muted-foreground">Day {day}</h4>
-                  {dayItems.map((item) => (
-                    <ItemRow
-                      key={item.id}
-                      item={item}
-                      canEdit={canEdit}
-                      onEdit={() => {
-                        setEditingItemId(item.id);
-                        setEditItemNotes(item.notes || '');
-                      }}
-                      onDelete={() => onDeleteItem(item.id)}
-                    />
-                  ))}
-                </div>
-              ))}
+          <CardContent className="space-y-2">
+            {sortedItems.map((item) => (
+              <ItemRow
+                key={item.id}
+                item={item}
+                canEdit={canEdit}
+                onEdit={() => {
+                  setEditingItemId(item.id);
+                  setEditItemNotes(item.notes || '');
+                }}
+                onDelete={() => onDeleteItem(item.id)}
+              />
+            ))}
           </CardContent>
         </Card>
       )}
@@ -409,7 +349,7 @@ export default function ItineraryView({
           <DialogHeader>
             <DialogTitle>Edit Notes</DialogTitle>
             <DialogDescription>
-              Add personal notes about this place for your trip.
+              Add personal notes about this place.
             </DialogDescription>
           </DialogHeader>
           <Textarea
@@ -445,9 +385,6 @@ interface ItemRowProps {
 function ItemRow({ item, canEdit, onEdit, onDelete }: ItemRowProps) {
   return (
     <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg group">
-      {canEdit && (
-        <GripVertical className="w-4 h-4 text-muted-foreground/50 cursor-grab" />
-      )}
       <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-xl shrink-0">
         {categoryIcons[item.category]}
       </div>
@@ -476,9 +413,9 @@ function ItemRow({ item, canEdit, onEdit, onDelete }: ItemRowProps) {
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
-                <AlertDialogTitle>Remove from trip?</AlertDialogTitle>
+                <AlertDialogTitle>Remove from list?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  Remove &quot;{item.place_name}&quot; from this trip?
+                  Remove &quot;{item.place_name}&quot; from this list?
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
