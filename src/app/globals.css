@@ -170,19 +170,20 @@ body {
   animation: fadeIn 0.3s ease-out forwards;
 }
 
-/* Zoom controls visibility - only hide on devices that support hover */
-/* On touch devices (tablets, phones), controls are always visible */
+/* Zoom controls visibility - dimmed by default, full on hover */
+/* This ensures discoverability while keeping the map clean */
 .zoom-controls-hover {
   opacity: 1;
   transition: opacity 200ms ease;
 }
 
 @media (hover: hover) {
-  /* Device supports hover (mouse/trackpad) - hide by default, show on hover */
+  /* Device supports hover (mouse/trackpad) - show dimmed, brighten on hover */
   .zoom-controls-hover {
-    opacity: 0;
+    opacity: 0.5;
   }
   .group:hover .zoom-controls-hover,
+  .zoom-controls-hover:hover,
   .zoom-controls-hover:focus-within {
     opacity: 1;
   }

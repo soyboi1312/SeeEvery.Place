@@ -75,6 +75,7 @@ function HomeContent() {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const [currentItems, setCurrentItems] = useState<CategoryItem[]>([]);
+  const [isCategoryLoading, setIsCategoryLoading] = useState(false);
   const [profileData, setProfileData] = useState<{ isPublic: boolean; username: string | null }>({ isPublic: false, username: null });
   const { user, signOut, isAdmin, username } = useAuth();
   const { isDarkMode, toggleDarkMode } = useDarkMode();
@@ -242,7 +243,11 @@ function HomeContent() {
 
   // Load items for the active category asynchronously (code-split)
   useEffect(() => {
-    getCategoryItemsAsync(activeCategory).then(setCurrentItems);
+    setIsCategoryLoading(true);
+    getCategoryItemsAsync(activeCategory).then((items) => {
+      setCurrentItems(items);
+      setIsCategoryLoading(false);
+    });
   }, [activeCategory]);
 
   const currentStats = useMemo(() => {
@@ -304,7 +309,7 @@ function HomeContent() {
         onPreloadAuth={preloadAuthModal}
       />
 
-      <div className="max-w-6xl mx-auto px-4 py-6 space-y-6 flex-grow w-full overflow-hidden">
+      <div className="max-w-6xl mx-auto px-4 py-6 pb-24 space-y-6 flex-grow w-full overflow-hidden">
         {/* Hero Section - NOW RENDERS IMMEDIATELY FOR FAST LCP */}
         <div className="text-center py-8 sm:py-12">
           <h1 className="text-4xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-6xl">
@@ -365,6 +370,7 @@ function HomeContent() {
               stats={currentStats}
               category={activeCategory}
               isAuthenticated={!!user}
+              isLoading={isCategoryLoading}
             />
           </div>
         )}
