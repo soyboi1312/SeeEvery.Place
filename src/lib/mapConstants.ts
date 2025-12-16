@@ -4,10 +4,10 @@
  * Extracted from mapUtils to prevent eager loading of all data files.
  */
 
-// Map Data URLs - absolute URLs to static files in public/geo/
+// Map Data URLs - using jsDelivr CDN for reliable delivery
 // Must be absolute for react-simple-maps URL parsing (uses new URL() internally)
-export const GEO_URL_WORLD = "https://seeevery.place/geo/countries-110m.json";
-export const GEO_URL_USA = "https://seeevery.place/geo/states-10m.json";
+export const GEO_URL_WORLD = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json";
+export const GEO_URL_USA = "https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json";
 
 // US territories that cannot be displayed on the Albers USA projection
 export const UNSUPPORTED_ALBERS_USA_IDS = new Set([
