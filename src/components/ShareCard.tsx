@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Category, UserSelections } from '@/lib/types';
 import { getStats } from '@/lib/storage';
 import { Download, Share2, Copy, Check, Loader2, ExternalLink } from 'lucide-react';
+import { XIcon, BlueskyIcon, FacebookIcon, RedditIcon } from '@/components/Icons';
 
 // Optimized Imports
 import { categoryTotals, getCategoryItemsAsync, type CategoryItem } from '@/lib/categoryUtils';
@@ -108,6 +109,43 @@ export default function ShareCard({ selections, category, subcategory, onClose, 
     }
   };
 
+  // Social share links
+  const getSocialLinks = () => {
+    if (!username) return null;
+
+    const url = `https://seeevery.place/u/${username}`;
+    const text = `Check out my travel map on SeeEveryPlace!`;
+    const encodedUrl = encodeURIComponent(url);
+    const encodedText = encodeURIComponent(text);
+
+    return [
+      {
+        name: 'X / Twitter',
+        icon: XIcon,
+        url: `https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedText}`,
+        color: 'hover:bg-black hover:text-white',
+      },
+      {
+        name: 'Bluesky',
+        icon: BlueskyIcon,
+        url: `https://bsky.app/intent/compose?text=${encodedText}%20${encodedUrl}`,
+        color: 'hover:bg-[#0085ff] hover:text-white',
+      },
+      {
+        name: 'Facebook',
+        icon: FacebookIcon,
+        url: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`,
+        color: 'hover:bg-[#1877F2] hover:text-white',
+      },
+      {
+        name: 'Reddit',
+        icon: RedditIcon,
+        url: `https://www.reddit.com/submit?url=${encodedUrl}&title=${encodedText}`,
+        color: 'hover:bg-[#FF4500] hover:text-white',
+      },
+    ];
+  };
+
   return (
     <Dialog open={true} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto sm:max-h-[85vh]">
@@ -201,24 +239,48 @@ export default function ShareCard({ selections, category, subcategory, onClose, 
 
           <div className="space-y-3">
             {isPublicProfile && username ? (
-              <div className="space-y-2">
-                <Label className="text-green-600 dark:text-green-400 flex items-center gap-1.5">
-                   <ExternalLink className="w-3.5 h-3.5" /> Your Public Link
-                </Label>
-                <div className="flex gap-2">
-                  <Input
-                    readOnly
-                    value={`https://seeevery.place/u/${username}`}
-                    className="bg-muted font-mono text-xs"
-                  />
-                  <Button
-                    onClick={handleCopyLink}
-                    variant="outline"
-                    size="icon"
-                    className={linkCopied ? "text-green-600 border-green-600" : ""}
-                  >
-                    {linkCopied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                  </Button>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label className="text-green-600 dark:text-green-400 flex items-center gap-1.5">
+                     <ExternalLink className="w-3.5 h-3.5" /> Your Public Link
+                  </Label>
+                  <div className="flex gap-2">
+                    <Input
+                      readOnly
+                      value={`https://seeevery.place/u/${username}`}
+                      className="bg-muted font-mono text-xs"
+                    />
+                    <Button
+                      onClick={handleCopyLink}
+                      variant="outline"
+                      size="icon"
+                      className={linkCopied ? "text-green-600 border-green-600" : ""}
+                    >
+                      {linkCopied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Social Share Buttons */}
+                <div className="space-y-2">
+                  <Label className="text-xs text-muted-foreground">Share to Socials</Label>
+                  <div className="flex flex-wrap gap-2">
+                    {getSocialLinks()?.map((social) => (
+                      <Button
+                        key={social.name}
+                        variant="outline"
+                        size="icon"
+                        className={`transition-colors ${social.color}`}
+                        asChild
+                        title={`Share on ${social.name}`}
+                      >
+                        <a href={social.url} target="_blank" rel="noopener noreferrer">
+                          <social.icon className="w-4 h-4" />
+                          <span className="sr-only">Share on {social.name}</span>
+                        </a>
+                      </Button>
+                    ))}
+                  </div>
                 </div>
               </div>
             ) : (
