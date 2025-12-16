@@ -15,7 +15,14 @@ import {
   DropdownMenuTrigger,
   DropdownMenuGroup,
 } from '@/components/ui/dropdown-menu';
-import { Moon, Sun, Cloud, CloudOff, Loader2, User, ChevronDown, Users, Lightbulb, Trophy, Settings } from 'lucide-react';
+import { Moon, Sun, Cloud, CloudOff, Loader2, User, ChevronDown, Users, Lightbulb, Trophy, Settings, Menu, X } from 'lucide-react';
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet';
 
 // Group definitions
 const categoryGroups: Record<CategoryGroup, Category[]> = {
@@ -82,6 +89,7 @@ export default function Header({
   onPreloadAuth
 }: HeaderProps) {
   const [isScrolled, setIsScrolled] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -91,6 +99,7 @@ export default function Header({
   }, []);
 
   const handleCategorySelect = (cat: Category) => {
+    setMobileMenuOpen(false);
     router.push(`/?category=${cat}`);
   };
 
@@ -107,6 +116,52 @@ export default function Header({
       {/* Reduced px-4 to px-2 on mobile to prevent overflow on very small screens */}
       <div className="max-w-6xl mx-auto px-2 sm:px-4 h-14 sm:h-16 flex items-center justify-between">
         <div className="flex items-center gap-2 sm:gap-6">
+          {/* Mobile Menu Button */}
+          <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" className="sm:hidden">
+                <Menu className="w-5 h-5" />
+                <span className="sr-only">Open menu</span>
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="w-[280px] sm:w-[350px]">
+              <SheetHeader>
+                <SheetTitle className="text-left">Explore Categories</SheetTitle>
+              </SheetHeader>
+              <nav className="mt-6 flex flex-col gap-4">
+                {(Object.keys(categoryGroups) as CategoryGroup[]).map((group) => (
+                  <div key={group}>
+                    <h3 className="text-xs uppercase text-muted-foreground font-semibold mb-2">
+                      {groupLabels[group]}
+                    </h3>
+                    <div className="flex flex-col gap-1">
+                      {categoryGroups[group].map((cat) => (
+                        <button
+                          key={cat}
+                          onClick={() => handleCategorySelect(cat)}
+                          className="flex items-center gap-2 px-2 py-2 rounded-md hover:bg-accent text-left transition-colors"
+                        >
+                          <span className="text-lg">{categoryIcons[cat]}</span>
+                          <span className="text-sm font-medium">{categoryLabels[cat]}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+                <div className="border-t pt-4 mt-2">
+                  <Link
+                    href="/community"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center gap-2 px-2 py-2 rounded-md hover:bg-accent transition-colors"
+                  >
+                    <Users className="w-5 h-5" />
+                    <span className="font-medium">Community</span>
+                  </Link>
+                </div>
+              </nav>
+            </SheetContent>
+          </Sheet>
+
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 group">
             <div className="relative w-8 h-8 transition-transform group-hover:scale-110 shrink-0">
@@ -122,7 +177,7 @@ export default function Header({
             </div>
           </Link>
 
-          {/* Explore Dropdown (Shadcn) */}
+          {/* Explore Dropdown (Desktop only) */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="hidden sm:flex gap-1 items-center font-medium">
@@ -183,11 +238,10 @@ export default function Header({
               onMouseEnter={onPreloadAuth}
               onFocus={onPreloadAuth}
               size="sm"
-              className="gap-2"
+              className="gap-1.5"
             >
               <User className="w-4 h-4" />
-              {/* Hide 'Sign In' text on mobile to save space */}
-              <span className="hidden sm:inline">Sign In</span>
+              <span className="text-xs sm:text-sm">Sign In</span>
             </Button>
           ) : (
             <DropdownMenu>

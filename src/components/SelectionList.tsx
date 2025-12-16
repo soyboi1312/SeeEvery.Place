@@ -74,6 +74,7 @@ interface SelectionListProps {
   stats: { visited: number; bucketList: number; total: number; percentage: number };
   category?: Category;
   isAuthenticated?: boolean;
+  isLoading?: boolean;
 }
 
 // Empty state content by category
@@ -224,6 +225,7 @@ export default function SelectionList({
   stats,
   category,
   isAuthenticated = false,
+  isLoading = false,
 }: SelectionListProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterMode, setFilterMode] = useState<'all' | 'visited' | 'bucketList' | 'unvisited'>('all');
@@ -440,8 +442,17 @@ export default function SelectionList({
         ref={parentRef}
         className="flex-1 overflow-y-auto max-h-[60vh] sm:max-h-[500px]"
       >
-        {/* Virtualized list for large datasets */}
-        {shouldVirtualize && filteredItems.length > 0 ? (
+        {/* Loading skeleton when switching categories */}
+        {isLoading ? (
+          <div className="p-4 space-y-3 animate-pulse">
+            <div className="h-6 bg-muted rounded w-24 mb-4" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+              {[...Array(12)].map((_, i) => (
+                <div key={i} className="h-11 bg-muted rounded-lg" />
+              ))}
+            </div>
+          </div>
+        ) : shouldVirtualize && filteredItems.length > 0 ? (
           <div
             className="p-4 relative"
             style={{ height: `${rowVirtualizer.getTotalSize()}px` }}
