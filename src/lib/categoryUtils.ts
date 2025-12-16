@@ -78,17 +78,28 @@ export interface CategoryItem {
 const dataCache: Partial<Record<Category, CategoryDataItem[]>> = {};
 
 /**
+ * Check if we're running in the browser (client-side).
+ * Used to skip fetch() during SSG build where there's no server to fetch from.
+ */
+const isBrowser = typeof window !== 'undefined';
+
+/**
  * Fetch JSON data from the public data directory.
  * Used for large datasets to avoid bundling in JavaScript.
- * Returns null if the file doesn't exist or fetch fails.
+ * Returns null if the file doesn't exist, fetch fails, or we're on the server.
  *
  * OPTIMIZATION: Using fetch() instead of dynamic imports moves data from
  * the JavaScript bundle to a network request that can be:
  * - Cached by the service worker (/data/*.json rule in next.config.mjs)
  * - Loaded in parallel with other resources
  * - Smaller in size (JSON vs JS module overhead)
+ *
+ * NOTE: Only works client-side. During SSG/SSR, returns null to use fallback.
  */
 async function fetchJsonData<T>(filename: string): Promise<T | null> {
+  // Skip fetch during SSG build - there's no server to fetch from
+  if (!isBrowser) return null;
+
   try {
     const response = await fetch(`/data/categories/${filename}`);
     if (!response.ok) return null;
@@ -101,13 +112,20 @@ async function fetchJsonData<T>(filename: string): Promise<T | null> {
 /**
  * Try to load data from JSON first (for better caching), fall back to dynamic import.
  * This allows gradual migration to JSON files without breaking existing code.
+ *
+ * Client-side: Tries JSON fetch first for service worker caching benefits.
+ * Server-side (SSG): Uses dynamic import directly to avoid fetch timeout issues.
  */
 async function loadWithJsonFallback<T>(
   jsonFile: string,
   fallbackLoader: () => Promise<T[]>
 ): Promise<T[]> {
-  const jsonData = await fetchJsonData<T[]>(jsonFile);
-  if (jsonData) return jsonData;
+  // On client, try JSON fetch first for caching benefits
+  if (isBrowser) {
+    const jsonData = await fetchJsonData<T[]>(jsonFile);
+    if (jsonData) return jsonData;
+  }
+  // Fall back to dynamic import (always used server-side)
   return fallbackLoader();
 }
 
