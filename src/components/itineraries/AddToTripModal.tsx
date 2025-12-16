@@ -18,7 +18,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Plus,
   Loader2,
-  MapPin,
+  Trophy,
   Check,
 } from 'lucide-react';
 
@@ -150,11 +150,11 @@ export default function AddToTripModal({
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <MapPin className="w-5 h-5 text-primary" />
-            Add to List
+            <Trophy className="w-5 h-5 text-primary" />
+            Add to Quest
           </DialogTitle>
           <DialogDescription>
-            Add this place to an existing list or create a new one.
+            Add this place to an existing quest or create a new one.
           </DialogDescription>
         </DialogHeader>
 
@@ -171,8 +171,8 @@ export default function AddToTripModal({
 
         <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'existing' | 'new')}>
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="existing">Existing List</TabsTrigger>
-            <TabsTrigger value="new">New List</TabsTrigger>
+            <TabsTrigger value="existing">Existing Quest</TabsTrigger>
+            <TabsTrigger value="new">New Quest</TabsTrigger>
           </TabsList>
 
           {/* Existing Trips Tab */}
@@ -184,15 +184,15 @@ export default function AddToTripModal({
             ) : itineraries.length === 0 ? (
               <div className="text-center py-8">
                 <div className="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center mx-auto mb-4 text-3xl">
-                  🗺️
+                  🏆
                 </div>
-                <h3 className="font-semibold mb-1">No lists yet</h3>
+                <h3 className="font-semibold mb-1">No quests yet</h3>
                 <p className="text-sm text-muted-foreground mb-4">
-                  Create your first list to start tracking!
+                  Create your first quest to start tracking!
                 </p>
                 <Button onClick={() => setActiveTab('new')}>
                   <Plus className="w-4 h-4 mr-2" />
-                  Create List
+                  Create Quest
                 </Button>
               </div>
             ) : (
@@ -243,13 +243,13 @@ export default function AddToTripModal({
             )}
           </TabsContent>
 
-          {/* New List Tab */}
+          {/* New Quest Tab */}
           <TabsContent value="new" className="mt-4 space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="list-title">List Name *</Label>
+              <Label htmlFor="list-title">Quest Name *</Label>
               <Input
                 id="list-title"
-                placeholder="e.g., National Parks Quest, Stadiums to Visit"
+                placeholder="e.g., National Parks Quest, Stadiums to Conquer"
                 value={newTitle}
                 onChange={(e) => setNewTitle(e.target.value)}
                 maxLength={100}
@@ -260,7 +260,7 @@ export default function AddToTripModal({
               <Label htmlFor="list-description">Description (optional)</Label>
               <Textarea
                 id="list-description"
-                placeholder="What's this list about?"
+                placeholder="What's this quest about?"
                 value={newDescription}
                 onChange={(e) => setNewDescription(e.target.value)}
                 maxLength={500}
@@ -282,7 +282,7 @@ export default function AddToTripModal({
                 ) : (
                   <>
                     <Plus className="w-4 h-4 mr-2" />
-                    Create List & Add Place
+                    Create Quest & Add Place
                   </>
                 )}
               </Button>

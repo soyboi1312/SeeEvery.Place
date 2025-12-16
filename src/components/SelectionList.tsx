@@ -236,7 +236,7 @@ export default function SelectionList({
   const [descriptions, setDescriptions] = useState<Record<string, string> | null>(null);
   const [isLoadingInfo, setIsLoadingInfo] = useState(false);
 
-  // Add to List modal state
+  // Add to Quest modal state
   const [tripModalItem, setTripModalItem] = useState<{ id: string; name: string } | null>(null);
 
   // Debounce search query to prevent lag on large lists (300ms delay)
@@ -580,7 +580,7 @@ export default function SelectionList({
                     </div>
                     <div className="flex items-center gap-1.5">
                       <Plus className="w-3 h-3 text-purple-500" />
-                      Add to List
+                      Add to Quest
                     </div>
                   </div>
                 </>
@@ -676,7 +676,7 @@ export default function SelectionList({
         </DialogContent>
       </Dialog>
 
-      {/* Add to List Modal */}
+      {/* Add to Quest Modal */}
       {tripModalItem && category && (
         <AddToTripModal
           isOpen={!!tripModalItem}
@@ -757,7 +757,7 @@ const ItemCard = memo(function ItemCard({ item, status, visitedDate, notes, onTo
               )}
             </div>
           </Button>
-          {/* Add to List Button - Visible on hover for quick access */}
+          {/* Add to Quest Button - Visible on hover for quick access */}
           {isAuthenticated && (
             <Button
               variant="ghost"
@@ -767,7 +767,7 @@ const ItemCard = memo(function ItemCard({ item, status, visitedDate, notes, onTo
                 e.stopPropagation();
                 onAddToTrip();
               }}
-              title="Add to List"
+              title="Add to Quest"
             >
               <Plus className="w-4 h-4" />
             </Button>
