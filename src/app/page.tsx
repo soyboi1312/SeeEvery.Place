@@ -306,18 +306,15 @@ function HomeContent() {
 
       <div className="max-w-6xl mx-auto px-4 py-6 space-y-6 flex-grow w-full overflow-hidden">
         {/* Hero Section - NOW RENDERS IMMEDIATELY FOR FAST LCP */}
-        <div className="text-center py-8 sm:py-12">
-          <h1 className="text-4xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-6xl">
-            Travel Map & Tracker
+        <div className="text-center py-4 sm:py-8">
+          <h1 className="text-3xl sm:text-4xl font-bold text-gray-800 dark:text-white mb-2">
+            Free Travel Map & Tracker
+            <span className="block text-lg sm:text-xl font-normal text-gray-600 dark:text-gray-300 mt-2">
+              Where have you been? Track countries, parks, peaks, and more. 
+            </span>
           </h1>
-          <p className="mt-6 text-lg leading-8 text-gray-600 dark:text-gray-300">
-            Where have you been? Track countries, parks, peaks, and more.
-          </p>
-          <p className="mt-2 text-lg leading-8 text-gray-600 dark:text-gray-300">
-            Challenge friends with travel quests.
-          </p>
-          <p className="mt-2 text-lg leading-8 text-gray-600 dark:text-gray-300">
-            Share your map and stats. <strong className="font-semibold text-gray-900 dark:text-white">Not your photo gallery.</strong>
+          <p className="text-gray-600 dark:text-gray-300 max-w-xl mx-auto mt-3">
+           Plan collaborative trips with friends. Share your map and stats. <strong className="font-semibold text-gray-900 dark:text-white">Not your photo gallery.</strong>
           </p>
         </div>
 
