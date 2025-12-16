@@ -581,6 +581,14 @@ const themeColors: Record<CategoryGroup, string> = {
   destinations: 'from-slate-50 to-gray-100 dark:from-slate-900 dark:to-gray-800',
 };
 
+// Text gradient colors for hero titles (vibrant and visible in light/dark)
+const textGradientColors: Record<CategoryGroup, string> = {
+  nature: 'from-emerald-500 to-teal-600 dark:from-emerald-400 dark:to-teal-400',
+  sports: 'from-blue-500 to-sky-600 dark:from-blue-400 dark:to-sky-400',
+  culture: 'from-violet-500 to-fuchsia-600 dark:from-violet-400 dark:to-fuchsia-400',
+  destinations: 'from-primary to-slate-600 dark:from-primary dark:to-slate-400',
+};
+
 // Accent colors for buttons and highlights by group
 const accentColors: Record<CategoryGroup, { bg: string; hover: string; challenge: string }> = {
   nature: {
@@ -847,6 +855,7 @@ export default async function CategoryLandingPage({ params }: Props) {
   const group = getGroupForCategory(category as Category);
   const gradientClass = themeColors[group];
   const accent = accentColors[group];
+  const textGradient = textGradientColors[group];
 
   // Fetch items for dynamic stats
   const items = await getCategoryItemsAsync(category as Category);
@@ -935,10 +944,10 @@ export default async function CategoryLandingPage({ params }: Props) {
               <Badge variant="outline" className="mb-4 py-1.5 px-3 text-sm bg-background/50 backdrop-blur">
                 Free {label} Tracker
               </Badge>
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight mb-4 text-foreground">
-                Track Every{' '}
-                <span className={`text-transparent bg-clip-text bg-gradient-to-r ${accent}`}>
-                  {label.split(' ')[0]}
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight mb-4">
+                <span className="text-foreground">Track Every </span>
+                <span className={`text-transparent bg-clip-text bg-gradient-to-r ${textGradient}`}>
+                  {label}
                 </span>
               </h1>
               <p className="text-lg md:text-xl text-muted-foreground mb-6 max-w-xl mx-auto lg:mx-0 leading-relaxed">
@@ -1193,13 +1202,17 @@ export default async function CategoryLandingPage({ params }: Props) {
         {/* Featured Challenge */}
         {biggestRegion && challengeDesc && (
           <section className="my-12">
-            <Card className="bg-gradient-to-br from-primary to-primary/80 text-primary-foreground border-0">
-              <CardContent className="p-8 text-center">
+            <Card className={`${accent.challenge} text-white border-0 overflow-hidden relative`}>
+              <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent" />
+              <CardContent className="p-8 text-center relative">
+                <div className="inline-flex items-center gap-2 bg-white/10 rounded-full px-3 py-1 text-sm font-medium mb-4">
+                  <span>🏆</span> Regional Challenge
+                </div>
                 <h3 className="font-bold text-2xl mb-3">The {biggestRegion[0]} Challenge</h3>
-                <p className="opacity-90 mb-6 text-lg">
+                <p className="text-white/80 mb-6 text-lg">
                   {challengeDesc(biggestRegion[0], biggestRegion[1])}
                 </p>
-                <Button asChild variant="secondary" className="bg-white/20 hover:bg-white/30 text-white border-0">
+                <Button asChild className="bg-white text-slate-900 hover:bg-white/90 font-semibold shadow-lg">
                   <Link href={`/?category=${category}`}>
                     View Checklist
                     <ChevronRight className="w-4 h-4 ml-1" />
