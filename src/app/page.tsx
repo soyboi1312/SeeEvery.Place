@@ -27,7 +27,7 @@ const preloadAuthModal = () => import('@/components/AuthModal');
 
 import MapErrorBoundary from '@/components/MapErrorBoundary';
 import { Button } from '@/components/ui/button';
-import { Share2, Trophy } from 'lucide-react';
+import { Share2, Trophy, Users } from 'lucide-react';
 
 const MapVisualization = dynamic(() => import('@/components/MapVisualization'), {
   loading: () => (
@@ -311,22 +311,25 @@ function HomeContent() {
           <h1 className="text-3xl sm:text-4xl font-bold text-gray-800 dark:text-white mb-2">
             Turn the World Into Your Quest Log.
             <span className="block text-lg sm:text-xl font-normal text-gray-600 dark:text-gray-300 mt-2">
-              The free travel tracker that gamifies exploration.
+              Compete with friends, track your streaks, and conquer the map.
             </span>
           </h1>
           <p className="text-gray-600 dark:text-gray-300 max-w-xl mx-auto mt-3">
-            Track countries, parks, peaks, and more. Unlock achievements, earn XP, and complete your bucket list.
+            Join the ultimate game for travelers. Track countries, stadiums, and peaks to earn XP and climb the leaderboard. Plan collaborative quests with friends or take on seasonal challenges.
             <br className="hidden sm:block" />
-            <span className="font-medium"> No itineraries. No dates. Just the thrill of completing the set.</span>
+            <span className="font-medium"> It&apos;s not just travel—it&apos;s a high score.</span>
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center mt-4">
-            <p className="text-gray-600 dark:text-gray-300 sm:self-center">
-              No account needed to get started!
-            </p>
+            <Button asChild variant="default" className="gap-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white border-0">
+              <Link href="/community">
+                <Users className="w-4 h-4" />
+                Join the Community
+              </Link>
+            </Button>
             <Button asChild variant="outline" className="gap-2 border-amber-400 dark:border-amber-600 text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20">
               <Link href="/trips">
                 <Trophy className="w-4 h-4" />
-                My Quests
+                Start a Quest
               </Link>
             </Button>
           </div>
