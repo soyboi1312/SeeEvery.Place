@@ -85,49 +85,7 @@ export const FoodieIcon = ({ className = "w-6 h-6", strokeWidth = 1.5 }: IconPro
   </svg>
 );
 
-// 10. The "Root" (Carrot)
-export const CarrotIcon = ({ className = "w-6 h-6", strokeWidth = 1.5 }: IconProps) => (
-  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={strokeWidth} stroke="currentColor" className={className}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M12.75 2.25c0 .414.336.75.75.75H15m-6 0h1.5c.414 0 .75-.336.75-.75M4.5 20.25l7.5-16.5a.75.75 0 011.5 0l2.25 4.95a2.25 2.25 0 01-2.052 3.18L4.5 20.25z" />
-    <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 8.25h3m-4.5 4.5h3" />
-  </svg>
-);
-
-// 11. The "Green" (Broccoli)
-export const BroccoliIcon = ({ className = "w-6 h-6", strokeWidth = 1.5 }: IconProps) => (
-  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={strokeWidth} stroke="currentColor" className={className}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M12 12.75v8.25m0-8.25c-3 0-4.5-2.25-4.5-5.25 0-3 2.25-4.5 4.5-4.5s4.5 1.5 4.5 4.5c0 3-1.5 5.25-4.5 5.25z" />
-    <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 7.5c-1.5 0-2.25 1.5-2.25 3s.75 3 2.25 3m9-6c1.5 0 2.25 1.5 2.25 3s-.75 3-2.25 3" />
-    <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 21h4.5" />
-  </svg>
-);
-
-// 12. The "Kernel" (Corn)
-export const CornIcon = ({ className = "w-6 h-6", strokeWidth = 1.5 }: IconProps) => (
-  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={strokeWidth} stroke="currentColor" className={className}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M6 3.75a3 3 0 013-3h6a3 3 0 013 3v10.5a6 6 0 01-6 6h-3a3 3 0 01-3-3V3.75z" />
-    <path strokeLinecap="round" strokeLinejoin="round" d="M6 9h12M6 15h12M9 20.25V3.75m6 16.5V3.75" />
-  </svg>
-);
-
-// 13. The "Purple" (Eggplant)
-export const EggplantIcon = ({ className = "w-6 h-6", strokeWidth = 1.5 }: IconProps) => (
-  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={strokeWidth} stroke="currentColor" className={className}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 5.25L12 2.25l3.75 3m-9.75 2.25c0 6.627 4.5 13.5 10.5 13.5s7.5-6.873 7.5-13.5c0-1.5-.75-2.25-2.25-2.25H8.25c-1.5 0-2.25.75-2.25 2.25z" />
-    <path strokeLinecap="round" strokeLinejoin="round" d="M6 8.25c3 1.5 6 1.5 12 0" />
-  </svg>
-);
-
-// 14. The "Vine" (Tomato)
-export const TomatoIcon = ({ className = "w-6 h-6", strokeWidth = 1.5 }: IconProps) => (
-  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={strokeWidth} stroke="currentColor" className={className}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M12 2.25v3m-4.5-1.5l1.5 1.5m6-1.5l-1.5 1.5" />
-    <path strokeLinecap="round" strokeLinejoin="round" d="M12 5.25c-5.25 0-9 3.75-9 9 0 4.142 3.358 7.5 9 7.5s9-3.358 9-7.5c0-5.25-3.75-9-9-9z" />
-    <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 11.25s1.5 3 4.5 3 4.5-3 4.5-3" />
-  </svg>
-);
-
-// 15. The "Spicy" (Chili Pepper)
+// 10. The "Spicy" (Chili Pepper)
 export const ChiliIcon = ({ className = "w-6 h-6", strokeWidth = 1.5 }: IconProps) => (
   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={strokeWidth} stroke="currentColor" className={className}>
     <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 2.25c1.5 1.5 2.25 3 1.5 5.25-1.5 4.5-5.25 9-11.25 11.25-.75-2.25.75-7.5 3.75-10.5 2.25-2.25 4.5-4.5 6-6z" />
@@ -135,15 +93,7 @@ export const ChiliIcon = ({ className = "w-6 h-6", strokeWidth = 1.5 }: IconProp
   </svg>
 );
 
-// 16. The "Forager" (Mushroom)
-export const MushroomIcon = ({ className = "w-6 h-6", strokeWidth = 1.5 }: IconProps) => (
-  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={strokeWidth} stroke="currentColor" className={className}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M12 21v-7.5m-5.25 7.5h10.5m-9-7.5c0-5.25 1.5-9 6.75-9 5.25 0 6.75 3.75 6.75 9H6.75z" />
-    <path strokeLinecap="round" strokeLinejoin="round" d="M12 13.5c1.5 0 2.25-1.5 2.25-1.5" />
-  </svg>
-);
-
-// 17. The "Pit" (Avocado)
+// 11. The "Pit" (Avocado)
 export const AvocadoIcon = ({ className = "w-6 h-6", strokeWidth = 1.5 }: IconProps) => (
   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={strokeWidth} stroke="currentColor" className={className}>
     <path strokeLinecap="round" strokeLinejoin="round" d="M12 2.25c-3 0-6 3.75-6 9 0 5.25 3 10.5 6 10.5s6-5.25 6-10.5c0-5.25-3-9-6-9z" />
@@ -162,13 +112,7 @@ export const PROFILE_ICONS: Record<string, React.ComponentType<IconProps>> = {
   palm: PalmIcon,
   binoculars: BinocularsIcon,
   foodie: FoodieIcon,
-  carrot: CarrotIcon,
-  broccoli: BroccoliIcon,
-  corn: CornIcon,
-  eggplant: EggplantIcon,
-  tomato: TomatoIcon,
   chili: ChiliIcon,
-  mushroom: MushroomIcon,
   avocado: AvocadoIcon,
 };
 
