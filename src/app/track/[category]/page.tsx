@@ -1202,13 +1202,17 @@ export default async function CategoryLandingPage({ params }: Props) {
         {/* Featured Challenge */}
         {biggestRegion && challengeDesc && (
           <section className="my-12">
-            <Card className="bg-gradient-to-br from-primary to-primary/80 text-primary-foreground border-0">
-              <CardContent className="p-8 text-center">
+            <Card className={`${accent.challenge} text-white border-0 overflow-hidden relative`}>
+              <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent" />
+              <CardContent className="p-8 text-center relative">
+                <div className="inline-flex items-center gap-2 bg-white/10 rounded-full px-3 py-1 text-sm font-medium mb-4">
+                  <span>🏆</span> Regional Challenge
+                </div>
                 <h3 className="font-bold text-2xl mb-3">The {biggestRegion[0]} Challenge</h3>
-                <p className="opacity-90 mb-6 text-lg">
+                <p className="text-white/80 mb-6 text-lg">
                   {challengeDesc(biggestRegion[0], biggestRegion[1])}
                 </p>
-                <Button asChild variant="secondary" className="bg-white/20 hover:bg-white/30 text-white border-0">
+                <Button asChild className="bg-white text-slate-900 hover:bg-white/90 font-semibold shadow-lg">
                   <Link href={`/?category=${category}`}>
                     View Checklist
                     <ChevronRight className="w-4 h-4 ml-1" />
