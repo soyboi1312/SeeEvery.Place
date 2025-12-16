@@ -35,7 +35,7 @@ export default function AboutPage() {
           <h1 className="text-4xl font-bold text-foreground mb-6">About See Every Place</h1>
 
           <p className="text-xl text-muted-foreground mb-8">
-            Track your past adventures, plan your future trips, and share beautiful maps with friends and family.
+            Track your adventures, build custom lists, and share beautiful maps with friends and family.
           </p>
 
           {/* What is it */}
@@ -147,10 +147,10 @@ export default function AboutPage() {
               <Card>
                 <CardContent className="pt-6">
                   <MapPin className="w-8 h-8 text-orange-500 mb-3" />
-                  <h3 className="font-bold text-foreground mb-2">Trip Planning</h3>
+                  <h3 className="font-bold text-foreground mb-2">Custom Lists</h3>
                   <p className="text-muted-foreground text-sm">
-                    Create trip itineraries with dates, add places you want to visit, and invite friends
-                    to collaborate on planning together.
+                    Create place collections for any goal—national parks to conquer, stadiums to visit,
+                    or road trip routes. Share with friends and track together.
                   </p>
                 </CardContent>
               </Card>

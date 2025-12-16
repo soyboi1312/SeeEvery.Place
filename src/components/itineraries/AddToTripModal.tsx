@@ -19,7 +19,6 @@ import {
   Plus,
   Loader2,
   MapPin,
-  Calendar,
   Check,
 } from 'lucide-react';
 
@@ -46,11 +45,9 @@ export default function AddToTripModal({
   const [isAdding, setIsAdding] = useState<string | null>(null);
   const [addedTo, setAddedTo] = useState<Set<string>>(new Set());
 
-  // New trip form state
+  // New list form state
   const [newTitle, setNewTitle] = useState('');
   const [newDescription, setNewDescription] = useState('');
-  const [newStartDate, setNewStartDate] = useState('');
-  const [newEndDate, setNewEndDate] = useState('');
   const [isCreating, setIsCreating] = useState(false);
 
   // Fetch user's itineraries
@@ -117,8 +114,6 @@ export default function AddToTripModal({
         body: JSON.stringify({
           title: newTitle.trim(),
           description: newDescription.trim() || undefined,
-          start_date: newStartDate || undefined,
-          end_date: newEndDate || undefined,
         }),
       });
 
@@ -156,10 +151,10 @@ export default function AddToTripModal({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <MapPin className="w-5 h-5 text-primary" />
-            Add to Trip
+            Add to List
           </DialogTitle>
           <DialogDescription>
-            Add this place to an existing trip or create a new one.
+            Add this place to an existing list or create a new one.
           </DialogDescription>
         </DialogHeader>
 
@@ -176,8 +171,8 @@ export default function AddToTripModal({
 
         <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'existing' | 'new')}>
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="existing">Existing Trip</TabsTrigger>
-            <TabsTrigger value="new">New Trip</TabsTrigger>
+            <TabsTrigger value="existing">Existing List</TabsTrigger>
+            <TabsTrigger value="new">New List</TabsTrigger>
           </TabsList>
 
           {/* Existing Trips Tab */}
@@ -191,13 +186,13 @@ export default function AddToTripModal({
                 <div className="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center mx-auto mb-4 text-3xl">
                   🗺️
                 </div>
-                <h3 className="font-semibold mb-1">No trips yet</h3>
+                <h3 className="font-semibold mb-1">No lists yet</h3>
                 <p className="text-sm text-muted-foreground mb-4">
-                  Create your first trip to start planning!
+                  Create your first list to start tracking!
                 </p>
                 <Button onClick={() => setActiveTab('new')}>
                   <Plus className="w-4 h-4 mr-2" />
-                  Create Trip
+                  Create List
                 </Button>
               </div>
             ) : (
@@ -219,7 +214,6 @@ export default function AddToTripModal({
                         <div className="font-medium truncate">{itinerary.title}</div>
                         <div className="text-sm text-muted-foreground">
                           {itinerary.item_count || 0} places
-                          {itinerary.start_date && ` • ${new Date(itinerary.start_date).toLocaleDateString()}`}
                         </div>
                       </div>
                       <Button
@@ -249,13 +243,13 @@ export default function AddToTripModal({
             )}
           </TabsContent>
 
-          {/* New Trip Tab */}
+          {/* New List Tab */}
           <TabsContent value="new" className="mt-4 space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="trip-title">Trip Name *</Label>
+              <Label htmlFor="list-title">List Name *</Label>
               <Input
-                id="trip-title"
-                placeholder="e.g., Summer 2025 Road Trip"
+                id="list-title"
+                placeholder="e.g., National Parks Quest, Stadiums to Visit"
                 value={newTitle}
                 onChange={(e) => setNewTitle(e.target.value)}
                 maxLength={100}
@@ -263,43 +257,15 @@ export default function AddToTripModal({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="trip-description">Description (optional)</Label>
+              <Label htmlFor="list-description">Description (optional)</Label>
               <Textarea
-                id="trip-description"
-                placeholder="What's this trip about?"
+                id="list-description"
+                placeholder="What's this list about?"
                 value={newDescription}
                 onChange={(e) => setNewDescription(e.target.value)}
                 maxLength={500}
                 className="resize-none h-20"
               />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="start-date" className="flex items-center gap-1">
-                  <Calendar className="w-4 h-4" />
-                  Start Date
-                </Label>
-                <Input
-                  id="start-date"
-                  type="date"
-                  value={newStartDate}
-                  onChange={(e) => setNewStartDate(e.target.value)}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="end-date" className="flex items-center gap-1">
-                  <Calendar className="w-4 h-4" />
-                  End Date
-                </Label>
-                <Input
-                  id="end-date"
-                  type="date"
-                  value={newEndDate}
-                  onChange={(e) => setNewEndDate(e.target.value)}
-                  min={newStartDate}
-                />
-              </div>
             </div>
 
             <DialogFooter>
@@ -316,7 +282,7 @@ export default function AddToTripModal({
                 ) : (
                   <>
                     <Plus className="w-4 h-4 mr-2" />
-                    Create Trip & Add Place
+                    Create List & Add Place
                   </>
                 )}
               </Button>

@@ -7,7 +7,6 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { PROFILE_ICONS } from '@/components/ProfileIcons';
 import {
-  Calendar,
   MapPin,
   Users,
   Globe,
@@ -15,6 +14,7 @@ import {
   Crown,
   Pencil,
   Eye,
+  Target,
 } from 'lucide-react';
 
 interface ItineraryCardProps {
@@ -50,29 +50,11 @@ const getRoleBadge = (role: ItineraryRole) => {
   }
 };
 
-const formatDateRange = (startDate?: string, endDate?: string) => {
-  if (!startDate && !endDate) return null;
-
-  const options: Intl.DateTimeFormatOptions = {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric'
-  };
-
-  const start = startDate ? new Date(startDate).toLocaleDateString('en-US', options) : '';
-  const end = endDate ? new Date(endDate).toLocaleDateString('en-US', options) : '';
-
-  if (start && end) {
-    return `${start} - ${end}`;
-  }
-  return start || end;
-};
-
 const ItineraryCard = memo(function ItineraryCard({
   itinerary,
   showOwner = false
 }: ItineraryCardProps) {
-  const dateRange = formatDateRange(itinerary.start_date, itinerary.end_date);
+  const placesCount = itinerary.item_count || 0;
   const IconComponent = itinerary.owner_avatar_url && PROFILE_ICONS[itinerary.owner_avatar_url]
     ? PROFILE_ICONS[itinerary.owner_avatar_url]
     : null;
@@ -121,27 +103,19 @@ const ItineraryCard = memo(function ItineraryCard({
             </p>
           )}
 
-          {/* Date Range */}
-          {dateRange && (
-            <div className="flex items-center gap-1.5 text-sm text-muted-foreground mb-3">
-              <Calendar className="w-4 h-4" />
-              <span>{dateRange}</span>
-            </div>
-          )}
-
-          {/* Stats Row */}
+          {/* Stats Row - Quest Progress Style */}
           <div className="flex items-center gap-4 text-sm text-muted-foreground">
-            {/* Places Count */}
+            {/* Places Count - prominently displayed */}
             <div className="flex items-center gap-1.5">
-              <MapPin className="w-4 h-4" />
-              <span>{itinerary.item_count || 0} places</span>
+              <Target className="w-4 h-4 text-purple-500" />
+              <span className="font-medium">{placesCount} {placesCount === 1 ? 'place' : 'places'}</span>
             </div>
 
             {/* Collaborators Count */}
             {(itinerary.collaborator_count || 0) > 0 && (
               <div className="flex items-center gap-1.5">
                 <Users className="w-4 h-4" />
-                <span>{itinerary.collaborator_count} collaborator{itinerary.collaborator_count !== 1 ? 's' : ''}</span>
+                <span>{itinerary.collaborator_count}</span>
               </div>
             )}
           </div>
