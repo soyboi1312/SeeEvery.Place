@@ -45,7 +45,7 @@ import AuthModal from '@/components/AuthModal';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { MapPin, Globe, ArrowRight, Instagram, Users, Calendar, Loader2 } from 'lucide-react';
+import { MapPin, Globe, ArrowRight, Instagram, Users, Calendar, Loader2, Share2, Copy, Check } from 'lucide-react';
 import { FollowButton } from '@/components/FollowButton';
 import { FollowersList } from '@/components/FollowersList';
 import {
@@ -55,6 +55,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { XIcon, BlueskyIcon, FacebookIcon, RedditIcon } from '@/components/Icons';
 
 interface PublicProfile {
   id: string;
@@ -131,6 +138,9 @@ export default function PublicProfileClient({
   const [publicTrips, setPublicTrips] = useState<Itinerary[]>([]);
   const [isLoadingTrips, setIsLoadingTrips] = useState(true);
 
+  // Share link state
+  const [hasCopiedLink, setHasCopiedLink] = useState(false);
+
   // Fetch public trips for this user
   const fetchPublicTrips = useCallback(async () => {
     try {
@@ -154,6 +164,70 @@ export default function PublicProfileClient({
     setIsFollowing(newIsFollowing);
     setFollowerCount(prev => newIsFollowing ? prev + 1 : Math.max(0, prev - 1));
   };
+
+  // Share functionality
+  const handleShare = (platform: string) => {
+    const url = typeof window !== 'undefined' ? window.location.href : `https://seeevery.place/u/${username}`;
+    const text = `Check out ${displayName}'s travel map on SeeEveryPlace!`;
+    const encodedUrl = encodeURIComponent(url);
+    const encodedText = encodeURIComponent(text);
+
+    let shareUrl = '';
+    switch (platform) {
+      case 'twitter':
+        shareUrl = `https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedText}`;
+        break;
+      case 'bluesky':
+        shareUrl = `https://bsky.app/intent/compose?text=${encodedText}%20${encodedUrl}`;
+        break;
+      case 'facebook':
+        shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`;
+        break;
+      case 'reddit':
+        shareUrl = `https://www.reddit.com/submit?url=${encodedUrl}&title=${encodedText}`;
+        break;
+      case 'copy':
+        navigator.clipboard.writeText(url).then(() => {
+          setHasCopiedLink(true);
+          setTimeout(() => setHasCopiedLink(false), 2000);
+        });
+        return;
+    }
+
+    if (shareUrl) {
+      window.open(shareUrl, '_blank', 'noopener,noreferrer');
+    }
+  };
+
+  // Share dropdown component
+  const ShareDropdown = ({ size = "default" }: { size?: "default" | "sm" }) => (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="outline" size={size} className="gap-2">
+          <Share2 className="w-4 h-4" />
+          {size === "default" && "Share"}
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-56">
+        <DropdownMenuItem onClick={() => handleShare('copy')}>
+          {hasCopiedLink ? <Check className="w-4 h-4 mr-2" /> : <Copy className="w-4 h-4 mr-2" />}
+          {hasCopiedLink ? 'Copied!' : 'Copy Link'}
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => handleShare('twitter')}>
+          <XIcon className="w-4 h-4 mr-2" /> Share on X
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => handleShare('bluesky')}>
+          <BlueskyIcon className="w-4 h-4 mr-2" /> Share on Bluesky
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => handleShare('facebook')}>
+          <FacebookIcon className="w-4 h-4 mr-2" /> Share on Facebook
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => handleShare('reddit')}>
+          <RedditIcon className="w-4 h-4 mr-2" /> Share on Reddit
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
 
   // Parse selections safely
   const selections: UserSelections = useMemo(() => {
@@ -281,14 +355,15 @@ export default function PublicProfileClient({
                       @{username} | Member since {memberSince}
                     </p>
                   </div>
-                  {/* Follow Button (Desktop) */}
-                  <div className="hidden md:block">
+                  {/* Follow Button + Share (Desktop) */}
+                  <div className="hidden md:flex items-center gap-2">
                     <FollowButton
                       userId={profile.id}
                       currentUserId={user?.id}
                       initialIsFollowing={isFollowing}
                       onFollowChange={handleFollowChange}
                     />
+                    <ShareDropdown />
                   </div>
                 </div>
 
@@ -326,8 +401,8 @@ export default function PublicProfileClient({
                     </DialogContent>
                   </Dialog>
 
-                  {/* Follow Button (Mobile) */}
-                  <div className="md:hidden">
+                  {/* Follow Button + Share (Mobile) */}
+                  <div className="md:hidden flex items-center gap-2">
                     <FollowButton
                       userId={profile.id}
                       currentUserId={user?.id}
@@ -335,6 +410,7 @@ export default function PublicProfileClient({
                       onFollowChange={handleFollowChange}
                       size="sm"
                     />
+                    <ShareDropdown size="sm" />
                   </div>
                 </div>
 
