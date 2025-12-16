@@ -222,7 +222,7 @@ const nextConfig = {
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' data: blob: https://*.supabase.co",
               "font-src 'self' data:",
-              "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://cloudflareinsights.com",
+              "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://cloudflareinsights.com https://cdn.jsdelivr.net",
               "worker-src 'self' blob:",
               "frame-ancestors 'none'",
             ].join('; '),
