@@ -14,13 +14,30 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     const { itineraryId } = await params;
     const supabase = await createClient();
 
-    const { data, error } = await supabase.rpc('get_itinerary_collaborators', {
-      itinerary_uuid: itineraryId,
-    });
+    // Get collaborators with profile info
+    const { data, error } = await supabase
+      .from('itinerary_collaborators')
+      .select(`
+        *,
+        user:profiles!itinerary_collaborators_user_id_fkey(id, username, display_name)
+      `)
+      .eq('itinerary_id', itineraryId)
+      .order('created_at', { ascending: true });
 
     if (error) {
       console.error('Error fetching collaborators:', error);
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      // Fallback to simple query without join
+      const { data: simpleData, error: simpleError } = await supabase
+        .from('itinerary_collaborators')
+        .select('*')
+        .eq('itinerary_id', itineraryId)
+        .order('created_at', { ascending: true });
+
+      if (simpleError) {
+        return NextResponse.json({ error: simpleError.message }, { status: 500 });
+      }
+
+      return NextResponse.json({ collaborators: simpleData || [] });
     }
 
     return NextResponse.json({ collaborators: data || [] });

@@ -15,20 +15,26 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     const { itineraryId } = await params;
     const supabase = await createClient();
 
-    const { data, error } = await supabase.rpc('get_itinerary_details', {
-      itinerary_uuid: itineraryId,
-    });
+    // Get itinerary - RLS will handle access control
+    const { data, error } = await supabase
+      .from('itineraries')
+      .select('*')
+      .eq('id', itineraryId)
+      .single();
 
     if (error) {
       console.error('Error fetching itinerary:', error);
+      if (error.code === 'PGRST116') {
+        return NextResponse.json({ error: 'Itinerary not found' }, { status: 404 });
+      }
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    if (!data || data.length === 0) {
+    if (!data) {
       return NextResponse.json({ error: 'Itinerary not found' }, { status: 404 });
     }
 
-    return NextResponse.json({ itinerary: data[0] });
+    return NextResponse.json({ itinerary: data });
   } catch (error) {
     console.error('Get itinerary API error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

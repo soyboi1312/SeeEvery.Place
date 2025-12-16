@@ -18,11 +18,14 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     const limit = parseInt(searchParams.get('limit') || '10');
     const offset = parseInt(searchParams.get('offset') || '0');
 
-    const { data, error } = await supabase.rpc('get_user_public_itineraries', {
-      target_user_id: userId,
-      page_limit: limit,
-      page_offset: offset,
-    });
+    // Get public itineraries for the user
+    const { data, error } = await supabase
+      .from('itineraries')
+      .select('*')
+      .eq('owner_id', userId)
+      .eq('is_public', true)
+      .order('updated_at', { ascending: false })
+      .range(offset, offset + limit - 1);
 
     if (error) {
       console.error('Error fetching public itineraries:', error);
