@@ -9,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogFooter,
@@ -157,6 +158,9 @@ export default function AddToTripModal({
             <MapPin className="w-5 h-5 text-primary" />
             Add to Trip
           </DialogTitle>
+          <DialogDescription>
+            Add this place to an existing trip or create a new one.
+          </DialogDescription>
         </DialogHeader>
 
         {/* Place Info */}

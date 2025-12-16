@@ -11,6 +11,7 @@ import CollaboratorSelector from './CollaboratorSelector';
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogFooter,
@@ -407,6 +408,9 @@ export default function ItineraryView({
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>Edit Notes</DialogTitle>
+            <DialogDescription>
+              Add personal notes about this place for your trip.
+            </DialogDescription>
           </DialogHeader>
           <Textarea
             value={editItemNotes}
