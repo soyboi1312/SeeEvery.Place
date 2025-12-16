@@ -44,5 +44,5 @@ export async function GET(
   }
 }
 
-// Allow caching at edge
-export const runtime = 'edge';
+// Dynamic route - geo files are served from ASSETS binding
+export const dynamic = 'force-dynamic';
