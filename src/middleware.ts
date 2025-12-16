@@ -32,10 +32,13 @@ export const config = {
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico
-     * - geo/* (GeoJSON data files in public folder)
-     * - files/* (static files in public folder)
-     * - data/* (static data files in public folder)
+     * - robots.txt (search engine crawler instructions)
+     * - sitemap.xml (search engine sitemap)
+     * - geo/ (map data files)
+     * - files/ (static assets)
+     * - data/ (static JSON data)
+     * - Static assets (svg, png, jpg, json, js, css, etc.)
      */
-    '/((?!_next/static|_next/image|favicon.ico|geo/|files/|data/).*)',
+    '/((?!_next/static|_next/image|favicon.ico|robots\\.txt|sitemap\\.xml|geo/|files/|data/|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|json|js|css|woff|woff2)$).*)',
   ],
 };
