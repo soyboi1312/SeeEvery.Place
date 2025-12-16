@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -129,6 +130,9 @@ export default function CollaboratorSelector({
       <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Trip Collaborators</DialogTitle>
+          <DialogDescription>
+            Manage who can view or edit this trip.
+          </DialogDescription>
         </DialogHeader>
 
         {/* Owner */}
