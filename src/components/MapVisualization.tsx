@@ -286,7 +286,7 @@ const MapVisualization = memo(function MapVisualization({ category, selections, 
       ref={containerRef}
       className="w-full bg-primary-50/50 dark:bg-slate-800/50 rounded-2xl overflow-hidden border border-black/5 dark:border-white/10 shadow-premium-lg mb-6 relative will-change-transform"
     >
-      <div className="w-full overflow-hidden">
+      <div className="w-full overflow-hidden aspect-[2/1]">
         {getMapComponent(category, selections, onToggle, subcategory, tooltipHandlers, items)}
       </div>
 
