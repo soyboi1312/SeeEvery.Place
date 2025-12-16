@@ -209,6 +209,24 @@ const nextConfig = {
             key: 'Strict-Transport-Security',
             value: 'max-age=63072000; includeSubDomains; preload',
           },
+          {
+            // Content Security Policy - allows Next.js inline scripts and workers
+            // 'self' allows scripts/styles from same origin
+            // 'unsafe-inline' needed for Next.js inline scripts and styles
+            // 'unsafe-eval' needed for Next.js development and some production features
+            // blob: and worker-src needed for Web Workers (clustering worker, service worker)
+            key: 'Content-Security-Policy',
+            value: [
+              "default-src 'self'",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+              "style-src 'self' 'unsafe-inline'",
+              "img-src 'self' data: blob: https://*.supabase.co",
+              "font-src 'self' data:",
+              "connect-src 'self' https://*.supabase.co wss://*.supabase.co",
+              "worker-src 'self' blob:",
+              "frame-ancestors 'none'",
+            ].join('; '),
+          },
         ],
       },
     ];
