@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createAdminClient } from '@/lib/supabase/server';
+import { createAdminClient, createClient } from '@/lib/supabase/server';
 import { jwtVerify } from 'jose';
-import { cookies } from 'next/headers';
 
 // Secret for verifying impersonation tokens
 const getImpersonationSecret = () => {
@@ -79,28 +78,19 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(`${siteUrl}/auth/auth-code-error`);
     }
 
-    // Set the session cookies
-    const cookieStore = await cookies();
-    const { access_token, refresh_token } = sessionData.session;
+    // Use the SSR client to properly set session cookies
+    // This ensures cookies are named correctly, chunked if necessary, and secure
+    const supabase = await createClient();
 
-    // Set Supabase auth cookies
-    // The cookie names follow Supabase's convention
-    const projectRef = process.env.NEXT_PUBLIC_SUPABASE_URL?.match(/https:\/\/([^.]+)/)?.[1] || 'supabase';
-
-    cookieStore.set(`sb-${projectRef}-auth-token`, JSON.stringify({
-      access_token,
-      refresh_token,
-      expires_at: sessionData.session.expires_at,
-      expires_in: sessionData.session.expires_in,
-      token_type: 'bearer',
-      user: sessionData.session.user,
-    }), {
-      path: '/',
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 60 * 60 * 24 * 7, // 1 week
+    const { error: setSessionError } = await supabase.auth.setSession({
+      access_token: sessionData.session.access_token,
+      refresh_token: sessionData.session.refresh_token,
     });
+
+    if (setSessionError) {
+      console.error('Failed to set session cookie:', setSessionError);
+      return NextResponse.redirect(`${siteUrl}/auth/auth-code-error`);
+    }
 
     // Log successful impersonation
     try {
