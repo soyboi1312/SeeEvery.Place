@@ -9,7 +9,7 @@ import Footer from '@/components/Footer';
 import AuthModal from '@/components/AuthModal';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowRight, Globe, BarChart3, Trophy, User, Palette, Sparkles, Mail, Rocket } from 'lucide-react';
+import { ArrowRight, Globe, BarChart3, Trophy, User, Palette, Sparkles, Mail, Rocket, MapPin } from 'lucide-react';
 
 export default function AboutPage() {
   const { isDarkMode, toggleDarkMode } = useDarkMode();
@@ -36,7 +36,7 @@ export default function AboutPage() {
           <h1 className="text-4xl font-bold text-foreground mb-6">About See Every Place</h1>
 
           <p className="text-xl text-muted-foreground mb-8">
-            Track your adventures, build your bucket list, and share beautiful maps with friends and family.
+            Track your past adventures, plan your future trips, and share beautiful maps with friends and family.
           </p>
 
           {/* What is it */}
@@ -142,6 +142,16 @@ export default function AboutPage() {
                   <p className="text-muted-foreground text-sm">
                     Plan your future adventures by adding destinations to your bucket list and watch
                     your dreams become reality.
+                  </p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="pt-6">
+                  <MapPin className="w-8 h-8 text-orange-500 mb-3" />
+                  <h3 className="font-bold text-foreground mb-2">Trip Planning</h3>
+                  <p className="text-muted-foreground text-sm">
+                    Create trip itineraries with dates, add places you want to visit, and invite friends
+                    to collaborate on planning together.
                   </p>
                 </CardContent>
               </Card>
