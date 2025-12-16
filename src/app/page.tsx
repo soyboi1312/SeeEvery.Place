@@ -27,7 +27,7 @@ const preloadAuthModal = () => import('@/components/AuthModal');
 
 import MapErrorBoundary from '@/components/MapErrorBoundary';
 import { Button } from '@/components/ui/button';
-import { Share2, Trophy, Users } from 'lucide-react';
+import { Share2 } from 'lucide-react';
 
 const MapVisualization = dynamic(() => import('@/components/MapVisualization'), {
   loading: () => (
@@ -307,27 +307,23 @@ function HomeContent() {
 
       <div className="max-w-6xl mx-auto px-4 py-6 space-y-6 flex-grow w-full overflow-hidden">
         {/* Hero Section - NOW RENDERS IMMEDIATELY FOR FAST LCP */}
-        <div className="text-center py-4 sm:py-8">
-          <h1 className="text-3xl sm:text-4xl font-bold text-gray-800 dark:text-white mb-2">
-            Turn the World Into Your Quest Log.
-            <span className="block text-lg sm:text-xl font-normal text-gray-600 dark:text-gray-300 mt-2">
-              Track countries, parks, peaks, and more. Plan collaborative quests with friends.
-              <p>Share your map and stats. <strong>Not your photo gallery.</strong></p>
-            </span>
+        <div className="text-center py-8 sm:py-12">
+          <h1 className="text-4xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-6xl">
+            See Every Place
           </h1>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center mt-4">
-            <Button asChild variant="default" className="gap-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white border-0">
-              <Link href="/community">
-                <Users className="w-4 h-4" />
-                Join the Community
+          <p className="mt-6 text-lg leading-8 text-gray-600 dark:text-gray-300">
+            Track countries, parks, peaks, and more. Plan collaborative trips with friends.
+            Share your map and stats. <strong className="font-semibold text-gray-900 dark:text-white">Not your photo gallery.</strong>
+          </p>
+          <div className="mt-10 flex items-center justify-center gap-x-6">
+            <Button asChild className="rounded-md bg-blue-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-500">
+              <Link href="#map">
+                Start Mapping
               </Link>
             </Button>
-            <Button asChild variant="outline" className="gap-2 border-amber-400 dark:border-amber-600 text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20">
-              <Link href="/trips">
-                <Trophy className="w-4 h-4" />
-                Start a Quest
-              </Link>
-            </Button>
+            <Link href="/about" className="text-sm font-semibold leading-6 text-gray-900 dark:text-white hover:text-gray-600 dark:hover:text-gray-300">
+              Learn more <span aria-hidden="true">→</span>
+            </Link>
           </div>
         </div>
 
