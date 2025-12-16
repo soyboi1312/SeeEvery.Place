@@ -46,7 +46,7 @@ type SortOption = 'popular' | 'newest';
 
 export default function SuggestPage() {
   const { isDarkMode, toggleDarkMode } = useDarkMode();
-  const { user, signOut, isAdmin } = useAuth();
+  const { user, signOut, isAdmin, username } = useAuth();
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [votedIds, setVotedIds] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
@@ -231,6 +231,7 @@ export default function SuggestPage() {
         onSignOut={signOut}
         isSignedIn={!!user}
         userEmail={user?.email}
+        username={username}
         isDarkMode={isDarkMode}
         onToggleDarkMode={toggleDarkMode}
         isAdmin={isAdmin}

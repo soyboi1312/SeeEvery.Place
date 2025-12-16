@@ -15,7 +15,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuGroup,
 } from '@/components/ui/dropdown-menu';
-import { Moon, Sun, Cloud, CloudOff, Loader2, User, ChevronDown, Users, Lightbulb, MapPin } from 'lucide-react';
+import { Moon, Sun, Cloud, CloudOff, Loader2, User, ChevronDown, Users, Lightbulb, MapPin, Settings } from 'lucide-react';
 
 // Group definitions
 const categoryGroups: Record<CategoryGroup, Category[]> = {
@@ -39,6 +39,7 @@ interface HeaderProps {
   onSignOut: () => void;
   isSignedIn: boolean;
   userEmail?: string;
+  username?: string | null;
   isDarkMode?: boolean;
   onToggleDarkMode?: () => void;
   isAdmin?: boolean;
@@ -73,6 +74,7 @@ export default function Header({
   onSignOut,
   isSignedIn,
   userEmail,
+  username,
   isDarkMode,
   onToggleDarkMode,
   isAdmin,
@@ -217,10 +219,18 @@ export default function Header({
                     Community
                   </Link>
                 </DropdownMenuItem>
+                {username && (
+                  <DropdownMenuItem asChild>
+                    <Link href={`/u/${username}`}>
+                      <User className="w-4 h-4 mr-2" />
+                      My Profile
+                    </Link>
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuItem asChild>
                   <Link href="/settings">
-                    <User className="w-4 h-4 mr-2" />
-                    My Profile
+                    <Settings className="w-4 h-4 mr-2" />
+                    Settings
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
