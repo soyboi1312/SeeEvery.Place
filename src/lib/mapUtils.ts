@@ -8,10 +8,10 @@
 import { Category, UserSelections, Status } from '@/lib/types';
 import { getLookupMapForCategory } from './mapRegistry';
 
-// Map Data URLs - relative paths to static files in public/geo/
-// These files are copied from node_modules by scripts/copy-geo-assets.js
-export const GEO_URL_WORLD = "/geo/countries-110m.json";
-export const GEO_URL_USA = "/geo/states-10m.json";
+// Map Data URLs - using jsDelivr CDN for reliable static file serving.
+// Cloudflare Workers static assets were returning 503 errors.
+export const GEO_URL_WORLD = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json";
+export const GEO_URL_USA = "https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json";
 
 // Mapping FIPS codes (from US topojson) to Postal Codes
 export const fipsToAbbr: Record<string, string> = {
