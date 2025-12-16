@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useDarkMode } from '@/lib/hooks/useDarkMode';
 import { createClient } from '@/lib/supabase/client';
@@ -29,7 +28,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Sun, Moon, ArrowLeft, Download, Upload, Trash2, ChevronRight, Check, Loader2, Users } from 'lucide-react';
+import { Download, Upload, Trash2, ChevronRight, Check, Loader2 } from 'lucide-react';
+import Header from '@/components/Header';
+import Footer from '@/components/Footer';
+import AuthModal from '@/components/AuthModal';
 
 interface Profile {
   id: string;
@@ -114,6 +116,15 @@ export default function SettingsPage() {
 
   // XP and Level display
   const [selections, setSelections] = useState<UserSelections | null>(null);
+
+  // Auth modal
+  const [showAuthModal, setShowAuthModal] = useState(false);
+
+  const handleSignOut = async () => {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    router.push('/');
+  };
 
   const loadProfile = useCallback(async (userId: string) => {
     const supabase = createClient();
@@ -491,79 +502,49 @@ export default function SettingsPage() {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-primary-50 to-white dark:from-slate-900 dark:to-slate-800">
-        <header className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-black/5 dark:border-white/10 sticky top-0 z-40">
-          <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
-            <Link href="/" className="flex items-center gap-3 group">
-              <div className="relative w-8 h-8 transition-transform group-hover:scale-110 duration-200">
-                <Image src="/logo.svg" alt="See Every Place Logo" fill className="object-contain" priority />
-              </div>
-              <div className="flex flex-col">
-                <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent leading-none">
-                  SeeEvery<span className="text-purple-500">.</span>Place<span className="text-[10px] align-super">TM</span>
-                </h1>
-              </div>
-            </Link>
-          </div>
-        </header>
+      <div className="min-h-screen flex flex-col bg-gradient-to-b from-primary-50 to-white dark:from-slate-900 dark:to-slate-800">
+        <Header
+          onSignIn={() => setShowAuthModal(true)}
+          onSignOut={handleSignOut}
+          isSignedIn={false}
+          isDarkMode={isDarkMode}
+          onToggleDarkMode={toggleDarkMode}
+          syncStatus="idle"
+        />
 
-        <main className="max-w-2xl mx-auto px-4 py-16 text-center">
+        <main className="max-w-2xl mx-auto px-4 py-16 text-center flex-grow">
           <h2 className="text-2xl font-bold text-primary-900 dark:text-white mb-4">Sign in required</h2>
           <p className="text-primary-600 dark:text-primary-300 mb-6">You need to be signed in to access settings.</p>
           <Button asChild size="lg">
             <Link href="/">Go Home</Link>
           </Button>
         </main>
+
+        <Footer user={null} onSignIn={() => setShowAuthModal(true)} showCategoryDirectory={false} />
+
+        {showAuthModal && (
+          <AuthModal onClose={() => setShowAuthModal(false)} />
+        )}
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-primary-50 to-white dark:from-slate-900 dark:to-slate-800">
+    <div className="min-h-screen flex flex-col bg-gradient-to-b from-primary-50 to-white dark:from-slate-900 dark:to-slate-800">
       {/* Header */}
-      <header className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-black/5 dark:border-white/10 sticky top-0 z-40">
-        <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-3 group">
-            <div className="relative w-8 h-8 transition-transform group-hover:scale-110 duration-200">
-              <Image src="/logo.svg" alt="See Every Place Logo" fill className="object-contain" priority />
-            </div>
-            <div className="flex flex-col">
-              <h1 className="text-xl font-bold text-primary-900 dark:text-white leading-none">
-                SeeEvery<span className="text-accent-500">.</span>Place<span className="text-[10px] align-super">TM</span>
-              </h1>
-              <span className="text-[10px] text-primary-500 dark:text-primary-400 font-medium tracking-wider uppercase hidden sm:block">
-                Free Travel Tracker
-              </span>
-            </div>
-          </Link>
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" asChild className="hidden sm:flex gap-1.5 items-center">
-              <Link href="/community">
-                <Users className="w-4 h-4" />
-                Community
-              </Link>
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={toggleDarkMode}
-              title={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
-              aria-label={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
-            >
-              {isDarkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-            </Button>
-            <Button asChild>
-              <Link href="/">
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to Map
-              </Link>
-            </Button>
-          </div>
-        </div>
-      </header>
+      <Header
+        onSignIn={() => setShowAuthModal(true)}
+        onSignOut={handleSignOut}
+        isSignedIn={true}
+        userEmail={user.email}
+        username={profile?.username}
+        isDarkMode={isDarkMode}
+        onToggleDarkMode={toggleDarkMode}
+        syncStatus="idle"
+      />
 
       {/* Content */}
-      <main className="max-w-2xl mx-auto px-4 py-8">
+      <main className="max-w-2xl mx-auto px-4 py-8 flex-grow w-full">
         <h2 className="text-3xl font-bold text-primary-900 dark:text-white mb-2">Settings</h2>
         <p className="text-primary-600 dark:text-primary-300 mb-8">Manage your profile, account, and data</p>
 
@@ -1110,22 +1091,7 @@ export default function SettingsPage() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-black/5 dark:border-white/10 bg-white/50 dark:bg-slate-900/50">
-        <div className="max-w-4xl mx-auto px-4 py-6 text-center text-sm text-primary-500 dark:text-primary-400">
-          <div className="flex justify-center items-center gap-4 mb-2">
-            <Link href="/about" className="hover:text-primary-700 dark:hover:text-primary-200 transition-colors">About</Link>
-            <Separator orientation="vertical" className="h-4" />
-            <Link href="/achievements" className="hover:text-primary-700 dark:hover:text-primary-200 transition-colors">Achievements</Link>
-            <Separator orientation="vertical" className="h-4" />
-            <Link href="/suggest" className="hover:text-primary-700 dark:hover:text-primary-200 transition-colors">Suggest</Link>
-            <Separator orientation="vertical" className="h-4" />
-            <Link href="/privacy" className="hover:text-primary-700 dark:hover:text-primary-200 transition-colors">Privacy</Link>
-            <Separator orientation="vertical" className="h-4" />
-            <Link href="/terms" className="hover:text-primary-700 dark:hover:text-primary-200 transition-colors">Terms</Link>
-          </div>
-          <p>See Every Place - Free Travel Tracker</p>
-        </div>
-      </footer>
+      <Footer user={user} onSignIn={() => setShowAuthModal(true)} showCategoryDirectory={false} />
 
       {/* Reset Category Modal */}
       <AlertDialog open={showResetModal} onOpenChange={setShowResetModal}>
@@ -1171,6 +1137,11 @@ export default function SettingsPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Auth Modal */}
+      {showAuthModal && (
+        <AuthModal onClose={() => setShowAuthModal(false)} />
+      )}
     </div>
   );
 }
