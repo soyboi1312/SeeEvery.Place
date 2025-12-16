@@ -15,9 +15,13 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     const { itineraryId } = await params;
     const supabase = await createClient();
 
-    const { data, error } = await supabase.rpc('get_itinerary_items', {
-      itinerary_uuid: itineraryId,
-    });
+    // Get items - RLS will handle access control
+    const { data, error } = await supabase
+      .from('itinerary_items')
+      .select('*')
+      .eq('itinerary_id', itineraryId)
+      .order('day_number', { ascending: true, nullsFirst: false })
+      .order('sort_order', { ascending: true });
 
     if (error) {
       console.error('Error fetching itinerary items:', error);
