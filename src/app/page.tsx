@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo, useCallback, useRef, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
+import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import CategoryTabs from '@/components/CategoryTabs';
@@ -26,7 +27,7 @@ const preloadAuthModal = () => import('@/components/AuthModal');
 
 import MapErrorBoundary from '@/components/MapErrorBoundary';
 import { Button } from '@/components/ui/button';
-import { Share2 } from 'lucide-react';
+import { Share2, MapPin } from 'lucide-react';
 
 const MapVisualization = dynamic(() => import('@/components/MapVisualization'), {
   loading: () => (
@@ -307,19 +308,27 @@ function HomeContent() {
         {/* Hero Section - NOW RENDERS IMMEDIATELY FOR FAST LCP */}
         <div className="text-center py-4 sm:py-8">
           <h1 className="text-3xl sm:text-4xl font-bold text-gray-800 dark:text-white mb-2">
-            Track Your Adventures.
+            Track Your Past. Plan Your Future.
             <span className="block text-lg sm:text-xl font-normal text-gray-600 dark:text-gray-300 mt-2">
               The free travel tracker for pure exploration.
             </span>
           </h1>
           <p className="text-gray-600 dark:text-gray-300 max-w-xl mx-auto mt-3">
-            Track countries, parks, peaks, and more. Share your map and stats.
+            Track countries, parks, peaks, and more. Plan trips and collaborate with friends.
             <br className="hidden sm:block" />
             <span className="font-medium"> Not your photo gallery.</span>
           </p>
-          <p className="text-gray-600 dark:text-gray-300 max-w-xl mx-auto mt-2">
-            No account needed to get started!
-          </p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center mt-4">
+            <p className="text-gray-600 dark:text-gray-300 sm:self-center">
+              No account needed to get started!
+            </p>
+            <Button asChild variant="outline" className="gap-2 border-purple-300 dark:border-purple-700 text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20">
+              <Link href="/trips">
+                <MapPin className="w-4 h-4" />
+                Plan a Trip
+              </Link>
+            </Button>
+          </div>
         </div>
 
         {/* URL param sync - isolated in Suspense to allow SSR of Hero */}
