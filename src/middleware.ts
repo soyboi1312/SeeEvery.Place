@@ -32,7 +32,10 @@ export const config = {
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico
+     * - geo/* (GeoJSON data files in public folder)
+     * - files/* (static files in public folder)
+     * - data/* (static data files in public folder)
      */
-    '/((?!_next/static|_next/image|favicon.ico).*)',
+    '/((?!_next/static|_next/image|favicon.ico|geo/|files/|data/).*)',
   ],
 };
