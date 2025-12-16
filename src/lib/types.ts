@@ -159,3 +159,83 @@ export interface UserProfile {
   createdAt: Date;
   updatedAt: Date;
 }
+
+// =====================
+// ITINERARY (TRIPS) TYPES
+// =====================
+
+export type ItineraryRole = 'owner' | 'editor' | 'viewer' | 'public';
+
+export interface Itinerary {
+  id: string;
+  owner_id: string;
+  owner_username?: string;
+  owner_avatar_url?: string;
+  title: string;
+  description?: string;
+  start_date?: string;
+  end_date?: string;
+  is_public: boolean;
+  cover_image_url?: string;
+  created_at: string;
+  updated_at: string;
+  item_count?: number;
+  collaborator_count?: number;
+  user_role?: ItineraryRole;
+}
+
+export interface ItineraryItem {
+  id: string;
+  itinerary_id: string;
+  category: Category;
+  place_id: string;
+  place_name: string;
+  notes?: string;
+  sort_order: number;
+  day_number?: number;
+  added_by?: string;
+  added_by_username?: string;
+  created_at: string;
+}
+
+export interface ItineraryCollaborator {
+  user_id: string;
+  username: string;
+  avatar_url?: string;
+  full_name?: string;
+  role: 'editor' | 'viewer';
+  created_at: string;
+}
+
+export interface CreateItineraryInput {
+  title: string;
+  description?: string;
+  start_date?: string;
+  end_date?: string;
+  is_public?: boolean;
+}
+
+export interface UpdateItineraryInput {
+  title?: string;
+  description?: string;
+  start_date?: string;
+  end_date?: string;
+  is_public?: boolean;
+  cover_image_url?: string;
+}
+
+export interface AddItineraryItemInput {
+  itinerary_id: string;
+  category: Category;
+  place_id: string;
+  place_name: string;
+  notes?: string;
+  sort_order?: number;
+  day_number?: number;
+}
+
+export interface UpdateItineraryItemInput {
+  notes?: string;
+  sort_order?: number;
+  day_number?: number;
+}
