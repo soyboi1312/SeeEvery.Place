@@ -154,12 +154,19 @@ const MapVisualization = memo(function MapVisualization({ category, selections, 
     };
   }, []);
 
-  // Dismiss tooltip on scroll or touch anywhere (mobile fix)
-  // This handles cases where tooltip gets stuck on hybrid devices or when scrolling
-  useEffect(() => {
-    if (!tooltipContent) return;
+  // Track whether tooltip is open via ref (avoids re-adding listeners on content changes)
+  const tooltipOpenRef = useRef(false);
+  tooltipOpenRef.current = !!tooltipContent;
 
-    const dismissTooltip = () => setTooltipContent(null);
+  // OPTIMIZATION: Add dismiss listeners once on mount instead of on every tooltip content change
+  // This avoids thrashing the DOM event registry when tooltip text updates frequently
+  useEffect(() => {
+    const dismissTooltip = () => {
+      // Only dismiss if tooltip is actually open (check ref, not state)
+      if (tooltipOpenRef.current) {
+        setTooltipContent(null);
+      }
+    };
 
     // Dismiss on scroll (user scrolling the page)
     window.addEventListener('scroll', dismissTooltip, true);
@@ -170,7 +177,7 @@ const MapVisualization = memo(function MapVisualization({ category, selections, 
       window.removeEventListener('scroll', dismissTooltip, true);
       window.removeEventListener('touchstart', dismissTooltip, true);
     };
-  }, [tooltipContent]);
+  }, []);
 
   // Show two-finger hint on single-touch pan attempts (mobile UX)
   // This prevents the "scroll trap" where users get stuck trying to scroll past the map
