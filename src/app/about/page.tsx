@@ -13,7 +13,7 @@ import { ArrowRight, Globe, BarChart3, Trophy, User, Palette, Sparkles, Mail, Ro
 
 export default function AboutPage() {
   const { isDarkMode, toggleDarkMode } = useDarkMode();
-  const { user, signOut, isAdmin } = useAuth();
+  const { user, signOut, isAdmin, username } = useAuth();
   const [showAuthModal, setShowAuthModal] = useState(false);
 
   return (
@@ -23,6 +23,7 @@ export default function AboutPage() {
         onSignOut={signOut}
         isSignedIn={!!user}
         userEmail={user?.email}
+        username={username}
         isDarkMode={isDarkMode}
         onToggleDarkMode={toggleDarkMode}
         isAdmin={isAdmin}

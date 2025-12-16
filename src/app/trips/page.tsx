@@ -31,7 +31,7 @@ import {
 
 export default function TripsPage() {
   const router = useRouter();
-  const { user, signOut, isAdmin } = useAuth();
+  const { user, signOut, isAdmin, username } = useAuth();
   const { isDarkMode, toggleDarkMode } = useDarkMode();
 
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -113,6 +113,7 @@ export default function TripsPage() {
           onSignIn={() => setShowAuthModal(true)}
           onSignOut={signOut}
           isSignedIn={false}
+          username={username}
           isDarkMode={isDarkMode}
           onToggleDarkMode={toggleDarkMode}
           isAdmin={isAdmin}
@@ -150,6 +151,7 @@ export default function TripsPage() {
         onSignOut={signOut}
         isSignedIn={!!user}
         userEmail={user?.email}
+        username={username}
         isDarkMode={isDarkMode}
         onToggleDarkMode={toggleDarkMode}
         isAdmin={isAdmin}

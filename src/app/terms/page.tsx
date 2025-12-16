@@ -13,7 +13,7 @@ import { ArrowRight, AlertTriangle, X } from 'lucide-react';
 
 export default function TermsPage() {
   const { isDarkMode, toggleDarkMode } = useDarkMode();
-  const { user, signOut, isAdmin } = useAuth();
+  const { user, signOut, isAdmin, username } = useAuth();
   const [showAuthModal, setShowAuthModal] = useState(false);
 
   return (
@@ -23,6 +23,7 @@ export default function TermsPage() {
         onSignOut={signOut}
         isSignedIn={!!user}
         userEmail={user?.email}
+        username={username}
         isDarkMode={isDarkMode}
         onToggleDarkMode={toggleDarkMode}
         isAdmin={isAdmin}

@@ -9,6 +9,7 @@ export function useAuth() {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [username, setUsername] = useState<string | null>(null);
 
   // Use ref to store singleton client (avoids SSR issues with useMemo)
   const clientRef = useRef<SupabaseClient | null>(null);
@@ -38,6 +39,23 @@ export function useAuth() {
     setIsAdmin(!!data);
   }, [getClient]);
 
+  // Fetch username from profile
+  const fetchUsername = useCallback(async (userId: string | undefined) => {
+    if (!userId) {
+      setUsername(null);
+      return;
+    }
+
+    const supabase = getClient();
+    const { data } = await supabase
+      .from('profiles')
+      .select('username')
+      .eq('id', userId)
+      .single();
+
+    setUsername(data?.username ?? null);
+  }, [getClient]);
+
   useEffect(() => {
     const supabase = getClient();
 
@@ -47,6 +65,7 @@ export function useAuth() {
       setUser(session?.user ?? null);
       setLoading(false);
       checkAdminStatus(session?.user?.email);
+      fetchUsername(session?.user?.id);
     });
 
     // Listen for auth changes
@@ -56,11 +75,12 @@ export function useAuth() {
         setUser(session?.user ?? null);
         setLoading(false);
         checkAdminStatus(session?.user?.email);
+        fetchUsername(session?.user?.id);
       }
     );
 
     return () => subscription.unsubscribe();
-  }, [getClient, checkAdminStatus]);
+  }, [getClient, checkAdminStatus, fetchUsername]);
 
   const signInWithGoogle = useCallback(async () => {
     const { error } = await getClient().auth.signInWithOAuth({
@@ -102,6 +122,7 @@ export function useAuth() {
     session,
     loading,
     isAdmin,
+    username,
     signInWithGoogle,
     signInWithApple,
     signInWithEmail,
