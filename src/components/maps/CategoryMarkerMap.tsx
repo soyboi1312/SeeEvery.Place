@@ -8,35 +8,62 @@
 'use client';
 
 import { memo, useState, useCallback } from 'react';
-import { Geographies, Geography } from '@vnedyalk0v/react19-simple-maps';
+import { Geographies } from '@vnedyalk0v/react19-simple-maps';
 import { useNameGetter, getMarkerSize, useCategoryMarkers } from '@/lib/hooks/useMapData';
 import { useClusteringWorker, isCluster } from '@/lib/hooks/useClusteringWorker';
 import { renderCategoryMarker } from '@/components/MapMarkers/registry';
-import { MarkerMapProps, CategoryMarkerMapConfig } from './types';
+import { MarkerMapProps, CategoryMarkerMapConfig, IdExtractor } from './types';
 import InteractiveMapShell from './InteractiveMapShell';
 import MemoizedMarker from './MemoizedMarker';
 import ClusterMarker from './ClusterMarker';
+import { TappableGeography } from './TappableGeography';
 
 /**
- * Static background map component - memoized to prevent re-renders on zoom/pan
- * Generic version that accepts geoUrl as prop
+ * Interactive background map component - memoized to prevent re-renders on zoom/pan
+ * Uses TappableGeography to enable click-to-navigate on background regions
  */
-const StaticBackground = memo(function StaticBackground({ geoUrl }: { geoUrl: string }) {
+interface InteractiveBackgroundProps {
+  geoUrl: string;
+  getId?: IdExtractor;
+  onRegionClick?: (id: string) => void;
+}
+
+const InteractiveBackground = memo(function InteractiveBackground({
+  geoUrl,
+  getId,
+  onRegionClick
+}: InteractiveBackgroundProps) {
+  // Adapter to match TappableGeography's onToggle signature
+  const handleToggle = useCallback((id: string) => {
+    onRegionClick?.(id);
+  }, [onRegionClick]);
+
+  // No-op tooltip handlers for background regions (tooltips handled by markers)
+  const noOpHandlers = {
+    onMouseEnter: () => {},
+    onMouseLeave: () => {},
+    onMouseMove: () => {},
+  };
+
   return (
     <Geographies geography={geoUrl}>
       {({ geographies }) =>
-        geographies.map((geo) => (
-          <Geography
-            key={(geo as unknown as { rsmKey: string }).rsmKey}
-            geography={geo}
-            className="region-path unvisited outline-none focus:outline-none"
-            style={{
-              default: { outline: "none" },
-              hover: { outline: "none" },
-              pressed: { outline: "none" },
-            }}
-          />
-        ))
+        geographies.map((geo) => {
+          const id = getId ? getId(geo) : '';
+          const name = geo.properties?.name || '';
+
+          return (
+            <TappableGeography
+              key={(geo as unknown as { rsmKey: string }).rsmKey}
+              geo={geo}
+              id={id}
+              status="unvisited"
+              name={name}
+              onToggle={onRegionClick ? handleToggle : undefined}
+              {...noOpHandlers}
+            />
+          );
+        })
       }
     </Geographies>
   );
@@ -44,6 +71,7 @@ const StaticBackground = memo(function StaticBackground({ geoUrl }: { geoUrl: st
 
 export interface CategoryMarkerMapProps extends MarkerMapProps {
   config: CategoryMarkerMapConfig;
+  onRegionClick?: (id: string) => void; // Handler for background region clicks
 }
 
 const CategoryMarkerMap = memo(function CategoryMarkerMap({
@@ -54,6 +82,7 @@ const CategoryMarkerMap = memo(function CategoryMarkerMap({
   tooltip,
   items,
   config,
+  onRegionClick,
 }: CategoryMarkerMapProps) {
   const {
     geoUrl,
@@ -67,6 +96,7 @@ const CategoryMarkerMap = memo(function CategoryMarkerMap({
     showSphere,
     showGraticule,
     filterAlbersUsa = false,
+    getId,
   } = config;
 
   // Track current zoom level for clustering
@@ -111,7 +141,7 @@ const CategoryMarkerMap = memo(function CategoryMarkerMap({
 
         return (
           <>
-            <StaticBackground geoUrl={geoUrl} />
+            <InteractiveBackground geoUrl={geoUrl} getId={getId} onRegionClick={onRegionClick} />
             {isClusteringEnabled ? (
               // Render clustered markers
               clusters.map((feature, index) => {
