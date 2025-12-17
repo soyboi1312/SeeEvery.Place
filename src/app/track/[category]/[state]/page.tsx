@@ -102,6 +102,14 @@ const accentColors: Record<CategoryGroup, { bg: string; hover: string; challenge
   destinations: { bg: 'bg-primary-700', hover: 'hover:bg-primary-800', challenge: 'bg-primary-900' },
 };
 
+// Text gradient colors for hero titles (vibrant and visible in light/dark)
+const textGradientColors: Record<CategoryGroup, string> = {
+  nature: 'from-emerald-500 to-teal-600 dark:from-emerald-400 dark:to-teal-400',
+  sports: 'from-blue-500 to-indigo-600 dark:from-blue-400 dark:to-indigo-400',
+  culture: 'from-amber-500 to-orange-600 dark:from-amber-400 dark:to-orange-400',
+  destinations: 'from-primary to-slate-600 dark:from-primary dark:to-slate-400',
+};
+
 // State-specific descriptions
 function getStateDescription(category: Category, stateName: string, count: number): string {
   const descriptions: Partial<Record<Category, string>> = {
@@ -255,6 +263,7 @@ export default async function StateCategoryPage({ params }: Props) {
   const group = getGroupForCategory(category as Category);
   const gradientClass = themeColors[group];
   const accent = accentColors[group];
+  const textGradient = textGradientColors[group];
 
   // Get other states with this category for "Explore Other States" section
   const allStates = getStatesForCategory(category as Category);
