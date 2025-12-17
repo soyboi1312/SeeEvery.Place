@@ -87,9 +87,11 @@ export const WORLD_REGION_CONFIG: RegionMapConfig = {
 export const US_MARKER_CONFIG: CategoryMarkerMapConfig = {
   ...BASE_US_CONFIG,
   filterAlbersUsa: true,
+  getId: getUSStateId, // Enable click-to-navigate to state pages
 };
 
 export const WORLD_MARKER_CONFIG: CategoryMarkerMapConfig = {
   ...BASE_WORLD_CONFIG,
   filterAlbersUsa: false,
+  getId: getCountryId, // Enable click-to-navigate to country pages
 };

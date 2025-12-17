@@ -57,6 +57,7 @@ export interface CategoryMarkerMapConfig {
   showSphere?: boolean;
   showGraticule?: boolean;
   filterAlbersUsa?: boolean;
+  getId?: IdExtractor; // For interactive background click-to-navigate
 }
 
 // Strategy pattern: function to extract ID from geography properties
