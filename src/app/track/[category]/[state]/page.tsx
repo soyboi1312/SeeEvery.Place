@@ -5,14 +5,14 @@ import Script from 'next/script';
 import { Category, categoryLabels, categoryIcons, getGroupForCategory, CategoryGroup } from '@/lib/types';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ArrowRight, ChevronRight, ChevronLeft } from 'lucide-react';
+import { ChevronLeft } from 'lucide-react';
 import { nationalParks } from '@/data/nationalParks';
 import { nationalMonuments } from '@/data/nationalMonuments';
 import { stateParks } from '@/data/stateParks';
 import { weirdAmericana } from '@/data/weirdAmericana';
 import { usStates } from '@/data/usStates';
+import InteractiveStateList from '@/components/InteractiveStateList';
 
 // Categories that support state-level filtering
 const stateFilterableCategories: Category[] = [
@@ -336,91 +336,13 @@ export default async function StateCategoryPage({ params }: Props) {
             </p>
           </div>
 
-          {/* Stats Section */}
+          {/* Interactive List - Click to mark visited or bucket list */}
           <section className="mb-12">
-            <div className="grid md:grid-cols-3 gap-6">
-              <Card className="text-center">
-                <CardContent className="p-6">
-                  <div className="text-3xl mb-3">📍</div>
-                  <div className="text-2xl font-bold text-foreground mb-1">{items.length}</div>
-                  <p className="text-muted-foreground text-sm">
-                    {label} in {stateName}
-                  </p>
-                </CardContent>
-              </Card>
-              <Card className="text-center">
-                <CardContent className="p-6">
-                  <div className="text-3xl mb-3">🗺️</div>
-                  <div className="text-2xl font-bold text-foreground mb-1">Interactive</div>
-                  <p className="text-muted-foreground text-sm">
-                    Visual map tracking
-                  </p>
-                </CardContent>
-              </Card>
-              <Card className="text-center">
-                <CardContent className="p-6">
-                  <div className="text-3xl mb-3">✓</div>
-                  <div className="text-2xl font-bold text-foreground mb-1">Free</div>
-                  <p className="text-muted-foreground text-sm">
-                    No account required
-                  </p>
-                </CardContent>
-              </Card>
-            </div>
-          </section>
-
-          {/* CTA */}
-          <div className="text-center mb-12">
-            <Button asChild size="lg" className="text-lg px-8 py-6 h-auto">
-              <Link href={`/?category=${category}`}>
-                Start Tracking {stateName} {label}
-                <ArrowRight className="w-5 h-5 ml-2" />
-              </Link>
-            </Button>
-            <p className="mt-4 text-muted-foreground text-sm">
-              Free to use, no account required
-            </p>
-          </div>
-
-          {/* Challenge Section */}
-          <section className="my-12">
-            <Card className="bg-gradient-to-br from-primary to-primary/80 text-primary-foreground border-0">
-              <CardContent className="p-8 text-center">
-                <h2 className="font-bold text-2xl mb-3">The {stateName} Challenge</h2>
-                <p className="opacity-90 mb-6 text-lg">
-                  Can you visit all {items.length} {label.toLowerCase()} in {stateName}? Start tracking your progress today!
-                </p>
-                <Button asChild variant="secondary" className="bg-white/20 hover:bg-white/30 text-white border-0">
-                  <Link href={`/?category=${category}`}>
-                    Accept the Challenge
-                    <ChevronRight className="w-4 h-4 ml-1" />
-                  </Link>
-                </Button>
-              </CardContent>
-            </Card>
-          </section>
-
-          {/* List of Items */}
-          <section className="my-12">
-            <h2 className="text-2xl font-bold text-foreground mb-6 text-center">
-              All {label} in {stateName}
-            </h2>
-            <div className="grid gap-3 md:grid-cols-2">
-              {items.map((item) => (
-                <Card key={item.id}>
-                  <CardContent className="p-4">
-                    <h3 className="font-semibold text-foreground">
-                      {item.name}
-                    </h3>
-                    {'region' in item && (
-                      <p className="text-sm text-muted-foreground">
-                        {item.region}
-                      </p>
-                    )}
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+            <InteractiveStateList
+              items={items}
+              category={category as Category}
+              title={`${label} in ${stateName}`}
+            />
           </section>
 
           {/* Explore Other States */}
