@@ -945,7 +945,7 @@ export default async function CategoryLandingPage({ params }: Props) {
                 Free {label} Tracker
               </Badge>
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight mb-4">
-                <span className="text-foreground">Track Every </span>
+                <span className="text-foreground">Track All </span>
                 <span className={`text-transparent bg-clip-text bg-gradient-to-r ${textGradient}`}>
                   {label}
                 </span>
