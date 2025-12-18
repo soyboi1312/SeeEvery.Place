@@ -13,6 +13,10 @@ export interface USCity {
 export const usCities: USCity[] = [
   // Northeast
   { id: "new-york", name: "New York City", state: "New York", stateCode: "NY", region: "Northeast", population: 8336817, lat: 40.7128, lng: -74.0060 },
+  { id: "portland-me", name: "Portland", state: "Maine", stateCode: "ME", region: "Northeast", population: 68408, lat: 43.6615, lng: -70.2553 },
+  { id: "manchester-nh", name: "Manchester", state: "New Hampshire", stateCode: "NH", region: "Northeast", population: 115644, lat: 42.9956, lng: -71.4548 },
+  { id: "burlington", name: "Burlington", state: "Vermont", stateCode: "VT", region: "Northeast", population: 44743, lat: 44.4759, lng: -73.2121 },
+  { id: "wilmington", name: "Wilmington", state: "Delaware", stateCode: "DE", region: "Northeast", population: 70898, lat: 39.7447, lng: -75.5484 },
   { id: "philadelphia", name: "Philadelphia", state: "Pennsylvania", stateCode: "PA", region: "Northeast", population: 1584064, lat: 39.9526, lng: -75.1652 },
   { id: "boston", name: "Boston", state: "Massachusetts", stateCode: "MA", region: "Northeast", population: 692600, lat: 42.3601, lng: -71.0589 },
   { id: "pittsburgh", name: "Pittsburgh", state: "Pennsylvania", stateCode: "PA", region: "Northeast", population: 302971, lat: 40.4406, lng: -79.9959 },
@@ -25,6 +29,9 @@ export const usCities: USCity[] = [
 
   // Southeast
   { id: "miami", name: "Miami", state: "Florida", stateCode: "FL", region: "Southeast", population: 442241, lat: 25.7617, lng: -80.1918 },
+  { id: "charleston-wv", name: "Charleston", state: "West Virginia", stateCode: "WV", region: "Southeast", population: 46536, lat: 38.3498, lng: -81.6326 },
+  { id: "jackson-ms", name: "Jackson", state: "Mississippi", stateCode: "MS", region: "Southeast", population: 153701, lat: 32.2988, lng: -90.1848 },
+  { id: "little-rock", name: "Little Rock", state: "Arkansas", stateCode: "AR", region: "Southeast", population: 202591, lat: 34.7465, lng: -92.2896 },
   { id: "atlanta", name: "Atlanta", state: "Georgia", stateCode: "GA", region: "Southeast", population: 498715, lat: 33.7490, lng: -84.3880 },
   { id: "charlotte", name: "Charlotte", state: "North Carolina", stateCode: "NC", region: "Southeast", population: 874579, lat: 35.2271, lng: -80.8431 },
   { id: "tampa", name: "Tampa", state: "Florida", stateCode: "FL", region: "Southeast", population: 399700, lat: 27.9506, lng: -82.4572 },
@@ -42,6 +49,9 @@ export const usCities: USCity[] = [
 
   // Midwest
   { id: "chicago", name: "Chicago", state: "Illinois", stateCode: "IL", region: "Midwest", population: 2746388, lat: 41.8781, lng: -87.6298 },
+  { id: "wichita", name: "Wichita", state: "Kansas", stateCode: "KS", region: "Midwest", population: 397532, lat: 37.6872, lng: -97.3301 },
+  { id: "fargo", name: "Fargo", state: "North Dakota", stateCode: "ND", region: "Midwest", population: 125990, lat: 46.8772, lng: -96.7898 },
+  { id: "sioux-falls", name: "Sioux Falls", state: "South Dakota", stateCode: "SD", region: "Midwest", population: 192517, lat: 43.5460, lng: -96.7313 },
   { id: "detroit", name: "Detroit", state: "Michigan", stateCode: "MI", region: "Midwest", population: 639111, lat: 42.3314, lng: -83.0458 },
   { id: "indianapolis", name: "Indianapolis", state: "Indiana", stateCode: "IN", region: "Midwest", population: 887642, lat: 39.7684, lng: -86.1581 },
   { id: "columbus", name: "Columbus", state: "Ohio", stateCode: "OH", region: "Midwest", population: 905748, lat: 39.9612, lng: -82.9988 },
@@ -74,6 +84,8 @@ export const usCities: USCity[] = [
 
   // West
   { id: "los-angeles", name: "Los Angeles", state: "California", stateCode: "CA", region: "West", population: 3898747, lat: 34.0522, lng: -118.2437 },
+  { id: "billings", name: "Billings", state: "Montana", stateCode: "MT", region: "West", population: 117116, lat: 45.7833, lng: -108.5007 },
+  { id: "cheyenne", name: "Cheyenne", state: "Wyoming", stateCode: "WY", region: "West", population: 65132, lat: 41.1400, lng: -104.8202 },
   { id: "san-diego", name: "San Diego", state: "California", stateCode: "CA", region: "West", population: 1386932, lat: 32.7157, lng: -117.1611 },
   { id: "san-jose", name: "San Jose", state: "California", stateCode: "CA", region: "West", population: 1013240, lat: 37.3382, lng: -121.8863 },
   { id: "san-francisco", name: "San Francisco", state: "California", stateCode: "CA", region: "West", population: 873965, lat: 37.7749, lng: -122.4194 },
