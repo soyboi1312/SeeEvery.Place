@@ -12,7 +12,7 @@ import { nationalMonuments } from '@/data/nationalMonuments';
 import { stateParks } from '@/data/stateParks';
 import { weirdAmericana } from '@/data/weirdAmericana';
 import { usStates } from '@/data/usStates';
-import InteractiveStateList from '@/components/InteractiveStateList';
+import StatePageClient from './StatePageClient';
 
 // Categories that support state-level filtering
 const stateFilterableCategories: Category[] = [
@@ -336,12 +336,14 @@ export default async function StateCategoryPage({ params }: Props) {
             </p>
           </div>
 
-          {/* Interactive List - Click to mark visited or bucket list */}
+          {/* Interactive Map & List - Click markers or list items to toggle status */}
           <section className="mb-12">
-            <InteractiveStateList
+            <StatePageClient
               items={items}
               category={category as Category}
               title={`${label} in ${stateName}`}
+              regionCode={stateCode}
+              isCountry={false}
             />
           </section>
 

@@ -26,6 +26,16 @@ export interface MarkerableItem {
   lat?: number;
   lng?: number;
   type?: string; // For parks with subcategory filtering
+  state?: string; // State code (e.g., "CA", "NY") for US filtering
+  countryCode?: string; // Country code (e.g., "US", "JP") for world filtering
+}
+
+/**
+ * Filter criteria for restricting markers to a specific region
+ */
+export interface RegionFilter {
+  state?: string; // Filter by US state code
+  country?: string; // Filter by country code
 }
 
 /**
@@ -39,7 +49,8 @@ export function getMarkersFromData(
   data: MarkerableItem[],
   selections: UserSelections,
   filterAlbersUsa = false,
-  subcategory?: string
+  subcategory?: string,
+  regionFilter?: RegionFilter
 ): MarkerData[] {
   const markers: MarkerData[] = [];
   const categorySelections = selections[category] || [];
@@ -66,6 +77,21 @@ export function getMarkersFromData(
 
     const item = dataMap.get(selection.id);
     if (!item || !item.lat || !item.lng) continue;
+
+    // Apply region filtering if provided
+    if (regionFilter) {
+      if (regionFilter.state) {
+        // Check if item's state matches (handle multi-state items like "WY/MT/ID")
+        const itemState = item.state?.toUpperCase() || '';
+        const filterState = regionFilter.state.toUpperCase();
+        if (itemState !== filterState && !itemState.includes(filterState)) {
+          continue;
+        }
+      }
+      if (regionFilter.country && item.countryCode !== regionFilter.country) {
+        continue;
+      }
+    }
 
     const marker: MarkerData = {
       coordinates: [item.lng, item.lat],

@@ -5,7 +5,7 @@
 import { useMemo, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Category, Status, UserSelections } from '@/lib/types';
-import { MarkerData, MarkerableItem, getMarkersFromData } from '@/lib/markerUtils';
+import { MarkerData, MarkerableItem, getMarkersFromData, RegionFilter } from '@/lib/markerUtils';
 import { loadCategoryData, CategoryDataItem } from '@/lib/categoryUtils';
 
 // Selection type used across map components
@@ -93,7 +93,8 @@ export function useCategoryMarkers(
   category: Category,
   selections: UserSelections,
   filterAlbersUsa: boolean,
-  subcategory?: string
+  subcategory?: string,
+  regionFilter?: RegionFilter
 ): MarkerData[] {
   // Use React Query to cache the heavy category data
   const { data: categoryData } = useCategoryData(category);
@@ -110,9 +111,10 @@ export function useCategoryMarkers(
       categoryData as MarkerableItem[],
       selections,
       filterAlbersUsa,
-      subcategory
+      subcategory,
+      regionFilter
     );
-  }, [category, categoryData, selections, filterAlbersUsa, subcategory]);
+  }, [category, categoryData, selections, filterAlbersUsa, subcategory, regionFilter]);
 
   return markers;
 }
