@@ -107,7 +107,7 @@ export default function Header({
 
   return (
     <header
-      className={`sticky top-0 z-40 w-full transition-all duration-200 backdrop-blur-md ${
+      className={`sticky top-0 z-40 w-full transition-all duration-300 ease-out backdrop-blur-md ${
         isScrolled
           ? 'bg-white/80 dark:bg-slate-900/80 border-b border-border shadow-sm'
           : 'bg-transparent border-b border-transparent'

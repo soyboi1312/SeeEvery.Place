@@ -18,8 +18,22 @@ import { StatusVisibility } from '@/lib/markerUtils';
 import { useAuth } from '@/lib/hooks/useAuth';
 
 // Loading placeholder for lazy-loaded map components
+// Uses a simplified world outline SVG to give visual context while loading
 const MapLoadingPlaceholder = () => (
-  <div className="h-full w-full bg-gray-100 dark:bg-gray-700 animate-pulse rounded-lg" />
+  <div className="h-full w-full bg-gray-100 dark:bg-gray-700 animate-pulse rounded-lg flex items-center justify-center">
+    {/* Simplified world map outline - provides visual context during load */}
+    <svg
+      viewBox="0 0 1000 500"
+      className="w-3/4 h-auto opacity-20 dark:opacity-10"
+      fill="currentColor"
+    >
+      {/* Simplified continent outlines */}
+      <path d="M150,180 Q200,120 280,140 Q340,100 400,130 Q420,90 480,110 L500,140 Q520,100 560,120 Q620,90 680,130 Q720,110 760,150 L780,200 Q820,180 850,220 L830,280 Q800,320 750,300 Q700,340 650,310 Q600,350 550,320 Q500,360 450,330 Q400,370 350,340 Q300,380 250,350 Q200,390 160,350 Q120,320 140,280 Q100,240 150,180 Z" />
+      <path d="M100,250 Q80,290 120,340 Q100,380 140,400 Q120,430 160,450 L200,440 Q240,470 280,450 Q260,420 300,400 L280,350 Q260,310 220,320 Q180,280 140,300 Q100,270 100,250 Z" />
+      <path d="M520,250 Q560,220 620,240 Q680,210 740,250 Q780,230 820,270 L840,320 Q860,370 820,400 Q780,440 720,420 Q660,460 600,430 Q540,470 500,430 Q460,400 480,350 Q440,300 480,270 Q500,240 520,250 Z" />
+      <path d="M850,350 Q890,320 930,360 L950,420 Q970,470 920,490 L860,480 Q820,450 850,400 Q830,380 850,350 Z" />
+    </svg>
+  </div>
 );
 
 // Dynamic imports for map components - reduces initial bundle size
