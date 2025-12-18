@@ -14,8 +14,7 @@ import {
   TooltipHandlers,
   MapVisualizationProps,
 } from './maps';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
+import { StatusVisibility } from '@/lib/markerUtils';
 import { useAuth } from '@/lib/hooks/useAuth';
 
 // Loading placeholder for lazy-loaded map components
@@ -64,7 +63,7 @@ function getMapComponent(
   tooltip?: TooltipHandlers,
   items?: MapVisualizationProps['items'],
   onRegionClick?: (id: string) => void,
-  hideUnvisited = false
+  statusVisibility?: StatusVisibility
 ) {
   const handlers = tooltip || {
     onMouseEnter: () => {},
@@ -99,23 +98,33 @@ function getMapComponent(
       items={items}
       config={config}
       onRegionClick={onRegionClick}
-      hideUnvisited={hideUnvisited}
+      statusVisibility={statusVisibility}
     />
   );
 }
 
+// Default visibility - all statuses visible
+const DEFAULT_VISIBILITY: StatusVisibility = { visited: true, bucketList: true, unvisited: true };
+
 const MapVisualization = memo(function MapVisualization({ category, selections, onToggle, subcategory, items }: MapVisualizationProps) {
   const router = useRouter();
   const { user } = useAuth();
-  const [showUnvisited, setShowUnvisited] = useState(true);
+  // Track which marker statuses are visible (toggled via clickable legend)
+  const [statusVisibility, setStatusVisibility] = useState<StatusVisibility>(DEFAULT_VISIBILITY);
 
-  // Hide unvisited markers ONLY if:
-  // User is logged in AND explicitly toggled them off.
-  // Guests (user === null) always see all markers - this is safe because:
-  // 1. Static JSON files (no DB queries)
-  // 2. Supercluster groups markers to reduce DOM nodes
-  // 3. Web Workers handle clustering calculations off main thread
-  const hideUnvisited = user ? !showUnvisited : false;
+  // Toggle a specific status visibility when legend item is clicked
+  const toggleStatusVisibility = useCallback((status: keyof StatusVisibility) => {
+    setStatusVisibility(prev => ({ ...prev, [status]: !prev[status] }));
+  }, []);
+
+  // Compute the effective visibility filter to pass to map
+  // Guests always see all markers; logged-in users can filter via legend
+  const effectiveVisibility = useMemo((): StatusVisibility | undefined => {
+    // If all are visible (default state), pass undefined for better performance (no filtering)
+    const allVisible = statusVisibility.visited && statusVisibility.bucketList && statusVisibility.unvisited;
+    if (allVisible) return undefined;
+    return statusVisibility;
+  }, [statusVisibility]);
 
   const isRegionMap = usesRegionMap(category);
   // Only store tooltip content in state - position is handled via ref for performance
@@ -325,7 +334,7 @@ const MapVisualization = memo(function MapVisualization({ category, selections, 
       className="w-full bg-primary-50/50 dark:bg-slate-800/50 rounded-2xl overflow-hidden border border-black/5 dark:border-white/10 shadow-premium-lg mb-6 relative will-change-transform"
     >
       <div className="w-full overflow-hidden aspect-[2/1]">
-        {getMapComponent(category, selections, onToggle, subcategory, tooltipHandlers, items, handleRegionClick, hideUnvisited)}
+        {getMapComponent(category, selections, onToggle, subcategory, tooltipHandlers, items, handleRegionClick, effectiveVisibility)}
       </div>
 
       {/* Two-finger pan hint overlay for mobile */}
@@ -355,46 +364,53 @@ const MapVisualization = memo(function MapVisualization({ category, selections, 
         document.body
       )}
 
-      {/* Legend and Toggle */}
-      <div className="flex flex-col items-center gap-3 pb-4 px-2">
-        {/* Toggle for logged-in users with smaller categories (<500 items) */}
-        {user && !isRegionMap && items && items.length < 500 && (
-          <div className="flex items-center space-x-2">
-            <Switch
-              id="show-unvisited"
-              checked={showUnvisited}
-              onCheckedChange={setShowUnvisited}
-            />
-            <Label htmlFor="show-unvisited" className="text-sm text-primary-600 dark:text-primary-300 cursor-pointer">
-              Show unvisited
-            </Label>
-          </div>
-        )}
+      {/* Clickable Legend - click to toggle marker visibility */}
+      <div className="flex justify-center flex-wrap gap-x-6 gap-y-2 text-sm pb-4 px-2">
+        {/* Visited */}
+        <button
+          onClick={() => !isRegionMap && toggleStatusVisibility('visited')}
+          className={`flex items-center gap-2 transition-opacity ${
+            isRegionMap ? 'cursor-default' : 'cursor-pointer hover:opacity-80'
+          } ${statusVisibility.visited ? 'opacity-100' : 'opacity-40'}`}
+          title={isRegionMap ? 'Visited' : (statusVisibility.visited ? 'Click to hide visited' : 'Click to show visited')}
+        >
+          <span className={`w-3 h-3 rounded-full ${statusVisibility.visited ? 'bg-green-500' : 'bg-gray-400 dark:bg-gray-600'}`}></span>
+          <span className={statusVisibility.visited ? 'text-primary-600 dark:text-primary-300' : 'text-gray-400 dark:text-gray-500 line-through'}>
+            Visited
+          </span>
+        </button>
 
-        {/* Legend */}
-        <div className="flex justify-center flex-wrap gap-x-6 gap-y-2 text-sm text-primary-600 dark:text-primary-300">
-          <div className="flex items-center gap-2">
-            <span className="w-3 h-3 rounded-full bg-green-500"></span>
-            <span>Visited</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="w-3 h-3 rounded-full bg-amber-500"></span>
-            <span>Bucket List</span>
-          </div>
-          {/* Show "Not Visited" in legend when unvisited markers are visible:
-              - Region maps: always show (regions are never hidden)
-              - Marker maps: show for guests (always see all) or when toggle is on */}
-          {(isRegionMap || !user || showUnvisited) && (
-            <div className="flex items-center gap-2">
-              {isRegionMap ? (
-                <span className="w-3 h-3 rounded-full bg-gray-200 dark:bg-gray-600 border border-gray-300 dark:border-gray-500"></span>
-              ) : (
-                <span className="w-3 h-3 rounded-full bg-slate-400"></span>
-              )}
-              <span>Not Visited</span>
-            </div>
+        {/* Bucket List */}
+        <button
+          onClick={() => !isRegionMap && toggleStatusVisibility('bucketList')}
+          className={`flex items-center gap-2 transition-opacity ${
+            isRegionMap ? 'cursor-default' : 'cursor-pointer hover:opacity-80'
+          } ${statusVisibility.bucketList ? 'opacity-100' : 'opacity-40'}`}
+          title={isRegionMap ? 'Bucket List' : (statusVisibility.bucketList ? 'Click to hide bucket list' : 'Click to show bucket list')}
+        >
+          <span className={`w-3 h-3 rounded-full ${statusVisibility.bucketList ? 'bg-amber-500' : 'bg-gray-400 dark:bg-gray-600'}`}></span>
+          <span className={statusVisibility.bucketList ? 'text-primary-600 dark:text-primary-300' : 'text-gray-400 dark:text-gray-500 line-through'}>
+            Bucket List
+          </span>
+        </button>
+
+        {/* Not Visited */}
+        <button
+          onClick={() => !isRegionMap && toggleStatusVisibility('unvisited')}
+          className={`flex items-center gap-2 transition-opacity ${
+            isRegionMap ? 'cursor-default' : 'cursor-pointer hover:opacity-80'
+          } ${statusVisibility.unvisited ? 'opacity-100' : 'opacity-40'}`}
+          title={isRegionMap ? 'Not Visited' : (statusVisibility.unvisited ? 'Click to hide not visited' : 'Click to show not visited')}
+        >
+          {isRegionMap ? (
+            <span className={`w-3 h-3 rounded-full ${statusVisibility.unvisited ? 'bg-gray-200 dark:bg-gray-600 border border-gray-300 dark:border-gray-500' : 'bg-gray-400 dark:bg-gray-600'}`}></span>
+          ) : (
+            <span className={`w-3 h-3 rounded-full ${statusVisibility.unvisited ? 'bg-slate-400' : 'bg-gray-400 dark:bg-gray-600'}`}></span>
           )}
-        </div>
+          <span className={statusVisibility.unvisited ? 'text-primary-600 dark:text-primary-300' : 'text-gray-400 dark:text-gray-500 line-through'}>
+            Not Visited
+          </span>
+        </button>
       </div>
     </div>
   );

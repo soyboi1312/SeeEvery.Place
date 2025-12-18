@@ -40,6 +40,16 @@ export interface RegionFilter {
 }
 
 /**
+ * Visibility filter for marker statuses.
+ * Each status can be toggled on/off independently via the legend.
+ */
+export interface StatusVisibility {
+  visited: boolean;
+  bucketList: boolean;
+  unvisited: boolean;
+}
+
+/**
  * Generate markers from loaded category data.
  * This is a pure function that processes data arrays into markers
  * without importing the data itself.
@@ -54,7 +64,7 @@ export function getMarkersFromData(
   filterAlbersUsa = false,
   subcategory?: string,
   regionFilter?: RegionFilter,
-  hideUnvisited = false
+  statusVisibility?: StatusVisibility
 ): MarkerData[] {
   const markers: MarkerData[] = [];
   const categorySelections = selections[category] || [];
@@ -113,9 +123,11 @@ export function getMarkersFromData(
     const selection = selectionMap.get(item.id);
     const status: Status = selection ? selection.status : 'unvisited';
 
-    // Skip unvisited markers if hideUnvisited is true
-    if (hideUnvisited && status === 'unvisited') {
-      continue;
+    // Skip markers based on status visibility filter
+    if (statusVisibility) {
+      if (status === 'visited' && !statusVisibility.visited) continue;
+      if (status === 'bucketList' && !statusVisibility.bucketList) continue;
+      if (status === 'unvisited' && !statusVisibility.unvisited) continue;
     }
 
     const marker: MarkerData = {

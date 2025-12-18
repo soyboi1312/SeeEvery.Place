@@ -13,7 +13,7 @@ import { useNameGetter, getMarkerSize, useCategoryMarkers } from '@/lib/hooks/us
 import { useClusteringWorker, isCluster } from '@/lib/hooks/useClusteringWorker';
 import { renderCategoryMarker } from '@/components/MapMarkers/registry';
 import { MarkerMapProps, CategoryMarkerMapConfig, IdExtractor } from './types';
-import { RegionFilter } from '@/lib/markerUtils';
+import { RegionFilter, StatusVisibility } from '@/lib/markerUtils';
 import InteractiveMapShell from './InteractiveMapShell';
 import MemoizedMarker from './MemoizedMarker';
 import ClusterMarker from './ClusterMarker';
@@ -82,7 +82,7 @@ export interface CategoryMarkerMapProps extends MarkerMapProps {
   config: CategoryMarkerMapConfig;
   onRegionClick?: (id: string) => void; // Handler for background region clicks
   regionFilter?: RegionFilter; // Filter markers to a specific state/country
-  hideUnvisited?: boolean; // Hide unvisited markers to reduce visual noise
+  statusVisibility?: StatusVisibility; // Filter markers by status (clicked legend items)
 }
 
 const CategoryMarkerMap = memo(function CategoryMarkerMap({
@@ -95,7 +95,7 @@ const CategoryMarkerMap = memo(function CategoryMarkerMap({
   config,
   onRegionClick,
   regionFilter,
-  hideUnvisited = false,
+  statusVisibility,
 }: CategoryMarkerMapProps) {
   const {
     geoUrl,
@@ -117,8 +117,8 @@ const CategoryMarkerMap = memo(function CategoryMarkerMap({
 
   // Use extracted hook for data fetching - ISP/SRP
   // Pass regionFilter to only show markers in the specified state/country
-  // hideUnvisited reduces marker count for performance and visual clarity
-  const markers = useCategoryMarkers(category, selections, filterAlbersUsa, subcategory, regionFilter, hideUnvisited);
+  // statusVisibility filters markers by status (clicked legend items)
+  const markers = useCategoryMarkers(category, selections, filterAlbersUsa, subcategory, regionFilter, statusVisibility);
 
   // Use marker clustering for large datasets (>500 markers)
   // 500 SVG markers are trivial for modern browsers; clustering only needed for very dense datasets
