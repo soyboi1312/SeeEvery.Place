@@ -16,6 +16,8 @@ import { MarkerSymbolDefs } from '@/components/MapMarkers';
 export interface ZoomState {
   position: MapPosition;
   zoom: number;
+  // Programmatic zoom to coordinates (for cluster expansion)
+  zoomTo: (coordinates: [number, number], zoom: number) => void;
 }
 
 interface InteractiveMapShellProps {
@@ -67,6 +69,7 @@ const InteractiveMapShell = memo(function InteractiveMapShell({
     handleZoomIn,
     handleZoomOut,
     handleMoveEnd,
+    zoomTo,
     canZoomIn,
     canZoomOut,
   } = useMapZoom({
@@ -118,6 +121,7 @@ const InteractiveMapShell = memo(function InteractiveMapShell({
   const zoomState: ZoomState = {
     position,
     zoom: position.zoom,
+    zoomTo,
   };
 
   return (

@@ -17,7 +17,8 @@ export async function middleware(request: NextRequest) {
     pathname.endsWith('.svg') ||
     pathname.endsWith('.png') ||
     pathname.endsWith('.jpg') ||
-    pathname.endsWith('.ico')
+    pathname.endsWith('.ico') ||
+    pathname.endsWith('.webmanifest')
   ) {
     return NextResponse.next();
   }
@@ -39,6 +40,6 @@ export const config = {
      * - data/ (static JSON data)
      * - Static assets (svg, png, jpg, json, js, css, etc.)
      */
-    '/((?!_next/static|_next/image|favicon.ico|robots\\.txt|sitemap\\.xml|geo/|files/|data/|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|json|js|css|woff|woff2)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|robots\\.txt|sitemap\\.xml|geo/|files/|data/|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|json|js|css|woff|woff2|webmanifest)$).*)',
   ],
 };
