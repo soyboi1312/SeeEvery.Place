@@ -28,6 +28,7 @@ export interface MarkerableItem {
   type?: string; // For parks with subcategory filtering
   state?: string; // State code (e.g., "CA", "NY") for US filtering
   countryCode?: string; // Country code (e.g., "US", "JP") for world filtering
+  country?: string; // Full country name for fallback matching
 }
 
 /**
@@ -43,6 +44,8 @@ export interface RegionFilter {
  * This is a pure function that processes data arrays into markers
  * without importing the data itself.
  * Items without lat/lng coordinates are filtered out (e.g., countries use polygons).
+ *
+ * FIX: Iterates over DATA (all items) instead of SELECTIONS to show unvisited markers.
  */
 export function getMarkersFromData(
   category: Category,
@@ -55,28 +58,26 @@ export function getMarkersFromData(
   const markers: MarkerData[] = [];
   const categorySelections = selections[category] || [];
 
-  // Create a quick lookup map for the current data
-  // This is O(N) but N is small per category (max ~500 items)
-  // and this runs only when that category is active
-  const dataMap = new Map<string, MarkerableItem>();
-  for (const item of data) {
-    dataMap.set(item.id, item);
+  // Create a quick lookup map for selections (visited/bucketList items)
+  const selectionMap = new Map<string, { status: Status }>();
+  for (const s of categorySelections) {
+    if (!s.deleted) {
+      selectionMap.set(s.id, { status: s.status });
+    }
   }
 
   // Pre-compute sport type
   const sportType = stadiumCategoryToSport[category];
 
-  for (const selection of categorySelections) {
-    // Skip soft-deleted selections
-    if (selection.deleted) continue;
+  // Iterate over ALL data items to generate markers (visited and unvisited)
+  for (const item of data) {
+    // Skip items without coordinates
+    if (!item.lat || !item.lng) continue;
 
     // Filter out unsupported Albers USA territories if requested
-    if (filterAlbersUsa && UNSUPPORTED_ALBERS_USA_IDS.has(selection.id)) {
+    if (filterAlbersUsa && UNSUPPORTED_ALBERS_USA_IDS.has(item.id)) {
       continue;
     }
-
-    const item = dataMap.get(selection.id);
-    if (!item || !item.lat || !item.lng) continue;
 
     // Apply region filtering if provided
     if (regionFilter) {
@@ -88,27 +89,41 @@ export function getMarkersFromData(
           continue;
         }
       }
-      if (regionFilter.country && item.countryCode !== regionFilter.country) {
+      if (regionFilter.country) {
+        // Check countryCode first, fallback to checking country name
+        const filterCountry = regionFilter.country.toUpperCase();
+        const itemCode = item.countryCode?.toUpperCase();
+        if (itemCode !== filterCountry) {
+          continue;
+        }
+      }
+    }
+
+    // Handle National Parks types/subcategories
+    let parkType: string | undefined;
+    if (category === 'nationalParks' && item.type) {
+      parkType = item.type;
+      if (subcategory && subcategory !== 'All' && item.type !== subcategory) {
         continue;
       }
     }
 
+    // Get status from selections or default to 'unvisited'
+    const selection = selectionMap.get(item.id);
+    const status: Status = selection ? selection.status : 'unvisited';
+
     const marker: MarkerData = {
       coordinates: [item.lng, item.lat],
-      status: selection.status,
-      id: selection.id,
+      status: status,
+      id: item.id,
     };
 
     if (sportType) {
       marker.sport = sportType;
     }
 
-    // Handle National Parks types/subcategories
-    if (category === 'nationalParks' && item.type) {
-      marker.parkType = item.type;
-      if (subcategory && subcategory !== 'All' && item.type !== subcategory) {
-        continue;
-      }
+    if (parkType) {
+      marker.parkType = parkType;
     }
 
     markers.push(marker);
