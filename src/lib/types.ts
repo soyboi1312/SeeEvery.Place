@@ -7,34 +7,56 @@ import { ReactNode } from "react";
 // To add a new category: simply add it here, everything else derives automatically
 // NOTE: If updating this, also update get_analytics_summary() in supabase/migrations/20241207_analytics_rpc.sql
 
+// Map configuration types
+export type MapType = 'region' | 'marker';
+export type MapProjection = 'world' | 'us';
+
 export const CATEGORY_SCHEMA = {
-  countries: { label: "Countries", icon: "🌍", group: "destinations", xp: 25, total: 197 },
-  worldCities: { label: "World Cities", icon: "🌆", group: "destinations", xp: 10, total: 115 },
-  states: { label: "US States", icon: "🇺🇸", group: "destinations", xp: 15, total: 50 },
-  territories: { label: "US Territories", icon: "🏝️", group: "destinations", xp: 20, total: 14 },
-  usCities: { label: "US Cities", icon: "🏙️", group: "destinations", xp: 5, total: 75 },
-  nationalParks: { label: "National Parks", icon: "🏞️", group: "nature", xp: 30, total: 63 },
-  nationalMonuments: { label: "National Monuments", icon: "🗽", group: "nature", xp: 25, total: 138 },
-  stateParks: { label: "State Parks", icon: "🌲", group: "nature", xp: 15, total: 305 },
-  fiveKPeaks: { label: "5000m+ Peaks", icon: "🏔️", group: "nature", xp: 50, total: 37 },
-  fourteeners: { label: "US 14ers", icon: "⛰️", group: "nature", xp: 40, total: 70 },
-  museums: { label: "Museums", icon: "🎨", group: "culture", xp: 15, total: 46 },
-  mlbStadiums: { label: "MLB Stadiums", icon: "⚾", group: "sports", xp: 20, total: 33 },
-  nflStadiums: { label: "NFL Stadiums", icon: "🏈", group: "sports", xp: 20, total: 32 },
-  nbaStadiums: { label: "NBA Arenas", icon: "🏀", group: "sports", xp: 20, total: 30 },
-  nhlStadiums: { label: "NHL Arenas", icon: "🏒", group: "sports", xp: 20, total: 32 },
-  soccerStadiums: { label: "Soccer Stadiums", icon: "⚽", group: "sports", xp: 25, total: 48 },
-  euroFootballStadiums: { label: "European Football", icon: "⚽", group: "sports", xp: 20, total: 179 },
-  rugbyStadiums: { label: "Rugby Stadiums", icon: "🏉", group: "sports", xp: 25, total: 87 },
-  cricketStadiums: { label: "Cricket Grounds", icon: "🏏", group: "sports", xp: 25, total: 75 },
-  f1Tracks: { label: "F1 Tracks", icon: "🏎️", group: "sports", xp: 35, total: 34 },
-  marathons: { label: "Marathon Majors", icon: "🏃", group: "sports", xp: 100, total: 7 },
-  airports: { label: "Airports", icon: "✈️", group: "destinations", xp: 5, total: 58 },
-  skiResorts: { label: "Ski Resorts", icon: "⛷️", group: "nature", xp: 25, total: 32 },
-  themeParks: { label: "Theme Parks", icon: "🎢", group: "culture", xp: 20, total: 37 },
-  surfingReserves: { label: "Surfing Reserves", icon: "🌊", group: "nature", xp: 30, total: 26 },
-  weirdAmericana: { label: "Weird Americana", icon: "🗿", group: "culture", xp: 15, total: 56 },
+  // Region maps (colored polygons)
+  countries: { label: "Countries", icon: "🌍", group: "destinations", xp: 25, total: 197, mapType: 'region' as const, projection: 'world' as const, drillDown: false },
+  states: { label: "US States", icon: "🇺🇸", group: "destinations", xp: 15, total: 50, mapType: 'region' as const, projection: 'us' as const, drillDown: false },
+
+  // US marker maps (Albers USA projection)
+  usCities: { label: "US Cities", icon: "🏙️", group: "destinations", xp: 5, total: 75, mapType: 'marker' as const, projection: 'us' as const, drillDown: false },
+  nationalParks: { label: "National Parks", icon: "🏞️", group: "nature", xp: 30, total: 63, mapType: 'marker' as const, projection: 'us' as const, drillDown: true },
+  nationalMonuments: { label: "National Monuments", icon: "🗽", group: "nature", xp: 25, total: 138, mapType: 'marker' as const, projection: 'us' as const, drillDown: true },
+  stateParks: { label: "State Parks", icon: "🌲", group: "nature", xp: 15, total: 305, mapType: 'marker' as const, projection: 'us' as const, drillDown: true },
+  fourteeners: { label: "US 14ers", icon: "⛰️", group: "nature", xp: 40, total: 70, mapType: 'marker' as const, projection: 'us' as const, drillDown: false },
+  weirdAmericana: { label: "Weird Americana", icon: "🗿", group: "culture", xp: 15, total: 56, mapType: 'marker' as const, projection: 'us' as const, drillDown: true },
+
+  // World marker maps (Natural Earth projection)
+  worldCities: { label: "World Cities", icon: "🌆", group: "destinations", xp: 10, total: 115, mapType: 'marker' as const, projection: 'world' as const, drillDown: true },
+  territories: { label: "US Territories", icon: "🏝️", group: "destinations", xp: 20, total: 14, mapType: 'marker' as const, projection: 'world' as const, drillDown: false },
+  fiveKPeaks: { label: "5000m+ Peaks", icon: "🏔️", group: "nature", xp: 50, total: 37, mapType: 'marker' as const, projection: 'world' as const, drillDown: false },
+  museums: { label: "Museums", icon: "🎨", group: "culture", xp: 15, total: 46, mapType: 'marker' as const, projection: 'world' as const, drillDown: false },
+  mlbStadiums: { label: "MLB Stadiums", icon: "⚾", group: "sports", xp: 20, total: 33, mapType: 'marker' as const, projection: 'world' as const, drillDown: false },
+  nflStadiums: { label: "NFL Stadiums", icon: "🏈", group: "sports", xp: 20, total: 32, mapType: 'marker' as const, projection: 'world' as const, drillDown: false },
+  nbaStadiums: { label: "NBA Arenas", icon: "🏀", group: "sports", xp: 20, total: 30, mapType: 'marker' as const, projection: 'world' as const, drillDown: false },
+  nhlStadiums: { label: "NHL Arenas", icon: "🏒", group: "sports", xp: 20, total: 32, mapType: 'marker' as const, projection: 'world' as const, drillDown: false },
+  soccerStadiums: { label: "Soccer Stadiums", icon: "⚽", group: "sports", xp: 25, total: 48, mapType: 'marker' as const, projection: 'world' as const, drillDown: false },
+  euroFootballStadiums: { label: "European Football", icon: "⚽", group: "sports", xp: 20, total: 179, mapType: 'marker' as const, projection: 'world' as const, drillDown: false },
+  rugbyStadiums: { label: "Rugby Stadiums", icon: "🏉", group: "sports", xp: 25, total: 87, mapType: 'marker' as const, projection: 'world' as const, drillDown: false },
+  cricketStadiums: { label: "Cricket Grounds", icon: "🏏", group: "sports", xp: 25, total: 75, mapType: 'marker' as const, projection: 'world' as const, drillDown: false },
+  f1Tracks: { label: "F1 Tracks", icon: "🏎️", group: "sports", xp: 35, total: 34, mapType: 'marker' as const, projection: 'world' as const, drillDown: false },
+  marathons: { label: "Marathon Majors", icon: "🏃", group: "sports", xp: 100, total: 7, mapType: 'marker' as const, projection: 'world' as const, drillDown: false },
+  airports: { label: "Airports", icon: "✈️", group: "destinations", xp: 5, total: 58, mapType: 'marker' as const, projection: 'world' as const, drillDown: false },
+  skiResorts: { label: "Ski Resorts", icon: "⛷️", group: "nature", xp: 25, total: 32, mapType: 'marker' as const, projection: 'world' as const, drillDown: false },
+  themeParks: { label: "Theme Parks", icon: "🎢", group: "culture", xp: 20, total: 37, mapType: 'marker' as const, projection: 'world' as const, drillDown: false },
+  surfingReserves: { label: "Surfing Reserves", icon: "🌊", group: "nature", xp: 30, total: 26, mapType: 'marker' as const, projection: 'world' as const, drillDown: false },
 } as const;
+
+// Derived sets for map rendering (used by MapVisualization)
+export const US_MARKER_CATEGORIES = new Set(
+  (Object.entries(CATEGORY_SCHEMA) as [Category, typeof CATEGORY_SCHEMA[Category]][])
+    .filter(([, config]) => config.mapType === 'marker' && config.projection === 'us')
+    .map(([key]) => key)
+);
+
+export const DRILL_DOWN_CATEGORIES = new Set(
+  (Object.entries(CATEGORY_SCHEMA) as [Category, typeof CATEGORY_SCHEMA[Category]][])
+    .filter(([, config]) => config.drillDown)
+    .map(([key]) => key)
+);
 
 // Helper to access category metadata
 export const getCategoryMeta = (category: Category) => CATEGORY_SCHEMA[category];
