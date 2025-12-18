@@ -107,4 +107,7 @@ export const countryNameToISO: Record<string, string> = {
 
   // Other territories (excluding US territories like Puerto Rico which are tracked separately)
   "Greenland": "GL", "Fr. Polynesia": "PF", "French Polynesia": "PF",
+
+  // Antarctica
+  "Antarctica": "AQ",
 };

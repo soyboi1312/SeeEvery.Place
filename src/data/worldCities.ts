@@ -277,6 +277,9 @@ const internationalCities: WorldCity[] = [
   { id: "nukualofa", name: "Nukuʻalofa", country: "Tonga", countryCode: "TO", continent: "Oceania", population: 27600, lat: -21.2089, lng: -175.1982 },
   { id: "funafuti", name: "Funafuti", country: "Tuvalu", countryCode: "TV", continent: "Oceania", population: 6320, lat: -8.5243, lng: 179.1942 },
   { id: "port-vila", name: "Port Vila", country: "Vanuatu", countryCode: "VU", continent: "Oceania", population: 51437, lat: -17.7338, lng: 168.3219 },
+
+  // ============ ANTARCTICA ============
+  { id: "mcmurdo-station", name: "McMurdo Station", country: "Antarctica", countryCode: "AQ", continent: "Antarctica", population: 1258, lat: -77.8463, lng: 166.6681 },
 ];
 
 // Select major US cities for the World view, derived from usCities (DRY principle)
@@ -304,7 +307,7 @@ const usWorldCities: WorldCity[] = usCities
 // Export merged array of international + US cities
 export const worldCities: WorldCity[] = [...internationalCities, ...usWorldCities];
 
-export const worldCityContinents = ["Asia", "Europe", "North America", "South America", "Africa", "Oceania"];
+export const worldCityContinents = ["Africa", "Antarctica", "Asia", "Europe", "North America", "Oceania", "South America"];
 
 export const getWorldCitiesByContinent = (continent: string) =>
   worldCities.filter(c => c.continent === continent);
