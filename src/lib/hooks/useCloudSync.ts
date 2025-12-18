@@ -142,5 +142,31 @@ export function useCloudSync({
     return () => clearTimeout(debounceSync);
   }, [selections, user, isLoaded]);
 
+  // Retry sync when device comes back online
+  // This handles cases where a user makes changes while offline (e.g., in a tunnel)
+  // and ensures data is synced as soon as connectivity is restored
+  useEffect(() => {
+    if (!user || !isLoaded || !initialSyncComplete.current) return;
+
+    const handleOnline = async () => {
+      const currentData = JSON.stringify(selections);
+
+      // Only retry if there are unsaved changes
+      if (lastSyncedData.current !== currentData) {
+        console.log('Connection restored - retrying sync...');
+        try {
+          await syncToCloud(selections);
+          lastSyncedData.current = currentData;
+          console.log('Sync completed after reconnection');
+        } catch (err) {
+          console.error('Failed to sync after reconnection:', err);
+        }
+      }
+    };
+
+    window.addEventListener('online', handleOnline);
+    return () => window.removeEventListener('online', handleOnline);
+  }, [selections, user, isLoaded]);
+
   return { isSyncing };
 }

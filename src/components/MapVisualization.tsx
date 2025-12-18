@@ -8,7 +8,7 @@ import { useState, useCallback, useMemo, useEffect, useRef, memo } from 'react';
 import { createPortal } from 'react-dom';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
-import { Category, Status } from '@/lib/types';
+import { Category, Status, CATEGORY_SCHEMA, US_MARKER_CATEGORIES, DRILL_DOWN_CATEGORIES } from '@/lib/types';
 import {
   TooltipState,
   TooltipHandlers,
@@ -50,23 +50,11 @@ const CategoryMarkerMap = dynamic(() => import('./maps/CategoryMarkerMap'), {
 // Import configs directly (no wrapper components needed - DRY)
 import { US_REGION_CONFIG, WORLD_REGION_CONFIG, US_MARKER_CONFIG, WORLD_MARKER_CONFIG } from './maps/mapConfigs';
 
-// Categories that use US map (Albers USA projection)
-const US_MARKER_CATEGORIES = new Set<Category>([
-  'nationalParks', 'nationalMonuments', 'stateParks', 'fourteeners', 'weirdAmericana', 'usCities'
-]);
-
 // Check if category uses region coloring (countries/states) vs markers (other categories)
+// Derived from CATEGORY_SCHEMA.mapType in types.ts
 function usesRegionMap(category: Category): boolean {
-  return category === 'countries' || category === 'states';
+  return CATEGORY_SCHEMA[category].mapType === 'region';
 }
-
-// Categories that support drill-down to state/country pages
-const DRILL_DOWN_CATEGORIES = new Set<Category>([
-  // US categories (drill down to state pages)
-  'nationalParks', 'nationalMonuments', 'stateParks', 'weirdAmericana',
-  // World categories (drill down to country pages)
-  'worldCities'
-]);
 
 // Get the appropriate map component for a category
 function getMapComponent(
