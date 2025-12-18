@@ -109,10 +109,13 @@ const MapVisualization = memo(function MapVisualization({ category, selections, 
   const { user } = useAuth();
   const [showUnvisited, setShowUnvisited] = useState(true);
 
-  // Hide unvisited markers if:
-  // 1. User is not logged in (reduces load/noise for anonymous users)
-  // 2. User is logged in but explicitly toggled them off
-  const hideUnvisited = !user || !showUnvisited;
+  // Hide unvisited markers ONLY if:
+  // User is logged in AND explicitly toggled them off.
+  // Guests (user === null) always see all markers - this is safe because:
+  // 1. Static JSON files (no DB queries)
+  // 2. Supercluster groups markers to reduce DOM nodes
+  // 3. Web Workers handle clustering calculations off main thread
+  const hideUnvisited = user ? !showUnvisited : false;
 
   const isRegionMap = usesRegionMap(category);
   // Only store tooltip content in state - position is handled via ref for performance
