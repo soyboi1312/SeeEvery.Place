@@ -82,6 +82,7 @@ export interface CategoryMarkerMapProps extends MarkerMapProps {
   config: CategoryMarkerMapConfig;
   onRegionClick?: (id: string) => void; // Handler for background region clicks
   regionFilter?: RegionFilter; // Filter markers to a specific state/country
+  hideUnvisited?: boolean; // Hide unvisited markers to reduce visual noise
 }
 
 const CategoryMarkerMap = memo(function CategoryMarkerMap({
@@ -94,6 +95,7 @@ const CategoryMarkerMap = memo(function CategoryMarkerMap({
   config,
   onRegionClick,
   regionFilter,
+  hideUnvisited = false,
 }: CategoryMarkerMapProps) {
   const {
     geoUrl,
@@ -115,7 +117,8 @@ const CategoryMarkerMap = memo(function CategoryMarkerMap({
 
   // Use extracted hook for data fetching - ISP/SRP
   // Pass regionFilter to only show markers in the specified state/country
-  const markers = useCategoryMarkers(category, selections, filterAlbersUsa, subcategory, regionFilter);
+  // hideUnvisited reduces marker count for performance and visual clarity
+  const markers = useCategoryMarkers(category, selections, filterAlbersUsa, subcategory, regionFilter, hideUnvisited);
 
   // Use marker clustering for large datasets (>100 markers)
   // Web Worker offloads clustering to separate thread for better UI performance

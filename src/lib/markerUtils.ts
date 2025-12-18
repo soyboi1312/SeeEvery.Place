@@ -53,7 +53,8 @@ export function getMarkersFromData(
   selections: UserSelections,
   filterAlbersUsa = false,
   subcategory?: string,
-  regionFilter?: RegionFilter
+  regionFilter?: RegionFilter,
+  hideUnvisited = false
 ): MarkerData[] {
   const markers: MarkerData[] = [];
   const categorySelections = selections[category] || [];
@@ -111,6 +112,11 @@ export function getMarkersFromData(
     // Get status from selections or default to 'unvisited'
     const selection = selectionMap.get(item.id);
     const status: Status = selection ? selection.status : 'unvisited';
+
+    // Skip unvisited markers if hideUnvisited is true
+    if (hideUnvisited && status === 'unvisited') {
+      continue;
+    }
 
     const marker: MarkerData = {
       coordinates: [item.lng, item.lat],
