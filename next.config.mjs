@@ -213,10 +213,10 @@ const nextConfig = {
           },
           {
             // Content Security Policy - allows Next.js inline scripts and workers
-            // 'self' allows scripts/styles from same origin
-            // 'unsafe-inline' needed for Next.js inline scripts and styles
-            // 'unsafe-eval' needed for Next.js development and some production features
-            // blob: and worker-src needed for Web Workers (clustering worker, service worker)
+            // - 'unsafe-inline': Required for Next.js inline scripts and Tailwind/CSS-in-JS styles
+            // - 'unsafe-eval': Required for React Compiler (experimental) and some Next.js internals
+            //   Note: Cannot easily remove in production while using reactCompiler: true
+            // - blob:/worker-src: Required for Web Workers (clustering worker, service worker)
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",

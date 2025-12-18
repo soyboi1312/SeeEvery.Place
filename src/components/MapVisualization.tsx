@@ -291,10 +291,10 @@ const MapVisualization = memo(function MapVisualization({ category, selections, 
   }, []);
 
   // Update tooltip position via ref (no re-render) for smooth 60fps tracking
+  // Using transform instead of top/left promotes the tooltip to its own compositor layer
   const updateTooltipPosition = useCallback((x: number, y: number) => {
     if (tooltipRef.current) {
-      tooltipRef.current.style.left = `${x + 10}px`;
-      tooltipRef.current.style.top = `${y + 10}px`;
+      tooltipRef.current.style.transform = `translate(${x + 10}px, ${y + 10}px)`;
     }
   }, []);
 
@@ -357,7 +357,7 @@ const MapVisualization = memo(function MapVisualization({ category, selections, 
         <div
           ref={tooltipRef}
           className="fixed z-50 px-2 py-1 text-sm font-medium text-white bg-gray-900 rounded shadow-lg pointer-events-none whitespace-nowrap"
-          style={{ left: 0, top: 0 }}
+          style={{ left: 0, top: 0, willChange: 'transform' }}
         >
           {tooltipContent}
         </div>,
