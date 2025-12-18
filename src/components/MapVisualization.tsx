@@ -308,9 +308,41 @@ const MapVisualization = memo(function MapVisualization({ category, selections, 
   // Using transform instead of top/left promotes the tooltip to its own compositor layer
   // Y offset is negative (-40px) to position tooltip ABOVE the finger on touch devices
   // This prevents finger obstruction on mobile while keeping it visible near cursor on desktop
+  // Includes boundary detection to flip tooltip when near viewport edges
   const updateTooltipPosition = useCallback((x: number, y: number) => {
     if (tooltipRef.current) {
-      tooltipRef.current.style.transform = `translate(${x + 15}px, ${y - 40}px)`;
+      const tooltip = tooltipRef.current;
+      const tooltipWidth = tooltip.offsetWidth;
+      const tooltipHeight = tooltip.offsetHeight;
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+      const padding = 10; // Minimum distance from viewport edge
+
+      // Default: position to the right and above cursor
+      let translateX = x + 15;
+      let translateY = y - 40;
+
+      // Flip horizontally if tooltip would overflow right edge
+      if (translateX + tooltipWidth + padding > viewportWidth) {
+        translateX = x - tooltipWidth - 15;
+      }
+
+      // Flip vertically if tooltip would overflow top edge
+      if (translateY < padding) {
+        translateY = y + 20; // Position below cursor instead
+      }
+
+      // Ensure tooltip doesn't overflow bottom edge
+      if (translateY + tooltipHeight + padding > viewportHeight) {
+        translateY = viewportHeight - tooltipHeight - padding;
+      }
+
+      // Ensure tooltip doesn't overflow left edge
+      if (translateX < padding) {
+        translateX = padding;
+      }
+
+      tooltip.style.transform = `translate(${translateX}px, ${translateY}px)`;
     }
   }, []);
 

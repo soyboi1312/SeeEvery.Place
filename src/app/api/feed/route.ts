@@ -3,6 +3,8 @@ import { createClient } from '@/lib/supabase/server';
 import { z } from 'zod';
 
 // Zod schema for POST request validation
+// NOTE: xpEarned is intentionally NOT accepted from clients to prevent XP spoofing.
+// XP is calculated server-side in the record_activity RPC based on activity type.
 const ActivitySchema = z.object({
   activityType: z.enum(['visit', 'achievement', 'level_up', 'challenge_complete', 'started_tracking', 'bucket_list']),
   category: z.string().nullable().optional(),
@@ -14,7 +16,6 @@ const ActivitySchema = z.object({
   newLevel: z.number().int().nullable().optional(),
   challengeId: z.string().nullable().optional(),
   challengeName: z.string().nullable().optional(),
-  xpEarned: z.number().int().nullable().optional(),
 });
 
 /**
@@ -181,9 +182,9 @@ export async function POST(request: NextRequest) {
       newLevel,
       challengeId,
       challengeName,
-      xpEarned,
     } = parseResult.data;
 
+    // XP is calculated server-side in the RPC to prevent spoofing
     const { data, error } = await supabase.rpc('record_activity', {
       p_activity_type: activityType,
       p_category: category || null,
@@ -195,7 +196,6 @@ export async function POST(request: NextRequest) {
       p_new_level: newLevel || null,
       p_challenge_id: challengeId || null,
       p_challenge_name: challengeName || null,
-      p_xp_earned: xpEarned || null,
     });
 
     if (error) {
