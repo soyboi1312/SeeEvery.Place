@@ -417,9 +417,15 @@ drop policy if exists "Users can create own activities" on public.activity_feed;
 create index if not exists activity_feed_user_id_idx on public.activity_feed(user_id);
 create index if not exists activity_feed_created_at_idx on public.activity_feed(created_at desc);
 create index if not exists activity_feed_type_idx on public.activity_feed(activity_type);
+-- Primary composite index for user-specific feeds (My Feed, Friends Feed)
+-- Most queries filter by user_id first, then sort by time. Leading with user_id
+-- enables efficient index-only scans for the common "show my recent activities" pattern.
 create index if not exists activity_feed_user_created_idx on public.activity_feed(user_id, created_at desc);
--- Composite index for efficient activity type + time queries (covers filter + sort)
--- Allows Postgres to scan in correct order without memory sort
+-- Composite index for user-filtered activity type queries (e.g., "My visits")
+-- Covers WHERE user_id = X AND activity_type = Y ORDER BY created_at DESC
+create index if not exists activity_feed_user_type_time_idx on public.activity_feed(user_id, activity_type, created_at desc);
+-- Global activity type + time index (for admin views or global feeds)
+-- Secondary to user_id indexes; useful when no user filter is applied
 create index if not exists activity_feed_type_time_idx on public.activity_feed(activity_type, created_at desc);
 
 -- ============================================

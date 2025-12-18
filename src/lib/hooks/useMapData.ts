@@ -85,6 +85,14 @@ export function useCategoryData(category: Category) {
 }
 
 /**
+ * Return type for useCategoryMarkers hook - includes loading state for UI feedback
+ */
+export interface CategoryMarkersResult {
+  markers: MarkerData[];
+  isLoading: boolean;
+}
+
+/**
  * Hook for loading category markers with async data fetching
  * Follows Interface Segregation Principle - separates data fetching from presentation
  * Uses React Query for caching the heavy category data
@@ -96,9 +104,9 @@ export function useCategoryMarkers(
   subcategory?: string,
   regionFilter?: RegionFilter,
   statusVisibility?: StatusVisibility
-): MarkerData[] {
+): CategoryMarkersResult {
   // Use React Query to cache the heavy category data
-  const { data: categoryData } = useCategoryData(category);
+  const { data: categoryData, isLoading } = useCategoryData(category);
 
   // Derive markers from cached data when selections change
   const markers = useMemo(() => {
@@ -118,5 +126,5 @@ export function useCategoryMarkers(
     );
   }, [category, categoryData, selections, filterAlbersUsa, subcategory, regionFilter, statusVisibility]);
 
-  return markers;
+  return { markers, isLoading };
 }

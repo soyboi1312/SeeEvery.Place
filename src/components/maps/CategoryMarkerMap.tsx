@@ -118,7 +118,7 @@ const CategoryMarkerMap = memo(function CategoryMarkerMap({
   // Use extracted hook for data fetching - ISP/SRP
   // Pass regionFilter to only show markers in the specified state/country
   // statusVisibility filters markers by status (clicked legend items)
-  const markers = useCategoryMarkers(category, selections, filterAlbersUsa, subcategory, regionFilter, statusVisibility);
+  const { markers, isLoading } = useCategoryMarkers(category, selections, filterAlbersUsa, subcategory, regionFilter, statusVisibility);
 
   // Use marker clustering for large datasets (>500 markers)
   // 500 SVG markers are trivial for modern browsers; clustering only needed for very dense datasets
@@ -139,7 +139,19 @@ const CategoryMarkerMap = memo(function CategoryMarkerMap({
   }, []);
 
   return (
-    <InteractiveMapShell
+    <div className="relative w-full h-full">
+      {/* Loading overlay - shown while category data is fetching */}
+      {isLoading && (
+        <div className="absolute inset-0 z-30 flex items-center justify-center bg-slate-100/80 dark:bg-slate-900/80 backdrop-blur-sm animate-pulse">
+          <div className="flex flex-col items-center gap-3">
+            <div className="w-8 h-8 border-3 border-primary-500 border-t-transparent rounded-full animate-spin" />
+            <span className="text-sm font-medium text-slate-600 dark:text-slate-400">
+              Loading map data...
+            </span>
+          </div>
+        </div>
+      )}
+      <InteractiveMapShell
       projection={projection}
       projectionConfig={projectionConfig}
       width={width}
@@ -224,6 +236,7 @@ const CategoryMarkerMap = memo(function CategoryMarkerMap({
         );
       }}
     </InteractiveMapShell>
+    </div>
   );
 });
 
