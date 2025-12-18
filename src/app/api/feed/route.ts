@@ -1,5 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { z } from 'zod';
+
+// Zod schema for POST request validation
+const ActivitySchema = z.object({
+  activityType: z.enum(['visit', 'achievement', 'level_up', 'challenge_complete', 'started_tracking', 'bucket_list']),
+  category: z.string().nullable().optional(),
+  placeId: z.string().nullable().optional(),
+  placeName: z.string().nullable().optional(),
+  achievementId: z.string().nullable().optional(),
+  achievementName: z.string().nullable().optional(),
+  oldLevel: z.number().int().nullable().optional(),
+  newLevel: z.number().int().nullable().optional(),
+  challengeId: z.string().nullable().optional(),
+  challengeName: z.string().nullable().optional(),
+  xpEarned: z.number().int().nullable().optional(),
+});
 
 /**
  * GET /api/feed
@@ -138,6 +154,20 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
+
+    // Validate request body with Zod
+    const parseResult = ActivitySchema.safeParse(body);
+    if (!parseResult.success) {
+      // Return all validation errors in a single message
+      const errorMessage = parseResult.error.issues
+        .map(issue => issue.message)
+        .join('. ');
+      return NextResponse.json(
+        { error: errorMessage },
+        { status: 400 }
+      );
+    }
+
     const {
       activityType,
       category,
@@ -150,19 +180,7 @@ export async function POST(request: NextRequest) {
       challengeId,
       challengeName,
       xpEarned,
-    } = body;
-
-    if (!activityType) {
-      return NextResponse.json({ error: 'activityType is required' }, { status: 400 });
-    }
-
-    const validTypes = ['visit', 'achievement', 'level_up', 'challenge_complete', 'started_tracking', 'bucket_list'];
-    if (!validTypes.includes(activityType)) {
-      return NextResponse.json(
-        { error: `Invalid activityType. Use: ${validTypes.join(', ')}` },
-        { status: 400 }
-      );
-    }
+    } = parseResult.data;
 
     const { data, error } = await supabase.rpc('record_activity', {
       p_activity_type: activityType,

@@ -292,9 +292,11 @@ const MapVisualization = memo(function MapVisualization({ category, selections, 
 
   // Update tooltip position via ref (no re-render) for smooth 60fps tracking
   // Using transform instead of top/left promotes the tooltip to its own compositor layer
+  // Y offset is negative (-40px) to position tooltip ABOVE the finger on touch devices
+  // This prevents finger obstruction on mobile while keeping it visible near cursor on desktop
   const updateTooltipPosition = useCallback((x: number, y: number) => {
     if (tooltipRef.current) {
-      tooltipRef.current.style.transform = `translate(${x + 10}px, ${y + 10}px)`;
+      tooltipRef.current.style.transform = `translate(${x + 15}px, ${y - 40}px)`;
     }
   }, []);
 
@@ -329,9 +331,10 @@ const MapVisualization = memo(function MapVisualization({ category, selections, 
   return (
     // Removed touch-action-none to allow single-finger page scrolling
     // Two-finger gestures still work for map pan/zoom via d3-zoom
+    // cursor-grab indicates the map is pannable/zoomable
     <div
       ref={containerRef}
-      className="w-full bg-primary-50/50 dark:bg-slate-800/50 rounded-2xl overflow-hidden border border-black/5 dark:border-white/10 shadow-premium-lg mb-6 relative will-change-transform"
+      className="w-full bg-primary-50/50 dark:bg-slate-800/50 rounded-2xl overflow-hidden border border-black/5 dark:border-white/10 shadow-premium-lg mb-6 relative will-change-transform cursor-grab active:cursor-grabbing"
     >
       <div className="w-full overflow-hidden aspect-[2/1]">
         {getMapComponent(category, selections, onToggle, subcategory, tooltipHandlers, items, handleRegionClick, effectiveVisibility)}
@@ -369,6 +372,8 @@ const MapVisualization = memo(function MapVisualization({ category, selections, 
         {/* Visited */}
         <button
           onClick={() => !isRegionMap && toggleStatusVisibility('visited')}
+          aria-pressed={statusVisibility.visited}
+          aria-label={statusVisibility.visited ? 'Hide visited places' : 'Show visited places'}
           className={`flex items-center gap-2 transition-opacity ${
             isRegionMap ? 'cursor-default' : 'cursor-pointer hover:opacity-80'
           } ${statusVisibility.visited ? 'opacity-100' : 'opacity-40'}`}
@@ -383,6 +388,8 @@ const MapVisualization = memo(function MapVisualization({ category, selections, 
         {/* Bucket List */}
         <button
           onClick={() => !isRegionMap && toggleStatusVisibility('bucketList')}
+          aria-pressed={statusVisibility.bucketList}
+          aria-label={statusVisibility.bucketList ? 'Hide bucket list places' : 'Show bucket list places'}
           className={`flex items-center gap-2 transition-opacity ${
             isRegionMap ? 'cursor-default' : 'cursor-pointer hover:opacity-80'
           } ${statusVisibility.bucketList ? 'opacity-100' : 'opacity-40'}`}
@@ -397,6 +404,8 @@ const MapVisualization = memo(function MapVisualization({ category, selections, 
         {/* Not Visited */}
         <button
           onClick={() => !isRegionMap && toggleStatusVisibility('unvisited')}
+          aria-pressed={statusVisibility.unvisited}
+          aria-label={statusVisibility.unvisited ? 'Hide unvisited places' : 'Show unvisited places'}
           className={`flex items-center gap-2 transition-opacity ${
             isRegionMap ? 'cursor-default' : 'cursor-pointer hover:opacity-80'
           } ${statusVisibility.unvisited ? 'opacity-100' : 'opacity-40'}`}

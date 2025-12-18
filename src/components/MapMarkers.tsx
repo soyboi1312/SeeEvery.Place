@@ -120,27 +120,3 @@ export const SkiMarker = memo((props: MarkerProps) => <LogoMarker {...props} />)
 export const ThemeParkMarker = memo((props: MarkerProps) => <LogoMarker {...props} />);
 export const SurfingMarker = memo((props: MarkerProps) => <LogoMarker {...props} />);
 export const WeirdMarker = memo((props: MarkerProps) => <LogoMarker {...props} />);
-
-// -----------------------------------------------------------------------------
-// HELPER FUNCTIONS (Deprecated but kept for compatibility)
-// -----------------------------------------------------------------------------
-
-export function renderSportMarker(sport: string | undefined, fillColor: string) {
-  return <LogoMarker fillColor={fillColor} size="default" />;
-}
-
-export function renderSneakerMarker(fillColor: string) {
-  return <LogoMarker fillColor={fillColor} size="default" />;
-}
-
-export function renderMountainMarker(fillColor: string) {
-  return <LogoMarker fillColor={fillColor} size="default" />;
-}
-
-export function renderF1CarMarker(fillColor: string) {
-  return <LogoMarker fillColor={fillColor} size="default" />;
-}
-
-export function renderAirplaneMarker(fillColor: string) {
-  return <LogoMarker fillColor={fillColor} size="default" />;
-}
