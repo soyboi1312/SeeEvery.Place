@@ -13,6 +13,7 @@ import { useNameGetter, getMarkerSize, useCategoryMarkers } from '@/lib/hooks/us
 import { useClusteringWorker, isCluster } from '@/lib/hooks/useClusteringWorker';
 import { renderCategoryMarker } from '@/components/MapMarkers/registry';
 import { MarkerMapProps, CategoryMarkerMapConfig, IdExtractor } from './types';
+import { RegionFilter } from '@/lib/markerUtils';
 import InteractiveMapShell from './InteractiveMapShell';
 import MemoizedMarker from './MemoizedMarker';
 import ClusterMarker from './ClusterMarker';
@@ -72,6 +73,7 @@ const InteractiveBackground = memo(function InteractiveBackground({
 export interface CategoryMarkerMapProps extends MarkerMapProps {
   config: CategoryMarkerMapConfig;
   onRegionClick?: (id: string) => void; // Handler for background region clicks
+  regionFilter?: RegionFilter; // Filter markers to a specific state/country
 }
 
 const CategoryMarkerMap = memo(function CategoryMarkerMap({
@@ -83,6 +85,7 @@ const CategoryMarkerMap = memo(function CategoryMarkerMap({
   items,
   config,
   onRegionClick,
+  regionFilter,
 }: CategoryMarkerMapProps) {
   const {
     geoUrl,
@@ -103,7 +106,8 @@ const CategoryMarkerMap = memo(function CategoryMarkerMap({
   const [currentZoom, setCurrentZoom] = useState(1);
 
   // Use extracted hook for data fetching - ISP/SRP
-  const markers = useCategoryMarkers(category, selections, filterAlbersUsa, subcategory);
+  // Pass regionFilter to only show markers in the specified state/country
+  const markers = useCategoryMarkers(category, selections, filterAlbersUsa, subcategory, regionFilter);
 
   // Use marker clustering for large datasets (>100 markers)
   // Web Worker offloads clustering to separate thread for better UI performance
