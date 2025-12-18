@@ -44,9 +44,12 @@ function usesRegionMap(category: Category): boolean {
   return category === 'countries' || category === 'states';
 }
 
-// Categories that support drill-down to state pages
+// Categories that support drill-down to state/country pages
 const DRILL_DOWN_CATEGORIES = new Set<Category>([
-  'nationalParks', 'nationalMonuments', 'stateParks', 'weirdAmericana'
+  // US categories (drill down to state pages)
+  'nationalParks', 'nationalMonuments', 'stateParks', 'weirdAmericana',
+  // World categories (drill down to country pages)
+  'worldCities'
 ]);
 
 // Get the appropriate map component for a category

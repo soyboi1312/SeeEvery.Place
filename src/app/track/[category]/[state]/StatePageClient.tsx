@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import dynamic from 'next/dynamic';
 import { Category, Status, UserSelections, emptySelections } from '@/lib/types';
 import { loadSelections, saveSelectionsAsync, toggleSelection, setSelectionStatus } from '@/lib/storage';
@@ -19,7 +20,8 @@ const CategoryMarkerMap = dynamic(() => import('@/components/maps/CategoryMarker
 interface Item {
   id: string;
   name: string;
-  state: string;
+  state?: string; // US categories
+  country?: string; // World categories
   region?: string;
   countryCode?: string;
 }
@@ -138,7 +140,7 @@ export default function StatePageClient({
     return items.map(item => ({
       id: item.id,
       name: item.name,
-      group: item.region || item.state,
+      group: item.region || item.state || item.country,
     }));
   }, [items]);
 
@@ -148,12 +150,29 @@ export default function StatePageClient({
     ? { country: regionCode.toUpperCase() }
     : { state: regionCode.toUpperCase() };
 
+  // Tooltip state and ref for smooth tracking
+  const [tooltipContent, setTooltipContent] = useState<string | null>(null);
+  const tooltipRef = useRef<HTMLDivElement>(null);
+
+  // Update tooltip position directly via ref for 60fps performance
+  const updateTooltipPosition = useCallback((x: number, y: number) => {
+    if (tooltipRef.current) {
+      tooltipRef.current.style.left = `${x + 10}px`;
+      tooltipRef.current.style.top = `${y + 10}px`;
+    }
+  }, []);
+
   // Tooltip handlers for the map
   const tooltipHandlers = useMemo(() => ({
-    onMouseEnter: () => {},
-    onMouseLeave: () => {},
-    onMouseMove: () => {},
-  }), []);
+    onMouseEnter: (content: string, e: React.MouseEvent) => {
+      setTooltipContent(content);
+      updateTooltipPosition(e.clientX, e.clientY);
+    },
+    onMouseLeave: () => setTooltipContent(null),
+    onMouseMove: (e: React.MouseEvent) => {
+      updateTooltipPosition(e.clientX, e.clientY);
+    },
+  }), [updateTooltipPosition]);
 
   if (!isLoaded) {
     return (
@@ -201,7 +220,23 @@ export default function StatePageClient({
             <span className="w-3 h-3 rounded-full bg-amber-500"></span>
             <span>Bucket List</span>
           </div>
+          <div className="flex items-center gap-2">
+            <span className="w-3 h-3 rounded-full bg-slate-400"></span>
+            <span>Not Visited</span>
+          </div>
         </div>
+
+        {/* Tooltip - rendered via portal to escape CSS transform stacking context */}
+        {tooltipContent && typeof document !== 'undefined' && createPortal(
+          <div
+            ref={tooltipRef}
+            className="fixed z-50 px-2 py-1 text-sm font-medium text-white bg-gray-900 rounded shadow-lg pointer-events-none whitespace-nowrap"
+            style={{ left: 0, top: 0 }}
+          >
+            {tooltipContent}
+          </div>,
+          document.body
+        )}
       </div>
 
       {/* Interactive List View */}
