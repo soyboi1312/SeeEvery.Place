@@ -75,6 +75,12 @@ const withPWA = withPWAInit({
         // so CacheFirst trusts the cache and avoids unnecessary network requests.
         // StaleWhileRevalidate would still ping the network in the background, wasting
         // Cloudflare requests when the files never actually change.
+        //
+        // VERSIONING NOTE: If you update a geo file (e.g., fix a border), returning users
+        // won't see the update until their cache expires (30 days). To force an update:
+        //   Option A: Rename the file (e.g., countries-v2.json) and update imports
+        //   Option B: Use a version query param in the URL (e.g., ?v=2)
+        // The 30-day expiration balances freshness vs CDN cost optimization.
         urlPattern: /\/geo\/.*/i,
         handler: "CacheFirst",
         options: {
