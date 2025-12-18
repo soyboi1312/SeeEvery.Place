@@ -366,6 +366,9 @@ create policy "Users can unfollow"
 create index if not exists follows_follower_id_idx on public.follows(follower_id);
 create index if not exists follows_following_id_idx on public.follows(following_id);
 create index if not exists follows_created_at_idx on public.follows(created_at desc);
+-- Composite index for RLS policy optimization: covers the activity_feed correlated subquery
+-- that joins follows + profiles for visibility checks. Single B-tree traversal vs two lookups.
+create index if not exists follows_lookup_idx on public.follows(follower_id, following_id);
 
 -- Activity feed table for storing events
 create table if not exists public.activity_feed (
