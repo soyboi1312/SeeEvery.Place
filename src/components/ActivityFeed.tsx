@@ -230,7 +230,7 @@ export function ActivityFeed({
     count: activities.length,
     getScrollElement: () => parentRef.current,
     estimateSize: () => ACTIVITY_ITEM_HEIGHT, // Fallback estimate
-    overscan: 5, // Render 5 extra items above/below viewport
+    overscan: 10, // Render 10 extra items to ensure images start loading before entering viewport
   });
 
   const fetchActivities = useCallback(async (reset = false) => {

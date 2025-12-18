@@ -29,7 +29,9 @@ export async function GET(request: NextRequest) {
 
     const searchParams = request.nextUrl.searchParams;
     const type = searchParams.get('type') || 'global';
-    const limit = parseInt(searchParams.get('limit') || '20', 10);
+    // Cap limit at 50 to prevent abuse (e.g., ?limit=10000)
+    const rawLimit = parseInt(searchParams.get('limit') || '20', 10);
+    const limit = Math.min(Math.max(rawLimit, 1), 50);
     const offset = parseInt(searchParams.get('offset') || '0', 10);
     const filter = searchParams.get('filter') || null;
 

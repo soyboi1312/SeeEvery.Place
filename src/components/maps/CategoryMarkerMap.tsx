@@ -7,7 +7,7 @@
  */
 'use client';
 
-import { memo, useState, useCallback } from 'react';
+import { memo, useState, useCallback, useRef } from 'react';
 import { Geographies } from '@vnedyalk0v/react19-simple-maps';
 import { useNameGetter, getMarkerSize, useCategoryMarkers } from '@/lib/hooks/useMapData';
 import { useClusteringWorker, isCluster } from '@/lib/hooks/useClusteringWorker';
@@ -115,6 +115,17 @@ const CategoryMarkerMap = memo(function CategoryMarkerMap({
   // Track current zoom level for clustering
   const [currentZoom, setCurrentZoom] = useState(1);
 
+  // Track drag state to prevent accidental navigation when panning the map
+  // If user clicks, drags, and releases, we don't want to trigger region click
+  const isDraggingRef = useRef(false);
+
+  // Wrap onRegionClick to only fire if not dragging
+  const handleRegionClickSafe = useCallback((id: string) => {
+    if (!isDraggingRef.current) {
+      onRegionClick?.(id);
+    }
+  }, [onRegionClick]);
+
   // Use extracted hook for data fetching - ISP/SRP
   // Pass regionFilter to only show markers in the specified state/country
   // statusVisibility filters markers by status (clicked legend items)
@@ -139,7 +150,12 @@ const CategoryMarkerMap = memo(function CategoryMarkerMap({
   }, []);
 
   return (
-    <div className="relative w-full h-full">
+    <div
+      className="relative w-full h-full"
+      // Track pointer movement to detect drags vs clicks
+      onPointerDown={() => { isDraggingRef.current = false; }}
+      onPointerMove={() => { isDraggingRef.current = true; }}
+    >
       {/* Loading overlay - shown while category data is fetching */}
       {isLoading && (
         <div className="absolute inset-0 z-30 flex items-center justify-center bg-slate-100/80 dark:bg-slate-900/80 backdrop-blur-sm animate-pulse">
@@ -164,26 +180,33 @@ const CategoryMarkerMap = memo(function CategoryMarkerMap({
       className="w-full h-full"
       onZoomChange={handleZoomChange}
     >
-      {({ zoom }) => {
+      {({ zoom, zoomTo }) => {
         const markerSize = getMarkerSize(zoom);
 
         return (
           <>
-            <InteractiveBackground geoUrl={geoUrl} getId={getId} onRegionClick={onRegionClick} />
+            <InteractiveBackground geoUrl={geoUrl} getId={getId} onRegionClick={handleRegionClickSafe} />
             {isClusteringEnabled ? (
               // Render clustered markers
               clusters.map((feature, index) => {
                 const [lng, lat] = feature.geometry.coordinates;
 
                 if (isCluster(feature)) {
-                  // Render cluster marker
+                  // Render cluster marker with click-to-zoom functionality
+                  const clusterId = feature.properties.cluster_id;
+                  const handleClusterClick = async () => {
+                    const expansionZoom = await getClusterExpansionZoom(clusterId);
+                    zoomTo([lng, lat], expansionZoom);
+                  };
+
                   return (
                     <ClusterMarker
-                      key={`cluster-${feature.properties.cluster_id}`}
+                      key={`cluster-${clusterId}`}
                       coordinates={[lng, lat]}
                       pointCount={feature.properties.point_count}
                       dominantStatus={feature.properties.dominantStatus}
                       size={markerSize}
+                      onClick={handleClusterClick}
                     />
                   );
                 }

@@ -51,6 +51,14 @@ export function useMapZoom({
     setPosition({ coordinates: initialCenter, zoom: initialZoom });
   }, [initialCenter, initialZoom]);
 
+  // Zoom to a specific location and zoom level (used for cluster expansion)
+  const zoomTo = useCallback((coordinates: [number, number], zoom: number) => {
+    setPosition({
+      coordinates,
+      zoom: Math.min(Math.max(zoom, minZoom), maxZoom),
+    });
+  }, [minZoom, maxZoom]);
+
   const canZoomIn = position.zoom < maxZoom;
   const canZoomOut = position.zoom > minZoom;
 
@@ -60,6 +68,7 @@ export function useMapZoom({
     handleZoomOut,
     handleMoveEnd,
     handleReset,
+    zoomTo,
     canZoomIn,
     canZoomOut,
   };

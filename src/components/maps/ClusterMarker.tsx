@@ -31,6 +31,10 @@ const ClusterMarker = memo(function ClusterMarker({
   const fillColor = dominantStatus === 'visited' ? '#22c55e' :
                     dominantStatus === 'bucketList' ? '#f59e0b' : '#94a3b8';
 
+  // Text color: dark on amber for WCAG contrast (amber-950 on amber-500 = 7.5:1 ratio)
+  // White text on amber has only 1.96:1 contrast, failing accessibility
+  const textColor = dominantStatus === 'bucketList' ? '#451a03' : 'white';
+
   // Format count for display
   const displayCount = pointCount > 99 ? '99+' : pointCount.toString();
   const fontSize = pointCount > 99 ? 8 : 10;
@@ -43,8 +47,17 @@ const ClusterMarker = memo(function ClusterMarker({
     <Marker coordinates={coordinates as any}>
       <g
         onClick={onClick}
+        tabIndex={onClick ? 0 : undefined}
+        role={onClick ? 'button' : undefined}
+        aria-label={`Cluster of ${pointCount} places, mostly ${dominantStatus}. Click to zoom in.`}
+        onKeyDown={(e) => {
+          if ((e.key === 'Enter' || e.key === ' ') && onClick) {
+            e.preventDefault();
+            onClick();
+          }
+        }}
         style={{ cursor: onClick ? 'pointer' : 'default' }}
-        className="transition-transform hover:scale-110"
+        className="transition-transform hover:scale-110 outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
       >
         {/* Invisible hit area for mobile touch targets (minimum 44px) */}
         <circle r={hitAreaRadius} fill="transparent" />
@@ -67,12 +80,12 @@ const ClusterMarker = memo(function ClusterMarker({
         {/* Count text */}
         <text
           textAnchor="middle"
-          y={fontSize / 3}
+          dominantBaseline="central"
           style={{
             fontFamily: 'system-ui, -apple-system, sans-serif',
             fontSize: `${fontSize}px`,
             fontWeight: 600,
-            fill: 'white',
+            fill: textColor,
             pointerEvents: 'none',
           }}
         >
