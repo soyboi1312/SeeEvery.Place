@@ -14,6 +14,9 @@ import {
   TooltipHandlers,
   MapVisualizationProps,
 } from './maps';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
+import { useAuth } from '@/lib/hooks/useAuth';
 
 // Loading placeholder for lazy-loaded map components
 const MapLoadingPlaceholder = () => (
@@ -44,9 +47,12 @@ function usesRegionMap(category: Category): boolean {
   return category === 'countries' || category === 'states';
 }
 
-// Categories that support drill-down to state pages
+// Categories that support drill-down to state/country pages
 const DRILL_DOWN_CATEGORIES = new Set<Category>([
-  'nationalParks', 'nationalMonuments', 'stateParks', 'weirdAmericana'
+  // US categories (drill down to state pages)
+  'nationalParks', 'nationalMonuments', 'stateParks', 'weirdAmericana',
+  // World categories (drill down to country pages)
+  'worldCities'
 ]);
 
 // Get the appropriate map component for a category
@@ -57,7 +63,8 @@ function getMapComponent(
   subcategory?: string,
   tooltip?: TooltipHandlers,
   items?: MapVisualizationProps['items'],
-  onRegionClick?: (id: string) => void
+  onRegionClick?: (id: string) => void,
+  hideUnvisited = false
 ) {
   const handlers = tooltip || {
     onMouseEnter: () => {},
@@ -92,12 +99,24 @@ function getMapComponent(
       items={items}
       config={config}
       onRegionClick={onRegionClick}
+      hideUnvisited={hideUnvisited}
     />
   );
 }
 
 const MapVisualization = memo(function MapVisualization({ category, selections, onToggle, subcategory, items }: MapVisualizationProps) {
   const router = useRouter();
+  const { user } = useAuth();
+  const [showUnvisited, setShowUnvisited] = useState(true);
+
+  // Hide unvisited markers ONLY if:
+  // User is logged in AND explicitly toggled them off.
+  // Guests (user === null) always see all markers - this is safe because:
+  // 1. Static JSON files (no DB queries)
+  // 2. Supercluster groups markers to reduce DOM nodes
+  // 3. Web Workers handle clustering calculations off main thread
+  const hideUnvisited = user ? !showUnvisited : false;
+
   const isRegionMap = usesRegionMap(category);
   // Only store tooltip content in state - position is handled via ref for performance
   const [tooltipContent, setTooltipContent] = useState<string | null>(null);
@@ -306,7 +325,7 @@ const MapVisualization = memo(function MapVisualization({ category, selections, 
       className="w-full bg-primary-50/50 dark:bg-slate-800/50 rounded-2xl overflow-hidden border border-black/5 dark:border-white/10 shadow-premium-lg mb-6 relative will-change-transform"
     >
       <div className="w-full overflow-hidden aspect-[2/1]">
-        {getMapComponent(category, selections, onToggle, subcategory, tooltipHandlers, items, handleRegionClick)}
+        {getMapComponent(category, selections, onToggle, subcategory, tooltipHandlers, items, handleRegionClick, hideUnvisited)}
       </div>
 
       {/* Two-finger pan hint overlay for mobile */}
@@ -336,23 +355,44 @@ const MapVisualization = memo(function MapVisualization({ category, selections, 
         document.body
       )}
 
-      {/* Legend */}
-      {/* Added flex-wrap to prevent overflow on small screens */}
-      <div className="flex justify-center flex-wrap gap-x-6 gap-y-2 pb-4 text-sm text-primary-600 dark:text-primary-300 px-2">
-        <div className="flex items-center gap-2">
-          <span className="w-3 h-3 rounded-full bg-green-500"></span>
-          <span>Visited</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="w-3 h-3 rounded-full bg-amber-500"></span>
-          <span>Bucket List</span>
-        </div>
-        {isRegionMap && (
-          <div className="flex items-center gap-2">
-            <span className="w-3 h-3 rounded-full bg-gray-200 dark:bg-gray-600 border border-gray-300 dark:border-gray-500"></span>
-            <span>Not Visited</span>
+      {/* Legend and Toggle */}
+      <div className="flex flex-col items-center gap-3 pb-4 px-2">
+        {/* Toggle for logged-in users with smaller categories (<500 items) */}
+        {user && !isRegionMap && items && items.length < 500 && (
+          <div className="flex items-center space-x-2">
+            <Switch
+              id="show-unvisited"
+              checked={showUnvisited}
+              onCheckedChange={setShowUnvisited}
+            />
+            <Label htmlFor="show-unvisited" className="text-sm text-primary-600 dark:text-primary-300 cursor-pointer">
+              Show unvisited
+            </Label>
           </div>
         )}
+
+        {/* Legend */}
+        <div className="flex justify-center flex-wrap gap-x-6 gap-y-2 text-sm text-primary-600 dark:text-primary-300">
+          <div className="flex items-center gap-2">
+            <span className="w-3 h-3 rounded-full bg-green-500"></span>
+            <span>Visited</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="w-3 h-3 rounded-full bg-amber-500"></span>
+            <span>Bucket List</span>
+          </div>
+          {/* Only show "Not Visited" in legend when markers are visible */}
+          {(isRegionMap || (user && showUnvisited)) && (
+            <div className="flex items-center gap-2">
+              {isRegionMap ? (
+                <span className="w-3 h-3 rounded-full bg-gray-200 dark:bg-gray-600 border border-gray-300 dark:border-gray-500"></span>
+              ) : (
+                <span className="w-3 h-3 rounded-full bg-slate-400"></span>
+              )}
+              <span>Not Visited</span>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -3,7 +3,7 @@
  * Generic map with markers for category-specific locations
  * Follows DRY principle by unifying USMarkerMap and WorldMarkerMap logic
  * Follows ISP by using useCategoryMarkers hook for data fetching
- * Uses supercluster for marker clustering on large datasets (100+ markers)
+ * Uses supercluster for marker clustering on large datasets (500+ markers)
  */
 'use client';
 
@@ -18,6 +18,14 @@ import InteractiveMapShell from './InteractiveMapShell';
 import MemoizedMarker from './MemoizedMarker';
 import ClusterMarker from './ClusterMarker';
 import { TappableGeography } from './TappableGeography';
+import { Status } from '@/lib/types';
+
+// Define colors for all marker states
+const STATUS_COLORS: Record<Status, string> = {
+  visited: '#22c55e',    // Green
+  bucketList: '#f59e0b', // Amber
+  unvisited: '#94a3b8'   // Slate-400 (Grey)
+};
 
 /**
  * Interactive background map component - memoized to prevent re-renders on zoom/pan
@@ -74,6 +82,7 @@ export interface CategoryMarkerMapProps extends MarkerMapProps {
   config: CategoryMarkerMapConfig;
   onRegionClick?: (id: string) => void; // Handler for background region clicks
   regionFilter?: RegionFilter; // Filter markers to a specific state/country
+  hideUnvisited?: boolean; // Hide unvisited markers to reduce visual noise
 }
 
 const CategoryMarkerMap = memo(function CategoryMarkerMap({
@@ -86,6 +95,7 @@ const CategoryMarkerMap = memo(function CategoryMarkerMap({
   config,
   onRegionClick,
   regionFilter,
+  hideUnvisited = false,
 }: CategoryMarkerMapProps) {
   const {
     geoUrl,
@@ -107,15 +117,17 @@ const CategoryMarkerMap = memo(function CategoryMarkerMap({
 
   // Use extracted hook for data fetching - ISP/SRP
   // Pass regionFilter to only show markers in the specified state/country
-  const markers = useCategoryMarkers(category, selections, filterAlbersUsa, subcategory, regionFilter);
+  // hideUnvisited reduces marker count for performance and visual clarity
+  const markers = useCategoryMarkers(category, selections, filterAlbersUsa, subcategory, regionFilter, hideUnvisited);
 
-  // Use marker clustering for large datasets (>100 markers)
+  // Use marker clustering for large datasets (>500 markers)
+  // 500 SVG markers are trivial for modern browsers; clustering only needed for very dense datasets
   // Web Worker offloads clustering to separate thread for better UI performance
   const { clusters, isClusteringEnabled, getClusterExpansionZoom } = useClusteringWorker(
     markers,
     currentZoom,
     undefined, // Use world bounds
-    { enabled: markers.length > 100 }
+    { enabled: markers.length > 500 }
   );
 
   // Use extracted hook for name lookup - DRY principle
@@ -166,7 +178,7 @@ const CategoryMarkerMap = memo(function CategoryMarkerMap({
 
                 // Render individual marker
                 const props = feature.properties;
-                const fillColor = props.status === 'visited' ? '#22c55e' : '#f59e0b';
+                const fillColor = STATUS_COLORS[props.status as Status] || STATUS_COLORS.unvisited;
 
                 return (
                   <MemoizedMarker
@@ -188,7 +200,7 @@ const CategoryMarkerMap = memo(function CategoryMarkerMap({
             ) : (
               // Render unclustered markers (original behavior for small datasets)
               markers.map((marker) => {
-                const fillColor = marker.status === 'visited' ? '#22c55e' : '#f59e0b';
+                const fillColor = STATUS_COLORS[marker.status] || STATUS_COLORS.unvisited;
 
                 return (
                   <MemoizedMarker

@@ -12,15 +12,28 @@ import { nationalMonuments } from '@/data/nationalMonuments';
 import { stateParks } from '@/data/stateParks';
 import { weirdAmericana } from '@/data/weirdAmericana';
 import { usStates } from '@/data/usStates';
+import { worldCities } from '@/data/worldCities';
+import { countries } from '@/data/countries';
 import StatePageClient from './StatePageClient';
 
-// Categories that support state-level filtering
+// Categories that support state/country-level filtering
 const stateFilterableCategories: Category[] = [
+  // US categories (filter by state)
   'nationalParks',
   'nationalMonuments',
   'stateParks',
   'weirdAmericana',
+  // World categories (filter by country)
+  'worldCities',
 ];
+
+// World categories that use country codes instead of state codes
+const WORLD_CATEGORIES = new Set<Category>(['worldCities']);
+
+// Helper to check if a category uses country-based filtering
+function isWorldCategory(category: Category): boolean {
+  return WORLD_CATEGORIES.has(category);
+}
 
 // State code to full name mapping
 const stateNames: Record<string, string> = {};
@@ -28,36 +41,57 @@ usStates.forEach(s => {
   stateNames[s.code] = s.name;
 });
 
-// Get items for a category filtered by state
-function getItemsByState(category: Category, stateCode: string) {
-  const upperState = stateCode.toUpperCase();
+// Country code to full name mapping
+const countryNames: Record<string, string> = {};
+countries.forEach(c => {
+  countryNames[c.code] = c.name;
+});
+
+// Get items for a category filtered by state or country
+function getItemsByRegion(category: Category, regionCode: string) {
+  const upperCode = regionCode.toUpperCase();
 
   switch (category) {
+    // US categories - filter by state
     case 'nationalParks':
       return nationalParks.filter(p =>
-        p.state === upperState || p.state.includes(upperState)
+        p.state === upperCode || p.state.includes(upperCode)
       );
     case 'nationalMonuments':
       return nationalMonuments.filter(m =>
-        m.state === upperState || m.state.includes(upperState)
+        m.state === upperCode || m.state.includes(upperCode)
       );
     case 'stateParks':
       return stateParks.filter(p =>
-        p.state === upperState || p.state.includes(upperState)
+        p.state === upperCode || p.state.includes(upperCode)
       );
     case 'weirdAmericana':
       return weirdAmericana.filter(w =>
-        w.state === upperState || w.state.includes(upperState)
+        w.state === upperCode || w.state.includes(upperCode)
       );
+    // World categories - filter by country code
+    case 'worldCities':
+      return worldCities.filter(c => c.countryCode === upperCode);
     default:
       return [];
   }
 }
 
-// Get all unique states for a category
-function getStatesForCategory(category: Category): string[] {
-  const states = new Set<string>();
+// Get all unique states/countries for a category
+function getRegionsForCategory(category: Category): string[] {
+  const regions = new Set<string>();
 
+  // Handle world categories - return country codes
+  if (isWorldCategory(category)) {
+    switch (category) {
+      case 'worldCities':
+        worldCities.forEach(c => regions.add(c.countryCode));
+        break;
+    }
+    return Array.from(regions).sort();
+  }
+
+  // Handle US categories - return state codes
   let items: { state: string }[] = [];
   switch (category) {
     case 'nationalParks':
@@ -77,13 +111,13 @@ function getStatesForCategory(category: Category): string[] {
   items.forEach(item => {
     // Handle multi-state items like "WY/MT/ID"
     if (item.state.includes('/')) {
-      item.state.split('/').forEach(s => states.add(s.trim()));
+      item.state.split('/').forEach(s => regions.add(s.trim()));
     } else {
-      states.add(item.state);
+      regions.add(item.state);
     }
   });
 
-  return Array.from(states).sort();
+  return Array.from(regions).sort();
 }
 
 // Theme colors by category group
@@ -110,28 +144,35 @@ const textGradientColors: Record<CategoryGroup, string> = {
   destinations: 'from-primary to-slate-600 dark:from-primary dark:to-slate-400',
 };
 
-// State-specific descriptions
-function getStateDescription(category: Category, stateName: string, count: number): string {
+// Region-specific descriptions (for states and countries)
+function getRegionDescription(category: Category, regionName: string, count: number, isCountry: boolean): string {
+  if (isCountry) {
+    const descriptions: Partial<Record<Category, string>> = {
+      worldCities: `Explore ${count} major cities in ${regionName}. Track your visits to the world's greatest urban destinations.`,
+    };
+    return descriptions[category] || `Track ${count} locations in ${regionName}.`;
+  }
+
   const descriptions: Partial<Record<Category, string>> = {
-    nationalParks: `Discover all ${count} National Parks in ${stateName}. Track your visits, build your bucket list, and explore the natural wonders of ${stateName}.`,
-    nationalMonuments: `Explore ${count} National Monuments in ${stateName}. From historic landmarks to natural wonders, track your journey through ${stateName}'s protected treasures.`,
-    stateParks: `${stateName} has ${count} incredible state parks waiting for you. Track your adventures and discover hidden gems across the state.`,
-    weirdAmericana: `${stateName} is home to ${count} quirky roadside attractions. From giant sculptures to mystery spots, track the weird and wonderful!`,
+    nationalParks: `Discover all ${count} National Parks in ${regionName}. Track your visits, build your bucket list, and explore the natural wonders of ${regionName}.`,
+    nationalMonuments: `Explore ${count} National Monuments in ${regionName}. From historic landmarks to natural wonders, track your journey through ${regionName}'s protected treasures.`,
+    stateParks: `${regionName} has ${count} incredible state parks waiting for you. Track your adventures and discover hidden gems across the state.`,
+    weirdAmericana: `${regionName} is home to ${count} quirky roadside attractions. From giant sculptures to mystery spots, track the weird and wonderful!`,
   };
-  return descriptions[category] || `Track ${count} locations in ${stateName}.`;
+  return descriptions[category] || `Track ${count} locations in ${regionName}.`;
 }
 
 // Generate JSON-LD structured data
-function generateJsonLd(category: Category, stateName: string, stateCode: string, count: number) {
+function generateJsonLd(category: Category, regionName: string, regionCode: string, count: number, isCountry: boolean) {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://seeevery.place';
   const label = categoryLabels[category];
 
   return {
     '@context': 'https://schema.org',
     '@type': 'WebPage',
-    name: `${label} in ${stateName} | See Every Place`,
-    description: getStateDescription(category, stateName, count),
-    url: `${baseUrl}/track/${category}/${stateCode.toLowerCase()}`,
+    name: `${label} in ${regionName} | See Every Place`,
+    description: getRegionDescription(category, regionName, count, isCountry),
+    url: `${baseUrl}/track/${category}/${regionCode.toLowerCase()}`,
     isPartOf: {
       '@type': 'WebSite',
       name: 'See Every Place',
@@ -139,18 +180,16 @@ function generateJsonLd(category: Category, stateName: string, stateCode: string
     },
     about: {
       '@type': 'Place',
-      name: stateName,
-      address: {
-        '@type': 'PostalAddress',
-        addressRegion: stateCode,
-        addressCountry: 'US',
-      },
+      name: regionName,
+      address: isCountry
+        ? { '@type': 'PostalAddress', addressCountry: regionCode }
+        : { '@type': 'PostalAddress', addressRegion: regionCode, addressCountry: 'US' },
     },
   };
 }
 
 // Generate Breadcrumb JSON-LD schema for SEO
-function generateBreadcrumbJsonLd(category: Category, label: string, stateName: string, stateCode: string) {
+function generateBreadcrumbJsonLd(category: Category, label: string, regionName: string, regionCode: string) {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://seeevery.place';
 
   return {
@@ -172,23 +211,23 @@ function generateBreadcrumbJsonLd(category: Category, label: string, stateName: 
       {
         '@type': 'ListItem',
         position: 3,
-        name: stateName,
-        item: `${baseUrl}/track/${category}/${stateCode.toLowerCase()}`,
+        name: regionName,
+        item: `${baseUrl}/track/${category}/${regionCode.toLowerCase()}`,
       },
     ],
   };
 }
 
-// Generate static params for all category/state combinations
+// Generate static params for all category/state/country combinations
 export function generateStaticParams() {
   const params: { category: string; state: string }[] = [];
 
   for (const category of stateFilterableCategories) {
-    const states = getStatesForCategory(category);
-    for (const state of states) {
+    const regions = getRegionsForCategory(category);
+    for (const region of regions) {
       params.push({
         category,
-        state: state.toLowerCase(),
+        state: region.toLowerCase(),
       });
     }
   }
@@ -202,31 +241,34 @@ type Props = {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { category, state } = await params;
-  const stateCode = state.toUpperCase();
-  const stateName = stateNames[stateCode];
+  const regionCode = state.toUpperCase();
+  const isCountry = isWorldCategory(category as Category);
 
-  if (!stateName || !stateFilterableCategories.includes(category as Category)) {
+  // Get region name from appropriate lookup
+  const regionName = isCountry ? countryNames[regionCode] : stateNames[regionCode];
+
+  if (!regionName || !stateFilterableCategories.includes(category as Category)) {
     return { title: 'Not Found' };
   }
 
-  const items = getItemsByState(category as Category, stateCode);
+  const items = getItemsByRegion(category as Category, regionCode);
   const label = categoryLabels[category as Category];
-  const description = getStateDescription(category as Category, stateName, items.length);
+  const description = getRegionDescription(category as Category, regionName, items.length, isCountry);
 
   return {
-    title: `${label} in ${stateName} | See Every Place`,
+    title: `${label} in ${regionName} | See Every Place`,
     description,
     keywords: [
-      `${label.toLowerCase()} in ${stateName}`,
-      `${stateName} ${label.toLowerCase()}`,
-      `${stateName} ${label.toLowerCase()} checklist`,
-      `${stateName} ${label.toLowerCase()} map`,
-      `visit ${stateName}`,
+      `${label.toLowerCase()} in ${regionName}`,
+      `${regionName} ${label.toLowerCase()}`,
+      `${regionName} ${label.toLowerCase()} checklist`,
+      `${regionName} ${label.toLowerCase()} map`,
+      `visit ${regionName}`,
       'travel tracker',
       'bucket list',
     ],
     openGraph: {
-      title: `${label} in ${stateName} | See Every Place`,
+      title: `${label} in ${regionName} | See Every Place`,
       description,
       type: 'website',
     },
@@ -235,19 +277,22 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function StateCategoryPage({ params }: Props) {
   const { category, state } = await params;
-  const stateCode = state.toUpperCase();
-  const stateName = stateNames[stateCode];
+  const regionCode = state.toUpperCase();
+  const isCountry = isWorldCategory(category as Category);
 
-  // Validate category and state
+  // Get region name from appropriate lookup
+  const regionName = isCountry ? countryNames[regionCode] : stateNames[regionCode];
+
+  // Validate category and region
   if (!stateFilterableCategories.includes(category as Category)) {
     redirect(`/track/${category}`);
   }
 
-  if (!stateName) {
+  if (!regionName) {
     notFound();
   }
 
-  const items = getItemsByState(category as Category, stateCode);
+  const items = getItemsByRegion(category as Category, regionCode);
 
   if (items.length === 0) {
     notFound();
@@ -255,9 +300,9 @@ export default async function StateCategoryPage({ params }: Props) {
 
   const label = categoryLabels[category as Category];
   const icon = categoryIcons[category as Category];
-  const description = getStateDescription(category as Category, stateName, items.length);
-  const jsonLd = generateJsonLd(category as Category, stateName, stateCode, items.length);
-  const breadcrumbJsonLd = generateBreadcrumbJsonLd(category as Category, label, stateName, stateCode);
+  const description = getRegionDescription(category as Category, regionName, items.length, isCountry);
+  const jsonLd = generateJsonLd(category as Category, regionName, regionCode, items.length, isCountry);
+  const breadcrumbJsonLd = generateBreadcrumbJsonLd(category as Category, label, regionName, regionCode);
 
   // Get category group and theme
   const group = getGroupForCategory(category as Category);
@@ -265,10 +310,10 @@ export default async function StateCategoryPage({ params }: Props) {
   const accent = accentColors[group];
   const textGradient = textGradientColors[group];
 
-  // Get other states with this category for "Explore Other States" section
-  const allStates = getStatesForCategory(category as Category);
-  const otherStates = allStates
-    .filter(s => s !== stateCode)
+  // Get other regions with this category for "Explore Other Regions" section
+  const allRegions = getRegionsForCategory(category as Category);
+  const otherRegions = allRegions
+    .filter(r => r !== regionCode)
     .slice(0, 8);
 
   return (
@@ -322,14 +367,14 @@ export default async function StateCategoryPage({ params }: Props) {
                 </Link>
               </li>
               <li className="text-muted-foreground/60">/</li>
-              <li className="text-foreground font-medium">{stateName}</li>
+              <li className="text-foreground font-medium">{regionName}</li>
             </ol>
           </nav>
 
           <div className="text-center mb-12">
             <span className="text-6xl mb-4 block">{icon}</span>
             <h1 className="text-4xl font-bold text-foreground mb-4">
-              {label} in {stateName}
+              {label} in {regionName}
             </h1>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
               {description}
@@ -341,29 +386,29 @@ export default async function StateCategoryPage({ params }: Props) {
             <StatePageClient
               items={items}
               category={category as Category}
-              title={`${label} in ${stateName}`}
-              regionCode={stateCode}
-              isCountry={false}
+              title={`${label} in ${regionName}`}
+              regionCode={regionCode}
+              isCountry={isCountry}
             />
           </section>
 
-          {/* Explore Other States */}
-          {otherStates.length > 0 && (
+          {/* Explore Other Regions */}
+          {otherRegions.length > 0 && (
             <section className="my-12">
               <h2 className="text-2xl font-bold text-foreground mb-6 text-center">
-                Explore {label} in Other States
+                Explore {label} in Other {isCountry ? 'Countries' : 'States'}
               </h2>
               <div className="flex flex-wrap justify-center gap-2">
-                {otherStates.map((otherState) => (
+                {otherRegions.map((otherRegion) => (
                   <Link
-                    key={otherState}
-                    href={`/track/${category}/${otherState.toLowerCase()}`}
+                    key={otherRegion}
+                    href={`/track/${category}/${otherRegion.toLowerCase()}`}
                   >
                     <Badge
                       variant="secondary"
                       className="px-4 py-2 text-sm font-medium hover:bg-secondary/80 transition-colors cursor-pointer"
                     >
-                      {stateNames[otherState] || otherState}
+                      {isCountry ? (countryNames[otherRegion] || otherRegion) : (stateNames[otherRegion] || otherRegion)}
                     </Badge>
                   </Link>
                 ))}
@@ -373,7 +418,7 @@ export default async function StateCategoryPage({ params }: Props) {
                   href={`/track/${category}`}
                   className="text-sm text-muted-foreground hover:text-foreground hover:underline transition-colors"
                 >
-                  View all {allStates.length} states with {label.toLowerCase()} →
+                  View all {allRegions.length} {isCountry ? 'countries' : 'states'} with {label.toLowerCase()} →
                 </Link>
               </div>
             </section>

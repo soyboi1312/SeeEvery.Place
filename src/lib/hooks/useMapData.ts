@@ -94,7 +94,8 @@ export function useCategoryMarkers(
   selections: UserSelections,
   filterAlbersUsa: boolean,
   subcategory?: string,
-  regionFilter?: RegionFilter
+  regionFilter?: RegionFilter,
+  hideUnvisited = false
 ): MarkerData[] {
   // Use React Query to cache the heavy category data
   const { data: categoryData } = useCategoryData(category);
@@ -112,9 +113,10 @@ export function useCategoryMarkers(
       selections,
       filterAlbersUsa,
       subcategory,
-      regionFilter
+      regionFilter,
+      hideUnvisited
     );
-  }, [category, categoryData, selections, filterAlbersUsa, subcategory, regionFilter]);
+  }, [category, categoryData, selections, filterAlbersUsa, subcategory, regionFilter, hideUnvisited]);
 
   return markers;
 }
