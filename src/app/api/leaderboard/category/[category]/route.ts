@@ -17,8 +17,11 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     const { data: { user } } = await supabase.auth.getUser();
 
     const searchParams = request.nextUrl.searchParams;
-    const limit = parseInt(searchParams.get('limit') || '50', 10);
-    const offset = parseInt(searchParams.get('offset') || '0', 10);
+    // Cap limit to prevent DoS - max 100 entries per request
+    const rawLimit = parseInt(searchParams.get('limit') || '50', 10);
+    const limit = Math.min(Math.max(rawLimit, 1), 100);
+    const rawOffset = parseInt(searchParams.get('offset') || '0', 10);
+    const offset = Math.max(rawOffset, 0);
 
     const { data, error } = await supabase.rpc('get_category_leaderboard', {
       p_category: category,
@@ -28,7 +31,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
     if (error) {
       console.error('Error fetching category leaderboard:', error);
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ error: 'Failed to fetch category leaderboard' }, { status: 500 });
     }
 
     // Transform data to frontend-friendly format

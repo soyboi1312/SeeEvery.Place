@@ -13,8 +13,11 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
     const type = searchParams.get('type') || 'global';
     const period = searchParams.get('period') || 'all_time';
-    const limit = parseInt(searchParams.get('limit') || '50', 10);
-    const offset = parseInt(searchParams.get('offset') || '0', 10);
+    // Cap limit to prevent DoS - max 100 entries per request
+    const rawLimit = parseInt(searchParams.get('limit') || '50', 10);
+    const limit = Math.min(Math.max(rawLimit, 1), 100);
+    const rawOffset = parseInt(searchParams.get('offset') || '0', 10);
+    const offset = Math.max(rawOffset, 0);
 
     if (!['global', 'friends'].includes(type)) {
       return NextResponse.json(
@@ -68,7 +71,7 @@ export async function GET(request: NextRequest) {
 
     if (error) {
       console.error('Error fetching leaderboard:', error);
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ error: 'Failed to fetch leaderboard' }, { status: 500 });
     }
 
     // Transform data to frontend-friendly format
