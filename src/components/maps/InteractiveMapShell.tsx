@@ -5,7 +5,7 @@
  */
 'use client';
 
-import { ReactNode, memo, useState, useRef, useEffect } from 'react';
+import { ReactNode, memo, useState, useRef, useEffect, useCallback } from 'react';
 import { ComposableMap, ZoomableGroup, Sphere, Graticule } from '@vnedyalk0v/react19-simple-maps';
 import { useMapZoom, MapPosition } from './useMapZoom';
 import { useDebounce } from '@/lib/hooks/useDebounce';
@@ -84,33 +84,33 @@ const InteractiveMapShell = memo(function InteractiveMapShell({
     onZoomChange?.(debouncedZoom);
   }, [debouncedZoom, onZoomChange]);
 
-  // --- Scroll Zoom Delay Logic ---
-  // Prevents accidental zooming when scrolling past the map
-  // Scroll zoom only enabled after hovering for 800ms
-  const [isScrollZoomEnabled, setIsScrollZoomEnabled] = useState(false);
-  const zoomTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // --- Ctrl/Meta Scroll Zoom Logic ---
+  // Standard UX: Only zoom with Ctrl+scroll (Windows/Linux) or Cmd+scroll (Mac)
+  // Show hint when user tries to scroll without modifier key
+  const [showScrollHint, setShowScrollHint] = useState(false);
+  const hintTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const handleMouseEnter = () => {
-    // Start a timer when user hovers. If they stay for 800ms, enable scroll zoom.
-    zoomTimerRef.current = setTimeout(() => {
-      setIsScrollZoomEnabled(true);
-    }, 800);
-  };
+  // Show hint briefly when user scrolls without modifier
+  const showHintBriefly = useCallback(() => {
+    setShowScrollHint(true);
+    if (hintTimeoutRef.current) clearTimeout(hintTimeoutRef.current);
+    hintTimeoutRef.current = setTimeout(() => setShowScrollHint(false), 2000);
+  }, []);
 
-  const handleMouseLeave = () => {
-    // If they leave before the timer fires, cancel it.
-    if (zoomTimerRef.current) {
-      clearTimeout(zoomTimerRef.current);
-      zoomTimerRef.current = null;
+  // Handle wheel events to detect scroll-without-modifier attempts
+  const handleWheel = useCallback((e: React.WheelEvent) => {
+    // If user is scrolling without Ctrl/Meta, show the hint
+    if (!e.ctrlKey && !e.metaKey) {
+      showHintBriefly();
+    } else {
+      setShowScrollHint(false);
     }
-    // Immediately disable scroll zoom so the page scrolls normally again
-    setIsScrollZoomEnabled(false);
-  };
+  }, [showHintBriefly]);
 
-  // Cleanup timer on unmount
+  // Cleanup timeout on unmount
   useEffect(() => {
     return () => {
-      if (zoomTimerRef.current) clearTimeout(zoomTimerRef.current);
+      if (hintTimeoutRef.current) clearTimeout(hintTimeoutRef.current);
     };
   }, []);
   // ------------------------------------
@@ -123,21 +123,19 @@ const InteractiveMapShell = memo(function InteractiveMapShell({
   return (
     <div
       className="relative w-full h-full group"
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
+      onWheel={handleWheel}
       // CSS containment optimization: isolates map paint/layout from the rest of the page
       // Prevents expensive layout recalculations when map DOM updates (e.g., marker changes)
       //
       // IMPORTANT: containIntrinsicSize prevents CLS (Cumulative Layout Shift) when using
       // contentVisibility: 'auto'. Without it, the element can collapse to 0 height before
-      // the browser calculates the actual size, causing layout shifts. The '0 auto' value
-      // means: width is 0 (auto-calculated), height is auto (uses natural/intrinsic height).
-      // The minHeight ensures a fallback even before content renders.
+      // the browser calculates the actual size, causing layout shifts.
+      // aspectRatio: 2/1 matches the parent container's aspect-[2/1] class for proper sizing.
       style={{
         contain: 'strict',
         contentVisibility: 'auto',
-        containIntrinsicSize: '0 auto',
-        minHeight: '300px', // Prevent collapse before content loads
+        containIntrinsicSize: 'auto 50vw', // Width auto, height ~50% of viewport width (2:1 aspect)
+        aspectRatio: '2 / 1', // Match parent aspect ratio for proper intrinsic sizing
       }}
     >
       <ComposableMap
@@ -155,10 +153,10 @@ const InteractiveMapShell = memo(function InteractiveMapShell({
           // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Library uses branded Longitude/Latitude types
           center={position.coordinates as any}
           onMoveEnd={handleMoveEnd}
-          // Only allow scrolling if the timer has completed
+          // Standard UX: Only zoom if Ctrl/Meta is pressed (like Google Maps)
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           filterZoomEvent={(evt: any) => {
-            if (evt.type === 'wheel' && !isScrollZoomEnabled) return false;
+            if (evt.type === 'wheel' && !evt.ctrlKey && !evt.metaKey) return false;
             return true;
           }}
         >
@@ -180,6 +178,20 @@ const InteractiveMapShell = memo(function InteractiveMapShell({
         canZoomIn={canZoomIn}
         canZoomOut={canZoomOut}
       />
+
+      {/* Scroll hint overlay - shown when user scrolls without Ctrl/Cmd */}
+      {showScrollHint && (
+        <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] flex items-center justify-center pointer-events-none z-40 animate-fade-in">
+          <div className="bg-white dark:bg-slate-800 px-4 py-3 rounded-xl shadow-lg flex items-center gap-3">
+            <svg className="w-6 h-6 text-primary-600 dark:text-primary-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
+            </svg>
+            <span className="text-sm font-medium text-primary-800 dark:text-primary-200">
+              Use <kbd className="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-700 rounded text-xs font-mono">Ctrl</kbd> + scroll to zoom
+            </span>
+          </div>
+        </div>
+      )}
     </div>
   );
 });
