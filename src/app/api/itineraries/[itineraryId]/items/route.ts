@@ -9,19 +9,19 @@ interface RouteParams {
 /**
  * GET /api/itineraries/[itineraryId]/items
  * Get all items in an itinerary
+ * Uses RPC to include added_by_username for collaborative trips
  */
 export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
     const { itineraryId } = await params;
     const supabase = await createClient();
 
-    // Get items - RLS will handle access control
+    // Use RPC to get items with "added_by_username" join
+    // This is useful for collaborative trips to see who added what
     const { data, error } = await supabase
-      .from('itinerary_items')
-      .select('*')
-      .eq('itinerary_id', itineraryId)
-      .order('day_number', { ascending: true, nullsFirst: false })
-      .order('sort_order', { ascending: true });
+      .rpc('get_itinerary_items', {
+        itinerary_uuid: itineraryId
+      });
 
     if (error) {
       console.error('Error fetching itinerary items:', error);

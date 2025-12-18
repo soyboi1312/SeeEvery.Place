@@ -5,6 +5,7 @@ import { CreateItineraryInput } from '@/lib/types';
 /**
  * GET /api/itineraries
  * Get all itineraries for the current user (owned + collaborating)
+ * Uses RPC for correct pagination across both owned and collaborative trips
  */
 export async function GET(request: NextRequest) {
   try {
@@ -16,55 +17,26 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url);
-    const limit = parseInt(searchParams.get('limit') || '20');
+    // Cap limit at 50 to prevent abuse
+    const rawLimit = parseInt(searchParams.get('limit') || '20');
+    const limit = Math.min(Math.max(rawLimit, 1), 50);
     const offset = parseInt(searchParams.get('offset') || '0');
 
-    // Get itineraries owned by user
-    const { data: ownedData, error: ownedError } = await supabase
-      .from('itineraries')
-      .select('*')
-      .eq('owner_id', user.id)
-      .order('updated_at', { ascending: false })
-      .range(offset, offset + limit - 1);
+    // Use RPC for correct pagination across owned + collaborative trips
+    // The previous implementation broke pagination because offset was only applied
+    // to the owned list, causing collaborative trips to reappear on every page
+    const { data, error } = await supabase
+      .rpc('get_user_itineraries', {
+        page_limit: limit,
+        page_offset: offset
+      });
 
-    if (ownedError) {
-      console.error('Error fetching owned itineraries:', ownedError);
-      return NextResponse.json({ error: ownedError.message }, { status: 500 });
+    if (error) {
+      console.error('Error fetching itineraries:', error);
+      return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    // Get itineraries where user is a collaborator
-    const { data: collabData } = await supabase
-      .from('itinerary_collaborators')
-      .select('itinerary_id')
-      .eq('user_id', user.id);
-
-    let collaboratedItineraries: typeof ownedData = [];
-    if (collabData && collabData.length > 0) {
-      const collabIds = collabData.map(c => c.itinerary_id);
-      const { data: collabItineraries } = await supabase
-        .from('itineraries')
-        .select('*')
-        .in('id', collabIds)
-        .order('updated_at', { ascending: false });
-
-      collaboratedItineraries = collabItineraries || [];
-    }
-
-    // Merge and deduplicate
-    const allItineraries = [...(ownedData || [])];
-    const ownedIds = new Set(allItineraries.map(i => i.id));
-    for (const collab of collaboratedItineraries) {
-      if (!ownedIds.has(collab.id)) {
-        allItineraries.push(collab);
-      }
-    }
-
-    // Sort by updated_at
-    allItineraries.sort((a, b) =>
-      new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
-    );
-
-    return NextResponse.json({ itineraries: allItineraries });
+    return NextResponse.json({ itineraries: data || [] });
   } catch (error) {
     console.error('Itineraries API error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
