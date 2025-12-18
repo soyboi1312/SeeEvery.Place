@@ -347,12 +347,14 @@ const MapVisualization = memo(function MapVisualization({ category, selections, 
           <span className="w-3 h-3 rounded-full bg-amber-500"></span>
           <span>Bucket List</span>
         </div>
-        {isRegionMap && (
-          <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2">
+          {isRegionMap ? (
             <span className="w-3 h-3 rounded-full bg-gray-200 dark:bg-gray-600 border border-gray-300 dark:border-gray-500"></span>
-            <span>Not Visited</span>
-          </div>
-        )}
+          ) : (
+            <span className="w-3 h-3 rounded-full bg-slate-400"></span>
+          )}
+          <span>Not Visited</span>
+        </div>
       </div>
     </div>
   );

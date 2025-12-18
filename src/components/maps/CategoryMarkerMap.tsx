@@ -18,6 +18,14 @@ import InteractiveMapShell from './InteractiveMapShell';
 import MemoizedMarker from './MemoizedMarker';
 import ClusterMarker from './ClusterMarker';
 import { TappableGeography } from './TappableGeography';
+import { Status } from '@/lib/types';
+
+// Define colors for all marker states
+const STATUS_COLORS: Record<Status, string> = {
+  visited: '#22c55e',    // Green
+  bucketList: '#f59e0b', // Amber
+  unvisited: '#94a3b8'   // Slate-400 (Grey)
+};
 
 /**
  * Interactive background map component - memoized to prevent re-renders on zoom/pan
@@ -166,7 +174,7 @@ const CategoryMarkerMap = memo(function CategoryMarkerMap({
 
                 // Render individual marker
                 const props = feature.properties;
-                const fillColor = props.status === 'visited' ? '#22c55e' : '#f59e0b';
+                const fillColor = STATUS_COLORS[props.status as Status] || STATUS_COLORS.unvisited;
 
                 return (
                   <MemoizedMarker
@@ -188,7 +196,7 @@ const CategoryMarkerMap = memo(function CategoryMarkerMap({
             ) : (
               // Render unclustered markers (original behavior for small datasets)
               markers.map((marker) => {
-                const fillColor = marker.status === 'visited' ? '#22c55e' : '#f59e0b';
+                const fillColor = STATUS_COLORS[marker.status] || STATUS_COLORS.unvisited;
 
                 return (
                   <MemoizedMarker
