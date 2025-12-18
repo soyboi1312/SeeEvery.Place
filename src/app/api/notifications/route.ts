@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
 
     if (error) {
       console.error('Error fetching notifications:', error);
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ error: 'Failed to fetch notifications' }, { status: 500 });
     }
 
     // Get unread count
@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
 
     if (error) {
       console.error('Error marking notifications read:', error);
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ error: 'Failed to mark notifications as read' }, { status: 500 });
     }
 
     return NextResponse.json({
@@ -114,7 +114,7 @@ export async function DELETE(request: NextRequest) {
 
     if (error) {
       console.error('Error deleting notification:', error);
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ error: 'Failed to delete notification' }, { status: 500 });
     }
 
     return NextResponse.json({ success: true });

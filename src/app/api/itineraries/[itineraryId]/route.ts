@@ -25,7 +25,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
     if (error) {
       console.error('Error fetching itinerary:', error);
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ error: 'Failed to fetch itinerary' }, { status: 500 });
     }
 
     // RPC returns an array (rows), take the first one
@@ -93,11 +93,11 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       .single();
 
     if (error) {
-      console.error('Error updating itinerary:', error);
       if (error.code === 'PGRST116') {
         return NextResponse.json({ error: 'Itinerary not found or access denied' }, { status: 404 });
       }
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      console.error('Error updating itinerary:', error);
+      return NextResponse.json({ error: 'Failed to update itinerary' }, { status: 500 });
     }
 
     return NextResponse.json({ itinerary: data });
@@ -121,6 +121,21 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    // Verify user owns the itinerary before deletion
+    const { data: itinerary, error: fetchError } = await supabase
+      .from('itineraries')
+      .select('owner_id')
+      .eq('id', itineraryId)
+      .single();
+
+    if (fetchError || !itinerary) {
+      return NextResponse.json({ error: 'Itinerary not found' }, { status: 404 });
+    }
+
+    if (itinerary.owner_id !== user.id) {
+      return NextResponse.json({ error: 'Only the owner can delete this itinerary' }, { status: 403 });
+    }
+
     const { error } = await supabase
       .from('itineraries')
       .delete()
@@ -128,7 +143,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
 
     if (error) {
       console.error('Error deleting itinerary:', error);
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ error: 'Failed to delete itinerary' }, { status: 500 });
     }
 
     return NextResponse.json({ success: true });

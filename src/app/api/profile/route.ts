@@ -23,7 +23,8 @@ export async function GET() {
       .single();
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      console.error('Error fetching profile:', error);
+      return NextResponse.json({ error: 'Failed to fetch profile' }, { status: 500 });
     }
 
     return NextResponse.json(profile);
@@ -79,23 +80,9 @@ export async function PUT(request: NextRequest) {
           { status: 400 }
         );
       }
-
-      // Check if username is available (case-insensitive)
-      // Uses lowercase comparison to match the lower(username) index for optimal performance
-      // The DB constraint is the hard stop; this provides a better UI error message
-      const { data: existingUser } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('username', username.toLowerCase())
-        .neq('id', user.id)
-        .single();
-
-      if (existingUser) {
-        return NextResponse.json(
-          { error: 'Username is already taken' },
-          { status: 400 }
-        );
-      }
+      // Note: We rely on the database unique constraint to prevent duplicate usernames.
+      // This avoids a TOCTOU race condition where another user could claim the username
+      // between a pre-check and the actual update. The constraint error is handled below.
     }
 
     // Build update object
@@ -125,7 +112,8 @@ export async function PUT(request: NextRequest) {
           { status: 400 }
         );
       }
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      console.error('Error updating profile:', error);
+      return NextResponse.json({ error: 'Failed to update profile' }, { status: 500 });
     }
 
     return NextResponse.json(profile);

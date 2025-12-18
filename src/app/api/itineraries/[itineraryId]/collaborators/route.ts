@@ -1,8 +1,31 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { SupabaseClient } from '@supabase/supabase-js';
 
 interface RouteParams {
   params: Promise<{ itineraryId: string }>;
+}
+
+/**
+ * Helper to verify the current user owns the itinerary
+ * Returns the owner_id if found, or null if not found/error
+ */
+async function verifyItineraryOwnership(
+  supabase: SupabaseClient,
+  itineraryId: string,
+  userId: string
+): Promise<{ isOwner: boolean; notFound: boolean }> {
+  const { data: itinerary, error } = await supabase
+    .from('itineraries')
+    .select('owner_id')
+    .eq('id', itineraryId)
+    .single();
+
+  if (error || !itinerary) {
+    return { isOwner: false, notFound: true };
+  }
+
+  return { isOwner: itinerary.owner_id === userId, notFound: false };
 }
 
 /**
@@ -62,6 +85,15 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    // Verify user owns the itinerary
+    const { isOwner, notFound } = await verifyItineraryOwnership(supabase, itineraryId, user.id);
+    if (notFound) {
+      return NextResponse.json({ error: 'Itinerary not found' }, { status: 404 });
+    }
+    if (!isOwner) {
+      return NextResponse.json({ error: 'Only the owner can manage collaborators' }, { status: 403 });
+    }
+
     const body = await request.json();
     const { userId, role = 'editor' } = body;
 
@@ -104,10 +136,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       if (error.code === '23505') {
         return NextResponse.json({ error: 'User is already a collaborator' }, { status: 409 });
       }
-      if (error.code === '42501') {
-        return NextResponse.json({ error: 'Only the owner can add collaborators' }, { status: 403 });
-      }
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ error: 'Failed to add collaborator' }, { status: 500 });
     }
 
     return NextResponse.json({ collaborator: data }, { status: 201 });
@@ -132,6 +161,15 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    // Verify user owns the itinerary
+    const { isOwner, notFound } = await verifyItineraryOwnership(supabase, itineraryId, user.id);
+    if (notFound) {
+      return NextResponse.json({ error: 'Itinerary not found' }, { status: 404 });
+    }
+    if (!isOwner) {
+      return NextResponse.json({ error: 'Only the owner can manage collaborators' }, { status: 403 });
+    }
+
     const body = await request.json();
     const { userId } = body;
 
@@ -147,7 +185,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
 
     if (error) {
       console.error('Error removing collaborator:', error);
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ error: 'Failed to remove collaborator' }, { status: 500 });
     }
 
     return NextResponse.json({ success: true });
@@ -170,6 +208,15 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Verify user owns the itinerary
+    const { isOwner, notFound } = await verifyItineraryOwnership(supabase, itineraryId, user.id);
+    if (notFound) {
+      return NextResponse.json({ error: 'Itinerary not found' }, { status: 404 });
+    }
+    if (!isOwner) {
+      return NextResponse.json({ error: 'Only the owner can manage collaborators' }, { status: 403 });
     }
 
     const body = await request.json();
@@ -196,7 +243,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       if (error.code === 'PGRST116') {
         return NextResponse.json({ error: 'Collaborator not found' }, { status: 404 });
       }
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ error: 'Failed to update collaborator role' }, { status: 500 });
     }
 
     return NextResponse.json({ collaborator: data });

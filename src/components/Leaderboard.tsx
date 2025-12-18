@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, memo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -10,12 +10,11 @@ import {
   Medal,
   Crown,
   Loader2,
-  User,
   TrendingUp,
   Users,
 } from 'lucide-react';
 import Link from 'next/link';
-import { PROFILE_ICONS } from '@/components/ProfileIcons';
+import { AvatarDisplay } from '@/components/ui/AvatarDisplay';
 
 interface LeaderboardUser {
   id: string;
@@ -76,6 +75,57 @@ function getRankStyle(rank: number, isCurrentUser: boolean): string {
       return 'bg-white dark:bg-slate-800/30 border-slate-100 dark:border-slate-800';
   }
 }
+
+/**
+ * Memoized leaderboard entry row to prevent unnecessary re-renders
+ */
+const LeaderboardEntryRow = memo(function LeaderboardEntryRow({
+  entry,
+}: {
+  entry: LeaderboardEntry;
+}) {
+  return (
+    <Link
+      href={`/u/${entry.user.username}`}
+      className={`flex items-center gap-3 p-3 rounded-lg border transition-colors hover:opacity-90 ${getRankStyle(entry.rank, entry.isCurrentUser)}`}
+    >
+      {/* Rank */}
+      <div className="w-8 flex items-center justify-center">
+        {getRankIcon(entry.rank) || (
+          <span className="text-sm font-bold text-slate-400">
+            {entry.rank}
+          </span>
+        )}
+      </div>
+
+      {/* User avatar */}
+      <AvatarDisplay
+        avatarUrl={entry.user.avatarUrl}
+        username={entry.user.username}
+        size="md"
+      />
+
+      {/* User info */}
+      <div className="flex-1 min-w-0">
+        <p className="font-medium text-sm truncate">
+          {entry.user.fullName || entry.user.username}
+          {entry.isCurrentUser && (
+            <span className="text-blue-500 ml-1">(you)</span>
+          )}
+        </p>
+        <p className="text-xs text-slate-500">@{entry.user.username}</p>
+      </div>
+
+      {/* XP and Level */}
+      <div className="text-right flex-shrink-0">
+        <p className="font-bold text-sm">{entry.xp.toLocaleString()} XP</p>
+        <Badge variant="outline" className="text-xs">
+          Lv {entry.user.level}
+        </Badge>
+      </div>
+    </Link>
+  );
+});
 
 export function Leaderboard({
   className = '',
@@ -215,69 +265,7 @@ export function Leaderboard({
           <>
             <div className="space-y-2">
               {entries.map((entry) => (
-                <Link
-                  key={entry.user.id}
-                  href={`/u/${entry.user.username}`}
-                  className={`flex items-center gap-3 p-3 rounded-lg border transition-colors hover:opacity-90 ${getRankStyle(entry.rank, entry.isCurrentUser)}`}
-                >
-                  {/* Rank */}
-                  <div className="w-8 flex items-center justify-center">
-                    {getRankIcon(entry.rank) || (
-                      <span className="text-sm font-bold text-slate-400">
-                        {entry.rank}
-                      </span>
-                    )}
-                  </div>
-
-                  {/* User avatar */}
-                  {(() => {
-                    const avatarUrl = entry.user.avatarUrl;
-                    // Check if avatarUrl is a profile icon name
-                    if (avatarUrl && PROFILE_ICONS[avatarUrl]) {
-                      const IconComponent = PROFILE_ICONS[avatarUrl];
-                      return (
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white">
-                          <IconComponent className="w-5 h-5" />
-                        </div>
-                      );
-                    }
-                    // Check if it's a URL (for backwards compatibility)
-                    if (avatarUrl && (avatarUrl.startsWith('http') || avatarUrl.startsWith('/'))) {
-                      return (
-                        <img
-                          src={avatarUrl}
-                          alt={entry.user.username}
-                          className="w-10 h-10 rounded-full object-cover"
-                        />
-                      );
-                    }
-                    // Default fallback
-                    return (
-                      <div className="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center">
-                        <User className="w-5 h-5 text-slate-400" />
-                      </div>
-                    );
-                  })()}
-
-                  {/* User info */}
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-sm truncate">
-                      {entry.user.fullName || entry.user.username}
-                      {entry.isCurrentUser && (
-                        <span className="text-blue-500 ml-1">(you)</span>
-                      )}
-                    </p>
-                    <p className="text-xs text-slate-500">@{entry.user.username}</p>
-                  </div>
-
-                  {/* XP and Level */}
-                  <div className="text-right flex-shrink-0">
-                    <p className="font-bold text-sm">{entry.xp.toLocaleString()} XP</p>
-                    <Badge variant="outline" className="text-xs">
-                      Lv {entry.user.level}
-                    </Badge>
-                  </div>
-                </Link>
+                <LeaderboardEntryRow key={entry.user.id} entry={entry} />
               ))}
             </div>
 

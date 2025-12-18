@@ -3,13 +3,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { FollowButton } from '@/components/FollowButton';
-import { Search, Loader2, Users, User } from 'lucide-react';
+import { Search, Loader2, Users } from 'lucide-react';
 import { useDebounce } from '@/lib/hooks/useDebounce';
-import { PROFILE_ICONS } from '@/components/ProfileIcons';
+import { AvatarDisplay } from '@/components/ui/AvatarDisplay';
 import { useAuth } from '@/lib/hooks/useAuth';
 
 interface SearchUser {
@@ -114,29 +112,11 @@ export function UserSearch() {
                   href={`/u/${user.username}`}
                   className="flex items-center gap-3 flex-1 min-w-0"
                 >
-                  {(() => {
-                    const avatarUrl = user.avatarUrl;
-                    // Check if avatarUrl is a profile icon name
-                    if (avatarUrl && PROFILE_ICONS[avatarUrl]) {
-                      const IconComponent = PROFILE_ICONS[avatarUrl];
-                      return (
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white flex-shrink-0">
-                          <IconComponent className="w-5 h-5" />
-                        </div>
-                      );
-                    }
-                    // Use Avatar component for URLs or fallback
-                    return (
-                      <Avatar className="w-10 h-10">
-                        {avatarUrl && (avatarUrl.startsWith('http') || avatarUrl.startsWith('/')) && (
-                          <AvatarImage src={avatarUrl} />
-                        )}
-                        <AvatarFallback>
-                          {user.username[0].toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
-                    );
-                  })()}
+                  <AvatarDisplay
+                    avatarUrl={user.avatarUrl}
+                    username={user.username}
+                    size="md"
+                  />
                   <div className="flex-1 min-w-0">
                     <p className="font-medium truncate">@{user.username}</p>
                     {user.fullName && (

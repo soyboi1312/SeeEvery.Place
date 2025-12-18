@@ -73,7 +73,7 @@ export async function GET(request: NextRequest) {
 
     if (error) {
       console.error('Error fetching feed:', error);
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ error: 'Failed to fetch activity feed' }, { status: 500 });
     }
 
     // Determine hasMore based on whether we got the extra item
@@ -200,7 +200,7 @@ export async function POST(request: NextRequest) {
 
     if (error) {
       console.error('Error recording activity:', error);
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ error: 'Failed to record activity' }, { status: 500 });
     }
 
     return NextResponse.json({ success: true, activityId: data });

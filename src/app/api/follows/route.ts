@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
 
     if (error) {
       console.error('Error following user:', error);
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ error: 'Failed to follow user' }, { status: 500 });
     }
 
     if (data?.error) {
@@ -69,7 +69,7 @@ export async function DELETE(request: NextRequest) {
 
     if (error) {
       console.error('Error unfollowing user:', error);
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ error: 'Failed to unfollow user' }, { status: 500 });
     }
 
     return NextResponse.json({ success: true });

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient, createAdminClient } from '@/lib/supabase/server';
+import { getClientIP } from '@/lib/serverUtils';
 
 interface SelectionItem {
   id: string;
@@ -202,7 +203,7 @@ export async function DELETE(request: NextRequest) {
     }
 
     // Log the admin action
-    const ip = request.headers.get('x-forwarded-for')?.split(',')[0] || 'unknown';
+    const ip = getClientIP(request);
     try {
       await adminClient.from('admin_logs').insert({
         admin_email: user.email,

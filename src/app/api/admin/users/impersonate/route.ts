@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient, createAdminClient } from '@/lib/supabase/server';
 import { SignJWT } from 'jose';
+import { getClientIP } from '@/lib/serverUtils';
 
 // Secret for signing impersonation tokens - in production, use a proper secret management
 const getImpersonationSecret = () => {
@@ -79,7 +80,7 @@ export async function POST(request: NextRequest) {
       .sign(getImpersonationSecret());
 
     // Log the impersonation attempt
-    const ip = request.headers.get('x-forwarded-for')?.split(',')[0] || 'unknown';
+    const ip = getClientIP(request);
     try {
       await adminClient.from('admin_logs').insert({
         admin_email: user.email,
