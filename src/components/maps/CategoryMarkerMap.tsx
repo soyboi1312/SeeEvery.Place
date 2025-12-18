@@ -3,7 +3,7 @@
  * Generic map with markers for category-specific locations
  * Follows DRY principle by unifying USMarkerMap and WorldMarkerMap logic
  * Follows ISP by using useCategoryMarkers hook for data fetching
- * Uses supercluster for marker clustering on large datasets (100+ markers)
+ * Uses supercluster for marker clustering on large datasets (500+ markers)
  */
 'use client';
 
@@ -120,13 +120,14 @@ const CategoryMarkerMap = memo(function CategoryMarkerMap({
   // hideUnvisited reduces marker count for performance and visual clarity
   const markers = useCategoryMarkers(category, selections, filterAlbersUsa, subcategory, regionFilter, hideUnvisited);
 
-  // Use marker clustering for large datasets (>100 markers)
+  // Use marker clustering for large datasets (>500 markers)
+  // 500 SVG markers are trivial for modern browsers; clustering only needed for very dense datasets
   // Web Worker offloads clustering to separate thread for better UI performance
   const { clusters, isClusteringEnabled, getClusterExpansionZoom } = useClusteringWorker(
     markers,
     currentZoom,
     undefined, // Use world bounds
-    { enabled: markers.length > 100 }
+    { enabled: markers.length > 500 }
   );
 
   // Use extracted hook for name lookup - DRY principle
