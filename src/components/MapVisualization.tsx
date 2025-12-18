@@ -7,7 +7,6 @@
 import { useState, useCallback, useMemo, useEffect, useRef, memo } from 'react';
 import { createPortal } from 'react-dom';
 import dynamic from 'next/dynamic';
-import { useRouter } from 'next/navigation';
 import { Category, Status } from '@/lib/types';
 import {
   TooltipState,
@@ -51,8 +50,7 @@ function getMapComponent(
   onToggle?: (id: string, currentStatus: Status) => void,
   subcategory?: string,
   tooltip?: TooltipHandlers,
-  items?: MapVisualizationProps['items'],
-  onRegionClick?: (id: string) => void
+  items?: MapVisualizationProps['items']
 ) {
   const handlers = tooltip || {
     onMouseEnter: () => {},
@@ -73,7 +71,7 @@ function getMapComponent(
   const config = isUSCategory ? US_MARKER_CONFIG : WORLD_MARKER_CONFIG;
   // Key by geography, not category, to avoid remounting the map when switching
   // between categories that use the same base map (e.g., "National Parks" to "State Parks").
-  // This keeps the heavy InteractiveBackground component mounted and memoized.
+  // This keeps the heavy background component mounted and memoized.
   const mapKey = isUSCategory ? 'us-marker-map' : 'world-marker-map';
 
   return (
@@ -86,13 +84,11 @@ function getMapComponent(
       tooltip={handlers}
       items={items}
       config={config}
-      onRegionClick={onRegionClick}
     />
   );
 }
 
 const MapVisualization = memo(function MapVisualization({ category, selections, onToggle, subcategory, items }: MapVisualizationProps) {
-  const router = useRouter();
   const isRegionMap = usesRegionMap(category);
   // Only store tooltip content in state - position is handled via ref for performance
   const [tooltipContent, setTooltipContent] = useState<string | null>(null);
@@ -100,21 +96,6 @@ const MapVisualization = memo(function MapVisualization({ category, selections, 
   const tooltipRef = useRef<HTMLDivElement>(null);
   const [showTwoFingerHint, setShowTwoFingerHint] = useState(false);
   const hintTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-
-  // Handle background region clicks - navigate to state/country drill-down page
-  const handleRegionClick = useCallback((regionId: string) => {
-    if (!regionId) return;
-
-    // For US Categories (e.g., National Parks), navigate to state page
-    if (US_MARKER_CATEGORIES.has(category)) {
-      router.push(`/track/${category}/${regionId.toLowerCase()}`);
-    }
-    // For World Categories (e.g., World Cities), navigate to country page
-    // Note: Ensure /track/[category]/country/[countryCode] page exists before enabling
-    else {
-      router.push(`/track/${category}/${regionId.toLowerCase()}`);
-    }
-  }, [category, router]);
 
   // Fix sticky pointer on iPad Magic Keyboard by releasing pointer capture on pointerup
   // This handles cases where d3-zoom captures the pointer but doesn't release it
@@ -306,7 +287,7 @@ const MapVisualization = memo(function MapVisualization({ category, selections, 
       className="w-full bg-primary-50/50 dark:bg-slate-800/50 rounded-2xl overflow-hidden border border-black/5 dark:border-white/10 shadow-premium-lg mb-6 relative will-change-transform"
     >
       <div className="w-full overflow-hidden aspect-[2/1]">
-        {getMapComponent(category, selections, onToggle, subcategory, tooltipHandlers, items, handleRegionClick)}
+        {getMapComponent(category, selections, onToggle, subcategory, tooltipHandlers, items)}
       </div>
 
       {/* Two-finger pan hint overlay for mobile */}
