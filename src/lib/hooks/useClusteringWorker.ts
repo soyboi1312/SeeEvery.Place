@@ -48,6 +48,7 @@ export function useClusteringWorker(
 
   const workerRef = useRef<Worker | null>(null);
   const pendingRef = useRef<Map<number, (value: unknown) => void>>(new Map());
+  const initTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [workerSupported, setWorkerSupported] = useState(true);
   const [clusters, setClusters] = useState<ClusterOrPoint[]>([]);
   const [isInitialized, setIsInitialized] = useState(false);
@@ -115,6 +116,7 @@ export function useClusteringWorker(
         worker.terminate();
         workerRef.current = null;
         pendingRef.current.clear();
+        if (initTimeoutRef.current) clearTimeout(initTimeoutRef.current);
         setIsInitialized(false);
       };
     } catch {
@@ -137,20 +139,27 @@ export function useClusteringWorker(
   }, []);
 
   // Initialize clustering when markers change
+  // Debounced to prevent flooding the worker when user rapidly toggles markers
+  // (e.g., clicking through a list quickly). 50ms delay batches rapid changes.
   useEffect(() => {
     if (!workerRef.current || !enabled || markers.length === 0) return;
 
+    // Clear any pending init to batch rapid changes
+    if (initTimeoutRef.current) clearTimeout(initTimeoutRef.current);
+
     setIsInitialized(false);
-    sendMessage('INIT', {
-      markers: markers.map(m => ({
-        id: m.id,
-        coordinates: m.coordinates,
-        status: m.status,
-        sport: m.sport,
-        parkType: m.parkType,
-      })),
-      options: { radius, maxZoom, minPoints },
-    });
+    initTimeoutRef.current = setTimeout(() => {
+      sendMessage('INIT', {
+        markers: markers.map(m => ({
+          id: m.id,
+          coordinates: m.coordinates,
+          status: m.status,
+          sport: m.sport,
+          parkType: m.parkType,
+        })),
+        options: { radius, maxZoom, minPoints },
+      });
+    }, 50); // 50ms debounce - imperceptible delay, prevents worker flooding
   }, [markers, enabled, radius, maxZoom, minPoints, sendMessage]);
 
   // Request clusters when zoom/bounds change
