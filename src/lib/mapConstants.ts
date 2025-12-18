@@ -4,10 +4,24 @@
  * Extracted from mapUtils to prevent eager loading of all data files.
  */
 
+/**
+ * GeoJSON Data Version
+ * Increment this version to bust the 30-day PWA cache when geo data changes.
+ * Examples of when to increment:
+ *   - Border disputes resolved (e.g., new country recognized)
+ *   - Typos fixed in region names
+ *   - New territories/regions added
+ *
+ * The PWA service worker uses CacheFirst strategy with 30-day expiration,
+ * so returning users won't see geo updates until cache expires OR this version changes.
+ */
+export const GEO_DATA_VERSION = 'v1';
+
 // Map Data URLs - using our own API proxy to avoid CORS issues
 // Must be absolute for react-simple-maps URL parsing (uses new URL() internally)
-export const GEO_URL_WORLD = "https://seeevery.place/api/geo/countries-110m.json";
-export const GEO_URL_USA = "https://seeevery.place/api/geo/states-10m.json";
+// Version query param enables cache busting when GEO_DATA_VERSION changes
+export const GEO_URL_WORLD = `https://seeevery.place/api/geo/countries-110m.json?v=${GEO_DATA_VERSION}`;
+export const GEO_URL_USA = `https://seeevery.place/api/geo/states-10m.json?v=${GEO_DATA_VERSION}`;
 
 // US territories that cannot be displayed on the Albers USA projection
 export const UNSUPPORTED_ALBERS_USA_IDS = new Set([

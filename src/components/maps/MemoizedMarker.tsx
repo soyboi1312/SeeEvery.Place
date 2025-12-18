@@ -74,6 +74,9 @@ const MemoizedMarker = memo(function MemoizedMarker({
           }
         }}
       >
+        {/* Invisible hit area for mobile touch targets (minimum 44px / 22px radius) */}
+        {/* Ensures accessibility compliance even for small markers */}
+        <circle r={22} fill="transparent" />
         {children}
       </g>
     </Marker>

@@ -35,6 +35,9 @@ const ClusterMarker = memo(function ClusterMarker({
   const displayCount = pointCount > 99 ? '99+' : pointCount.toString();
   const fontSize = pointCount > 99 ? 8 : 10;
 
+  // Minimum 22px radius for 44px touch target (iOS/Android accessibility guidelines)
+  const hitAreaRadius = Math.max(clusterSize / 2 + 3, 22);
+
   return (
     // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Library uses branded Coordinates type
     <Marker coordinates={coordinates as any}>
@@ -43,6 +46,8 @@ const ClusterMarker = memo(function ClusterMarker({
         style={{ cursor: onClick ? 'pointer' : 'default' }}
         className="transition-transform hover:scale-110"
       >
+        {/* Invisible hit area for mobile touch targets (minimum 44px) */}
+        <circle r={hitAreaRadius} fill="transparent" />
         {/* Outer ring */}
         <circle
           r={clusterSize / 2 + 3}
