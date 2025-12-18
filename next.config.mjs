@@ -70,11 +70,13 @@ const withPWA = withPWAInit({
         },
       },
       {
-        // Match geo data files - StaleWhileRevalidate for snappy performance
-        // These files rarely change, so serve from cache immediately while
-        // fetching updates in the background for next time
+        // Match geo data files - CacheFirst for instant loading
+        // These files are already marked as immutable with long Cache-Control headers,
+        // so CacheFirst trusts the cache and avoids unnecessary network requests.
+        // StaleWhileRevalidate would still ping the network in the background, wasting
+        // Cloudflare requests when the files never actually change.
         urlPattern: /\/geo\/.*/i,
-        handler: "StaleWhileRevalidate",
+        handler: "CacheFirst",
         options: {
           cacheName: "geo-data",
           expiration: {
