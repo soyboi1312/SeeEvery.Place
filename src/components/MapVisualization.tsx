@@ -381,8 +381,10 @@ const MapVisualization = memo(function MapVisualization({ category, selections, 
             <span className="w-3 h-3 rounded-full bg-amber-500"></span>
             <span>Bucket List</span>
           </div>
-          {/* Only show "Not Visited" in legend when markers are visible */}
-          {(isRegionMap || (user && showUnvisited)) && (
+          {/* Show "Not Visited" in legend when unvisited markers are visible:
+              - Region maps: always show (regions are never hidden)
+              - Marker maps: show for guests (always see all) or when toggle is on */}
+          {(isRegionMap || !user || showUnvisited) && (
             <div className="flex items-center gap-2">
               {isRegionMap ? (
                 <span className="w-3 h-3 rounded-full bg-gray-200 dark:bg-gray-600 border border-gray-300 dark:border-gray-500"></span>
