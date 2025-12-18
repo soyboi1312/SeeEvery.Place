@@ -215,6 +215,9 @@ export const countries: Country[] = [
   { code: "TO", name: "Tonga", continent: "Oceania" },
   { code: "TV", name: "Tuvalu", continent: "Oceania" },
   { code: "VU", name: "Vanuatu", continent: "Oceania" },
+
+  // Antarctica
+  { code: "AQ", name: "Antarctica", continent: "Antarctica" },
 ];
 
 // Type-safe country codes - manually maintained to match countries array
@@ -248,9 +251,11 @@ export type CountryCode =
   | "UY" | "VE"
   // Oceania
   | "AU" | "FJ" | "KI" | "MH" | "FM" | "NR" | "NZ" | "PW" | "PG" | "WS"
-  | "SB" | "TO" | "TV" | "VU";
+  | "SB" | "TO" | "TV" | "VU"
+  // Antarctica
+  | "AQ";
 
-export const continents = ["Africa", "Asia", "Europe", "North America", "South America", "Oceania"];
+export const continents = ["Africa", "Antarctica", "Asia", "Europe", "North America", "South America", "Oceania"];
 
 export const getCountriesByContinent = (continent: string) =>
   countries.filter(c => c.continent === continent);
