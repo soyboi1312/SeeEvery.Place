@@ -11,7 +11,9 @@ const withPWA = withPWAInit({
   // Disable aggressive caching to prevent stale chunk issues in Firefox
   cacheOnFrontEndNav: false,
   aggressiveFrontEndNavCaching: false,
-  reloadOnOnline: true,
+  // Don't force reload when connection returns - user may have unsaved form data
+  // or be mid-interaction. The app can handle reconnection gracefully via UI.
+  reloadOnOnline: false,
   swcMinify: true,
   disable: process.env.NODE_ENV === "development", // Disable PWA in dev mode
   workboxOptions: {
