@@ -9,66 +9,31 @@ interface RouteParams {
 /**
  * GET /api/itineraries/[itineraryId]
  * Get a single itinerary with full details
+ * Uses RPC to fetch itinerary with owner details and user_role in a single query
  */
 export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
     const { itineraryId } = await params;
     const supabase = await createClient();
 
-    // Get itinerary - RLS will handle access control
+    // Use RPC to get itinerary with owner details and calculated user_role in one shot
+    // This reduces 2-3 database calls to a single call
     const { data, error } = await supabase
-      .from('itineraries')
-      .select('*')
-      .eq('id', itineraryId)
-      .single();
+      .rpc('get_itinerary_details', {
+        itinerary_uuid: itineraryId
+      });
 
     if (error) {
       console.error('Error fetching itinerary:', error);
-      if (error.code === 'PGRST116') {
-        return NextResponse.json({ error: 'Itinerary not found' }, { status: 404 });
-      }
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    if (!data) {
+    // RPC returns an array (rows), take the first one
+    const itinerary = Array.isArray(data) ? data[0] : data;
+
+    if (!itinerary) {
       return NextResponse.json({ error: 'Itinerary not found' }, { status: 404 });
     }
-
-    // Fetch owner profile
-    const { data: ownerProfile } = await supabase
-      .from('profiles')
-      .select('username, display_name, avatar_url')
-      .eq('id', data.owner_id)
-      .single();
-
-    // Get current user's role if authenticated
-    const { data: { user } } = await supabase.auth.getUser();
-    let userRole: 'owner' | 'editor' | 'viewer' | null = null;
-
-    if (user) {
-      if (user.id === data.owner_id) {
-        userRole = 'owner';
-      } else {
-        const { data: collab } = await supabase
-          .from('itinerary_collaborators')
-          .select('role')
-          .eq('itinerary_id', itineraryId)
-          .eq('user_id', user.id)
-          .single();
-
-        if (collab) {
-          userRole = collab.role as 'editor' | 'viewer';
-        }
-      }
-    }
-
-    const itinerary = {
-      ...data,
-      owner_username: ownerProfile?.username || null,
-      owner_display_name: ownerProfile?.display_name || null,
-      owner_avatar_url: ownerProfile?.avatar_url || null,
-      user_role: userRole,
-    };
 
     return NextResponse.json({ itinerary });
   } catch (error) {

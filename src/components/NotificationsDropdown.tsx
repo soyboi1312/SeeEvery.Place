@@ -12,9 +12,10 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Bell, UserPlus, Check, Loader2 } from 'lucide-react';
+import { Bell, UserPlus, Check, Loader2, MapPin } from 'lucide-react';
 import { formatTimeAgo } from '@/lib/utils/formatTimeAgo';
 import { PROFILE_ICONS } from '@/components/ProfileIcons';
+import Link from 'next/link';
 
 interface Notification {
   id: string;
@@ -31,10 +32,14 @@ interface Notification {
 
 function getNotificationIcon(type: string) {
   // Extensible: add new cases as notification types are implemented
-  if (type === 'follow') {
-    return <UserPlus className="w-4 h-4 text-blue-500" />;
+  switch (type) {
+    case 'follow':
+      return <UserPlus className="w-4 h-4 text-blue-500" />;
+    case 'trip_invite':
+      return <MapPin className="w-4 h-4 text-purple-500" />;
+    default:
+      return <Bell className="w-4 h-4" />;
   }
-  return <Bell className="w-4 h-4" />;
 }
 
 export function NotificationsDropdown() {
@@ -141,63 +146,90 @@ export function NotificationsDropdown() {
               <p className="text-sm">No notifications yet</p>
             </div>
           ) : (
-            notifications.map((notification) => (
-              <DropdownMenuItem
-                key={notification.id}
-                className={`flex items-start gap-3 p-3 cursor-pointer ${
-                  !notification.read ? 'bg-blue-50 dark:bg-blue-950/20' : ''
-                }`}
-                onClick={() => {
-                  if (!notification.read) {
-                    markAsRead(notification.id);
-                  }
-                }}
-              >
-                {(() => {
-                  const avatarUrl = notification.actor_avatar_url;
-                  // Check if avatarUrl is a profile icon name
-                  if (avatarUrl && PROFILE_ICONS[avatarUrl]) {
-                    const IconComponent = PROFILE_ICONS[avatarUrl];
+            notifications.map((notification) => {
+              // Trip invite notifications should link to the trip
+              const tripInviteId = notification.type === 'trip_invite'
+                ? (notification.data?.itinerary_id as string)
+                : null;
+
+              const NotificationContent = (
+                <>
+                  {(() => {
+                    const avatarUrl = notification.actor_avatar_url;
+                    // Check if avatarUrl is a profile icon name
+                    if (avatarUrl && PROFILE_ICONS[avatarUrl]) {
+                      const IconComponent = PROFILE_ICONS[avatarUrl];
+                      return (
+                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white flex-shrink-0">
+                          <IconComponent className="w-4 h-4" />
+                        </div>
+                      );
+                    }
+                    // Check if it's a URL (for backwards compatibility)
+                    if (avatarUrl && (avatarUrl.startsWith('http') || avatarUrl.startsWith('/'))) {
+                      return (
+                        <Avatar className="w-8 h-8">
+                          <AvatarImage src={avatarUrl} />
+                          <AvatarFallback>
+                            {notification.actor_username?.[0]?.toUpperCase() || '?'}
+                          </AvatarFallback>
+                        </Avatar>
+                      );
+                    }
+                    // Default fallback
                     return (
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white flex-shrink-0">
-                        <IconComponent className="w-4 h-4" />
+                      <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
+                        {getNotificationIcon(notification.type)}
                       </div>
                     );
-                  }
-                  // Check if it's a URL (for backwards compatibility)
-                  if (avatarUrl && (avatarUrl.startsWith('http') || avatarUrl.startsWith('/'))) {
-                    return (
-                      <Avatar className="w-8 h-8">
-                        <AvatarImage src={avatarUrl} />
-                        <AvatarFallback>
-                          {notification.actor_username?.[0]?.toUpperCase() || '?'}
-                        </AvatarFallback>
-                      </Avatar>
-                    );
-                  }
-                  // Default fallback
-                  return (
-                    <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
-                      {getNotificationIcon(notification.type)}
+                  })()}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate">
+                      {notification.title}
+                    </p>
+                    <p className="text-xs text-muted-foreground truncate">
+                      {notification.message}
+                    </p>
+                    {notification.type === 'trip_invite' && tripInviteId && (
+                      <span className="inline-block mt-1 text-xs text-purple-600 dark:text-purple-400 font-medium">
+                        View Quest {'\u2192'}
+                      </span>
+                    )}
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {formatTimeAgo(notification.created_at)}
+                    </p>
+                  </div>
+                  {!notification.read && (
+                    <div className="w-2 h-2 bg-blue-500 rounded-full shrink-0 mt-2" />
+                  )}
+                </>
+              );
+
+              return (
+                <DropdownMenuItem
+                  key={notification.id}
+                  className={`flex items-start gap-3 p-3 cursor-pointer ${
+                    !notification.read ? 'bg-blue-50 dark:bg-blue-950/20' : ''
+                  }`}
+                  onClick={() => {
+                    if (!notification.read) {
+                      markAsRead(notification.id);
+                    }
+                  }}
+                  asChild={!!tripInviteId}
+                >
+                  {tripInviteId ? (
+                    <Link href={`/trips/${tripInviteId}`} className="flex items-start gap-3">
+                      {NotificationContent}
+                    </Link>
+                  ) : (
+                    <div className="flex items-start gap-3 w-full">
+                      {NotificationContent}
                     </div>
-                  );
-                })()}
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate">
-                    {notification.title}
-                  </p>
-                  <p className="text-xs text-muted-foreground truncate">
-                    {notification.message}
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {formatTimeAgo(notification.created_at)}
-                  </p>
-                </div>
-                {!notification.read && (
-                  <div className="w-2 h-2 bg-blue-500 rounded-full shrink-0 mt-2" />
-                )}
-              </DropdownMenuItem>
-            ))
+                  )}
+                </DropdownMenuItem>
+              );
+            })
           )}
         </ScrollArea>
       </DropdownMenuContent>
