@@ -145,7 +145,7 @@ interface FAQ {
 
 const categoryFAQs: Partial<Record<Category, FAQ[]>> = {
   countries: [
-    { question: 'How many countries are there in the world?', answer: 'There are 197 recognized countries in the world - 193 UN member states plus 4 observer/partially recognized states (Vatican City, Palestine, Taiwan, and Kosovo). Our tracker includes all 197.' },
+    { question: 'How many countries are there in the world?', answer: 'There are 200 recognized countries and territories in the world - 193 UN member states plus 7 others including Vatican City, Palestine, Taiwan, Kosovo, Hong Kong, Macao, and Antarctica. Our tracker includes all 200.' },
     { question: 'What counts as visiting a country?', answer: 'Most travelers count a country as "visited" if they\'ve spent meaningful time there, not just airport layovers. Mark it visited when you\'ve explored outside the airport!' },
     { question: 'How can I share my country count?', answer: 'Use the Share button to create a beautiful shareable image with your map and stats. Perfect for social media bragging rights!' },
     { question: 'Is my country tracking data saved?', answer: 'Yes! Your data is automatically saved in your browser\'s local storage. No account needed - your progress stays on your device.' },
@@ -295,7 +295,7 @@ function generateBreadcrumbJsonLd(category: Category, label: string) {
 }
 
 const categoryDescriptions: Record<Category, string> = {
-  countries: 'Track all 197 countries around the world. Mark countries as visited or add them to your bucket list.',
+  countries: 'Track all 200 countries around the world. Mark countries as visited or add them to your bucket list.',
   states: 'Track all 50 US states plus Washington DC. Perfect for road trippers and domestic travelers.',
   territories: 'Track US territories and islands. From Puerto Rico to Guam, explore America beyond the 50 states.',
   usCities: 'Track major US cities. From New York to Los Angeles, mark every American city you have explored.',
