@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
 
     if (error) {
       console.error('Error checking follow status:', error);
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ error: 'Failed to check follow status' }, { status: 500 });
     }
 
     return NextResponse.json({ isFollowing: data || false });

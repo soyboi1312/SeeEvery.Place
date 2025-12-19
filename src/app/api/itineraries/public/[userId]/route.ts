@@ -29,7 +29,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
     if (error) {
       console.error('Error fetching public itineraries:', error);
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ error: 'Failed to fetch public itineraries' }, { status: 500 });
     }
 
     return NextResponse.json({ itineraries: data || [] });

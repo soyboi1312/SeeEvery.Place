@@ -7,6 +7,7 @@ import { ActivityFeed } from '@/components/ActivityFeed';
 import { Leaderboard } from '@/components/Leaderboard';
 import { UserSearch } from '@/components/UserSearch';
 import { NotificationsDropdown } from '@/components/NotificationsDropdown';
+import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import AuthModal from '@/components/AuthModal';
@@ -84,25 +85,40 @@ export default function CommunityPage() {
               {/* User Search */}
               <div>
                 <h2 className="text-lg font-semibold mb-3">Find Travelers</h2>
-                <UserSearch />
+                <ErrorBoundary
+                  fallbackTitle="Search unavailable"
+                  fallbackMessage="Unable to load user search. Please try again."
+                >
+                  <UserSearch />
+                </ErrorBoundary>
               </div>
 
               {/* Activity Feed */}
-              <ActivityFeed
-                defaultType="global"
-                showTabs={true}
-              />
+              <ErrorBoundary
+                fallbackTitle="Feed unavailable"
+                fallbackMessage="Unable to load activity feed. Please try again."
+              >
+                <ActivityFeed
+                  defaultType="global"
+                  showTabs={true}
+                />
+              </ErrorBoundary>
             </div>
 
             {/* Sidebar: Leaderboard */}
             <div className="space-y-6">
               <div className="lg:sticky lg:top-20">
-                <Leaderboard
-                  limit={10}
-                  defaultType="global"
-                  showPeriodTabs={true}
-                  showTypeTabs={true}
-                />
+                <ErrorBoundary
+                  fallbackTitle="Leaderboard unavailable"
+                  fallbackMessage="Unable to load leaderboard. Please try again."
+                >
+                  <Leaderboard
+                    limit={10}
+                    defaultType="global"
+                    showPeriodTabs={true}
+                    showTypeTabs={true}
+                  />
+                </ErrorBoundary>
               </div>
             </div>
           </div>

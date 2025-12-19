@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
 
     if (error) {
       console.error('Error searching users:', error);
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ error: 'Failed to search users' }, { status: 500 });
     }
 
     // Transform to frontend-friendly format

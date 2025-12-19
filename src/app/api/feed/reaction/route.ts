@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
 
     if (error) {
       console.error('Error toggling reaction:', error);
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ error: 'Failed to toggle reaction' }, { status: 500 });
     }
 
     if (data?.error) {
@@ -70,7 +70,7 @@ export async function GET(request: NextRequest) {
 
     if (error) {
       console.error('Error fetching reactions:', error);
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ error: 'Failed to fetch reactions' }, { status: 500 });
     }
 
     const reactions = (data || []).map((reaction: {

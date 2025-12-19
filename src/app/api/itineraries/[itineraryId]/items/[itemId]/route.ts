@@ -45,11 +45,11 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       .single();
 
     if (error) {
-      console.error('Error updating itinerary item:', error);
       if (error.code === 'PGRST116') {
         return NextResponse.json({ error: 'Item not found or access denied' }, { status: 404 });
       }
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      console.error('Error updating itinerary item:', error);
+      return NextResponse.json({ error: 'Failed to update itinerary item' }, { status: 500 });
     }
 
     return NextResponse.json({ item: data });
@@ -81,7 +81,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
 
     if (error) {
       console.error('Error deleting itinerary item:', error);
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ error: 'Failed to delete itinerary item' }, { status: 500 });
     }
 
     return NextResponse.json({ success: true });

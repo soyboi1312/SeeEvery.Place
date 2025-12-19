@@ -25,7 +25,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
     if (error) {
       console.error('Error fetching itinerary items:', error);
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ error: 'Failed to fetch itinerary items' }, { status: 500 });
     }
 
     return NextResponse.json({ items: data || [] });
@@ -99,7 +99,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       if (error.code === '42501') {
         return NextResponse.json({ error: 'Access denied' }, { status: 403 });
       }
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ error: 'Failed to add itinerary item' }, { status: 500 });
     }
 
     return NextResponse.json({ item: data }, { status: 201 });
