@@ -31,7 +31,7 @@ export async function DELETE(request: NextRequest) {
 
     if (error) {
       console.error('Error removing follower:', error);
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ error: 'Failed to remove follower' }, { status: 500 });
     }
 
     // Update follower count on current user's profile

@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
 
       if (error) {
         console.error('Error fetching mutual bucket list:', error);
-        return NextResponse.json({ error: error.message }, { status: 500 });
+        return NextResponse.json({ error: 'Failed to fetch mutual bucket list' }, { status: 500 });
       }
 
       const items = (data || []).map((item: {
@@ -57,7 +57,7 @@ export async function GET(request: NextRequest) {
 
       if (error) {
         console.error('Error fetching bucket list friends:', error);
-        return NextResponse.json({ error: error.message }, { status: 500 });
+        return NextResponse.json({ error: 'Failed to fetch bucket list friends' }, { status: 500 });
       }
 
       const friends = (data || []).map((friend: {

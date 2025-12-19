@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
 
     if (error) {
       console.error('Error fetching itineraries:', error);
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ error: 'Failed to fetch itineraries' }, { status: 500 });
     }
 
     return NextResponse.json({ itineraries: data || [] });
@@ -85,7 +85,7 @@ export async function POST(request: NextRequest) {
 
     if (error) {
       console.error('Error creating itinerary:', error);
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ error: 'Failed to create itinerary' }, { status: 500 });
     }
 
     return NextResponse.json({ itinerary: data }, { status: 201 });
