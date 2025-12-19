@@ -149,7 +149,7 @@ export default function AboutPage() {
                 <ul className="space-y-2">
                   <li className="flex items-center gap-3">
                     <span className="text-xl">🌍</span>
-                    <span><strong className="text-primary-900 dark:text-white">Countries</strong> - All 197 countries worldwide</span>
+                    <span><strong className="text-primary-900 dark:text-white">Countries</strong> - All 200 countries worldwide</span>
                   </li>
                   <li className="flex items-center gap-3">
                     <span className="text-xl">🇺🇸</span>
