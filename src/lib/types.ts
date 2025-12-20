@@ -41,7 +41,7 @@ export const CATEGORY_SCHEMA = {
   marathons: { label: "Marathon Majors", icon: "🏃", group: "sports", xp: 100, total: 8, mapType: 'marker' as const, projection: 'world' as const, drillDown: false },
   airports: { label: "Airports", icon: "✈️", group: "destinations", xp: 5, total: 59, mapType: 'marker' as const, projection: 'world' as const, drillDown: false },
   skiResorts: { label: "Ski Resorts", icon: "⛷️", group: "nature", xp: 25, total: 38, mapType: 'marker' as const, projection: 'world' as const, drillDown: false },
-  themeParks: { label: "Theme Parks", icon: "🎢", group: "culture", xp: 20, total: 47, mapType: 'marker' as const, projection: 'world' as const, drillDown: false },
+  themeParks: { label: "Theme Parks", icon: "🎢", group: "culture", xp: 20, total: 60, mapType: 'marker' as const, projection: 'world' as const, drillDown: false },
   surfingReserves: { label: "Surfing Reserves", icon: "🌊", group: "nature", xp: 30, total: 27, mapType: 'marker' as const, projection: 'world' as const, drillDown: false },
 } as const;
 
