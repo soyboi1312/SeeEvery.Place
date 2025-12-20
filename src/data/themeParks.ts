@@ -24,13 +24,29 @@ export const themeParks: ThemePark[] = [
   { id: "islands-adventure", name: "Islands of Adventure", location: "Orlando, Florida", country: "USA", region: "North America", lat: 28.4722, lng: -81.4703, opened: 1999 },
   { id: "universal-hollywood", name: "Universal Studios Hollywood", location: "Los Angeles, California", country: "USA", region: "North America", lat: 34.1381, lng: -118.3534, opened: 1964 },
 
-  // North America - Other Major Parks
+  // North America - Six Flags Parks
   { id: "six-flags-magic-mountain", name: "Six Flags Magic Mountain", location: "Valencia, California", country: "USA", region: "North America", lat: 34.4252, lng: -118.5972, opened: 1971 },
+  { id: "six-flags-great-adventure", name: "Six Flags Great Adventure", location: "Jackson, New Jersey", country: "USA", region: "North America", lat: 40.1367, lng: -74.4416, opened: 1974 },
+  { id: "six-flags-great-america", name: "Six Flags Great America", location: "Gurnee, Illinois", country: "USA", region: "North America", lat: 42.3698, lng: -87.9354, opened: 1976 },
+  { id: "six-flags-over-texas", name: "Six Flags Over Texas", location: "Arlington, Texas", country: "USA", region: "North America", lat: 32.7556, lng: -97.0692, opened: 1961 },
+  { id: "six-flags-over-georgia", name: "Six Flags Over Georgia", location: "Austell, Georgia", country: "USA", region: "North America", lat: 33.7678, lng: -84.5509, opened: 1967 },
+  { id: "six-flags-fiesta-texas", name: "Six Flags Fiesta Texas", location: "San Antonio, Texas", country: "USA", region: "North America", lat: 29.5996, lng: -98.6089, opened: 1992 },
+  { id: "six-flags-st-louis", name: "Six Flags St. Louis", location: "Eureka, Missouri", country: "USA", region: "North America", lat: 38.5111, lng: -90.6757, opened: 1971 },
+  { id: "six-flags-new-england", name: "Six Flags New England", location: "Agawam, Massachusetts", country: "USA", region: "North America", lat: 42.0391, lng: -72.6160, opened: 1870 },
+  { id: "six-flags-america", name: "Six Flags America", location: "Bowie, Maryland", country: "USA", region: "North America", lat: 38.9014, lng: -76.7714, opened: 1973 },
+  { id: "six-flags-discovery-kingdom", name: "Six Flags Discovery Kingdom", location: "Vallejo, California", country: "USA", region: "North America", lat: 38.1389, lng: -122.2326, opened: 1968 },
+  { id: "six-flags-mexico", name: "Six Flags México", location: "Mexico City", country: "Mexico", region: "North America", lat: 19.2948, lng: -99.2111, opened: 1982 },
+  { id: "six-flags-darien-lake", name: "Six Flags Darien Lake", location: "Darien, New York", country: "USA", region: "North America", lat: 42.4399, lng: -78.4101, opened: 1964 },
+  { id: "six-flags-great-escape", name: "The Great Escape", location: "Queensbury, New York", country: "USA", region: "North America", lat: 43.3492, lng: -73.6947, opened: 1954 },
+  { id: "la-ronde", name: "La Ronde", location: "Montreal, Quebec", country: "Canada", region: "North America", lat: 45.5224, lng: -73.5349, opened: 1967 },
+
+  // North America - Other Major Parks
   { id: "cedar-point", name: "Cedar Point", location: "Sandusky, Ohio", country: "USA", region: "North America", lat: 41.4781, lng: -82.6807, opened: 1870 },
   { id: "busch-gardens-tampa", name: "Busch Gardens Tampa Bay", location: "Tampa, Florida", country: "USA", region: "North America", lat: 28.0372, lng: -82.4214, opened: 1989 },
   { id: "legoland-california", name: "Legoland California", location: "Carlsbad, California", country: "USA", region: "North America", lat: 33.1267, lng: -117.3114, opened: 1999 },
   { id: "wonderland", name: "Canada's Wonderland", location: "Vaughan, Ontario", country: "Canada", region: "North America", lat: 43.8430, lng: -79.5393, opened: 1981 },
   { id: "hersheypark", name: "Hersheypark", location: "Hershey, Pennsylvania", country: "USA", region: "North America", lat: 40.2887, lng: -76.6549, opened: 1906 },
+  { id: "dorney-park", name: "Dorney Park", location: "Allentown, Pennsylvania", country: "USA", region: "North America", lat: 40.5793, lng: -75.5359, opened: 1884 },
   { id: "dollywood", name: "Dollywood", location: "Pigeon Forge, Tennessee", country: "USA", region: "North America", lat: 35.7953, lng: -83.5306, opened: 1961 },
   { id: "knotts", name: "Knott's Berry Farm", location: "Buena Park, California", country: "USA", region: "North America", lat: 33.8442, lng: -117.9986, opened: 1920 },
   { id: "kings-island", name: "Kings Island", location: "Mason, Ohio", country: "USA", region: "North America", lat: 39.3447, lng: -84.2686, opened: 1972 },
