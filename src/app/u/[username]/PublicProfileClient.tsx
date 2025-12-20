@@ -7,6 +7,7 @@ import { useDarkMode } from '@/lib/hooks/useDarkMode';
 import { useAuth } from '@/lib/hooks/useAuth';
 import {
   getTierColor,
+  getTierLabel,
   ACHIEVEMENTS,
   AchievementDefinition,
 } from '@/lib/achievements';
@@ -54,6 +55,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogDescription,
 } from '@/components/ui/dialog';
 import {
   DropdownMenu,
@@ -110,12 +112,35 @@ interface PublicProfileClientProps {
 // Mini achievement badge for display
 function MiniBadge({ achievement }: { achievement: AchievementDefinition }) {
   return (
-    <div
-      className={`w-12 h-12 rounded-full bg-gradient-to-br ${getTierColor(achievement.tier)} flex items-center justify-center shadow-lg`}
-      title={achievement.name}
-    >
-      <span className="text-xl">{achievement.icon}</span>
-    </div>
+    <Dialog>
+      <DialogTrigger asChild>
+        <button
+          className={`w-12 h-12 rounded-full bg-gradient-to-br ${getTierColor(achievement.tier)} flex items-center justify-center shadow-lg hover:scale-110 transition-transform cursor-pointer`}
+          title={achievement.name}
+        >
+          <span className="text-xl">{achievement.icon}</span>
+        </button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-sm">
+        <DialogHeader className="flex flex-col items-center">
+          <div className={`w-24 h-24 rounded-full bg-gradient-to-br ${getTierColor(achievement.tier)} flex items-center justify-center shadow-xl mb-4`}>
+            <span className="text-5xl">{achievement.icon}</span>
+          </div>
+          <DialogTitle className="text-center text-xl">{achievement.name}</DialogTitle>
+          <DialogDescription className="text-center text-base mt-2">
+            {achievement.description}
+          </DialogDescription>
+        </DialogHeader>
+        <div className="flex justify-center gap-3 mt-2">
+          <span className="px-3 py-1 bg-muted rounded-full text-xs font-medium uppercase tracking-wider">
+            {getTierLabel(achievement.tier)}
+          </span>
+          <span className="px-3 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 rounded-full text-xs font-bold">
+            +{achievement.xpReward} XP
+          </span>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
 
