@@ -65,26 +65,20 @@ export default function AboutPage() {
           {/* The Story Section */}
           <section className="mb-12 bg-primary-50/50 dark:bg-primary-900/20 rounded-2xl p-6 md:p-8 border border-black/5 dark:border-white/10">
             <h2 className="text-2xl font-bold text-primary-900 dark:text-white mb-4 flex items-center gap-2">
-              <span className="text-2xl">✨</span> Our Story
+              <span className="text-2xl">✨</span> Our Philosophy
             </h2>
             <div className="space-y-4 text-primary-600 dark:text-primary-300">
               <p>
-                It started with the realization that memories fade faster than we&apos;d like. We wanted a way to hold onto the places we&apos;ve seen—not just the countries, but the mountain peaks, the national parks, and those random roadside attractions that made the trip special.
+                Life and travel is not a checklist; it&apos;s about culture and experience and ways of being that challenge your own idea of normalcy. Being in the moment to experience the most human consistent: eating, sharing, experiencing.
               </p>
               <p>
-                Existing tools felt too generic. They didn&apos;t capture the detail of the journey, or they locked everything behind a login screen.
+                But when you get home? <strong className="text-primary-900 dark:text-white">Might as well keep track.</strong> And that&apos;s what we&apos;re here for.
               </p>
               <p>
-                We wanted something simple - a visual way to see where we&apos;d been and dream about where we&apos;d go next.
-                Not another app that wanted our email, credit card, or to post on our behalf. Just a beautiful map
-                that showed our journey.
+                Challenge your friends to look past the doldrums of existence in this capitalist hellscape and meet new people and redefine what living means.
               </p>
-              <p>
-                <strong className="text-primary-900 dark:text-white">So we built one.</strong> And now we&apos;re sharing it with you.
-              </p>
-              <p className="text-sm text-primary-500 dark:text-primary-400 pt-2 border-t border-black/5 dark:border-white/10">
-                See Every Place is free, works offline, and your data stays on your device.
-                No sign-up required. No tracking. Just you and your adventures.
+              <p className="italic border-l-4 border-primary-500 pl-4 my-4">
+                These aren&apos;t just new experiences to consume but realities to challenge what you think you know about the world.
               </p>
             </div>
           </section>
