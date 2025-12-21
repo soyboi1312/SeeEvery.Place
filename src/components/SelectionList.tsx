@@ -209,6 +209,11 @@ const emptyStateContent: Record<Category, { icon: string; title: string; subtitl
     title: 'Cricket Grounds',
     subtitle: 'Lord\'s, the MCG, Eden Gardens - track the world\'s great cricket venues!',
   },
+  countryHighPoints: {
+    icon: '🏔️',
+    title: 'Reach New Heights',
+    subtitle: 'Everest, Denali, Kilimanjaro - summit the highest point in every country!',
+  },
 };
 
 export default function SelectionList({

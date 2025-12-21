@@ -43,6 +43,7 @@ export const CATEGORY_SCHEMA = {
   skiResorts: { label: "Ski Resorts", icon: "⛷️", group: "nature", xp: 25, total: 38, mapType: 'marker' as const, projection: 'world' as const, drillDown: false },
   themeParks: { label: "Theme Parks", icon: "🎢", group: "culture", xp: 20, total: 60, mapType: 'marker' as const, projection: 'world' as const, drillDown: false },
   surfingReserves: { label: "Surfing Reserves", icon: "🌊", group: "nature", xp: 30, total: 27, mapType: 'marker' as const, projection: 'world' as const, drillDown: false },
+  countryHighPoints: { label: "Country High Points", icon: "🏔️", group: "nature", xp: 35, total: 199, mapType: 'marker' as const, projection: 'world' as const, drillDown: false },
 } as const;
 
 // Derived sets for map rendering (used by MapVisualization)
