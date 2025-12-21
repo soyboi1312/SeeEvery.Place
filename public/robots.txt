@@ -1,0 +1,32 @@
+User-agent: *
+Allow: /
+Allow: /track/
+Allow: /about
+Allow: /privacy
+Allow: /terms
+Allow: /suggest
+Allow: /u/
+Disallow: /admin/
+Disallow: /admin
+Disallow: /api/
+Disallow: /auth/
+Disallow: /settings
+Disallow: /newsletter/confirmed
+Disallow: /newsletter/unsubscribed
+Disallow: /newsletter/error
+Disallow: /_next/
+Disallow: /geo/
+
+User-agent: GPTBot
+Disallow: /
+
+User-agent: ChatGPT-User
+Disallow: /
+
+User-agent: CCBot
+Disallow: /
+
+User-agent: anthropic-ai
+Disallow: /
+
+Sitemap: https://seeevery.place/sitemap.xml
