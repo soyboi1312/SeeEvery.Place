@@ -17,6 +17,7 @@ import type { SurfingReserve } from '@/data/surfingReserves';
 import type { WeirdAmericana } from '@/data/weirdAmericana';
 import type { USCity } from '@/data/usCities';
 import type { WorldCity } from '@/data/worldCities';
+import type { CountryHighPoint } from '@/data/countryHighPoints';
 
 // Union type for all category data items
 // Exported for type-safe usage in map data hooks
@@ -38,7 +39,8 @@ export type CategoryDataItem =
   | SkiResort
   | ThemePark
   | SurfingReserve
-  | WeirdAmericana;
+  | WeirdAmericana
+  | CountryHighPoint;
 
 // Common country abbreviation aliases that differ from ISO codes
 export const countryAliases: Record<string, string[]> = {
@@ -191,6 +193,7 @@ export const categoryTitles: Record<Category, string> = {
   themeParks: 'Theme Parks & Attractions',
   surfingReserves: 'World Surfing Reserves',
   weirdAmericana: 'Quirky Roadside Attractions',
+  countryHighPoints: 'Highest Points by Country',
 };
 
 // Transform functions receive category-specific data at runtime via lookup.
@@ -337,6 +340,12 @@ const transforms: Record<Category, TransformFn> = {
     name: `${w.name} - ${w.city}, ${w.state}`,
     group: w.region,
   }),
+  countryHighPoints: (hp) => ({
+    id: hp.id,
+    name: `${hp.name} (${hp.elevation.toLocaleString()}m) - ${hp.country}`,
+    group: hp.continent,
+    code: hp.countryCode,
+  }),
 };
 
 // =====================
@@ -378,6 +387,7 @@ const DATA_LOADERS: Record<Category, () => Promise<any[]>> = {
   themeParks: () => loadWithJsonFallback('themeParks.json', () => import('@/data/themeParks').then(m => m.themeParks)),
   surfingReserves: () => import('@/data/surfingReserves').then(m => m.surfingReserves),
   weirdAmericana: () => loadWithJsonFallback('weirdAmericana.json', () => import('@/data/weirdAmericana').then(m => m.weirdAmericana)),
+  countryHighPoints: () => loadWithJsonFallback('countryHighPoints.json', () => import('@/data/countryHighPoints').then(m => m.countryHighPoints)),
 };
 
 // Dynamic data loaders - only load when needed

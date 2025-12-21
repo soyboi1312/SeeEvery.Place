@@ -135,6 +135,7 @@ const categoryKeywords: Record<Category, string[]> = {
   euroFootballStadiums: ['European football stadiums', 'Premier League stadiums', 'La Liga stadiums', 'Bundesliga stadiums', 'Serie A grounds', 'soccer grounds Europe'],
   rugbyStadiums: ['rugby stadium tracker', 'rugby grounds visited', 'Six Nations stadiums', 'rugby world cup venues', 'Premiership Rugby grounds'],
   cricketStadiums: ['cricket ground tracker', 'cricket stadiums visited', 'Test cricket venues', 'IPL stadiums', 'international cricket grounds'],
+  countryHighPoints: ['country high points tracker', 'highest peaks by country', 'seven summits', 'mountain summit tracker', 'peak bagging countries'],
 };
 
 // FAQ content for each category
@@ -321,6 +322,7 @@ const categoryDescriptions: Record<Category, string> = {
   euroFootballStadiums: 'Track European football stadiums across top leagues. From the Premier League to La Liga, mark every ground you have visited.',
   rugbyStadiums: 'Track professional rugby stadiums worldwide. From Six Nations to Super Rugby venues, record every ground you have experienced.',
   cricketStadiums: 'Track international cricket grounds. From Lord\'s to the MCG, mark every Test and ODI venue you have visited.',
+  countryHighPoints: 'Track the highest point in every country. From Mount Everest to the lowest country high points, conquer peaks around the world.',
 };
 
 // Example places for each category with unique facts and reasons to visit
@@ -566,6 +568,11 @@ const categoryExamples: Record<Category, PlaceExample[]> = {
     { name: 'Lord\'s, London', fact: 'Known as the "Home of Cricket," Lord\'s has hosted matches since 1814 and is owned by the Marylebone Cricket Club (MCC). The famous slope from one side to the other affects bowling strategy.', reason: 'Visit cricket\'s most sacred ground where the Laws of the Game were written. See the Ashes urn in the museum, walk through the Long Room, and experience cricket at its historic best.' },
     { name: 'Melbourne Cricket Ground', fact: 'The largest cricket stadium in the world with 100,024 capacity. The MCG has hosted the first-ever Test match (1877), AFL Grand Finals, and the 1956 and 2006 Olympic ceremonies.', reason: 'Experience the Boxing Day Test atmosphere with 90,000 fans creating one of sport\'s great traditions. The MCG is to Australian sport what Wembley is to English football.' },
     { name: 'Eden Gardens, Kolkata', fact: 'India\'s most iconic cricket ground can hold 66,000 passionate fans and has hosted some of cricket\'s most dramatic matches, including India\'s famous 2001 victory over Australia after following on.', reason: 'Feel the electricity of 66,000 Indian cricket fans creating an atmosphere unmatched anywhere in world sport. Eden Gardens turns cricket into a religious experience.' },
+  ],
+  countryHighPoints: [
+    { name: 'Mount Everest, Nepal/China', fact: 'At 8,849 meters, Everest is the highest point on Earth and the highest point for both Nepal and China (Tibet). The summit is so high that jet streams can blow across it, and the "death zone" above 8,000m has claimed over 300 lives.', reason: 'Stand at the roof of the world where only about 6,000 people have ever summited. Even reaching Base Camp at 5,364m is a life-changing trek through stunning Himalayan scenery.' },
+    { name: 'Denali, United States', fact: 'At 6,190 meters, Denali is the highest peak in North America and rises higher from base to summit than Everest. The mountain creates its own weather systems and has some of the coldest temperatures ever recorded on Earth.', reason: 'Experience true Alaskan wilderness on a peak visible from over 100 miles away. Whether summiting or viewing from Denali National Park, this mountain commands respect and awe.' },
+    { name: 'Mount Kilimanjaro, Tanzania', fact: 'At 5,895 meters, Kilimanjaro is Africa\'s highest peak and the world\'s tallest free-standing mountain. It\'s also the highest point you can reach without technical climbing equipment, making it accessible to determined trekkers.', reason: 'Trek through five distinct climate zones from tropical rainforest to arctic summit. Watch the sunrise from Uhuru Peak as the shadow of Kilimanjaro stretches across the African plains below.' },
   ],
 };
 
