@@ -1,0 +1,8 @@
+# Security Policy for SeeEvery.Place
+# See https://securitytxt.org/ for more information
+
+Contact: https://github.com/soyboi1312/SeeEvery.Place/security/advisories/new
+Expires: 2026-12-31T23:59:59.000Z
+Preferred-Languages: en
+Canonical: https://seeevery.place/.well-known/security.txt
+Policy: https://github.com/soyboi1312/SeeEvery.Place/security/policy
