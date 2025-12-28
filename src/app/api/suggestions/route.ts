@@ -56,12 +56,13 @@ export async function POST(request: NextRequest) {
 
     // 3. Validate using Zod Schema
     // We map the snake_case keys from the API request to the camelCase keys expected by the Zod schema
+    // Convert null values to undefined since Zod's .optional() accepts undefined but not null
     const validation = suggestionSchema.safeParse({
         title: body.title,
-        description: body.description,
-        examplePlaces: body.example_places, 
-        dataSource: body.data_source,
-        email: body.submitter_email
+        description: body.description ?? undefined,
+        examplePlaces: body.example_places ?? undefined,
+        dataSource: body.data_source ?? undefined,
+        email: body.submitter_email ?? undefined
     });
 
     if (!validation.success) {
