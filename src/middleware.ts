@@ -4,6 +4,15 @@ import { updateSession } from '@/lib/supabase/middleware';
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  // Redirect HTTP to HTTPS in production
+  // Check x-forwarded-proto header (set by reverse proxies/CDNs like Cloudflare)
+  const proto = request.headers.get('x-forwarded-proto');
+  if (proto === 'http') {
+    const httpsUrl = new URL(request.url);
+    httpsUrl.protocol = 'https:';
+    return NextResponse.redirect(httpsUrl, 301);
+  }
+
   // Skip auth middleware for static assets - let Next.js serve them directly
   // This ensures geo data, images, and other static files are served without 503 errors
   if (
