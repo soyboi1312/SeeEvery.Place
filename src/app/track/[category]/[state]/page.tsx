@@ -255,6 +255,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const label = categoryLabels[category as Category];
   const description = getRegionDescription(category as Category, regionName, items.length, isCountry);
 
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://seeevery.place';
+
   return {
     title: `${label} in ${regionName} | See Every Place`,
     description,
@@ -267,6 +269,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       'travel tracker',
       'bucket list',
     ],
+    alternates: {
+      canonical: `${baseUrl}/track/${category}/${state.toLowerCase()}`,
+    },
     openGraph: {
       title: `${label} in ${regionName} | See Every Place`,
       description,

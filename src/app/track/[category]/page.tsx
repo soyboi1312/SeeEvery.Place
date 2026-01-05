@@ -831,10 +831,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const description = categoryDescriptions[category as Category] || `Track ${label} you have visited.`;
   const keywords = categoryKeywords[category as Category] || [`${label} tracker`];
 
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://seeevery.place';
+
   return {
     title: `Track ${label} Visited | See Every Place`,
     description: `${description} Create beautiful shareable maps and bucket lists for free.`,
     keywords: [...keywords, 'travel tracker', 'bucket list', 'free travel app'],
+    alternates: {
+      canonical: `${baseUrl}/track/${category}`,
+    },
     openGraph: {
       title: `Track ${label} Visited | See Every Place`,
       description: description,
