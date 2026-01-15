@@ -8,6 +8,8 @@ import Footer from '@/components/Footer';
 import CategoryTabs from '@/components/CategoryTabs';
 import SelectionList from '@/components/SelectionList';
 import QuickStats from '@/components/QuickStats';
+import { ChallengesCard } from '@/components/ChallengesCard';
+import { NextMilestone } from '@/components/NextMilestone';
 
 // Dynamically import heavy modals to reduce initial bundle size
 // ShareCard imports all category data files (~100KB+ of coordinates/names)
@@ -336,6 +338,12 @@ function HomeContent() {
           <LoadingSkeletons />
         ) : (
           <div className="animate-fade-in space-y-6">
+            {/* Gamification Section: Challenges & Next Milestone */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <ChallengesCard showCompleted={false} />
+              <NextMilestone selections={selections} />
+            </div>
+
             <QuickStats
               selections={selections}
               onCategoryClick={handleCategoryChange}
