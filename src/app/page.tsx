@@ -337,8 +337,8 @@ function HomeContent() {
           <LoadingSkeletons />
         ) : (
           <div className="animate-fade-in space-y-6">
-            {/* Next Milestone Nudge */}
-            <NextMilestone selections={selections} />
+            {/* Next Milestone Nudge (logged-in users only) */}
+            {user && <NextMilestone selections={selections} />}
 
             <QuickStats
               selections={selections}
