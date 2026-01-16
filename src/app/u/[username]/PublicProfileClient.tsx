@@ -588,14 +588,9 @@ export default function PublicProfileClient({
             </CardHeader>
             <CardContent>
               <div className="flex flex-wrap gap-3">
-                {unlockedAchievements.slice(0, 12).map((achievement) => (
+                {unlockedAchievements.map((achievement) => (
                   <MiniBadge key={achievement.id} achievement={achievement} />
                 ))}
-                {unlockedAchievements.length > 12 && (
-                  <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center text-sm font-bold text-muted-foreground">
-                    +{unlockedAchievements.length - 12}
-                  </div>
-                )}
               </div>
             </CardContent>
           </Card>
