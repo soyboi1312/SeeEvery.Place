@@ -15,8 +15,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuGroup,
 } from '@/components/ui/dropdown-menu';
-import { Moon, Sun, Cloud, CloudOff, Loader2, User, ChevronDown, Users, Lightbulb, Trophy, Settings, Menu } from 'lucide-react';
-import { ChallengesCompact } from '@/components/ChallengesCard';
+import { Moon, Sun, Cloud, CloudOff, Loader2, User, ChevronDown, Users, Lightbulb, Plane, Settings, Menu } from 'lucide-react';
 import {
   Sheet,
   SheetContent,
@@ -217,13 +216,6 @@ export default function Header({
         </div>
 
         <div className="flex items-center gap-1 sm:gap-2">
-          {/* Active Challenge (Desktop only) */}
-          {isSignedIn && (
-            <div className="hidden md:block">
-              <ChallengesCompact />
-            </div>
-          )}
-
           {/* Sync Status */}
           {isSignedIn && syncStatus && <SyncStatusIcon status={syncStatus} />}
 
@@ -297,8 +289,8 @@ export default function Header({
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <Link href="/trips">
-                    <Trophy className="w-4 h-4 mr-2" />
-                    My Quests
+                    <Plane className="w-4 h-4 mr-2" />
+                    My Trips
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>

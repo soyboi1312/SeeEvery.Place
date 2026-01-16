@@ -34,7 +34,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Sun, Moon, Trophy, Medal, Sparkles, Lock, LogIn, Loader2 } from 'lucide-react';
+import { Sun, Moon, Trophy, Medal, Sparkles, Lock, LogIn, Loader2, Clock } from 'lucide-react';
+import { ChallengesCard } from '@/components/ChallengesCard';
 
 // Type for processed achievement items
 interface ProcessedAchievement {
@@ -565,6 +566,18 @@ export default function AchievementsPage() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Seasonal Challenges - only for logged in users */}
+        {user && (
+          <div className="mb-8">
+            <div className="flex items-center gap-2 mb-4">
+              <Clock className="w-5 h-5 text-amber-500" />
+              <h3 className="text-xl font-bold text-foreground">Seasonal Challenges</h3>
+              <span className="text-sm text-muted-foreground">Limited time</span>
+            </div>
+            <ChallengesCard showCompleted={true} />
+          </div>
+        )}
 
         {/* Filters */}
         <div className="flex flex-wrap items-center gap-4 mb-6">
