@@ -26,7 +26,6 @@ import {
   Loader2,
   Target,
 } from 'lucide-react';
-import { ChallengesCard } from '@/components/ChallengesCard';
 
 export default function TripsPage() {
   const router = useRouter();
@@ -125,9 +124,9 @@ export default function TripsPage() {
               <div className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/20 dark:to-purple-900/20 flex items-center justify-center mx-auto mb-6 text-4xl">
                 🗺️
               </div>
-              <h1 className="text-2xl font-bold mb-2">Track Your Quests</h1>
+              <h1 className="text-2xl font-bold mb-2">Track Your Trips</h1>
               <p className="text-muted-foreground mb-6">
-                Create custom place lists to track your adventures. Share with friends and conquer them together.
+                Create custom place lists to track your adventures. Share with friends and explore together.
               </p>
               <Button onClick={() => setShowAuthModal(true)} size="lg">
                 Sign in to Get Started
@@ -161,14 +160,14 @@ export default function TripsPage() {
         {/* Page Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">My Quests</h1>
+            <h1 className="text-3xl font-bold text-foreground">My Trips</h1>
             <p className="text-muted-foreground mt-1">
-              Create custom quests and track your conquests
+              Create custom trip lists and track your adventures
             </p>
           </div>
           <Button onClick={() => setShowCreateDialog(true)} className="gap-2">
             <Plus className="w-4 h-4" />
-            New Quest
+            New Trip
           </Button>
         </div>
 
@@ -178,7 +177,7 @@ export default function TripsPage() {
             <Card className="bg-gradient-to-br from-blue-500/10 to-purple-500/10 border-blue-200 dark:border-blue-800">
               <CardContent className="py-4 text-center">
                 <div className="text-3xl font-bold text-blue-600 dark:text-blue-400">{listStats.total}</div>
-                <div className="text-sm text-muted-foreground">Quests</div>
+                <div className="text-sm text-muted-foreground">Trips</div>
               </CardContent>
             </Card>
             <Card className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 border-purple-200 dark:border-purple-800">
@@ -196,9 +195,6 @@ export default function TripsPage() {
           </div>
         )}
 
-        {/* Active Challenges */}
-        <ChallengesCard showCompleted={false} className="mb-8" />
-
         {/* Lists Grid */}
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
@@ -210,13 +206,13 @@ export default function TripsPage() {
               <div className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/20 dark:to-purple-900/20 flex items-center justify-center mx-auto mb-6">
                 <Target className="w-10 h-10 text-purple-500" />
               </div>
-              <h2 className="text-xl font-bold mb-2">Start Your Quest</h2>
+              <h2 className="text-xl font-bold mb-2">Start Your First Trip</h2>
               <p className="text-muted-foreground mb-6 max-w-sm mx-auto">
-                Create your first quest to start tracking places. Conquer national parks, collect stadiums, or plan an epic road trip.
+                Create your first trip to start tracking places. Explore national parks, visit stadiums, or plan an epic road trip.
               </p>
               <Button onClick={() => setShowCreateDialog(true)} className="gap-2">
                 <Plus className="w-4 h-4" />
-                Create Your First Quest
+                Create Your First Trip
               </Button>
             </CardContent>
           </Card>
@@ -247,16 +243,16 @@ export default function TripsPage() {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Target className="w-5 h-5 text-primary" />
-              Create New Quest
+              Create New Trip
             </DialogTitle>
           </DialogHeader>
 
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="list-title">Quest Name *</Label>
+              <Label htmlFor="list-title">Trip Name *</Label>
               <Input
                 id="list-title"
-                placeholder="e.g., National Parks Quest, Stadiums to Conquer"
+                placeholder="e.g., National Parks Road Trip, Europe 2025"
                 value={newTitle}
                 onChange={(e) => setNewTitle(e.target.value)}
                 maxLength={100}
@@ -267,7 +263,7 @@ export default function TripsPage() {
               <Label htmlFor="list-description">Description (optional)</Label>
               <Textarea
                 id="list-description"
-                placeholder="What's this quest about?"
+                placeholder="What's this trip about?"
                 value={newDescription}
                 onChange={(e) => setNewDescription(e.target.value)}
                 maxLength={500}
@@ -289,7 +285,7 @@ export default function TripsPage() {
               ) : (
                 <>
                   <Plus className="w-4 h-4 mr-2" />
-                  Create Quest
+                  Create Trip
                 </>
               )}
             </Button>
