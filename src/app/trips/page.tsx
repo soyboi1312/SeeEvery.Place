@@ -24,10 +24,9 @@ import {
 import {
   Plus,
   Loader2,
-  MapPin,
-  Sparkles,
   Target,
 } from 'lucide-react';
+import { ChallengesCard } from '@/components/ChallengesCard';
 
 export default function TripsPage() {
   const router = useRouter();
@@ -196,6 +195,9 @@ export default function TripsPage() {
             </Card>
           </div>
         )}
+
+        {/* Active Challenges */}
+        <ChallengesCard showCompleted={false} className="mb-8" />
 
         {/* Lists Grid */}
         {isLoading ? (
