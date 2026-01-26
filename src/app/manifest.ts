@@ -9,6 +9,7 @@ export default function manifest(): MetadataRoute.Manifest {
     start_url: '/',
     scope: '/',
     display: 'standalone',
+    display_override: ['window-controls-overlay', 'standalone'],
     orientation: 'portrait-primary',
     background_color: '#ffffff',
     theme_color: '#3b82f6',
@@ -78,6 +79,13 @@ export default function manifest(): MetadataRoute.Manifest {
         type: 'image/png',
         form_factor: 'wide',
         label: 'Travel map showing visited countries',
+      },
+      {
+        src: '/files/mobile-screenshot.png',
+        sizes: '750x1334',
+        type: 'image/png',
+        form_factor: 'narrow',
+        label: 'Mobile view of the travel tracker',
       },
     ],
   }
