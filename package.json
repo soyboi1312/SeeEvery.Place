@@ -15,7 +15,9 @@
     "deploy": "node scripts/copy-geo-assets.js && opennextjs-cloudflare build && wrangler deploy",
     "deploy:workflow": "wrangler deploy --config wrangler.workflow.jsonc",
     "deploy:all": "npm run deploy:workflow && npm run deploy",
-    "postinstall": "node scripts/copy-geo-assets.js"
+    "postinstall": "node scripts/copy-geo-assets.js",
+    "pwa:screenshots": "node scripts/generate-screenshots.js",
+    "pwa:splash": "echo 'Open scripts/generate-splash-screens.html in browser'"
   },
   "dependencies": {
     "@ducanh2912/next-pwa": "^10.2.9",

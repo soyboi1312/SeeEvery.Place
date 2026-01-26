@@ -73,19 +73,35 @@ export default function manifest(): MetadataRoute.Manifest {
       },
     ],
     screenshots: [
+      // Wide (desktop) screenshots
       {
-        src: '/files/og-image.png',
-        sizes: '1200x630',
+        src: '/files/screenshots/desktop-map.png',
+        sizes: '1280x800',
         type: 'image/png',
         form_factor: 'wide',
-        label: 'Travel map showing visited countries',
+        label: 'Interactive world map showing visited countries',
       },
+      // Narrow (mobile) screenshots - need 3+ for Chrome Rich Install UI
       {
-        src: '/files/mobile-screenshot.png',
+        src: '/files/screenshots/mobile-map.png',
         sizes: '750x1334',
         type: 'image/png',
         form_factor: 'narrow',
-        label: 'Mobile view of the travel tracker',
+        label: 'Track your visited countries on the go',
+      },
+      {
+        src: '/files/screenshots/mobile-achievements.png',
+        sizes: '750x1334',
+        type: 'image/png',
+        form_factor: 'narrow',
+        label: 'Earn achievements as you explore the world',
+      },
+      {
+        src: '/files/screenshots/mobile-parks.png',
+        sizes: '750x1334',
+        type: 'image/png',
+        form_factor: 'narrow',
+        label: 'Track national parks and bucket list destinations',
       },
     ],
   }
