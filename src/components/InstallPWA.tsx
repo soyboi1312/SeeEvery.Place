@@ -3,6 +3,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { X, Download, Smartphone } from 'lucide-react';
+import { useStandalone } from '@/lib/hooks/useStandalone';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt(): Promise<void>;
@@ -13,18 +14,13 @@ const DISMISS_KEY = 'pwa-install-dismissed';
 const DISMISS_DURATION = 7 * 24 * 60 * 60 * 1000; // 7 days
 
 export default function InstallPWA() {
+  const { isStandalone, isIOS } = useStandalone();
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [showBanner, setShowBanner] = useState(false);
-  const [isIOS, setIsIOS] = useState(false);
-  const [isStandalone, setIsStandalone] = useState(false);
 
   useEffect(() => {
-    // Check if already running as installed PWA
-    const standalone = window.matchMedia('(display-mode: standalone)').matches
-      || (window.navigator as Navigator & { standalone?: boolean }).standalone === true;
-    setIsStandalone(standalone);
-
-    if (standalone) return; // Don't show install prompt if already installed
+    // Don't show install prompt if already installed
+    if (isStandalone) return;
 
     // Check if user dismissed recently
     const dismissedAt = localStorage.getItem(DISMISS_KEY);
@@ -32,28 +28,34 @@ export default function InstallPWA() {
       return;
     }
 
-    // Detect iOS (doesn't support beforeinstallprompt)
-    const isIOSDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as Window & { MSStream?: unknown }).MSStream;
-    setIsIOS(isIOSDevice);
-
     // For iOS, show manual instructions after a delay
-    if (isIOSDevice) {
+    if (isIOS) {
       const timer = setTimeout(() => setShowBanner(true), 3000);
       return () => clearTimeout(timer);
     }
 
     // For Android/Desktop Chrome, capture the install prompt
-    const handler = (e: Event) => {
+    const handleBeforeInstall = (e: Event) => {
       e.preventDefault();
       setDeferredPrompt(e as BeforeInstallPromptEvent);
       // Show banner after short delay to not interrupt initial experience
       setTimeout(() => setShowBanner(true), 2000);
     };
 
-    window.addEventListener('beforeinstallprompt', handler);
+    // Listen for successful installation to hide banner immediately
+    const handleAppInstalled = () => {
+      setDeferredPrompt(null);
+      setShowBanner(false);
+    };
 
-    return () => window.removeEventListener('beforeinstallprompt', handler);
-  }, []);
+    window.addEventListener('beforeinstallprompt', handleBeforeInstall);
+    window.addEventListener('appinstalled', handleAppInstalled);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
+      window.removeEventListener('appinstalled', handleAppInstalled);
+    };
+  }, [isStandalone, isIOS]);
 
   const handleInstall = useCallback(async () => {
     if (!deferredPrompt) return;

@@ -10,6 +10,7 @@ export const viewport: Viewport = {
   themeColor: '#3b82f6',
   width: 'device-width',
   initialScale: 1,
+  viewportFit: 'cover', // Allow PWA to use full screen including notch area
   // Removed maximumScale to fix Lighthouse accessibility audit
   // Users must be able to zoom.
 }
