@@ -1,3 +1,7 @@
+// This import causes a build-time error if this module is imported into client code.
+// This protects against accidentally exposing the service role key to the browser.
+import 'server-only';
+
 import { createServerClient } from '@supabase/ssr';
 import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
