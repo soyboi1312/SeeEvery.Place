@@ -4,6 +4,7 @@ import { QueryProvider } from '@/lib/providers/QueryProvider'
 import SystemBanner from '@/components/SystemBanner'
 import AchievementToast from '@/components/AchievementToast'
 import VersionChecker from '@/components/VersionChecker'
+import InstallPWA from '@/components/InstallPWA'
 
 export const viewport: Viewport = {
   themeColor: '#3b82f6',
@@ -124,6 +125,24 @@ export default function RootLayout({
         <meta name="format-detection" content="telephone=no" />
         <meta name="mobile-web-app-capable" content="yes" />
 
+        {/* iOS Splash Screens - generated for common device sizes */}
+        {/* iPhone 15 Pro Max, 14 Pro Max (1290x2796) */}
+        <link rel="apple-touch-startup-image" href="/files/splash/apple-splash-1290-2796.png" media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3)" />
+        {/* iPhone 15 Pro, 14 Pro (1179x2556) */}
+        <link rel="apple-touch-startup-image" href="/files/splash/apple-splash-1179-2556.png" media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3)" />
+        {/* iPhone 14, 13, 12 (1170x2532) */}
+        <link rel="apple-touch-startup-image" href="/files/splash/apple-splash-1170-2532.png" media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3)" />
+        {/* iPhone 11, XR (828x1792) */}
+        <link rel="apple-touch-startup-image" href="/files/splash/apple-splash-828-1792.png" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2)" />
+        {/* iPhone SE 3rd gen (750x1334) */}
+        <link rel="apple-touch-startup-image" href="/files/splash/apple-splash-750-1334.png" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2)" />
+        {/* iPad Pro 12.9" (2048x2732) */}
+        <link rel="apple-touch-startup-image" href="/files/splash/apple-splash-2048-2732.png" media="(device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2)" />
+        {/* iPad Pro 11" (1668x2388) */}
+        <link rel="apple-touch-startup-image" href="/files/splash/apple-splash-1668-2388.png" media="(device-width: 834px) and (device-height: 1194px) and (-webkit-device-pixel-ratio: 2)" />
+        {/* iPad Air/Mini (1640x2360) */}
+        <link rel="apple-touch-startup-image" href="/files/splash/apple-splash-1640-2360.png" media="(device-width: 820px) and (device-height: 1180px) and (-webkit-device-pixel-ratio: 2)" />
+
         {/* Preconnect to Supabase for faster auth/API handshakes */}
         {process.env.NEXT_PUBLIC_SUPABASE_URL && (
           <link rel="preconnect" href={process.env.NEXT_PUBLIC_SUPABASE_URL} />
@@ -154,6 +173,7 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
         <QueryProvider>
+          <InstallPWA />
           <VersionChecker />
           <SystemBanner />
           <AchievementToast />

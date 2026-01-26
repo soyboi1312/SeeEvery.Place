@@ -16,6 +16,9 @@ const withPWA = withPWAInit({
   reloadOnOnline: false,
   swcMinify: true,
   disable: process.env.NODE_ENV === "development", // Disable PWA in dev mode
+  fallbacks: {
+    document: "/offline", // Offline fallback page for navigation requests
+  },
   workboxOptions: {
     disableDevLogs: true,
     // Force new service worker to activate immediately
