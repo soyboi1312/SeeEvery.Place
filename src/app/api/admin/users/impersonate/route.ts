@@ -10,6 +10,9 @@ const getImpersonationSecret = () => {
   return new TextEncoder().encode(secret);
 };
 
+// Cookie name for impersonation token
+const IMPERSONATION_COOKIE = 'impersonation_token';
+
 // Impersonate user - generate a secure token for impersonation
 export async function POST(request: NextRequest) {
   try {
@@ -97,11 +100,24 @@ export async function POST(request: NextRequest) {
       console.error('Failed to log admin action:', logErr);
     }
 
-    return NextResponse.json({
+    // Create response with the verify link (no token in URL)
+    const response = NextResponse.json({
       success: true,
-      link: `${siteUrl}/api/admin/users/impersonate/verify?token=${token}`,
+      link: `${siteUrl}/api/admin/users/impersonate/verify`,
       email: targetUser.user.email,
     });
+
+    // Set the token in a secure httpOnly cookie instead of URL
+    // This prevents the token from appearing in browser history, logs, or referrer headers
+    response.cookies.set(IMPERSONATION_COOKIE, token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 300, // 5 minutes, matches token expiry
+      path: '/api/admin/users/impersonate/verify',
+    });
+
+    return response;
   } catch (error) {
     console.error('Impersonation error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

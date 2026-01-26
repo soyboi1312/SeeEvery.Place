@@ -9,6 +9,9 @@ const getImpersonationSecret = () => {
   return new TextEncoder().encode(secret);
 };
 
+// Cookie name for impersonation token (must match route.ts)
+const IMPERSONATION_COOKIE = 'impersonation_token';
+
 interface ImpersonationPayload {
   targetUserId: string;
   targetEmail: string;
@@ -21,7 +24,9 @@ export async function GET(request: NextRequest) {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
 
   try {
-    const token = request.nextUrl.searchParams.get('token');
+    // Read token from httpOnly cookie instead of URL params
+    // This prevents token exposure in browser history, logs, and referrer headers
+    const token = request.cookies.get(IMPERSONATION_COOKIE)?.value;
 
     if (!token) {
       return NextResponse.redirect(`${siteUrl}/auth/auth-code-error`);
@@ -109,9 +114,15 @@ export async function GET(request: NextRequest) {
     }
 
     // Redirect to home page with impersonation flag
-    return NextResponse.redirect(`${siteUrl}/?impersonated=true`);
+    // Clear the impersonation cookie after successful use
+    const response = NextResponse.redirect(`${siteUrl}/?impersonated=true`);
+    response.cookies.delete(IMPERSONATION_COOKIE);
+    return response;
   } catch (error) {
     console.error('Impersonation verification error:', error);
-    return NextResponse.redirect(`${siteUrl}/auth/auth-code-error`);
+    // Clear the cookie on error too
+    const response = NextResponse.redirect(`${siteUrl}/auth/auth-code-error`);
+    response.cookies.delete(IMPERSONATION_COOKIE);
+    return response;
   }
 }

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { CreateItineraryInput } from '@/lib/types';
+import { sanitizeText } from '@/lib/serverUtils';
 
 /**
  * GET /api/itineraries
@@ -70,12 +71,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Description must be 500 characters or less' }, { status: 400 });
     }
 
+    // Sanitize user inputs to prevent XSS
+    const sanitizedTitle = sanitizeText(body.title) || '';
+    const sanitizedDescription = sanitizeText(body.description);
+
     const { data, error } = await supabase
       .from('itineraries')
       .insert({
         owner_id: user.id,
-        title: body.title.trim(),
-        description: body.description?.trim() || null,
+        title: sanitizedTitle,
+        description: sanitizedDescription,
         start_date: body.start_date || null,
         end_date: body.end_date || null,
         is_public: body.is_public || false,
