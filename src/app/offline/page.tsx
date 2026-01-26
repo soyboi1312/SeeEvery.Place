@@ -1,6 +1,7 @@
 // src/app/offline/page.tsx
-import { WifiOff, RefreshCw, Home } from 'lucide-react'
+import { WifiOff, Home } from 'lucide-react'
 import Link from 'next/link'
+import { RefreshButton } from './RefreshButton'
 
 export const metadata = {
   title: 'Offline - See Every Place',
@@ -29,13 +30,7 @@ export default function OfflinePage() {
 
         {/* Actions */}
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
-          <button
-            onClick={() => window.location.reload()}
-            className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-full font-semibold hover:bg-blue-700 transition-colors"
-          >
-            <RefreshCw className="w-5 h-5" />
-            Try Again
-          </button>
+          <RefreshButton />
 
           <Link
             href="/"
