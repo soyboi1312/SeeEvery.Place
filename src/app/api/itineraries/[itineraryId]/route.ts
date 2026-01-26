@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { UpdateItineraryInput } from '@/lib/types';
+import { sanitizeText } from '@/lib/serverUtils';
 
 interface RouteParams {
   params: Promise<{ itineraryId: string }>;
@@ -72,10 +73,10 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: 'Description must be 500 characters or less' }, { status: 400 });
     }
 
-    // Build update object
+    // Build update object with sanitized inputs to prevent XSS
     const updateData: Record<string, unknown> = {};
-    if (body.title !== undefined) updateData.title = body.title.trim();
-    if (body.description !== undefined) updateData.description = body.description?.trim() || null;
+    if (body.title !== undefined) updateData.title = sanitizeText(body.title) || '';
+    if (body.description !== undefined) updateData.description = sanitizeText(body.description);
     if (body.start_date !== undefined) updateData.start_date = body.start_date || null;
     if (body.end_date !== undefined) updateData.end_date = body.end_date || null;
     if (body.is_public !== undefined) updateData.is_public = body.is_public;

@@ -36,3 +36,33 @@ export function getClientIP(request: NextRequest): string {
 
   return 'unknown';
 }
+
+/**
+ * Sanitize user input text to prevent XSS attacks.
+ * Strips HTML tags and encodes dangerous characters.
+ *
+ * Use this for any user-provided text that will be rendered in the UI,
+ * such as descriptions, titles, notes, etc.
+ *
+ * @param input - The raw user input string
+ * @returns Sanitized string safe for rendering
+ */
+export function sanitizeText(input: string | null | undefined): string | null {
+  if (input === null || input === undefined) {
+    return null;
+  }
+
+  return input
+    // Remove HTML tags
+    .replace(/<[^>]*>/g, '')
+    // Encode HTML entities to prevent injection
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#x27;')
+    // Remove null bytes and other control characters (except newlines/tabs)
+    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '')
+    // Trim whitespace
+    .trim();
+}

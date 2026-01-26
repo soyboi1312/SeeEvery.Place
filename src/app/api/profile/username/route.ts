@@ -4,6 +4,21 @@ import { createClient } from '@/lib/supabase/server';
 /**
  * GET /api/profile/username?username=xxx
  * Check if a username is available
+ *
+ * SECURITY NOTE: This endpoint is vulnerable to username enumeration.
+ * An attacker could use it to harvest valid usernames by checking many
+ * usernames in sequence. To mitigate:
+ *
+ * 1. Implement rate limiting (recommended: 10 requests/minute per IP)
+ *    - At infrastructure level (Cloudflare Rate Limiting rules)
+ *    - Or via middleware with a rate limiter library
+ *
+ * 2. Consider adding CAPTCHA for repeated requests
+ *
+ * 3. Add artificial delay (100-300ms) to slow down automated attacks
+ *
+ * Since this app deploys to Cloudflare Workers, the recommended approach
+ * is to configure Cloudflare Rate Limiting rules for this endpoint path.
  */
 export async function GET(request: NextRequest) {
   try {

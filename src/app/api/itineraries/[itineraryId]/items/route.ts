@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { AddItineraryItemInput, ALL_CATEGORIES } from '@/lib/types';
+import { sanitizeText } from '@/lib/serverUtils';
 
 interface RouteParams {
   params: Promise<{ itineraryId: string }>;
@@ -79,14 +80,18 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 
     const nextSortOrder = (existingItems?.[0]?.sort_order ?? -1) + 1;
 
+    // Sanitize user inputs to prevent XSS
+    const sanitizedPlaceName = sanitizeText(body.place_name) || '';
+    const sanitizedNotes = sanitizeText(body.notes);
+
     const { data, error } = await supabase
       .from('itinerary_items')
       .insert({
         itinerary_id: itineraryId,
         category: body.category,
         place_id: body.place_id,
-        place_name: body.place_name.trim(),
-        notes: body.notes?.trim() || null,
+        place_name: sanitizedPlaceName,
+        notes: sanitizedNotes,
         sort_order: body.sort_order ?? nextSortOrder,
         day_number: body.day_number || null,
         added_by: user.id,
