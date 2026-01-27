@@ -13,10 +13,33 @@ interface BeforeInstallPromptEvent extends Event {
 const DISMISS_KEY = 'pwa-install-dismissed';
 const DISMISS_DURATION = 7 * 24 * 60 * 60 * 1000; // 7 days
 
+// iOS Share icon (square with arrow pointing up)
+function IOSShareIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8" />
+      <polyline points="16 6 12 2 8 6" />
+      <line x1="12" y1="2" x2="12" y2="15" />
+    </svg>
+  );
+}
+
+// Android/Chrome menu icon (three vertical dots)
+function MenuDotsIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+      <circle cx="12" cy="5" r="2" />
+      <circle cx="12" cy="12" r="2" />
+      <circle cx="12" cy="19" r="2" />
+    </svg>
+  );
+}
+
 export default function InstallPWA() {
-  const { isStandalone, isIOS } = useStandalone();
+  const { isStandalone, isIOS, isAndroid, isMobile } = useStandalone();
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [showBanner, setShowBanner] = useState(false);
+  const [showManualAndroid, setShowManualAndroid] = useState(false);
 
   useEffect(() => {
     // Don't show install prompt if already installed
@@ -51,11 +74,26 @@ export default function InstallPWA() {
     window.addEventListener('beforeinstallprompt', handleBeforeInstall);
     window.addEventListener('appinstalled', handleAppInstalled);
 
+    // For Android browsers that don't fire beforeinstallprompt, show manual instructions
+    if (isAndroid) {
+      const fallbackTimer = setTimeout(() => {
+        if (!deferredPrompt) {
+          setShowManualAndroid(true);
+          setShowBanner(true);
+        }
+      }, 4000);
+      return () => {
+        clearTimeout(fallbackTimer);
+        window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
+        window.removeEventListener('appinstalled', handleAppInstalled);
+      };
+    }
+
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
       window.removeEventListener('appinstalled', handleAppInstalled);
     };
-  }, [isStandalone, isIOS]);
+  }, [isStandalone, isIOS, isAndroid, deferredPrompt]);
 
   const handleInstall = useCallback(async () => {
     if (!deferredPrompt) return;
@@ -86,14 +124,9 @@ export default function InstallPWA() {
         <div className="max-w-4xl mx-auto flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 flex-1 min-w-0">
             <Smartphone className="w-5 h-5 flex-shrink-0" />
-            <p className="text-sm font-medium truncate">
-              Install app: tap{' '}
-              <span className="inline-flex items-center">
-                <svg className="w-4 h-4 mx-1" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 2L12 14M12 14L7 9M12 14L17 9M4 16V20H20V16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
-                </svg>
-              </span>
-              then &quot;Add to Home Screen&quot;
+            <p className="text-sm font-medium">
+              <span className="hidden sm:inline">Install app: </span>
+              Tap <IOSShareIcon className="w-5 h-5 inline-block mx-0.5 -mt-0.5" /> then <span className="font-semibold">&quot;Add to Home Screen&quot;</span>
             </p>
           </div>
           <button
@@ -108,7 +141,31 @@ export default function InstallPWA() {
     );
   }
 
-  // Android/Desktop Chrome prompt
+  // Android manual fallback (for browsers without beforeinstallprompt)
+  if (showManualAndroid && !deferredPrompt) {
+    return (
+      <div className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-3 shadow-lg animate-slide-down">
+        <div className="max-w-4xl mx-auto flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 flex-1 min-w-0">
+            <Smartphone className="w-5 h-5 flex-shrink-0" />
+            <p className="text-sm font-medium">
+              <span className="hidden sm:inline">Install app: </span>
+              Tap <MenuDotsIcon className="w-5 h-5 inline-block mx-0.5" /> then <span className="font-semibold">&quot;Add to Home screen&quot;</span>
+            </p>
+          </div>
+          <button
+            onClick={handleDismiss}
+            className="p-1 hover:bg-white/20 rounded-full transition-colors flex-shrink-0"
+            aria-label="Dismiss install prompt"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Android/Desktop Chrome native prompt
   if (deferredPrompt) {
     return (
       <div className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-3 shadow-lg animate-slide-down">
@@ -116,7 +173,7 @@ export default function InstallPWA() {
           <div className="flex items-center gap-3 flex-1 min-w-0">
             <Download className="w-5 h-5 flex-shrink-0" />
             <p className="text-sm font-medium truncate">
-              Install See Every Place for offline access
+              {isMobile ? 'Add to Home screen for quick access' : 'Install See Every Place for offline access'}
             </p>
           </div>
           <div className="flex items-center gap-2 flex-shrink-0">
