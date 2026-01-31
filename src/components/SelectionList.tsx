@@ -58,6 +58,7 @@ interface Item {
   group?: string;
   code?: string;
   aliases?: string[];
+  unescoId?: number;
 }
 
 interface SelectionListProps {
@@ -679,6 +680,27 @@ export default function SelectionList({
               </div>
             ) : (
               descriptions?.[infoItem?.id || ''] || "No description available for this location yet. Go explore and write your own story!"
+            )}
+
+            {/* UNESCO Attribution - Required for compliance */}
+            {items.find(i => i.id === infoItem?.id)?.unescoId && (
+              <div className="mt-6 pt-4 border-t border-border/50 text-xs">
+                <p className="font-semibold text-foreground mb-1">Source & Attribution</p>
+                <p className="mb-2">
+                  <a
+                    href={`https://whc.unesco.org/en/list/${items.find(i => i.id === infoItem?.id)?.unescoId}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-primary hover:underline flex items-center gap-1"
+                  >
+                    View official UNESCO listing
+                    <span className="inline-block">↗</span>
+                  </a>
+                </p>
+                <p className="text-[10px] opacity-70">
+                  Copyright © 1992 - {new Date().getFullYear()} UNESCO/World Heritage Centre. All rights reserved.
+                </p>
+              </div>
             )}
           </div>
           <DialogFooter className="flex-col sm:flex-row gap-2">
