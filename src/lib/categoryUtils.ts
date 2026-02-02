@@ -18,6 +18,7 @@ import type { WeirdAmericana } from '@/data/weirdAmericana';
 import type { USCity } from '@/data/usCities';
 import type { WorldCity } from '@/data/worldCities';
 import type { CountryHighPoint } from '@/data/countryHighPoints';
+import type { UNESCOSite } from '@/data/unescoSites';
 
 // Union type for all category data items
 // Exported for type-safe usage in map data hooks
@@ -40,7 +41,8 @@ export type CategoryDataItem =
   | ThemePark
   | SurfingReserve
   | WeirdAmericana
-  | CountryHighPoint;
+  | CountryHighPoint
+  | UNESCOSite;
 
 // Common country abbreviation aliases that differ from ISO codes
 export const countryAliases: Record<string, string[]> = {
@@ -74,6 +76,7 @@ export interface CategoryItem {
   code?: string;
   aliases?: string[];
   subcategory?: string;
+  unescoId?: number;
 }
 
 // Cache for loaded data to avoid re-importing (moved up for getCategoryTotal)
@@ -194,6 +197,7 @@ export const categoryTitles: Record<Category, string> = {
   surfingReserves: 'World Surfing Reserves',
   weirdAmericana: 'Quirky Roadside Attractions',
   countryHighPoints: 'Highest Points by Country',
+  unescoSites: 'UNESCO World Heritage Sites',
 };
 
 // Transform functions receive category-specific data at runtime via lookup.
@@ -346,6 +350,13 @@ const transforms: Record<Category, TransformFn> = {
     group: hp.continent,
     code: hp.countryCode,
   }),
+  unescoSites: (s) => ({
+    id: s.id,
+    name: `${s.name} - ${s.country}`,
+    group: s.type,
+    code: s.countryCode,
+    unescoId: s.unescoId,
+  }),
 };
 
 // =====================
@@ -388,6 +399,7 @@ const DATA_LOADERS: Record<Category, () => Promise<any[]>> = {
   surfingReserves: () => import('@/data/surfingReserves').then(m => m.surfingReserves),
   weirdAmericana: () => loadWithJsonFallback('weirdAmericana.json', () => import('@/data/weirdAmericana').then(m => m.weirdAmericana)),
   countryHighPoints: () => loadWithJsonFallback('countryHighPoints.json', () => import('@/data/countryHighPoints').then(m => m.countryHighPoints)),
+  unescoSites: () => loadWithJsonFallback('unescoSites.json', () => import('@/data/unescoSites').then(m => m.unescoSites)),
 };
 
 // Dynamic data loaders - only load when needed

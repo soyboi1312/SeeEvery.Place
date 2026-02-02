@@ -105,6 +105,8 @@ const categories: Category[] = [
   'themeParks',
   'surfingReserves',
   'weirdAmericana',
+  'countryHighPoints',
+  'unescoSites',
 ];
 
 // Category-specific keywords for SEO
@@ -136,6 +138,7 @@ const categoryKeywords: Record<Category, string[]> = {
   rugbyStadiums: ['rugby stadium tracker', 'rugby grounds visited', 'Six Nations stadiums', 'rugby world cup venues', 'Premiership Rugby grounds'],
   cricketStadiums: ['cricket ground tracker', 'cricket stadiums visited', 'Test cricket venues', 'IPL stadiums', 'international cricket grounds'],
   countryHighPoints: ['country high points tracker', 'highest peaks by country', 'seven summits', 'mountain summit tracker', 'peak bagging countries'],
+  unescoSites: ['UNESCO world heritage sites tracker', 'world heritage checklist', 'UNESCO sites visited', 'cultural heritage bucket list', 'natural wonders tracker'],
 };
 
 // FAQ content for each category
@@ -226,6 +229,17 @@ const categoryFAQs: Partial<Record<Category, FAQ[]>> = {
     { question: 'What counts as weird Americana?', answer: 'Quirky roadside attractions, oversized statues, unusual museums, and bizarre landmarks that celebrate America\'s eccentric creativity and roadside culture.' },
     { question: 'Are these attractions free to visit?', answer: 'Many roadside attractions are free to view (like Cadillac Ranch). Some museums and indoor attractions charge admission, typically $5-20.' },
     { question: 'Where can I find the most weird attractions?', answer: 'Route 66 has the highest concentration, but every state has hidden gems. The Southwest, Midwest, and California are particularly rich in quirky stops.' },
+  ],
+  countryHighPoints: [
+    { question: 'What is a country high point?', answer: 'A country high point is the highest elevation point within a country\'s borders. They range from Mount Everest (Nepal/China, 8,849m) to the Maldives\' highest point at just 5 meters above sea level.' },
+    { question: 'Do I need to be a mountaineer to collect high points?', answer: 'Many country high points are accessible by road, cable car, or easy hike. Others require serious mountaineering. The challenge varies enormously from country to country.' },
+    { question: 'What are the Seven Summits?', answer: 'The Seven Summits are the highest peaks on each continent: Everest (Asia), Aconcagua (South America), Denali (North America), Kilimanjaro (Africa), Elbrus (Europe), Vinson (Antarctica), and Puncak Jaya or Kosciuszko (Oceania).' },
+  ],
+  unescoSites: [
+    { question: 'What is a UNESCO World Heritage Site?', answer: 'UNESCO World Heritage Sites are places of outstanding universal value, designated by the United Nations Educational, Scientific and Cultural Organization. They include cultural landmarks, natural wonders, and mixed sites across the globe.' },
+    { question: 'How many UNESCO World Heritage Sites are there?', answer: 'There are over 1,100 UNESCO World Heritage Sites across more than 160 countries. New sites are inscribed annually at the World Heritage Committee meeting.' },
+    { question: 'What types of sites are included?', answer: 'Sites are classified as Cultural (monuments, architecture, landscapes), Natural (geological formations, habitats, ecosystems), or Mixed (combining both cultural and natural significance).' },
+    { question: 'Which country has the most UNESCO sites?', answer: 'Italy leads with over 55 UNESCO World Heritage Sites, followed closely by China, Germany, France, and Spain. Europe has the highest concentration overall.' },
   ],
 };
 
@@ -323,6 +337,7 @@ const categoryDescriptions: Record<Category, string> = {
   rugbyStadiums: 'Track professional rugby stadiums worldwide. From Six Nations to Super Rugby venues, record every ground you have experienced.',
   cricketStadiums: 'Track international cricket grounds. From Lord\'s to the MCG, mark every Test and ODI venue you have visited.',
   countryHighPoints: 'Track the highest point in every country. From Mount Everest to the lowest country high points, conquer peaks around the world.',
+  unescoSites: 'Track UNESCO World Heritage Sites around the world. From ancient temples to natural wonders, check off humanity\'s greatest treasures.',
 };
 
 // Example places for each category with unique facts and reasons to visit
@@ -574,6 +589,16 @@ const categoryExamples: Record<Category, PlaceExample[]> = {
     { name: 'Denali, United States', fact: 'At 6,190 meters, Denali is the highest peak in North America and rises higher from base to summit than Everest. The mountain creates its own weather systems and has some of the coldest temperatures ever recorded on Earth.', reason: 'Experience true Alaskan wilderness on a peak visible from over 100 miles away. Whether summiting or viewing from Denali National Park, this mountain commands respect and awe.' },
     { name: 'Mount Kilimanjaro, Tanzania', fact: 'At 5,895 meters, Kilimanjaro is Africa\'s highest peak and the world\'s tallest free-standing mountain. It\'s also the highest point you can reach without technical climbing equipment, making it accessible to determined trekkers.', reason: 'Trek through five distinct climate zones from tropical rainforest to arctic summit. Watch the sunrise from Uhuru Peak as the shadow of Kilimanjaro stretches across the African plains below.' },
   ],
+  unescoSites: [
+    { name: 'Machu Picchu, Peru', fact: 'This 15th-century Inca citadel sits at 2,430 meters in the Andes Mountains and was unknown to the outside world until 1911. The site\'s precisely cut stone blocks fit together without mortar so tightly that a knife blade cannot fit between them.', reason: 'Trek the Inca Trail to reach this cloud-shrouded citadel at sunrise and marvel at Inca engineering that has withstood five centuries of earthquakes and tropical storms in one of the most dramatic mountain settings on Earth.' },
+    { name: 'Great Barrier Reef, Australia', fact: 'The world\'s largest coral reef system stretches over 2,300 kilometers and is visible from space. It supports more than 1,500 species of fish, 400 types of coral, and 4,000 species of mollusk, making it one of the most complex natural ecosystems on the planet.', reason: 'Snorkel or dive through an underwater wonderland of rainbow-colored coral gardens and swim alongside sea turtles, manta rays, and clownfish in one of the few living structures visible from orbit.' },
+    { name: 'Angkor Wat, Cambodia', fact: 'The largest religious monument in the world covers over 400 acres. Originally built as a Hindu temple in the 12th century, it gradually transformed into a Buddhist temple. Its five iconic towers represent Mount Meru, the home of the gods.', reason: 'Watch the sunrise silhouette the temple\'s towers reflected in the surrounding moat. Explore hundreds of temples reclaimed by jungle roots and discover bas-reliefs that tell stories spanning Hindu and Buddhist mythology.' },
+    { name: 'Serengeti National Park, Tanzania', fact: 'Home to the Great Migration, where over 1.5 million wildebeest and hundreds of thousands of zebras make a circular trek covering 800 kilometers annually, the largest mass movement of land animals on Earth.', reason: 'Witness the Great Migration as vast herds thunder across the plains and brave crocodile-infested river crossings. Experience the raw power of the African savanna and see the Big Five in one of the last great wildlife spectacles.' },
+    { name: 'Historic Centre of Rome, Italy', fact: 'The entire historic center of Rome is a UNESCO site encompassing nearly 3,000 years of history, from the Colosseum and Pantheon to St. Peter\'s Basilica. Rome has more UNESCO-listed sites than most entire countries.', reason: 'Walk the same streets as emperors and gladiators past the Colosseum, toss a coin in the Trevi Fountain, and gaze up at the Pantheon\'s perfect dome that has stood open to the sky for nearly 2,000 years.' },
+    { name: 'Great Wall of China', fact: 'Stretching over 20,000 kilometers across northern China, the Great Wall was built over 2,000 years by multiple dynasties. Contrary to popular myth, it is not visible from space with the naked eye, but it remains one of the most impressive feats of human engineering.', reason: 'Hike along ancient watchtowers and battlements that snake across dramatic mountain ridges. Visit restored sections near Beijing or venture to wild, unrestored stretches where you can walk alone through centuries of history.' },
+    { name: 'Galapagos Islands, Ecuador', fact: 'These volcanic islands inspired Charles Darwin\'s theory of evolution. The islands\' extreme isolation created unique species found nowhere else on Earth, including giant tortoises that can live over 100 years and marine iguanas, the only sea-going lizards.', reason: 'Swim with sea lions, walk among giant tortoises, and watch blue-footed boobies dance. Animals here have no fear of humans, creating wildlife encounters unlike anywhere else on the planet.' },
+    { name: 'Taj Mahal, India', fact: 'Built by Mughal emperor Shah Jahan as a mausoleum for his wife, the Taj Mahal took 22 years and 20,000 workers to complete. The white marble changes color throughout the day, appearing pink at dawn, white during the day, and golden under moonlight.', reason: 'Witness the world\'s greatest monument to love as it glows in the dawn light reflected in its long pools. Marvel at the perfect symmetry, intricate marble inlay of precious stones, and the story of devotion that inspired this architectural masterpiece.' },
+  ],
 };
 
 // Theme colors by category group
@@ -754,6 +779,18 @@ async function getCategoryStats(category: Category, items: CategoryItem[]): Prom
     stats.push({ label: 'Attractions', value: total, icon: '🗿' });
     stats.push({ label: 'Regions', value: regions, icon: '🗺️' });
     stats.push({ label: 'Most Iconic', value: 'Cadillac Ranch', icon: '🚗' });
+  } else if (category === 'countryHighPoints') {
+    const continents = new Set(items.map(i => i.group)).size;
+    const countries = new Set(items.map(i => i.code)).size;
+    stats.push({ label: 'High Points', value: total, icon: '🏔️' });
+    stats.push({ label: 'Continents', value: continents, icon: '🌍' });
+    stats.push({ label: 'Countries', value: countries, icon: '🗺️' });
+  } else if (category === 'unescoSites') {
+    const countries = new Set(items.map(i => i.code)).size;
+    const types = new Set(items.map(i => i.group)).size;
+    stats.push({ label: 'Heritage Sites', value: total, icon: '🏛️' });
+    stats.push({ label: 'Countries', value: countries, icon: '🌍' });
+    stats.push({ label: 'Site Types', value: types, icon: '🎨' });
   } else {
     // Default stats
     stats.push({ label: 'Total Locations', value: total, icon: '📍' });
@@ -815,6 +852,8 @@ const challengeDescriptions: Partial<Record<Category, (region: string, count: nu
   themeParks: (region, count) => `Experience all ${count} theme parks in ${region}!`,
   surfingReserves: (region, count) => `Ride the waves at all ${count} spots in ${region}!`,
   weirdAmericana: (region, count) => `Discover all ${count} quirky attractions in the ${region}!`,
+  countryHighPoints: (region, count) => `${region} has ${count} country high points. Summit them all!`,
+  unescoSites: (region, count) => `There are ${count} ${region} UNESCO World Heritage Sites. Can you visit them all?`,
 };
 
 export function generateStaticParams() {

@@ -215,6 +215,11 @@ const emptyStateContent: Record<Category, { icon: string; title: string; subtitl
     title: 'Reach New Heights',
     subtitle: 'Everest, Denali, Kilimanjaro - summit the highest point in every country!',
   },
+  unescoSites: {
+    icon: '🏛️',
+    title: 'World Heritage Explorer',
+    subtitle: 'Machu Picchu, Angkor Wat, the Great Wall - track humanity\'s greatest treasures!',
+  },
 };
 
 export default function SelectionList({
