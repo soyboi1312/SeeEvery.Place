@@ -682,10 +682,21 @@ export default function SelectionList({
               descriptions?.[infoItem?.id || ''] || "No description available for this location yet. Go explore and write your own story!"
             )}
 
-            {/* UNESCO Attribution - Required for compliance */}
+            {/* UNESCO Attribution - Required for RSS syndication compliance */}
             {items.find(i => i.id === infoItem?.id)?.unescoId && (
               <div className="mt-6 pt-4 border-t border-border/50 text-xs">
                 <p className="font-semibold text-foreground mb-1">Source & Attribution</p>
+                <p className="mb-1">
+                  <a
+                    href="https://whc.unesco.org"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-primary hover:underline flex items-center gap-1"
+                  >
+                    UNESCO World Heritage Centre
+                    <span className="inline-block">↗</span>
+                  </a>
+                </p>
                 <p className="mb-2">
                   <a
                     href={`https://whc.unesco.org/en/list/${items.find(i => i.id === infoItem?.id)?.unescoId}`}
@@ -693,7 +704,7 @@ export default function SelectionList({
                     rel="noopener noreferrer"
                     className="text-primary hover:underline flex items-center gap-1"
                   >
-                    View official UNESCO listing
+                    View official listing for this site
                     <span className="inline-block">↗</span>
                   </a>
                 </p>

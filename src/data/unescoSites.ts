@@ -1,3 +1,8 @@
+// Data sourced from UNESCO World Heritage Centre RSS feed.
+// Source: https://whc.unesco.org
+// Individual site pages: https://whc.unesco.org/en/list/{unescoId}
+// Copyright © 1992 - 2026 UNESCO/World Heritage Centre. All rights reserved.
+
 export interface UNESCOSite {
   id: string;
   name: string;
