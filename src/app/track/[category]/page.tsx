@@ -237,7 +237,7 @@ const categoryFAQs: Partial<Record<Category, FAQ[]>> = {
   ],
   unescoSites: [
     { question: 'What is a UNESCO World Heritage Site?', answer: 'UNESCO World Heritage Sites are places of outstanding universal value, designated by the United Nations Educational, Scientific and Cultural Organization. They include cultural landmarks, natural wonders, and mixed sites across the globe.' },
-    { question: 'How many UNESCO World Heritage Sites are there?', answer: 'There are over 1,100 UNESCO World Heritage Sites across more than 160 countries. New sites are inscribed annually at the World Heritage Committee meeting.' },
+    { question: 'How many UNESCO World Heritage Sites are there?', answer: 'There are 1,248 UNESCO World Heritage Sites across more than 160 countries. New sites are inscribed annually at the World Heritage Committee meeting.' },
     { question: 'What types of sites are included?', answer: 'Sites are classified as Cultural (monuments, architecture, landscapes), Natural (geological formations, habitats, ecosystems), or Mixed (combining both cultural and natural significance).' },
     { question: 'Which country has the most UNESCO sites?', answer: 'Italy leads with over 55 UNESCO World Heritage Sites, followed closely by China, Germany, France, and Spain. Europe has the highest concentration overall.' },
   ],
@@ -1340,7 +1340,7 @@ export default async function CategoryLandingPage({ params }: Props) {
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             {categories
               .filter((c) => c !== category)
-              .slice(0, 4)
+              .sort((a, b) => categoryLabels[a].localeCompare(categoryLabels[b]))
               .map((c) => (
                 <Link key={c} href={`/track/${c}`}>
                   <Card className="hover:shadow-lg transition-all text-center h-full">

@@ -352,8 +352,8 @@ const transforms: Record<Category, TransformFn> = {
   }),
   unescoSites: (s) => ({
     id: s.id,
-    name: `${s.name} - ${s.country}`,
-    group: s.type,
+    name: s.country ? `${s.name} - ${s.country}` : s.name,
+    group: s.type || s.region || 'World Heritage',
     code: s.countryCode,
     unescoId: s.unescoId,
   }),
