@@ -138,7 +138,7 @@ const categoryKeywords: Record<Category, string[]> = {
   rugbyStadiums: ['rugby stadium tracker', 'rugby grounds visited', 'Six Nations stadiums', 'rugby world cup venues', 'Premiership Rugby grounds'],
   cricketStadiums: ['cricket ground tracker', 'cricket stadiums visited', 'Test cricket venues', 'IPL stadiums', 'international cricket grounds'],
   countryHighPoints: ['country high points tracker', 'highest peaks by country', 'seven summits', 'mountain summit tracker', 'peak bagging countries'],
-  unescoSites: ['UNESCO world heritage sites tracker', 'world heritage checklist', 'UNESCO sites visited', 'cultural heritage bucket list', 'natural wonders tracker'],
+  unescoSites: ['UNESCO world heritage sites tracker', 'world heritage checklist', 'UNESCO sites visited', 'cultural heritage bucket list', 'natural wonders tracker', 'UNESCO travel list', '1248 world heritage sites', 'UNESCO site map', 'heritage site bucket list'],
 };
 
 // FAQ content for each category
@@ -337,7 +337,7 @@ const categoryDescriptions: Record<Category, string> = {
   rugbyStadiums: 'Track professional rugby stadiums worldwide. From Six Nations to Super Rugby venues, record every ground you have experienced.',
   cricketStadiums: 'Track international cricket grounds. From Lord\'s to the MCG, mark every Test and ODI venue you have visited.',
   countryHighPoints: 'Track the highest point in every country. From Mount Everest to the lowest country high points, conquer peaks around the world.',
-  unescoSites: 'Track UNESCO World Heritage Sites around the world. From ancient temples to natural wonders, check off humanity\'s greatest treasures.',
+  unescoSites: 'Track all 1,248 UNESCO World Heritage Sites across 160+ countries. From ancient temples and natural wonders to cultural landscapes, check off humanity\'s greatest treasures on an interactive map.',
 };
 
 // Example places for each category with unique facts and reasons to visit

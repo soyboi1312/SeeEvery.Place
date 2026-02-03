@@ -15,10 +15,13 @@ AS $$
 DECLARE
   result JSON;
   categories TEXT[] := ARRAY[
-    'countries', 'states', 'nationalParks', 'nationalMonuments', 'stateParks',
+    'countries', 'states', 'usCities', 'worldCities', 'territories',
+    'nationalParks', 'nationalMonuments', 'stateParks',
     'fiveKPeaks', 'fourteeners', 'museums', 'mlbStadiums', 'nflStadiums',
-    'nbaStadiums', 'nhlStadiums', 'soccerStadiums', 'f1Tracks', 'marathons',
-    'airports', 'skiResorts', 'themeParks', 'surfingReserves', 'weirdAmericana'
+    'nbaStadiums', 'nhlStadiums', 'soccerStadiums', 'euroFootballStadiums',
+    'rugbyStadiums', 'cricketStadiums', 'f1Tracks', 'marathons',
+    'airports', 'skiResorts', 'themeParks', 'surfingReserves', 'weirdAmericana',
+    'countryHighPoints', 'unescoSites'
   ];
 BEGIN
   -- Security check: only admins can access analytics
