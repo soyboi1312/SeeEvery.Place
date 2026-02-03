@@ -62,11 +62,28 @@ export function useNameGetter(items: NamedItem[] | undefined) {
   return useCallback((id: string) => nameMap.get(id) || id, [nameMap]);
 }
 
+import { CATEGORY_SCHEMA } from '@/lib/types';
+import type { MarkerSize } from '@/components/MapMarkers';
+
+// High-density threshold: categories with more than this many items use smaller markers
+const HIGH_DENSITY_THRESHOLD = 500;
+
 /**
- * Determines marker size based on zoom level
- * Centralized logic to avoid repetition across marker maps
+ * Determines marker size based on zoom level and category density
+ * High-density categories (>500 items) use smaller markers to prevent overlap
  */
-export function getMarkerSize(zoom: number): 'small' | 'default' {
+export function getMarkerSize(zoom: number, category?: Category): MarkerSize {
+  // Check if this is a high-density category
+  const isHighDensity = category && CATEGORY_SCHEMA[category].total > HIGH_DENSITY_THRESHOLD;
+
+  if (isHighDensity) {
+    // High-density: tiny at low zoom, small at medium, default only at high zoom
+    if (zoom < 2) return 'tiny';
+    if (zoom < 4) return 'small';
+    return 'default';
+  }
+
+  // Standard categories: small at low zoom, default otherwise
   return zoom < 2 ? 'small' : 'default';
 }
 

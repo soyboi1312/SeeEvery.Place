@@ -181,7 +181,7 @@ const CategoryMarkerMap = memo(function CategoryMarkerMap({
       onZoomChange={handleZoomChange}
     >
       {({ zoom, zoomTo }) => {
-        const markerSize = getMarkerSize(zoom);
+        const markerSize = getMarkerSize(zoom, category);
 
         return (
           <>

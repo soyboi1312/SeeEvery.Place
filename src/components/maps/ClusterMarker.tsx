@@ -8,11 +8,13 @@ import { memo } from 'react';
 import { Marker } from '@vnedyalk0v/react19-simple-maps';
 import { Status } from '@/lib/types';
 
+import type { MarkerSize } from '@/components/MapMarkers';
+
 interface ClusterMarkerProps {
   coordinates: [number, number];
   pointCount: number;
   dominantStatus: Status;
-  size?: 'small' | 'default';
+  size?: MarkerSize;
   onClick?: () => void;
 }
 
@@ -24,7 +26,8 @@ const ClusterMarker = memo(function ClusterMarker({
   onClick,
 }: ClusterMarkerProps) {
   // Calculate cluster size based on point count
-  const baseSize = size === 'small' ? 16 : 24;
+  // Tiny: 12px, Small: 16px, Default: 24px
+  const baseSize = size === 'tiny' ? 12 : size === 'small' ? 16 : 24;
   const clusterSize = Math.min(baseSize + Math.log2(pointCount) * 4, baseSize * 2);
 
   // Color based on dominant status
