@@ -6,13 +6,14 @@
 export interface UNESCOSite {
   id: string;
   name: string;
-  country: string;
-  countryCode: string;
-  type: "Cultural" | "Natural" | "Mixed";
-  year: number;
-  lat: number;
-  lng: number;
+  country?: string;
+  countryCode?: string;
+  type?: "Cultural" | "Natural" | "Mixed";
+  year?: number;
+  lat?: number;
+  lng?: number;
   unescoId?: number;
+  region?: string;
 }
 
 export const unescoSites: UNESCOSite[] = [
