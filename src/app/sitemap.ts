@@ -3,6 +3,7 @@ import { nationalParks } from '@/data/nationalParks'
 import { nationalMonuments } from '@/data/nationalMonuments'
 import { stateParks } from '@/data/stateParks'
 import { weirdAmericana } from '@/data/weirdAmericana'
+import { createAdminClient } from '@/lib/supabase/server'
 
 const categories = [
   'countries',
@@ -55,7 +56,7 @@ function getUniqueStates(items: { state: string }[]): string[] {
   return Array.from(states)
 }
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://seeevery.place'
 
   const categoryPages = categories.map((category) => ({
@@ -78,6 +79,31 @@ export default function sitemap(): MetadataRoute.Sitemap {
       })
     })
   })
+
+  // Fetch public user profiles for sitemap
+  let userProfilePages: MetadataRoute.Sitemap = []
+  try {
+    const adminClient = createAdminClient()
+    const { data: profiles } = await adminClient
+      .from('profiles')
+      .select('username, updated_at')
+      .eq('is_public', true)
+      .not('username', 'is', null)
+      .order('updated_at', { ascending: false })
+      .limit(1000) // Limit to prevent sitemap bloat
+
+    if (profiles) {
+      userProfilePages = profiles.map((profile) => ({
+        url: `${baseUrl}/u/${profile.username}`,
+        lastModified: profile.updated_at ? new Date(profile.updated_at) : new Date(),
+        changeFrequency: 'weekly' as const,
+        priority: 0.6,
+      }))
+    }
+  } catch (error) {
+    // Log error but don't fail sitemap generation
+    console.error('Error fetching public profiles for sitemap:', error)
+  }
 
   return [
     {
@@ -112,5 +138,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
     ...categoryPages,
     ...statePages,
+    ...userProfilePages,
   ]
 }

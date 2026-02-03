@@ -26,14 +26,19 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   const displayName = profile.full_name || username;
 
+  const profileUrl = `https://seeevery.place/u/${username}`;
+
   return {
     title: `${displayName}'s Travel Map | SeeEvery.Place`,
     description: profile.bio || `Check out ${displayName}'s travel adventures on SeeEvery.Place - the free travel tracker.`,
+    alternates: {
+      canonical: profileUrl,
+    },
     openGraph: {
       title: `${displayName}'s Travel Map`,
       description: profile.bio || `Check out ${displayName}'s travel adventures on SeeEvery.Place.`,
       type: 'profile',
-      url: `https://seeevery.place/u/${username}`,
+      url: profileUrl,
       images: [{ url: '/files/og-image.png', width: 1200, height: 630 }],
     },
     twitter: {
