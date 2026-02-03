@@ -12,7 +12,7 @@
 
 import { memo } from 'react';
 
-export type MarkerSize = 'default' | 'small';
+export type MarkerSize = 'default' | 'small' | 'tiny';
 
 interface MarkerProps {
   fillColor: string;
@@ -61,8 +61,8 @@ export const MarkerSymbolDefs = memo(function MarkerSymbolDefs() {
 
 function LogoMarkerBase({ fillColor, size = 'default' }: MarkerProps) {
   // Scale down the 512x512 paths to fit the map marker size
-  // Small: ~14px, Default: ~24px
-  const scale = size === 'small' ? 0.028 : 0.046;
+  // Tiny: ~8px (high-density categories), Small: ~14px, Default: ~24px
+  const scale = size === 'tiny' ? 0.016 : size === 'small' ? 0.028 : 0.046;
 
   // Calculate offsets to align the pin tip (256, 480) to the map coordinate (0, 0)
   // X: Center horizontally (-256 * scale)
