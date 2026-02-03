@@ -26,21 +26,31 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       };
     }
 
+    const tripUrl = `https://seeevery.place/trips/${tripId}`;
+
     // Only show rich metadata for public trips
     if (!trip.is_public) {
       return {
         title: `${trip.title} | SeeEvery.Place`,
         description: 'A private quest on SeeEvery.Place',
+        robots: {
+          index: false,
+          follow: false,
+        },
       };
     }
 
     return {
       title: `${trip.title} | SeeEvery.Place`,
       description: trip.description || `Check out this quest on SeeEvery.Place`,
+      alternates: {
+        canonical: tripUrl,
+      },
       openGraph: {
         title: trip.title,
         description: trip.description || `Check out this quest on SeeEvery.Place`,
         type: 'website',
+        url: tripUrl,
         images: trip.cover_image_url ? [{ url: trip.cover_image_url }] : [],
       },
       twitter: {
