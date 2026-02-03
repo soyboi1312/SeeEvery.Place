@@ -22,6 +22,7 @@ export const CATEGORY_SCHEMA = {
   nationalMonuments: { label: "National Monuments", icon: "🗽", group: "nature", xp: 25, total: 139, mapType: 'marker' as const, projection: 'us' as const, drillDown: true },
   stateParks: { label: "State Parks", icon: "🌲", group: "nature", xp: 15, total: 306, mapType: 'marker' as const, projection: 'us' as const, drillDown: true },
   fourteeners: { label: "US 14ers", icon: "⛰️", group: "nature", xp: 40, total: 70, mapType: 'marker' as const, projection: 'us' as const, drillDown: false },
+  unescoSites: { label: "UNESCO Sites", icon: "🏛️", group: "culture", xp: 20, total: 1248, mapType: 'marker' as const, projection: 'world' as const, drillDown: false },
   weirdAmericana: { label: "Weird Americana", icon: "🗿", group: "culture", xp: 15, total: 56, mapType: 'marker' as const, projection: 'us' as const, drillDown: true },
 
   // World marker maps (Natural Earth projection)
@@ -44,7 +45,6 @@ export const CATEGORY_SCHEMA = {
   themeParks: { label: "Theme Parks", icon: "🎢", group: "culture", xp: 20, total: 60, mapType: 'marker' as const, projection: 'world' as const, drillDown: false },
   surfingReserves: { label: "Surfing Reserves", icon: "🌊", group: "nature", xp: 30, total: 27, mapType: 'marker' as const, projection: 'world' as const, drillDown: false },
   countryHighPoints: { label: "Country High Points", icon: "🏔️", group: "nature", xp: 35, total: 199, mapType: 'marker' as const, projection: 'world' as const, drillDown: false },
-  unescoSites: { label: "UNESCO Sites", icon: "🏛️", group: "culture", xp: 20, total: 1248, mapType: 'marker' as const, projection: 'world' as const, drillDown: false },
 } as const;
 
 // Derived sets for map rendering (used by MapVisualization)

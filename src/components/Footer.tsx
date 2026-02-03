@@ -21,7 +21,9 @@ export default function Footer({ user, onSignIn, onSignInHover, showCategoryDire
               Track Your Adventures
             </h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 text-left">
-              {(Object.keys(categoryLabels) as Category[]).map((cat) => (
+              {(Object.keys(categoryLabels) as Category[])
+                .sort((a, b) => categoryLabels[a].localeCompare(categoryLabels[b]))
+                .map((cat) => (
                 <Link
                   key={cat}
                   href={`/track/${cat}`}
