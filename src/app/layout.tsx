@@ -90,6 +90,8 @@ export const metadata: Metadata = {
   classification: 'Travel Tracking Application',
 }
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://seeevery.place'
+
 const jsonLd = {
   '@context': 'https://schema.org',
   '@type': 'SoftwareApplication',
@@ -107,6 +109,31 @@ const jsonLd = {
     ratingValue: '4.8',
     ratingCount: '120',
   },
+}
+
+const websiteJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: 'See Every Place',
+  url: siteUrl,
+  description: 'Free travel tracking app to map countries, states, national parks, stadiums, and museums you have visited.',
+  potentialAction: {
+    '@type': 'SearchAction',
+    target: {
+      '@type': 'EntryPoint',
+      urlTemplate: `${siteUrl}/?category={search_term_string}`,
+    },
+    'query-input': 'required name=search_term_string',
+  },
+}
+
+const organizationJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: 'See Every Place',
+  url: siteUrl,
+  logo: `${siteUrl}/logo.svg`,
+  sameAs: [],
 }
 
 export default function RootLayout({
@@ -169,6 +196,14 @@ export default function RootLayout({
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
         />
         <QueryProvider>
           <InstallPWA />
