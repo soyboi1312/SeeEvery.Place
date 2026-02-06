@@ -25,6 +25,7 @@ const AuthModal = dynamic(() => import('@/components/AuthModal'), {
 // Preload AuthModal chunk on hover to reduce perceived latency
 const preloadAuthModal = () => import('@/components/AuthModal');
 
+import Link from 'next/link';
 import MapErrorBoundary from '@/components/MapErrorBoundary';
 import { Button } from '@/components/ui/button';
 import { Share2 } from 'lucide-react';
@@ -314,7 +315,7 @@ function HomeContent() {
         {/* Hero Section - NOW RENDERS IMMEDIATELY FOR FAST LCP */}
         <div className="text-center py-4 sm:py-8">
           <h1 className="text-3xl sm:text-4xl font-bold text-gray-800 dark:text-white mb-2">
-            Travel Map & Tracker
+            Free Travel Map &amp; Bucket List Tracker
           </h1>
           <p className="mt-6 text-lg leading-8 text-gray-600 dark:text-gray-300">
             Where have you been? Track countries, parks, peaks, and more.
@@ -390,6 +391,59 @@ function HomeContent() {
         </Button>
 
       </div>
+
+      {/* SEO Content Section - keyword-rich, crawlable text for search engines */}
+      <section className="max-w-6xl mx-auto px-4 py-12 space-y-10 text-gray-600 dark:text-gray-400">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-4">
+            Track Every Adventure on Your Travel Map
+          </h2>
+          <p className="leading-7">
+            See Every Place is a free travel tracker that lets you map every country, US state, national park, stadium, and museum you have visited. Create a personalized visited countries map, build your travel bucket list, and share beautiful stats with friends. Whether you are tracking all 200 countries, checking off the 63 US National Parks, or visiting every MLB stadium, See Every Place helps you visualize your journey.
+          </p>
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-8">
+          <div>
+            <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-2">Countries &amp; Destinations</h3>
+            <p className="leading-7 text-sm">
+              Track <Link href="/track/countries" className="text-blue-600 dark:text-blue-400 hover:underline">200 countries</Link> around
+              the world, all <Link href="/track/states" className="text-blue-600 dark:text-blue-400 hover:underline">50 US states</Link>,
+              and <Link href="/track/usCities" className="text-blue-600 dark:text-blue-400 hover:underline">major US cities</Link>.
+              Create a scratch map without the scratching.
+            </p>
+          </div>
+          <div>
+            <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-2">Parks &amp; Nature</h3>
+            <p className="leading-7 text-sm">
+              Check off <Link href="/track/nationalParks" className="text-blue-600 dark:text-blue-400 hover:underline">National Parks</Link>,
+              {' '}<Link href="/track/stateParks" className="text-blue-600 dark:text-blue-400 hover:underline">State Parks</Link>,
+              {' '}<Link href="/track/fourteeners" className="text-blue-600 dark:text-blue-400 hover:underline">14ers</Link>,
+              and <Link href="/track/unescoSites" className="text-blue-600 dark:text-blue-400 hover:underline">1,248 UNESCO World Heritage Sites</Link>.
+              Track your outdoor adventures.
+            </p>
+          </div>
+          <div>
+            <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-2">Sports &amp; Culture</h3>
+            <p className="leading-7 text-sm">
+              Visit every <Link href="/track/mlbStadiums" className="text-blue-600 dark:text-blue-400 hover:underline">MLB stadium</Link>,
+              {' '}<Link href="/track/nflStadiums" className="text-blue-600 dark:text-blue-400 hover:underline">NFL stadium</Link>,
+              {' '}<Link href="/track/museums" className="text-blue-600 dark:text-blue-400 hover:underline">world-class museum</Link>,
+              and <Link href="/track/f1Tracks" className="text-blue-600 dark:text-blue-400 hover:underline">F1 circuit</Link>.
+              Track your sports and culture bucket list.
+            </p>
+          </div>
+        </div>
+
+        <div>
+          <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-4">
+            How It Works
+          </h2>
+          <p className="leading-7">
+            Pick a category, mark places as visited or add them to your bucket list, and watch your map fill in. No account needed to start — your progress saves automatically. Sign in to sync across devices, unlock achievements, and share your public travel profile. See Every Place works on desktop and mobile, and installs as an app on your phone.
+          </p>
+        </div>
+      </section>
 
       {/* Shared Footer */}
       <Footer
