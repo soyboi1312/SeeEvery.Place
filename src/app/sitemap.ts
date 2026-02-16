@@ -3,6 +3,7 @@ import { nationalParks } from '@/data/nationalParks'
 import { nationalMonuments } from '@/data/nationalMonuments'
 import { stateParks } from '@/data/stateParks'
 import { weirdAmericana } from '@/data/weirdAmericana'
+import { worldCities } from '@/data/worldCities'
 import { createAdminClient } from '@/lib/supabase/server'
 
 const categories = [
@@ -32,6 +33,8 @@ const categories = [
   'themeParks',
   'surfingReserves',
   'weirdAmericana',
+  'countryHighPoints',
+  'unescoSites',
 ]
 
 // State-filterable categories with their data sources
@@ -56,6 +59,13 @@ function getUniqueStates(items: { state: string }[]): string[] {
   return Array.from(states)
 }
 
+// Get unique country codes from worldCities
+function getUniqueCountryCodes(): string[] {
+  const codes = new Set<string>()
+  worldCities.forEach(city => codes.add(city.countryCode.toLowerCase()))
+  return Array.from(codes)
+}
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://seeevery.place'
 
@@ -66,7 +76,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.9,
   }))
 
-  // Generate state-level pages for SEO
+  // Generate state-level pages for SEO (US categories)
   const statePages: MetadataRoute.Sitemap = []
   stateFilterableCategories.forEach(({ category, data }) => {
     const states = getUniqueStates(data)
@@ -79,6 +89,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       })
     })
   })
+
+  // Generate country-level pages for worldCities
+  const countryCodes = getUniqueCountryCodes()
+  const worldCityCountryPages: MetadataRoute.Sitemap = countryCodes.map(code => ({
+    url: `${baseUrl}/track/worldCities/${code}`,
+    lastModified: new Date(),
+    changeFrequency: 'monthly' as const,
+    priority: 0.7,
+  }))
 
   // Fetch public user profiles for sitemap
   let userProfilePages: MetadataRoute.Sitemap = []
@@ -144,6 +163,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
     ...categoryPages,
     ...statePages,
+    ...worldCityCountryPages,
     ...userProfilePages,
   ]
 }

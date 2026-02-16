@@ -6,6 +6,10 @@ import { RefreshButton } from './RefreshButton'
 export const metadata = {
   title: 'Offline - See Every Place',
   description: 'You are currently offline',
+  robots: {
+    index: false,
+    follow: false,
+  },
 }
 
 export default function OfflinePage() {

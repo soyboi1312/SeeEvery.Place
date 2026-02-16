@@ -7,16 +7,19 @@ Allow: /terms
 Allow: /suggest
 Allow: /community
 Allow: /u/
+Allow: /trips/
 Disallow: /admin/
 Disallow: /admin
 Disallow: /api/
 Disallow: /auth/
 Disallow: /settings
-Disallow: /newsletter/confirmed
-Disallow: /newsletter/unsubscribed
-Disallow: /newsletter/error
+Disallow: /settings/
+Disallow: /newsletter/
+Disallow: /offline
 Disallow: /_next/
 Disallow: /geo/
+Disallow: /data/
+Disallow: /files/
 
 User-agent: GPTBot
 Disallow: /
@@ -28,6 +31,9 @@ User-agent: CCBot
 Disallow: /
 
 User-agent: anthropic-ai
+Disallow: /
+
+User-agent: Google-Extended
 Disallow: /
 
 Sitemap: https://seeevery.place/sitemap.xml

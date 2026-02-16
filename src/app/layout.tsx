@@ -86,6 +86,9 @@ export const metadata: Metadata = {
     description: 'Map countries, states, national parks, stadiums, and museums. Track where you have been and see every place you want to go.',
     images: ['/files/og-image.png'],
   },
+  alternates: {
+    canonical: '/',
+  },
   category: 'travel',
   classification: 'Travel Tracking Application',
 }

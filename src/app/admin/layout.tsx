@@ -6,6 +6,10 @@ import { Separator } from '@/components/ui/separator';
 export const metadata = {
   title: 'Admin Panel - SeeEvery.Place',
   description: 'Admin dashboard for SeeEvery.Place',
+  robots: {
+    index: false,
+    follow: false,
+  },
 };
 
 export default async function AdminLayout({
