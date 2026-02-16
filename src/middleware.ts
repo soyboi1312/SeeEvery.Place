@@ -13,6 +13,14 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(httpsUrl, 301);
   }
 
+  // Normalize trailing slashes: redirect /path/ to /path (except root /)
+  // This prevents duplicate URLs from being indexed by search engines
+  if (pathname !== '/' && pathname.endsWith('/')) {
+    const url = new URL(request.url);
+    url.pathname = pathname.slice(0, -1);
+    return NextResponse.redirect(url, 301);
+  }
+
   // Skip auth middleware for static assets - let Next.js serve them directly
   // This ensures geo data, images, and other static files are served without 503 errors
   if (
