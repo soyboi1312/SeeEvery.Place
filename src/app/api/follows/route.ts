@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { checkRateLimit } from '@/lib/rateLimit';
 
 /**
  * POST /api/follows
@@ -7,6 +8,10 @@ import { createClient } from '@/lib/supabase/server';
  * Body: { userId: string }
  */
 export async function POST(request: NextRequest) {
+  // Rate limit: 30 follow/unfollow actions per minute per IP
+  const rateLimited = checkRateLimit(request, { max: 30, windowSeconds: 60, prefix: 'follow' });
+  if (rateLimited) return rateLimited;
+
   try {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();

@@ -57,8 +57,8 @@ export async function GET(request: NextRequest) {
     }
 
     const searchParams = request.nextUrl.searchParams;
-    const page = parseInt(searchParams.get('page') || '1');
-    const limit = parseInt(searchParams.get('limit') || '50');
+    const page = Math.max(1, parseInt(searchParams.get('page') || '1'));
+    const limit = Math.min(100, Math.max(1, parseInt(searchParams.get('limit') || '50')));
     const search = searchParams.get('search') || '';
     const filterActive = searchParams.get('active');
 
@@ -68,9 +68,12 @@ export async function GET(request: NextRequest) {
       .from('newsletter_subscribers')
       .select('*', { count: 'exact' });
 
-    // Apply filters
+    // Apply filters - sanitize search to prevent PostgREST filter injection
     if (search) {
-      query = query.or(`email.ilike.%${search}%,name.ilike.%${search}%`);
+      const sanitized = search.replace(/[%_.,()"'\\]/g, '');
+      if (sanitized) {
+        query = query.or(`email.ilike.%${sanitized}%,name.ilike.%${sanitized}%`);
+      }
     }
 
     if (filterActive === 'true') {

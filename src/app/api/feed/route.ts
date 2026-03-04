@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { z } from 'zod';
+import { checkRateLimit } from '@/lib/rateLimit';
 
 // Zod schema for POST request validation
 // NOTE: xpEarned is intentionally NOT accepted from clients to prevent XP spoofing.
@@ -148,6 +149,10 @@ export async function GET(request: NextRequest) {
  * Record a new activity
  */
 export async function POST(request: NextRequest) {
+  // Rate limit: 60 activity recordings per minute per IP
+  const rateLimited = checkRateLimit(request, { max: 60, windowSeconds: 60, prefix: 'feed-post' });
+  if (rateLimited) return rateLimited;
+
   try {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();

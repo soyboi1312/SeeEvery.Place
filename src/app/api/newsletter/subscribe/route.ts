@@ -1,9 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/server';
 import { sendEmail, generateConfirmationLink, generateToken } from '@/lib/email';
+import { checkRateLimit } from '@/lib/rateLimit';
 
 // POST /api/newsletter/subscribe - Public newsletter signup
 export async function POST(request: NextRequest) {
+  // Rate limit: 5 subscribe attempts per 10 minutes per IP
+  const rateLimited = checkRateLimit(request, { max: 5, windowSeconds: 600, prefix: 'newsletter-sub' });
+  if (rateLimited) return rateLimited;
+
   try {
     const body = await request.json();
 

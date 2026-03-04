@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { checkRateLimit } from '@/lib/rateLimit';
 
 /**
  * GET /api/users/search
@@ -7,6 +8,10 @@ import { createClient } from '@/lib/supabase/server';
  * Query params: ?q=searchterm&limit=20&offset=0
  */
 export async function GET(request: NextRequest) {
+  // Rate limit: 30 searches per minute per IP
+  const rateLimited = checkRateLimit(request, { max: 30, windowSeconds: 60, prefix: 'user-search' });
+  if (rateLimited) return rateLimited;
+
   try {
     const supabase = await createClient();
 

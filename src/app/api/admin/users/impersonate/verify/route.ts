@@ -3,9 +3,10 @@ import { createAdminClient, createClient } from '@/lib/supabase/server';
 import { jwtVerify } from 'jose';
 
 // Secret for verifying impersonation tokens
+// Uses a dedicated secret to separate concerns from the service role key
 const getImpersonationSecret = () => {
-  const secret = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!secret) throw new Error('Missing service role key');
+  const secret = process.env.IMPERSONATION_JWT_SECRET || process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!secret) throw new Error('Missing impersonation secret or service role key');
   return new TextEncoder().encode(secret);
 };
 

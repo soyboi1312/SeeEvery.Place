@@ -72,7 +72,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<Maintenan
           {
             action: 'cleanup-activity-feed',
             success: false,
-            error: error.message,
+            error: 'Activity feed cleanup failed',
             timestamp: new Date().toISOString(),
           },
           { status: 500 }
@@ -102,7 +102,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<Maintenan
       {
         action: 'error',
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: 'Internal server error',
         timestamp: new Date().toISOString(),
       },
       { status: 500 }

@@ -90,11 +90,21 @@ export async function PUT(request: NextRequest) {
       updated_at: new Date().toISOString(),
     };
 
-    if (full_name !== undefined) updateData.full_name = full_name || null;
+    if (full_name !== undefined) {
+      if (full_name && full_name.length > 100) {
+        return NextResponse.json({ error: 'Display name must be 100 characters or less' }, { status: 400 });
+      }
+      updateData.full_name = full_name || null;
+    }
     // Store username as lowercase to match the lower(username) index
     if (username !== undefined) updateData.username = username ? username.toLowerCase() : null;
-    if (bio !== undefined) updateData.bio = bio || null;
-    if (is_public !== undefined) updateData.is_public = is_public;
+    if (bio !== undefined) {
+      if (bio && bio.length > 500) {
+        return NextResponse.json({ error: 'Bio must be 500 characters or less' }, { status: 400 });
+      }
+      updateData.bio = bio || null;
+    }
+    if (is_public !== undefined) updateData.is_public = Boolean(is_public);
 
     const { data: profile, error } = await supabase
       .from('profiles')
