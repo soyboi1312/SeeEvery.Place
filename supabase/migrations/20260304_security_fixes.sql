@@ -56,22 +56,29 @@ DROP POLICY IF EXISTS "Users can update own activity" ON public.user_activity;
 -- MEDIUM: Fix search_users LIKE wildcard injection
 -- ============================================
 -- Escape LIKE wildcards (%, _) in search input to prevent pattern manipulation.
+-- Must drop first because we're replacing the function with the same signature.
+
+DROP FUNCTION IF EXISTS public.search_users(text, integer, integer);
 
 CREATE OR REPLACE FUNCTION public.search_users(
   search_query text,
-  result_limit int DEFAULT 10
+  page_limit integer DEFAULT 20,
+  page_offset integer DEFAULT 0
 )
 RETURNS TABLE (
-  id uuid,
+  user_id uuid,
   username text,
   full_name text,
   avatar_url text,
-  is_public boolean,
-  level int
+  bio text,
+  level integer,
+  total_xp integer,
+  follower_count integer,
+  is_following boolean
 )
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = ''
+SET search_path = public
 AS $$
 DECLARE
   sanitized_query text;
@@ -81,12 +88,19 @@ BEGIN
 
   RETURN QUERY
   SELECT
-    p.id,
+    p.id as user_id,
     p.username,
     p.full_name,
     p.avatar_url,
-    p.is_public,
-    p.level
+    p.bio,
+    public.calculate_level(COALESCE(p.total_xp, 0)) as level,
+    COALESCE(p.total_xp, 0) as total_xp,
+    COALESCE(p.follower_count, 0) as follower_count,
+    EXISTS (
+      SELECT 1 FROM public.follows f
+      WHERE f.follower_id = auth.uid()
+      AND f.following_id = p.id
+    ) as is_following
   FROM public.profiles p
   WHERE p.is_public = true
     AND p.username IS NOT NULL
@@ -100,9 +114,13 @@ BEGIN
          ELSE 2
     END,
     p.username
-  LIMIT result_limit;
+  LIMIT page_limit
+  OFFSET page_offset;
 END;
 $$;
+
+-- Re-grant execute permission after dropping/recreating
+GRANT EXECUTE ON FUNCTION public.search_users(text, integer, integer) TO authenticated;
 
 
 -- ============================================
@@ -110,36 +128,42 @@ $$;
 -- ============================================
 -- Any authenticated user could check if any other user is suspended.
 -- Now restricted to own status or admin access.
+-- Must drop first because we cannot change return type of existing function.
 
-CREATE OR REPLACE FUNCTION public.get_user_status(target_user_id uuid)
+DROP FUNCTION IF EXISTS public.get_user_status(uuid);
+
+CREATE OR REPLACE FUNCTION public.get_user_status(p_user_id uuid)
 RETURNS TABLE (
-  user_id uuid,
-  is_suspended boolean,
-  suspended_at timestamptz,
-  suspended_until timestamptz,
-  suspension_reason text
+  status text,
+  suspended_at timestamp with time zone,
+  suspended_by text,
+  suspend_reason text,
+  suspended_until timestamp with time zone
 )
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = ''
+SET search_path = public
 AS $$
 BEGIN
   -- Only allow users to check their own status or admins to check anyone
-  IF auth.uid() != target_user_id AND NOT public.is_admin() THEN
+  IF auth.uid() != p_user_id AND NOT public.is_admin() THEN
     RAISE EXCEPTION 'Not authorized to view this user status';
   END IF;
 
   RETURN QUERY
   SELECT
-    us.user_id,
-    us.is_suspended,
+    us.status,
     us.suspended_at,
-    us.suspended_until,
-    us.suspension_reason
+    us.suspended_by,
+    us.suspend_reason,
+    us.suspended_until
   FROM public.user_status us
-  WHERE us.user_id = target_user_id;
+  WHERE us.id = p_user_id;
 END;
 $$;
+
+-- Re-grant execute permission after dropping/recreating
+GRANT EXECUTE ON FUNCTION public.get_user_status(uuid) TO authenticated;
 
 
 -- ============================================
