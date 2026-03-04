@@ -57,7 +57,8 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
         .order('created_at', { ascending: true });
 
       if (simpleError) {
-        return NextResponse.json({ error: simpleError.message }, { status: 500 });
+        console.error('Fallback collaborators query error:', simpleError);
+        return NextResponse.json({ error: 'Failed to fetch collaborators' }, { status: 500 });
       }
 
       return NextResponse.json({ collaborators: simpleData || [] });

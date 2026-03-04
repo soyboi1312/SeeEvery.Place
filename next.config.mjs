@@ -284,6 +284,7 @@ const nextConfig = {
               "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://cloudflareinsights.com https://unpkg.com",
               "worker-src 'self' blob:",
               "frame-ancestors 'none'",
+              "upgrade-insecure-requests",
             ].join('; '),
           },
         ],

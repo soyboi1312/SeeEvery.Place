@@ -55,14 +55,15 @@ export function sanitizeText(input: string | null | undefined): string | null {
   return input
     // Remove HTML tags
     .replace(/<[^>]*>/g, '')
+    // Remove null bytes and other control characters (except newlines/tabs)
+    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '')
     // Encode HTML entities to prevent injection
+    // &amp; must be first to avoid double-encoding existing entities
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#x27;')
-    // Remove null bytes and other control characters (except newlines/tabs)
-    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '')
     // Trim whitespace
     .trim();
 }

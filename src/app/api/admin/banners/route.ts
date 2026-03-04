@@ -1,9 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient, createAdminClient } from '@/lib/supabase/server';
+import { sanitizeText } from '@/lib/serverUtils';
+
+const VALID_BANNER_TYPES = ['info', 'warning', 'success', 'error'] as const;
 
 interface BannerInput {
   message: string;
-  type?: 'info' | 'warning' | 'success' | 'error';
+  type?: typeof VALID_BANNER_TYPES[number];
   link_text?: string;
   link_url?: string;
   is_active?: boolean;
@@ -103,12 +106,18 @@ export async function POST(request: NextRequest) {
 
     const adminClient = createAdminClient();
 
+    // Validate banner type
+    const bannerType = body.type || 'info';
+    if (!VALID_BANNER_TYPES.includes(bannerType as typeof VALID_BANNER_TYPES[number])) {
+      return NextResponse.json({ error: 'Invalid banner type' }, { status: 400 });
+    }
+
     const { data: banner, error: insertError } = await adminClient
       .from('system_banners')
       .insert({
-        message: body.message.trim(),
-        type: body.type || 'info',
-        link_text: body.link_text?.trim() || null,
+        message: sanitizeText(body.message.trim()) || '',
+        type: bannerType,
+        link_text: sanitizeText(body.link_text?.trim()) || null,
         link_url: body.link_url?.trim() || null,
         is_active: body.is_active ?? true,
         starts_at: body.starts_at || new Date().toISOString(),
@@ -151,16 +160,21 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'Banner ID is required' }, { status: 400 });
     }
 
+    // Validate banner type if provided
+    if (updates.type && !VALID_BANNER_TYPES.includes(updates.type)) {
+      return NextResponse.json({ error: 'Invalid banner type' }, { status: 400 });
+    }
+
     const adminClient = createAdminClient();
 
     const { data: banner, error: updateError } = await adminClient
       .from('system_banners')
       .update({
-        message: updates.message?.trim(),
+        message: updates.message ? sanitizeText(updates.message.trim()) : undefined,
         type: updates.type,
-        link_text: updates.link_text?.trim() || null,
+        link_text: updates.link_text ? sanitizeText(updates.link_text.trim()) : updates.link_text === null ? null : undefined,
         link_url: updates.link_url?.trim() || null,
-        is_active: updates.is_active,
+        is_active: updates.is_active !== undefined ? Boolean(updates.is_active) : undefined,
         starts_at: updates.starts_at,
         ends_at: updates.ends_at,
         updated_at: new Date().toISOString(),

@@ -3,10 +3,11 @@ import { createClient, createAdminClient } from '@/lib/supabase/server';
 import { SignJWT } from 'jose';
 import { getClientIP } from '@/lib/serverUtils';
 
-// Secret for signing impersonation tokens - in production, use a proper secret management
+// Secret for signing impersonation tokens
+// Uses a dedicated secret to separate concerns from the service role key
 const getImpersonationSecret = () => {
-  const secret = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!secret) throw new Error('Missing service role key');
+  const secret = process.env.IMPERSONATION_JWT_SECRET || process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!secret) throw new Error('Missing impersonation secret or service role key');
   return new TextEncoder().encode(secret);
 };
 
