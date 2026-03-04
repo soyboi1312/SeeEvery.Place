@@ -130,9 +130,13 @@ GRANT EXECUTE ON FUNCTION public.search_users(text, integer, integer) TO authent
 -- Now restricted to own status or admin access.
 -- Must drop first because we cannot change return type of existing function.
 
-DROP FUNCTION IF EXISTS public.get_user_status(uuid);
+-- Use CASCADE to handle any dependent objects, and drop all overloads
+DO $$ BEGIN
+  DROP FUNCTION IF EXISTS public.get_user_status(uuid) CASCADE;
+EXCEPTION WHEN OTHERS THEN NULL;
+END $$;
 
-CREATE OR REPLACE FUNCTION public.get_user_status(p_user_id uuid)
+CREATE FUNCTION public.get_user_status(p_user_id uuid)
 RETURNS TABLE (
   status text,
   suspended_at timestamp with time zone,
